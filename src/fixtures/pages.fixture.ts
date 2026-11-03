@@ -1,12 +1,23 @@
 import { test as base } from '@playwright/test';
 import { env } from '../config/env';
-import { LoginPage, DashboardPage, PimPage, LeavePage } from '../pages';
+import {
+  LoginPage,
+  DashboardPage,
+  PimPage,
+  LeavePage,
+  EmployeeListPage,
+  AddEmployeePage,
+  PersonalDetailsPage,
+} from '../pages';
 
 interface Pages {
   loginPage: LoginPage;
   dashboardPage: DashboardPage;
   pimPage: PimPage;
   leavePage: LeavePage;
+  employeeListPage: EmployeeListPage;
+  addEmployeePage: AddEmployeePage;
+  personalDetailsPage: PersonalDetailsPage;
 }
 
 export const test = base.extend<Pages>({
@@ -21,6 +32,15 @@ export const test = base.extend<Pages>({
   },
   leavePage: async ({ page }, use) => {
     await use(new LeavePage(page));
+  },
+  employeeListPage: async ({ page }, use) => {
+    await use(new EmployeeListPage(page));
+  },
+  addEmployeePage: async ({ page }, use) => {
+    await use(new AddEmployeePage(page));
+  },
+  personalDetailsPage: async ({ page }, use) => {
+    await use(new PersonalDetailsPage(page));
   },
 });
 

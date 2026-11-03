@@ -1,0 +1,316 @@
+================================================================================
+  DAFTAR TEST CASE — PIM (FASE 1: EMPLOYEE LIST, ADD EMPLOYEE, PERSONAL DETAILS)
+  Modul    : PIM — Personnel Information Management
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/pim/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+  [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+  [TEMUAN]      = TC yang hasilnya didokumentasikan via report.finding() karena
+                   perilaku ambigu/environment-dependent, bukan pass/fail tegas
+
+  FORMAT ID  : TC-PIM-<SECTION>-NN  (SECTION = LIST | ADD | PD)
+  FILE       : TC-PIM-<SECTION>-NN-Verify-Name-In-English.spec.ts
+  FOLDER     : tests/pim/
+
+  CAKUPAN FASE 1 (modul ini): Employee List, Add Employee, Personal Details tab.
+  BELUM DICAKUP (Fase 2/3 — lihat README Roadmap): Contact Details, Emergency
+  Contacts, Dependents, Immigration, Job, Salary, Report-to, Qualifications,
+  Memberships, Configuration (Optional/Custom Fields, Data Import, Reporting
+  Methods, Termination Reasons), Reports.
+
+================================================================================
+  CATATAN TEKNIS — PIM
+  Dikonfirmasi via Playwright discovery run langsung terhadap OrangeHRM OS 5.9
+================================================================================
+
+  URL ADD EMPLOYEE        : /web/index.php/pim/addEmployee
+  URL EMPLOYEE LIST        : /web/index.php/pim/viewEmployeeList
+  URL PERSONAL DETAILS     : /web/index.php/pim/viewPersonalDetails/empNumber/<N>
+  Framework                : Vue 3 + OXD Design System (oxd-* components), sama
+                              dengan Login.
+
+  LOCATORS & PERILAKU KONFIRMASI (AddEmployeePage.ts):
+    First/Middle/Last Name   : page.getByPlaceholder(...)
+    Employee Id              : scoped ke .oxd-input-group yang punya label
+                                "Employee Id" persis (exact:true) — bukan
+                                positional index.
+    "Create Login Details"   : [TEMUAN PENTING] Dirender sebagai
+                                .oxd-switch-wrapper dengan native checkbox
+                                TERSEMBUNYI VISUAL (role="checkbox") di
+                                belakang <span class="oxd-switch-input"> yang
+                                menangkap event klik. Klik ke role="checkbox"
+                                langsung (bahkan dengan {force:true}) TIDAK
+                                PERNAH mengubah state Vue — field Username/
+                                Password tidak pernah muncul. Locator produksi
+                                WAJIB mengarah ke `.oxd-switch-input` (span-nya),
+                                bukan ke elemen dengan accessible role checkbox.
+    Field error messages      : .oxd-input-group .oxd-text--span (BUKAN
+                                .oxd-input-field-error-message seperti di
+                                Login — class error berbeda per halaman/
+                                komponen OrangeHRM, jangan asumsikan sama).
+
+  API ENDPOINT ADD EMPLOYEE (CONFIRMED):
+    POST /web/index.php/api/v2/pim/employees
+    - Sukses → status 200, body:
+        {"data":{"empNumber":N,"lastName":"...","firstName":"...",
+                  "middleName":"...","employeeId":"NNNN","terminationId":null},
+         "meta":[],"rels":[]}
+    - Employee Id duplikat → request TIDAK PERNAH TERKIRIM. Validasi client-
+      side memblokir submit dengan pesan "Employee Id already exists" sebelum
+      POST dipanggil.
+    - Employee Id field: ada BATAS PANJANG 10 KARAKTER client-side — payload
+      apa pun di atas 10 karakter (termasuk payload mirip XSS seperti
+      "<script>x</script>", 21 char) diblokir oleh validasi panjang dengan
+      pesan "Should not exceed 10 characters", BUKAN oleh filter XSS khusus.
+      Ini dicatat sebagai temuan di TC-PIM-ADD-20, bukan bukti proteksi XSS
+      yang sesungguhnya — payload XSS yang MUAT di bawah 10 karakter belum
+      tentu tertangkap.
+    - Whitespace-only First/Last Name → di-trim client-side jadi kosong,
+      memicu validasi "Required" sama seperti pola di Login (TC-LOGIN-15/16).
+
+  API ENDPOINT EMPLOYEE LIST (CONFIRMED):
+    GET /web/index.php/api/v2/pim/employees?limit=50&offset=0&model=detailed
+        &includeEmployees=onlyCurrent&sortField=employee.firstName&sortOrder=ASC
+    - Filter Employment Status → query param sebenarnya adalah `empStatusId`,
+      BUKAN `employmentStatus` (ditemukan salah asumsi awal, dikoreksi di
+      TC-PIM-LIST-03 — pelajaran yang sama seperti kasus username
+      case-insensitive di Login: verifikasi langsung, jangan asumsi nama
+      param dari UI label).
+    - Search Employee Id TIDAK PUNYA batas panjang client-side (beda dari
+      Employee Id di form Add Employee yang dibatasi 10 karakter) — ID
+      pencarian >10 karakter mengembalikan HTTP 422 dari server, dan UI
+      diam-diam fallback menampilkan SEMUA record alih-alih "No Records
+      Found". TC-PIM-LIST-09 disesuaikan memakai ID valid (bukan >10 char)
+      dan mendokumentasikan perilaku 422-silent-fallback sebagai temuan
+      terpisah.
+
+  LOCATORS & PERILAKU KONFIRMASI (EmployeeListPage.ts):
+    4 dropdown filter (Employment Status, Include, Job Title, Sub Unit) di-
+    scope lewat teks label persis (.oxd-input-group berisi label exact),
+    BUKAN index posisi .nth() — percobaan awal pakai index terbukti tidak
+    reliable karena urutan DOM tidak selalu sama dengan urutan visual di
+    semua kondisi layar/loading.
+    Modal konfirmasi delete: tombol "Yes, Delete" / "No, Cancel" (dikonfirmasi
+    teks persis, beda dari asumsi awal "Yes"/"No" polos).
+    [TEMUAN BELUM TUNTAS] Header kolom sort (mis. "Id") punya trailing space
+    di accessible name, dan filter hasText:'Id' ikut mencocokkan substring di
+    dalam "Middle" (dari "First (& Middle) Name"). exact:true maupun
+    getByText(exact) tetap gagal isolasi satu elemen. TC-PIM-LIST-07
+    sementara didokumentasikan sebagai finding (elemen trigger sort belum
+    teridentifikasi pasti), bukan hard-fail — butuh investigasi manual
+    DevTools lebih lanjut di sesi terpisah.
+
+  LOCATORS & PERILAKU KONFIRMASI (PersonalDetailsPage.ts):
+    Form Personal Details TERISI ASYNC setelah navigasi — URL berubah ke
+    /viewPersonalDetails/empNumber/N LEBIH DULU, baru kemudian field terisi
+    dari GET .../personal-details yang menyusul. Membaca value field segera
+    setelah waitForURL() mengembalikan string kosong. WAJIB pakai
+    waitUntilLoaded() (poll inputValue() first name sampai tidak kosong,
+    timeout 15s) sebelum membaca/assert field apa pun di halaman ini.
+    Gender radio (Male/Female): SAMA PERSIS seperti "Create Login Details" —
+    input dengan role="radio" tersembunyi visual di belakang
+    <span class="oxd-radio-input"> yang menangkap klik. check()/click() pada
+    role="radio" langsung timeout atau tidak mengubah state Vue walau dengan
+    {force:true}. WAJIB klik sibling <span>-nya (lihat
+    clickMaleRadio()/clickFemaleRadio()).
+    Filter hasText:'Male' pada .oxd-radio-wrapper JUGA mencocokkan radio
+    Female (satu wrapper group berisi kedua label) — strict-mode violation
+    kalau dipakai sembarangan; locator produksi pakai role=radio dengan nama
+    exact untuk baca checked state.
+
+================================================================================
+  TEST CASES
+================================================================================
+
+No.  Test Case ID      Status   Kategori           Skenario
+---  ----------------  -------  -----------------  --------------------------
+
+================================================================================
+  GROUP 1 — EMPLOYEE LIST (14 TC)
+================================================================================
+
+ 1   TC-PIM-LIST-01    [DONE]   Positive (+)       Search by exact Employee Name
+ 2   TC-PIM-LIST-02    [DONE]   Positive (+)       Search by Employee Id
+ 3   TC-PIM-LIST-03    [DONE]   Positive (+)       Filter by Employment Status
+                                                    (param: empStatusId)
+ 4   TC-PIM-LIST-04    [DONE]   Positive (+)       Filter by Sub Unit (nested dropdown)
+ 5   TC-PIM-LIST-05    [DONE]   Positive (+)       Filter by Include (Current/
+                                                    Current+Past/Past Only)
+ 6   TC-PIM-LIST-06    [DONE]   Positive (+)       Kombinasi multi-filter sekaligus
+ 7   TC-PIM-LIST-07    [DONE]   Positive (+) [TEMUAN]  Sort kolom asc/desc — elemen
+                                                    trigger belum teridentifikasi
+                                                    pasti, didokumentasikan sbg finding
+ 8   TC-PIM-LIST-08    [DONE]   Positive (+)       Pagination next page
+ 9   TC-PIM-LIST-09    [DONE]   Negative (-)       Search tidak ada hasil → "No
+                                                    Records Found"
+10   TC-PIM-LIST-10    [DONE]   Positive (+)       Reset mengembalikan filter default
+11   TC-PIM-LIST-11    [DONE]   Security (S)       XSS payload di search box
+12   TC-PIM-LIST-12    [DONE]   Security (S)       SQL injection payload di search box
+13   TC-PIM-LIST-13    [DONE]   Edge Case (!)      Delete Selected → modal → Cancel
+                                                    TIDAK menghapus
+14   TC-PIM-LIST-14    [DONE]   Positive (+) [API] GET /api/v2/pim/employees
+                                                    mencerminkan filter UI
+
+================================================================================
+  GROUP 2 — ADD EMPLOYEE (26 TC, ID 21 sengaja dilewati saat konsolidasi)
+================================================================================
+
+15   TC-PIM-ADD-01     [DONE]   Positive (+)       Tambah employee minimal (First+Last)
+16   TC-PIM-ADD-02     [DONE]   Positive (+)       Tambah employee lengkap (+Middle Name)
+17   TC-PIM-ADD-03     [DONE]   Positive (+)       "Create Login Details" switch
+                                                    menampilkan field username/password
+18   TC-PIM-ADD-04     [DONE]   Positive (+)       Upload foto valid (jpg, <1MB)
+19   TC-PIM-ADD-05     [DONE]   Negative (-)       Submit tanpa First Name → required
+20   TC-PIM-ADD-06     [DONE]   Negative (-)       Submit tanpa Last Name → required
+21   TC-PIM-ADD-07     [DONE]   Negative (-)       Whitespace-only nama → trimmed,
+                                                    "Required"
+22   TC-PIM-ADD-08     [DONE]   Negative (-) [TEMUAN]  Employee Id duplikat → "Employee
+                                                    Id already exists", POST tidak terkirim
+23   TC-PIM-ADD-09     [DONE]   Negative (-)       Create Login Details: username
+                                                    sudah dipakai
+24   TC-PIM-ADD-10     [DONE]   Negative (-)       Password & confirm password tidak cocok
+25   TC-PIM-ADD-11     [DONE]   Boundary (B)       First Name 30 karakter (batas)
+26   TC-PIM-ADD-12     [DONE]   Boundary (B) [TEMUAN]  First Name 31 karakter (over
+                                                    boundary)
+27   TC-PIM-ADD-13     [DONE]   Boundary (B)       Employee Id 10 karakter (batas)
+28   TC-PIM-ADD-14     [DONE]   Boundary (B) [TEMUAN]  Employee Id 11 karakter →
+                                                    "Should not exceed 10 characters"
+29   TC-PIM-ADD-15     [DONE]   Boundary (B)       Foto >1MB ditolak
+30   TC-PIM-ADD-16     [DONE]   Boundary (B)       Foto tepat 1MB diterima
+31   TC-PIM-ADD-17     [DONE]   Edge Case (!)      Foto dimensi jauh dari rekomendasi
+                                                    200x200
+32   TC-PIM-ADD-18     [DONE]   Security (S)       XSS payload di First Name
+33   TC-PIM-ADD-19     [DONE]   Security (S)       SQL injection di First/Last Name
+34   TC-PIM-ADD-20     [DONE]   Security (S) [TEMUAN]  Employee Id payload mirip-script
+                                                    diblokir oleh validasi panjang
+                                                    10 karakter, bukan filter XSS
+35   TC-PIM-ADD-22     [DONE]   Edge Case (!)      Double-click Save tidak duplikat
+36   TC-PIM-ADD-23     [DONE]   Edge Case (!)      Unicode/emoji di First Name
+37   TC-PIM-ADD-24     [DONE]   Edge Case (!)      RTL Arabic di First Name
+38   TC-PIM-ADD-25     [DONE]   Edge Case (!) [TEMUAN]  Navigasi tanpa save → TIDAK
+                                                    ada warning dialog, data hilang
+                                                    diam-diam
+39   TC-PIM-ADD-26     [DONE]   Edge Case (!)      Employee Id di-clear manual lalu submit
+40   TC-PIM-ADD-27     [DONE]   Edge Case (!)      Cancel button membatalkan form
+
+================================================================================
+  GROUP 3 — PERSONAL DETAILS (12 TC)
+================================================================================
+
+41   TC-PIM-PD-01      [DONE]   Positive (+)       Field ter-prefill dari employee baru
+42   TC-PIM-PD-02      [DONE]   Positive (+)       Edit Nationality/Marital Status
+43   TC-PIM-PD-03      [DONE]   Positive (+)       Date of Birth format valid
+44   TC-PIM-PD-04      [DONE]   Negative (-)       Date of Birth di masa depan
+45   TC-PIM-PD-05      [DONE]   Negative (-)       License Expiry tanpa License Number
+46   TC-PIM-PD-06      [DONE]   Negative (-)       Format tanggal salah
+47   TC-PIM-PD-07      [DONE]   Boundary (B) [TEMUAN]  Custom Field teks sangat panjang
+48   TC-PIM-PD-08      [DONE]   Edge Case (!)      Gender radio eksklusif (Male/Female)
+49   TC-PIM-PD-09      [DONE]   Edge Case (!)      DOB ekstrem (150 tahun lalu)
+50   TC-PIM-PD-10      [DONE]   Positive (+)       Re-upload foto profil
+51   TC-PIM-PD-11      [DONE]   Positive (+)       Hapus foto profil
+52   TC-PIM-PD-12      [DONE]   Positive (+) [API] Save Personal Details — endpoint,
+                                                    status code, response body
+
+================================================================================
+  SUMMARY
+================================================================================
+
+  Total Test Cases : 52 (dari 58 rencana awal; beberapa boundary/over-boundary
+                      dipecah jadi TC terpisah untuk kejelasan, 1 nomor
+                      sengaja dilewati saat konsolidasi)
+  Employee List    : 14
+  Add Employee     : 26
+  Personal Details : 12
+
+  Hard check() (pass/fail tegas) : ~42 TC
+  finding() (dokumentasi, bukan pass/fail tegas) : ~10 TC — dipakai untuk
+    perilaku yang genuinely ambigu/environment-dependent (lihat tag [TEMUAN]
+    di tabel di atas: validasi dimensi foto, upload ekstensi palsu, warning
+    navigasi unsaved, payload Employee Id, batas Custom Field, format/future/
+    extreme DOB, elemen trigger sort).
+
+================================================================================
+  TEMUAN SELAMA EKSPLORASI (bukan bug di test kita, tapi worth dicatat)
+================================================================================
+
+  1. "Create Login Details" dan Gender radio adalah native input YANG
+     DISEMBUNYIKAN SECARA VISUAL di belakang <span> custom-styled yang
+     menangkap event klik — pola OXD component yang BERBEDA dari pola input
+     biasa. Playwright role-based locator (getByRole checkbox/radio) tetap
+     BENAR untuk membaca state, tapi SALAH untuk klik — harus klik
+     elemen <span> sibling-nya.
+
+  2. Query param filter Employment Status sebenarnya `empStatusId`, bukan
+     `employmentStatus` seperti dugaan awal dari nama field di UI.
+
+  3. Employee Id di form Add Employee dibatasi 10 karakter client-side;
+     Employee Id di search box Employee List TIDAK dibatasi sama sekali
+     (beda komponen, beda validasi) dan ID >10 char memicu HTTP 422 yang
+     di-silent-fallback oleh UI jadi menampilkan semua record.
+
+  4. Personal Details form mengalami race condition yang mirip (tapi
+     kebalikan arah) dengan lesson #6 di TC-Login.txt: di sana masalahnya
+     "action sebelum goto() selesai", di sini masalahnya "baca value
+     sebelum fetch async selesai" — keduanya solusinya sama: tunggu
+     kondisi yang benar secara eksplisit, jangan asumsikan urutan event.
+
+  5. Server demo publik OrangeHRM sempat terdegradasi performanya saat sesi
+     implementasi ini berjalan (ratusan employee dibuat berulang kali lewat
+     banyak percobaan run) — bahkan suite Login yang sama sekali tidak
+     diubah ikut melambat dan sempat gagal sebagian saat demo lambat. Ini
+     bukti pentingnya membedakan "test gagal karena lingkungan" vs "test
+     gagal karena bug kode/aplikasi" sebelum menyimpulkan apa pun dari satu
+     run yang kebetulan berbarengan dengan beban server tinggi.
+
+================================================================================
+  CATATAN EKSEKUSI
+================================================================================
+
+  1. Semua TC pakai page object baru: EmployeeListPage.ts, AddEmployeePage.ts,
+     PersonalDetailsPage.ts (di src/pages/), diinjeksikan via
+     src/fixtures/pages.fixture.ts sama seperti LoginPage/DashboardPage.
+
+  2. Jalankan seluruh modul:
+       npx playwright test tests/pim --project=chromium
+
+  3. Jalankan satu TC:
+       npx playwright test tests/pim/TC-PIM-ADD-01-*.spec.ts --project=chromium
+
+  4. [FORMAT REPORTING] Sama persis dengan Login: setiap TC pakai TestReport
+     dari src/utils/testReport.ts (step logging + summary block + console-
+     error check otomatis via `page` sebagai argumen ke-4).
+
+  5. [BUG LIST OTOMATIS] Test case yang gagal otomatis masuk ke
+     docs/Bug-List.xlsx via src/reporters/bugListReporter.ts — TAPI karena
+     modul PIM membuat data sungguhan di demo publik (Add Employee), dan
+     demo publik ini sempat lambat selama development, review Bug-List.xlsx
+     dengan hati-hati sebelum menganggap semua entri adalah bug nyata —
+     bisa jadi noise dari server yang lambat, bukan masalah di kode/aplikasi.
+
+  6. Target adalah demo publik OrangeHRM — modul Add Employee BERSIFAT
+     DESTRUCTIVE/MUTATIF (membuat data employee baru setiap kali TC positive
+     dijalankan). Tidak ada cleanup otomatis; ini demo publik bersama yang
+     di-reset berkala oleh OrangeHRM sendiri, bukan environment terisolasi.
+
+  7. [PELAJARAN] Jangan asumsikan nama query param API dari label UI (lesson
+     #2 di atas) dan jangan asumsikan class CSS error message sama antar
+     halaman meski sama-sama OXD component (Login pakai
+     .oxd-input-field-error-message, PIM pakai .oxd-input-group
+     .oxd-text--span) — selalu verifikasi langsung.
+
+================================================================================
+  END OF DOCUMENT
+================================================================================
