@@ -25,34 +25,51 @@ LEGEND SIMBOL SKENARIO
 
 ================================================================================
   CATATAN TEKNIS — LOGIN PAGE
-  Dikonfirmasi via Playwright discovery run
+  Dikonfirmasi via Playwright discovery run terhadap OrangeHRM OS 5.9
 ================================================================================
 
   URL        : /web/index.php/auth/login
   Framework  : Vue 3 + OXD Design System (oxd-* components)
 
   LOCATORS (CONFIRMED):
-    Username input      : page.getByPlaceholder('Username')
-    Password input       : page.getByPlaceholder('Password')
-    Login button          : page.getByRole('button', { name: 'Login' })
-    Error message (login) : page.locator('.oxd-alert--error')
-    Required validation   : page.locator('.oxd-input-field-error-message')
-    "Forgot password?"    : page.locator('.orangehrm-login-forgot-header')
-                             [TEMUAN] Elemen ini adalah <p> dengan trailing
-                             space di textContent, BUKAN <a> — tidak punya
-                             accessible role "link". getByRole('link', ...)
-                             tidak akan menemukannya.
-    Dashboard heading     : page.getByRole('heading', { name: 'Dashboard' })
-    User dropdown          : page.locator('.oxd-userdropdown-tab')
-    Logout menu item       : page.getByRole('menuitem', { name: 'Logout' })
-                             [TEMUAN] Logout dirender sebagai menuitem di
-                             dropdown, bukan sebagai <a role="link">.
+    Username input       : page.getByPlaceholder('Username')
+    Password input        : page.getByPlaceholder('Password')
+    Login button           : page.getByRole('button', { name: 'Login' })
+    Error message (login)  : page.locator('.oxd-alert--error')
+    Required validation    : page.locator('.oxd-input-field-error-message')
+    "Forgot password?"     : page.locator('.orangehrm-login-forgot-header')
+                              [TEMUAN] Elemen ini adalah <p> dengan trailing
+                              space di textContent, BUKAN <a> — tidak punya
+                              accessible role "link". getByRole('link', ...)
+                              tidak akan menemukannya.
+    Dashboard heading      : page.getByRole('heading', { name: 'Dashboard' })
+    User dropdown           : page.locator('.oxd-userdropdown-tab')
+    Logout menu item        : page.getByRole('menuitem', { name: 'Logout' })
+                              [TEMUAN] Logout dirender sebagai menuitem di
+                              dropdown, bukan sebagai <a role="link">.
 
   API ENDPOINT (CONFIRMED):
     POST /web/index.php/auth/validate
     - Kredensial valid atau invalid → selalu 302 (redirect server-side)
     - Tidak ada 401/403 — pola session PHP klasik
-    - Username 255 karakter tidak memicu 5xx (dicoba di TC-LOGIN-07)
+    - Username 255/256 karakter tidak memicu 5xx (TC-LOGIN-17/18)
+    - Username tidak punya atribut maxlength di client — browser menerima
+      input berapa pun panjangnya (TC-LOGIN-18)
+    - Leading/trailing spaces pada username TIDAK di-trim oleh client —
+      dikirim apa adanya ke server dan login gagal (TC-LOGIN-28, dibuktikan
+      via inspeksi request payload)
+    - Whitespace-only input (hanya spasi) DI-trim oleh client menjadi
+      kosong, diblokir validasi "Required" sebelum sempat submit
+      (TC-LOGIN-15/16)
+
+  [TEMUAN PENTING] USERNAME TIDAK CASE-SENSITIVE
+    Asumsi awal (dari pengalaman app lain) adalah username case-sensitive.
+    Verifikasi langsung terhadap instance ini (OrangeHRM OS 5.9) membuktikan
+    SEBALIKNYA: "admin" (huruf kecil semua) berhasil login dengan akun
+    "Admin". TC-LOGIN-13 awalnya ditulis mengasumsikan case-sensitive dan
+    GAGAL saat dijalankan — bukan karena bug script, tapi karena asumsi
+    yang salah. Test ditulis ulang untuk mendokumentasikan perilaku AKTUAL.
+    Password TETAP case-sensitive (dibuktikan terpisah di TC-LOGIN-14).
 
 ================================================================================
   TEST CASES
@@ -67,116 +84,268 @@ No.  Test Case ID   Status   Skenario / Deskripsi
 
  1   TC-LOGIN-01    [DONE]   TC-LOGIN-01-Verify-Valid-Credentials-Redirect-To-Dashboard.spec.ts
                              (+) Verify Valid Credentials Redirect to Dashboard
-                             -> Navigate ke /web/index.php/auth/login.
                              -> Fill Username = "Admin", Password = "admin123".
                              -> Click "Login".
-                             Verify: URL berubah mengandung "/dashboard/index".
+                             Verify: URL mengandung "/dashboard/index".
                              Verify: Heading "Dashboard" visible.
 
- 2   TC-LOGIN-02    [DONE]   TC-LOGIN-02-Verify-Logout-Redirects-To-Login-Page.spec.ts
-                             (+) Verify Logout Redirects Back to Login Page
-                             -> Login (via fixture authenticatedTest).
-                             -> Klik user dropdown -> klik menuitem "Logout".
-                             Verify: URL kembali mengandung "/auth/login".
+ 2   TC-LOGIN-02    [DONE]   TC-LOGIN-02-Verify-Dashboard-Not-Accessible-Without-Login.spec.ts
+                             (+) Verify Dashboard Redirects to Login When Not Authenticated
+                             -> Tanpa login, navigate langsung ke /dashboard/index.
+                             Verify: URL redirect ke "/auth/login".
+                             Verify: Heading "Login" visible.
 
  3   TC-LOGIN-03    [DONE]   TC-LOGIN-03-Verify-Login-Page-Elements-Visible.spec.ts
                              (+) Verify Login Page Renders All Required Elements
-                             -> Navigate ke halaman login.
-                             Verify: Heading "Login" visible.
-                             Verify: Input Username visible & enabled.
-                             Verify: Input Password visible & enabled.
-                             Verify: Button "Login" visible & enabled.
-                             Verify: Elemen "Forgot your password?" visible.
-                             Verify: Kotak kredensial demo visible.
+                             Verify: Heading "Login", input Username/Password
+                                     (visible & enabled), button "Login"
+                                     (visible & enabled), "Forgot your
+                                     password?", kotak kredensial demo.
+
+ 4   TC-LOGIN-04    [DONE]   TC-LOGIN-04-Verify-Logout-Redirects-To-Login-Page.spec.ts
+                             (+) Verify Logout Redirects Back to Login Page
+                             -> Login -> klik user dropdown -> klik "Logout".
+                             Verify: URL kembali ke "/auth/login".
+
+ 5   TC-LOGIN-05    [DONE]   TC-LOGIN-05-Verify-Password-Field-Masked.spec.ts
+                             (+) Verify Password Input Is Masked (type=password)
+                             Verify: attribute type="password" sebelum DAN
+                                     sesudah diisi (tidak berubah).
+
+ 6   TC-LOGIN-06    [DONE]   TC-LOGIN-06-Verify-Session-Persists-After-Page-Refresh.spec.ts
+                             (+) Verify Session Persists After Page Refresh
+                             -> Login -> page.reload().
+                             Verify: URL tetap "/dashboard/index" (bukan
+                                     redirect ke login).
 
 ================================================================================
   GROUP 2 — NEGATIVE CASES (Invalid Input)
 ================================================================================
 
- 4   TC-LOGIN-04    [DONE]   TC-LOGIN-04-Verify-Invalid-Username-Shows-Error.spec.ts
+ 7   TC-LOGIN-07    [DONE]   TC-LOGIN-07-Verify-Invalid-Username-Shows-Error.spec.ts
                              (-) Verify Invalid Username Shows Error Message
-                             -> Fill Username = "InvalidUser", Password = "admin123".
-                             -> Click "Login".
-                             Verify: Error ".oxd-alert--error" visible,
-                                     berisi "Invalid credentials".
-                             Verify: URL tetap di "/auth/login".
+                             Verify: Error ".oxd-alert--error" = "Invalid
+                                     credentials". URL tetap di "/auth/login".
 
- 5   TC-LOGIN-05    [DONE]   TC-LOGIN-05-Verify-Invalid-Password-Shows-Error.spec.ts
+ 8   TC-LOGIN-08    [DONE]   TC-LOGIN-08-Verify-Invalid-Password-Shows-Error.spec.ts
                              (-) Verify Invalid Password Shows Error Message
-                             -> Fill Username = "Admin", Password = "wrong-password".
-                             -> Click "Login".
                              Verify: Error "Invalid credentials" visible.
 
- 6   TC-LOGIN-06    [DONE]   TC-LOGIN-06-Verify-Empty-Fields-Shows-Validation.spec.ts
+ 9   TC-LOGIN-09    [DONE]   TC-LOGIN-09-Verify-Both-Fields-Invalid-Shows-Error.spec.ts
+                             (-) Verify Both Invalid Username and Password Shows Error
+                             Verify: Error generik "Invalid credentials" —
+                                     tidak membocorkan field mana yang salah.
+
+10   TC-LOGIN-10    [DONE]   TC-LOGIN-10-Verify-Empty-Username-Shows-Validation.spec.ts
+                             (-) Verify Empty Username Shows Required Validation
+                             Verify: count(.oxd-input-field-error-message) = 1,
+                                     text = "Required". POST /auth/validate
+                                     TIDAK terkirim.
+
+11   TC-LOGIN-11    [DONE]   TC-LOGIN-11-Verify-Empty-Password-Shows-Validation.spec.ts
+                             (-) Verify Empty Password Shows Required Validation
+                             Verify: sama seperti TC-10, untuk field Password.
+
+12   TC-LOGIN-12    [DONE]   TC-LOGIN-12-Verify-Both-Empty-Fields-Shows-Two-Validations.spec.ts
                              (-) Verify Both Empty Fields Show Two Validation Messages
-                             -> Tidak isi apapun, klik "Login" langsung.
-                             Verify: count(.oxd-input-field-error-message) = 2.
-                             Verify: Kedua pesan = "Required".
-                             Verify: URL tetap di "/auth/login" (form tidak submit).
+                             Verify: count(.oxd-input-field-error-message) = 2,
+                                     keduanya "Required". URL tetap di login.
+
+13   TC-LOGIN-13    [DONE]   TC-LOGIN-13-Verify-Username-Is-Case-Insensitive.spec.ts
+                             (!) [TEMUAN] Username TERNYATA Tidak Case-Sensitive
+                             -> Fill Username = "admin" (huruf kecil semua).
+                             Verify: Login BERHASIL (redirect ke dashboard).
+                             Lihat CATATAN TEKNIS di atas untuk detail temuan.
+
+14   TC-LOGIN-14    [DONE]   TC-LOGIN-14-Verify-Case-Sensitive-Password.spec.ts
+                             (-) Verify Password Is Case-Sensitive
+                             -> Fill Password dengan huruf pertama di-flip case.
+                             Verify: Error "Invalid credentials" (password
+                                     TETAP case-sensitive, berbeda dari username).
+
+15   TC-LOGIN-15    [DONE]   TC-LOGIN-15-Verify-Whitespace-Only-Username-Shows-Validation.spec.ts
+                             (-) Verify Whitespace-Only Username Shows Validation Error
+                             Verify: validasi "Required" muncul, POST TIDAK
+                                     terkirim (client men-trim whitespace-only
+                                     menjadi kosong).
+
+16   TC-LOGIN-16    [DONE]   TC-LOGIN-16-Verify-Whitespace-Only-Password-Shows-Validation.spec.ts
+                             (-) Verify Whitespace-Only Password Shows Validation Error
+                             Verify: sama seperti TC-15, untuk field Password.
 
 ================================================================================
   GROUP 3 — BOUNDARY CASES
 ================================================================================
 
- 7   TC-LOGIN-07    [DONE]   TC-LOGIN-07-Verify-Username-255-Characters-Boundary.spec.ts
+17   TC-LOGIN-17    [DONE]   TC-LOGIN-17-Verify-Username-255-Characters-Boundary.spec.ts
                              (B) Verify Username with 255 Characters (Max Boundary)
-                             -> Fill Username = "a".repeat(255), Password = "admin123".
-                             -> Intercept POST /auth/validate.
-                             -> Click "Login".
-                             Verify: response.status() < 500 (server tidak crash).
-                             Verify: Error "Invalid credentials" tetap tampil normal.
+                             Verify: response.status() < 500. Error tampil normal.
+
+18   TC-LOGIN-18    [DONE]   TC-LOGIN-18-Verify-Username-256-Characters-Over-Boundary.spec.ts
+                             (B) Verify Username with 256 Characters (Over Boundary)
+                             Verify: input TIDAK punya attribute maxlength
+                                     (dikonfirmasi live). response.status() < 500.
+
+19   TC-LOGIN-19    [DONE]   TC-LOGIN-19-Verify-Password-255-Characters-Boundary.spec.ts
+                             (B) Verify Password with 255 Characters (Max Boundary)
+                             Verify: response.status() < 500. Error tampil normal.
+
+20   TC-LOGIN-20    [DONE]   TC-LOGIN-20-Verify-Single-Character-Username.spec.ts
+                             (B) Verify Single Character Username (Min Boundary)
+                             Verify: Error "Invalid credentials" visible.
 
 ================================================================================
   GROUP 4 — SECURITY CASES
 ================================================================================
 
- 8   TC-LOGIN-08    [DONE]   TC-LOGIN-08-Verify-SQL-Injection-In-Username-Is-Rejected.spec.ts
+21   TC-LOGIN-21    [DONE]   TC-LOGIN-21-Verify-SQL-Injection-In-Username-Is-Rejected.spec.ts
                              (S) Verify SQL Injection in Username Is Rejected
-                             -> Fill Username = "' OR '1'='1", Password = "anything".
-                             -> Click "Login".
-                             Verify: URL tetap di "/auth/login" (bukan /dashboard).
-                             Verify: Error "Invalid credentials" visible.
-                             Verify: Body halaman tidak mengandung kata "sql" /
-                                     "syntax error" (tidak membocorkan DB error).
+                             -> Fill Username = "' OR '1'='1".
+                             Verify: URL tetap "/auth/login". Body halaman
+                                     TIDAK mengandung "sql" / "syntax error".
 
- 9   TC-LOGIN-09    [DONE]   TC-LOGIN-09-Verify-XSS-In-Username-Is-Sanitized.spec.ts
+22   TC-LOGIN-22    [DONE]   TC-LOGIN-22-Verify-SQL-Injection-In-Password-Is-Rejected.spec.ts
+                             (S) Verify SQL Injection in Password Is Rejected
+                             Verify: Error "Invalid credentials" visible.
+
+23   TC-LOGIN-23    [DONE]   TC-LOGIN-23-Verify-XSS-In-Username-Is-Sanitized.spec.ts
                              (S) Verify XSS Payload in Username Is Sanitized
-                             -> Setup listener page.on('dialog') untuk deteksi alert.
-                             -> Fill Username = "<script>alert('xss')</script>".
-                             -> Click "Login".
-                             Verify: Tidak ada dialog/alert JS yang ter-trigger.
-                             Verify: Tidak ada elemen <script> berisi payload
-                                     ter-render di DOM.
-                             Verify: Error "Invalid credentials" tetap tampil normal.
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             Verify: TIDAK ada dialog JS ter-trigger. TIDAK ada
+                                     elemen <script> berisi payload di DOM.
+
+24   TC-LOGIN-24    [DONE]   TC-LOGIN-24-Verify-XSS-In-Password-Is-Sanitized.spec.ts
+                             (S) Verify XSS Payload in Password Is Sanitized
+                             -> Payload: "<img src=x onerror=alert(1)>".
+                             Verify: TIDAK ada dialog JS ter-trigger.
+
+25   TC-LOGIN-25    [DONE]   TC-LOGIN-25-Verify-Session-Invalidated-After-Logout.spec.ts
+                             (S) Verify Session Token Is Invalidated After Logout
+                             -> Logout -> navigate langsung ke /dashboard/index.
+                             Verify: redirect ke "/auth/login" (sesi lama
+                                     tidak bisa dipakai ulang).
+
+26   TC-LOGIN-26    [DONE]   TC-LOGIN-26-Verify-Direct-URL-Access-After-Logout-Redirects.spec.ts
+                             (S) Verify Protected URL Cannot Be Accessed After Logout
+                             -> Logout -> navigate ke /pim/viewPimModule.
+                             Verify: redirect ke "/auth/login". Data employee
+                                     TIDAK ter-expose.
+
+27   TC-LOGIN-27    [DONE]   TC-LOGIN-27-Verify-HTML-Injection-In-Username.spec.ts
+                             (S) Verify HTML Injection in Username Is Not Rendered
+                             -> Fill Username = "<h1>Hacked</h1>".
+                             Verify: heading "Hacked" TIDAK muncul sebagai
+                                     elemen DOM nyata.
 
 ================================================================================
   GROUP 5 — UNEXPECTED / EDGE CASES
 ================================================================================
 
-10   TC-LOGIN-10    [DONE]   TC-LOGIN-10-Verify-Login-With-Enter-Key.spec.ts
-                             (!) Verify Login Can Be Submitted via Enter Key
-                             -> Fill Username & Password.
-                             -> Tekan Enter di field Password (bukan klik tombol).
-                             Verify: URL berubah mengandung "/dashboard/index".
+28   TC-LOGIN-28    [DONE]   TC-LOGIN-28-Verify-Leading-Trailing-Spaces-In-Username.spec.ts
+                             (!) Verify Username with Leading/Trailing Spaces
+                             Verify: payload request mengandung spasi apa
+                                     adanya (TIDAK di-trim). Login gagal.
 
-11   TC-LOGIN-11    [DONE]   TC-LOGIN-11-Verify-Double-Click-Login-Button.spec.ts
+29   TC-LOGIN-29    [DONE]   TC-LOGIN-29-Verify-Login-With-Enter-Key.spec.ts
+                             (!) Verify Login Can Be Submitted via Enter Key
+                             -> Tekan Enter di field Password, bukan klik tombol.
+                             Verify: URL berubah ke "/dashboard/index".
+
+30   TC-LOGIN-30    [DONE]   TC-LOGIN-30-Verify-Double-Click-Login-Button.spec.ts
                              (!) Verify Double Click Login Button Does Not Submit Twice
-                             -> Fill Username & Password.
-                             -> Monitor semua POST /auth/validate request.
-                             -> Double-click tombol "Login".
-                             Verify: Jumlah POST /auth/validate === 1 (tidak ada
-                                     double submission).
+                             Verify: jumlah POST /auth/validate === 1.
+
+31   TC-LOGIN-31    [DONE]   TC-LOGIN-31-Verify-Login-With-Sequential-Keystrokes.spec.ts
+                             (!) Verify Login Works with Character-by-Character Input
+                             -> Isi field via pressSequentially (bukan fill
+                                sekali jadi) — simulasi mengetik manusia.
+                             Verify: login berhasil, URL ke dashboard.
+
+32   TC-LOGIN-32    [DONE]   TC-LOGIN-32-Verify-Special-Characters-In-Username.spec.ts
+                             (!) Verify Special Characters in Username
+                             -> Username = "Admin@#$%^&*()".
+                             Verify: response.status() < 500.
+
+33   TC-LOGIN-33    [DONE]   TC-LOGIN-33-Verify-Very-Long-Password.spec.ts
+                             (!) Verify Extremely Long Password (1000 chars)
+                             Verify: response diterima < 10 detik, status < 500.
+
+34   TC-LOGIN-34    [DONE]   TC-LOGIN-34-Verify-Unicode-Emoji-In-Username.spec.ts
+                             (!) Verify Unicode / Emoji in Username
+                             -> Username = "Admin😀🔥".
+                             Verify: response.status() < 500, tidak crash.
+
+35   TC-LOGIN-35    [DONE]   TC-LOGIN-35-Verify-Arabic-RTL-Characters-In-Username.spec.ts
+                             (!) Verify RTL Characters (Arabic) in Username
+                             -> Username = "مستخدم".
+                             Verify: response.status() < 500 (UTF-8 encoding OK).
+
+36   TC-LOGIN-36    [DONE]   TC-LOGIN-36-Verify-Null-Byte-In-Username.spec.ts
+                             (!) Verify Null Byte Character in Username
+                             -> Username = "Admin\u0000".
+                             Verify: response.status() < 500, redirect ke
+                                     "/auth/login" (tidak bypass auth).
+
+37   TC-LOGIN-37    [DONE]   TC-LOGIN-37-Verify-Rapid-Multiple-Failed-Logins.spec.ts
+                             (!) Verify Rapid Multiple Failed Logins (Brute Force Probe)
+                             -> Loop 5x kredensial salah berturut-turut.
+                             Verify: setiap attempt status < 500. Jika ada
+                                     429/Retry-After, dicatat via console.log
+                                     sebagai temuan (demo publik saat ini
+                                     tidak menunjukkan rate limiting).
+
+38   TC-LOGIN-38    [DONE]   TC-LOGIN-38-Verify-Back-Button-After-Login.spec.ts
+                             (!) Verify Browser Back Button After Login Stays Consistent
+                             -> Login -> page.goBack().
+                             Verify: halaman akhir konsisten (dashboard ATAU
+                                     login), tidak ada state rusak/blank.
+
+39   TC-LOGIN-39    [DONE]   TC-LOGIN-39-Verify-Dashboard-Not-Accessible-After-Cookie-Deleted.spec.ts
+                             (!) Verify Dashboard Not Accessible After Session Cookie Deleted
+                             -> Login -> context.clearCookies() -> navigate
+                                ke /dashboard/index.
+                             Verify: redirect ke "/auth/login". Heading
+                                     "Dashboard" TIDAK ter-expose sebelumnya.
+
+40   TC-LOGIN-40    [DONE]   TC-LOGIN-40-Verify-Forgot-Password-Link-Navigates.spec.ts
+                             (!) Verify "Forgot your password?" Link Is Functional
+                             -> Klik elemen "Forgot your password?".
+                             Verify: URL ke "/auth/requestPasswordResetCode".
+                             Verify: heading "Reset Password" visible.
 
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases : 11
-  Positive         : 3  (TC-01 s/d TC-03)
-  Negative         : 3  (TC-04 s/d TC-06)
-  Boundary         : 1  (TC-07)
-  Security         : 2  (TC-08 s/d TC-09)
-  Unexpected/Edge  : 2  (TC-10 s/d TC-11)
+  Total Test Cases : 40
+  Positive         : 6  (TC-01 s/d TC-06)
+  Negative         : 9  (TC-07 s/d TC-12, TC-14 s/d TC-16)
+  Boundary         : 4  (TC-17 s/d TC-20)
+  Security         : 7  (TC-21 s/d TC-27)
+  Unexpected/Edge  : 14 (TC-13, TC-28 s/d TC-40)
+
+================================================================================
+  TEMUAN SELAMA EKSPLORASI (bukan bug, tapi worth dicatat)
+================================================================================
+
+  1. Username TIDAK case-sensitive, password TETAP case-sensitive.
+     (TC-LOGIN-13 vs TC-LOGIN-14)
+
+  2. Input username TIDAK punya attribute maxlength — tidak ada batas
+     panjang di sisi client sama sekali. (TC-LOGIN-18)
+
+  3. Leading/trailing spaces pada username TIDAK di-trim sebelum dikirim
+     ke server, sedangkan whitespace-only DI-trim jadi kosong oleh
+     validator "Required" di client. Dua perilaku berbeda untuk dua
+     kasus yang mirip. (TC-LOGIN-15/16 vs TC-LOGIN-28)
+
+  4. "Forgot your password?" dirender sebagai <p> dengan click handler,
+     bukan <a> — tidak API-accessible lewat role "link".
+
+  5. "Logout" dirender sebagai menuitem di dropdown, bukan <a role="link">.
+
+  6. Tidak ditemukan rate limiting / lockout setelah 5x percobaan login
+     gagal berturut-turut pada demo publik ini. (TC-LOGIN-37)
 
 ================================================================================
   CATATAN EKSEKUSI
@@ -185,7 +354,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
   1. Semua TC berjalan via fixture khusus di src/fixtures/pages.fixture.ts:
      - `test`              -> page objects saja, tanpa auto-login.
      - `authenticatedTest` -> auto-login sebelum test body berjalan
-                               (dipakai di TC-LOGIN-02).
+                               (dipakai di TC-LOGIN-04/06/25/26/38/39).
 
   2. Jalankan seluruh modul:
        npx playwright test tests/login --project=chromium
@@ -195,6 +364,10 @@ No.  Test Case ID   Status   Skenario / Deskripsi
 
   4. Target adalah demo publik OrangeHRM — TC destructive (create/delete
      data) TIDAK ada di modul Login, jadi tidak perlu cleanup.
+
+  5. TC-LOGIN-37 (brute force) TIDAK memakai delay antar percobaan karena
+     modul Login tidak melakukan mutasi data — 5 percobaan beruntun aman
+     untuk demo publik ini (dikonfirmasi tidak menyebabkan error/hang).
 
 ================================================================================
   END OF DOCUMENT

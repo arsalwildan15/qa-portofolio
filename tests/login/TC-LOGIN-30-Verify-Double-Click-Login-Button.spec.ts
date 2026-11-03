@@ -2,11 +2,11 @@ import { test, expect } from '../../src/fixtures/pages.fixture';
 import { env } from '../../src/config/env';
 
 /**
- * TC-LOGIN-11 (!) Edge case
+ * TC-LOGIN-30 (!) Edge case
  * Verify double-clicking the Login button does not submit the form twice
  * (no duplicate POST /auth/validate requests).
  */
-test('TC-LOGIN-11: double click on Login button does not submit twice', async ({
+test('TC-LOGIN-30: double click on Login button does not submit twice', async ({
   page,
   loginPage,
 }) => {

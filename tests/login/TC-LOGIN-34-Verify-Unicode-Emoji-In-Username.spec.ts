@@ -2,11 +2,11 @@ import { test, expect } from '../../src/fixtures/pages.fixture';
 import { env } from '../../src/config/env';
 
 /**
- * TC-LOGIN-07 (B) Boundary
- * Verify a 255-character username (upper boundary) is accepted by the
- * form and handled gracefully by the server (no crash, no 5xx).
+ * TC-LOGIN-34 (!) Edge case
+ * Verify a username containing emoji/unicode characters does not crash
+ * the server and submits normally (emoji does not block the form).
  */
-test('TC-LOGIN-07: username with 255 characters does not crash the server', async ({
+test('TC-LOGIN-34: unicode and emoji in username do not crash the server', async ({
   page,
   loginPage,
 }) => {
@@ -14,7 +14,7 @@ test('TC-LOGIN-07: username with 255 characters does not crash the server', asyn
 
   const [response] = await Promise.all([
     page.waitForResponse((res) => res.url().includes('/auth/validate')),
-    loginPage.login('a'.repeat(255), env.password),
+    loginPage.login('Admin😀🔥', env.password),
   ]);
 
   expect(response.status()).toBeLessThan(500);

@@ -1,11 +1,11 @@
 import { test, expect } from '../../src/fixtures/pages.fixture';
 
 /**
- * TC-LOGIN-06 (-) Negative
+ * TC-LOGIN-12 (-) Negative
  * Verify submitting with both fields empty shows two "Required" messages
  * and the form is never submitted (client-side validation blocks it).
  */
-test('TC-LOGIN-06: empty username and password shows two validation messages', async ({
+test('TC-LOGIN-12: empty username and password shows two validation messages', async ({
   page,
   loginPage,
 }) => {

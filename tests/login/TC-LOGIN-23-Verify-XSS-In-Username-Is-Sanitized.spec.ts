@@ -1,11 +1,11 @@
 import { test, expect } from '../../src/fixtures/pages.fixture';
 
 /**
- * TC-LOGIN-09 (S) Security
+ * TC-LOGIN-23 (S) Security
  * Verify an XSS payload in the username field is never executed and the
  * raw <script> tag is not rendered as live HTML on the page.
  */
-test('TC-LOGIN-09: XSS payload in username is not executed', async ({ page, loginPage }) => {
+test('TC-LOGIN-23: XSS payload in username is not executed', async ({ page, loginPage }) => {
   let dialogFired = false;
   page.on('dialog', async (dialog) => {
     dialogFired = true;

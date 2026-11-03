@@ -1,11 +1,11 @@
 import { test, expect } from '../../src/fixtures/pages.fixture';
 
 /**
- * TC-LOGIN-08 (S) Security
+ * TC-LOGIN-21 (S) Security
  * Verify a classic SQL injection payload in the username field does not
  * bypass authentication and does not leak a database error to the client.
  */
-test('TC-LOGIN-08: SQL injection payload in username is rejected', async ({
+test('TC-LOGIN-21: SQL injection payload in username is rejected', async ({
   page,
   loginPage,
 }) => {

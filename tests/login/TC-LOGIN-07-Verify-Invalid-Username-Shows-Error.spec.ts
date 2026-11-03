@@ -2,10 +2,10 @@ import { test, expect } from '../../src/fixtures/pages.fixture';
 import { env } from '../../src/config/env';
 
 /**
- * TC-LOGIN-04 (-) Negative
+ * TC-LOGIN-07 (-) Negative
  * Verify an invalid username shows the "Invalid credentials" error.
  */
-test('TC-LOGIN-04: invalid username shows error message', async ({ page, loginPage }) => {
+test('TC-LOGIN-07: invalid username shows error message', async ({ page, loginPage }) => {
   await loginPage.goto();
   await loginPage.login('InvalidUser', env.password);
 
