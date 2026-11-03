@@ -6,13 +6,20 @@ export class LoginPage extends BasePage {
   readonly passwordInput: Locator;
   readonly loginButton: Locator;
   readonly errorMessage: Locator;
+  readonly requiredValidationMessages: Locator;
+  readonly forgotPasswordLink: Locator;
+  readonly credentialHintBox: Locator;
 
   constructor(page: Page) {
     super(page);
     this.usernameInput = page.getByPlaceholder('Username');
     this.passwordInput = page.getByPlaceholder('Password');
     this.loginButton = page.getByRole('button', { name: 'Login' });
-    this.errorMessage = page.getByText('Invalid credentials');
+    this.errorMessage = page.locator('.oxd-alert--error');
+    this.requiredValidationMessages = page.locator('.oxd-input-field-error-message');
+    // Rendered as a <p> with a click handler, not an <a>, so no accessible link role.
+    this.forgotPasswordLink = page.locator('.orangehrm-login-forgot-header');
+    this.credentialHintBox = page.getByText('Username :');
   }
 
   async goto(): Promise<void> {
@@ -23,5 +30,11 @@ export class LoginPage extends BasePage {
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
+  }
+
+  async submitViaEnterKey(username: string, password: string): Promise<void> {
+    await this.usernameInput.fill(username);
+    await this.passwordInput.fill(password);
+    await this.passwordInput.press('Enter');
   }
 }
