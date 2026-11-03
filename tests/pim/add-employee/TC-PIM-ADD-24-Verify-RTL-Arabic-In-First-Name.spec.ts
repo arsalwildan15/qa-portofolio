@@ -1,0 +1,49 @@
+/**
+ * ================================================================================
+ * TC-PIM-ADD-24 — Verify RTL Arabic In First Name
+ * Modul    : PIM - Add Employee
+ * Kategori : Edge Case (!)
+ * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
+ * File     : TC-PIM-ADD-24-Verify-RTL-Arabic-In-First-Name.spec.ts
+ * Path     : tests/pim/add-employee/
+ * ================================================================================
+ *
+ * TUJUAN:
+ *   Memverifikasi First Name berkarakter RTL (Arab) dikirim dan tersimpan
+ *   dengan benar (UTF-8) tanpa membuat server crash.
+ *
+ * RUN COMMAND:
+ *   npx playwright test tests/pim/add-employee/TC-PIM-ADD-24-Verify-RTL-Arabic-In-First-Name.spec.ts --project=chromium --headed
+ * ================================================================================
+ */
+
+import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
+import { env } from '../../../src/config/env';
+import { TestReport } from '../../../src/utils/testReport';
+import { uniqueEmployeeName } from '../../../src/data/testData';
+
+test('TC-PIM-ADD-24: RTL Arabic characters in First Name do not crash the server', async ({
+  page,
+  addEmployeePage,
+}) => {
+  const report = new TestReport('TC-PIM-ADD-24', 'RTL Arabic In First Name', env.baseURL, page);
+  const { lastName } = uniqueEmployeeName('QaArabic');
+  const firstName = 'محمد';
+
+  report.step(`Navigate ke Add Employee, fill First Name = "${firstName}" (Arabic)`);
+  await addEmployeePage.goto();
+  await addEmployeePage.fillName(firstName, lastName);
+
+  report.step('Klik Save, verify server tidak crash dan nama tersimpan sesuai input');
+  const [resp] = await Promise.all([
+    page.waitForResponse((r) => r.url().includes('/api/v2/pim/employees') && r.request().method() === 'POST'),
+    addEmployeePage.save(),
+  ]);
+  report.check('[API] status < 500', resp.status() < 500, `status=${resp.status()}`);
+  if (resp.status() === 200) {
+    const body = await resp.json().catch(() => null);
+    report.check('[API] firstName tersimpan sesuai input', body?.data?.firstName === firstName, JSON.stringify(body?.data));
+  }
+
+  report.print();
+});

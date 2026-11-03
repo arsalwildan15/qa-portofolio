@@ -23,7 +23,10 @@ LEGEND SIMBOL SKENARIO
 
   FORMAT ID  : TC-PIM-<SECTION>-NN  (SECTION = LIST | ADD | PD)
   FILE       : TC-PIM-<SECTION>-NN-Verify-Name-In-English.spec.ts
-  FOLDER     : tests/pim/
+  FOLDER     : tests/pim/<subfolder>/  (satu subfolder per section, bukan flat)
+               TC-PIM-LIST-*  -> tests/pim/employee-list/
+               TC-PIM-ADD-*   -> tests/pim/add-employee/
+               TC-PIM-PD-*    -> tests/pim/personal-details/
 
   CAKUPAN FASE 1 (modul ini): Employee List, Add Employee, Personal Details tab.
   BELUM DICAKUP (Fase 2/3 — lihat README Roadmap): Contact Details, Emergency
@@ -140,6 +143,7 @@ No.  Test Case ID      Status   Kategori           Skenario
 
 ================================================================================
   GROUP 1 — EMPLOYEE LIST (14 TC)
+  Folder: tests/pim/employee-list/
 ================================================================================
 
  1   TC-PIM-LIST-01    [DONE]   Positive (+)       Search by exact Employee Name
@@ -166,6 +170,7 @@ No.  Test Case ID      Status   Kategori           Skenario
 
 ================================================================================
   GROUP 2 — ADD EMPLOYEE (26 TC, ID 21 sengaja dilewati saat konsolidasi)
+  Folder: tests/pim/add-employee/
 ================================================================================
 
 15   TC-PIM-ADD-01     [DONE]   Positive (+)       Tambah employee minimal (First+Last)
@@ -208,6 +213,7 @@ No.  Test Case ID      Status   Kategori           Skenario
 
 ================================================================================
   GROUP 3 — PERSONAL DETAILS (12 TC)
+  Folder: tests/pim/personal-details/
 ================================================================================
 
 41   TC-PIM-PD-01      [DONE]   Positive (+)       Field ter-prefill dari employee baru
@@ -283,11 +289,17 @@ No.  Test Case ID      Status   Kategori           Skenario
      PersonalDetailsPage.ts (di src/pages/), diinjeksikan via
      src/fixtures/pages.fixture.ts sama seperti LoginPage/DashboardPage.
 
-  2. Jalankan seluruh modul:
+  2. Jalankan seluruh modul PIM Fase 1:
        npx playwright test tests/pim --project=chromium
 
-  3. Jalankan satu TC:
-       npx playwright test tests/pim/TC-PIM-ADD-01-*.spec.ts --project=chromium
+  3. Jalankan satu section saja:
+       npx playwright test tests/pim/employee-list --project=chromium
+       npx playwright test tests/pim/add-employee --project=chromium
+       npx playwright test tests/pim/personal-details --project=chromium
+
+  4. Jalankan satu TC:
+       npx playwright test tests/pim/add-employee/TC-PIM-ADD-01-*.spec.ts --project=chromium
+       (RUN COMMAND spesifik per TC ada di JSDoc header masing-masing file.)
 
   4. [FORMAT REPORTING] Sama persis dengan Login: setiap TC pakai TestReport
      dari src/utils/testReport.ts (step logging + summary block + console-

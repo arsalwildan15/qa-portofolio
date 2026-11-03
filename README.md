@@ -32,6 +32,9 @@ qa-portofolio/
 │   │   ├── LoginPage.ts
 │   │   ├── DashboardPage.ts
 │   │   ├── PimPage.ts
+│   │   ├── EmployeeListPage.ts
+│   │   ├── AddEmployeePage.ts
+│   │   ├── PersonalDetailsPage.ts
 │   │   └── LeavePage.ts
 │   ├── fixtures/         # Custom Playwright fixtures — inject page objects, provide authenticatedTest
 │   ├── utils/
@@ -40,9 +43,14 @@ qa-portofolio/
 │       └── bugListReporter.ts # Custom Playwright reporter — appends failed TCs to docs/Bug-List.xlsx
 ├── tests/
 │   ├── login/            # One module = one folder. Specs are named by test case ID.
-│   └── e2e/              # Cross-cutting / not-yet-split specs (PIM, Leave)
+│   ├── pim/              # One subfolder per PIM screen (not flat — each screen has its own specs)
+│   │   ├── employee-list/
+│   │   ├── add-employee/
+│   │   └── personal-details/
+│   └── e2e/              # Cross-cutting / not-yet-split specs (PIM smoke test, Leave)
 ├── docs/                 # Human-readable test case documentation, one file per module
 │   ├── TC-Login.txt
+│   ├── TC-PIM.txt
 │   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
 ├── .github/workflows/     # CI pipeline definition
 ├── playwright.config.ts
@@ -54,7 +62,7 @@ qa-portofolio/
 - **`pages/`** isolates every selector behind a typed class — a DOM change means editing one file, not every spec that touches that screen.
 - **`fixtures/`** wires page objects into Playwright's dependency-injection model (`pages.fixture.ts`) and exposes `authenticatedTest`, so specs that need a logged-in session never duplicate login steps.
 - **`config/`** and **`data/`** keep environment concerns and generated test data out of both page objects and specs, so each layer has exactly one reason to change.
-- **`tests/<module>/`** mirrors the application's menu structure. Each spec file is named `TC-<MODULE>-<NN>-Verify-<Name>.spec.ts`, one test case per file, tagged by scenario type in its JSDoc header: `(+)` positive, `(-)` negative, `(B)` boundary, `(S)` security, `(!)` edge case.
+- **`tests/<module>/`** mirrors the application's menu structure. Each spec file is named `TC-<MODULE>-<NN>-Verify-<Name>.spec.ts`, one test case per file, tagged by scenario type in its JSDoc header: `(+)` positive, `(-)` negative, `(B)` boundary, `(S)` security, `(!)` edge case. A module with multiple distinct screens (e.g. PIM: Employee List, Add Employee, Personal Details) gets one subfolder per screen instead of a flat file list, so the file tree itself communicates scope.
 - **`docs/TC-<Module>.txt`** is the readable counterpart to each `tests/<module>/` folder — same test case IDs, same scenario legend, meant for anyone who wants to review coverage without reading TypeScript.
 
 ## Test Execution & Reporting
@@ -148,7 +156,7 @@ Set these repository secrets if targeting a non-default environment:
 | Module | Scenarios | Docs |
 |--------|-----------|------|
 | Login | 40 TCs — positive, negative, boundary, security, edge (see `tests/login/`) | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| PIM | Add employee, search with no matching records | — |
+| PIM (Phase 1) | 52 TCs across Employee List (14), Add Employee (26), Personal Details (12) — positive, negative, boundary, security, edge (see `tests/pim/`). Phase 2/3 (other PIM tabs, Configuration, Reports) not yet covered. | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Leave | Submitting without entitlement is correctly blocked (see note below) | — |
 
 > **Note on the Leave suite:** the public OrangeHRM demo account carries no assigned leave entitlement, so a successful leave application cannot be exercised against it. Rather than asserting an outcome the environment can never produce, the test verifies the deterministic, environment-correct behavior instead: the UI reports an insufficient balance once a date range is selected.
