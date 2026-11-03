@@ -16,6 +16,7 @@ const HEADERS = [
   'Steps to Reproduce',
   'Expected Result',
   'Actual Result',
+  'Severity',
   'Priority',
   'Attachment',
   'Detected On',
@@ -36,6 +37,7 @@ interface BugRow {
   stepsToReproduce: string;
   expectedResult: string;
   actualResult: string;
+  severity: string;
   priority: string;
   attachment: string;
   detectedOn: string;
@@ -49,9 +51,11 @@ interface BugRow {
 /**
  * Appends one row per failed test case to docs/Bug-List.xlsx so a failing
  * run leaves behind a draft bug report, not just a red CI check. Fields
- * that can't be known from the failure alone (Expected Result, Priority)
- * are left as an explicit "[ISI MANUAL]" placeholder for QA review,
- * rather than guessed.
+ * that can't be known from the failure alone (Expected Result, Severity,
+ * Priority) are left as an explicit "[ISI MANUAL]" placeholder for QA
+ * review, rather than guessed — Severity (technical impact) and Priority
+ * (how urgently it should be fixed) are judgment calls a failing
+ * assertion alone can't make.
  */
 export default class BugListReporter implements Reporter {
   private readonly pendingRows: BugRow[] = [];
@@ -89,6 +93,7 @@ export default class BugListReporter implements Reporter {
       stepsToReproduce: steps,
       expectedResult: '[ISI MANUAL]',
       actualResult,
+      severity: '[ISI MANUAL]',
       priority: '[ISI MANUAL]',
       attachment,
       detectedOn: new Date().toLocaleDateString('id-ID', {
@@ -144,6 +149,7 @@ export default class BugListReporter implements Reporter {
       'Steps to Reproduce': row.stepsToReproduce,
       'Expected Result': row.expectedResult,
       'Actual Result': row.actualResult,
+      Severity: row.severity,
       Priority: row.priority,
       Attachment: row.attachment,
       'Detected On': row.detectedOn,

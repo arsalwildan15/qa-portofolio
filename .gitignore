@@ -6,3 +6,4 @@ playwright/.cache/
 allure-results/
 allure-report/
 .env
+docs/~$*.xlsx

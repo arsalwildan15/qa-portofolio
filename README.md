@@ -79,15 +79,17 @@ npx playwright test tests/login/TC-LOGIN-01-Verify-Valid-Credentials-Redirect-To
 
 ## Automatic Bug List (`docs/Bug-List.xlsx`)
 
-Every time a test case **fails**, a custom Playwright reporter (`src/reporters/bugListReporter.ts`) appends one draft row to `docs/Bug-List.xlsx` — same column layout used for manual bug tracking (`Bug ID`, `Summary`, `Category`, `Scope`, `Environment`, `Modul`, `Steps to Reproduce`, `Expected Result`, `Actual Result`, `Priority`, `Attachment`, `Detected On`, `Detected By`, `Status`, `Assigned To`, `Notes`, `Script Test Case`).
+Every time a test case **fails**, a custom Playwright reporter (`src/reporters/bugListReporter.ts`) appends one draft row to `docs/Bug-List.xlsx` — same column layout used for manual bug tracking (`Bug ID`, `Summary`, `Category`, `Scope`, `Environment`, `Modul`, `Steps to Reproduce`, `Expected Result`, `Actual Result`, `Severity`, `Priority`, `Attachment`, `Detected On`, `Detected By`, `Status`, `Assigned To`, `Notes`, `Script Test Case`).
 
 What's filled in automatically vs. left for QA review:
 
 | Filled automatically | Left as `[ISI MANUAL]` for QA review |
 |---|---|
-| Bug ID (auto-incrementing `BG-XXX`), Summary, Category, Scope, Environment, Modul, Steps to Reproduce (from the `[STEP n]` log), Actual Result (from the failing assertion), Attachment (relative path to the auto-captured screenshot/video), Detected On, Detected By, Status (`Open`), Script Test Case | Expected Result, Priority |
+| Bug ID (auto-incrementing `BG-XXX`), Summary, Category, Scope, Environment, Modul, Steps to Reproduce (from the `[STEP n]` log), Actual Result (from the failing assertion), Attachment (relative path to the auto-captured screenshot/video), Detected On, Detected By, Status (`Open`), Script Test Case | Expected Result, Severity, Priority |
 
-The file is created on first failure and only touched when a test fails — a fully green run leaves it untouched. It is **not** a replacement for human triage: Expected Result and Priority require judgment the failure alone can't provide, so they're explicitly flagged rather than guessed.
+`Severity` (technical impact: how broken the behavior is) and `Priority` (how urgently it should be fixed) are tracked as separate columns since they don't always move together — a cosmetic bug can be high-priority before a release, and a severe-but-rare edge case can sit low-priority.
+
+The file is created empty (header only) on the very first test run and only appended to when a test fails — a fully green run leaves it unchanged. It is **not** a replacement for human triage: Expected Result, Severity, and Priority require judgment the failure alone can't provide, so they're explicitly flagged rather than guessed.
 
 ## Getting Started
 
