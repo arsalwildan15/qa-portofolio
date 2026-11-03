@@ -1,9 +1,6 @@
 import { test as base } from '@playwright/test';
 import { env } from '../config/env';
-import { LoginPage } from '../pages/LoginPage';
-import { DashboardPage } from '../pages/DashboardPage';
-import { PimPage } from '../pages/PimPage';
-import { LeavePage } from '../pages/LeavePage';
+import { LoginPage, DashboardPage, PimPage, LeavePage } from '../pages';
 
 interface Pages {
   loginPage: LoginPage;

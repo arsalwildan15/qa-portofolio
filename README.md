@@ -1,28 +1,51 @@
 # QA Portofolio — OrangeHRM E2E Automation Suite
 
+[![Playwright E2E](https://github.com/arsalwildan15/qa-portofolio/actions/workflows/playwright.yml/badge.svg)](https://github.com/arsalwildan15/qa-portofolio/actions/workflows/playwright.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![Playwright](https://img.shields.io/badge/Playwright-1.49-2EAD33?logo=playwright&logoColor=white)
+![Allure](https://img.shields.io/badge/Report-Allure-E12C2C)
+
 End-to-end test automation suite for the [OrangeHRM demo application](https://opensource-demo.orangehrmlive.com/), built with **Playwright + TypeScript** following the Page Object Model, with **Allure** reporting and a **GitHub Actions** CI/CD pipeline.
 
 ## Tech Stack
 
-- [Playwright](https://playwright.dev/) — browser automation (Chromium, Firefox, WebKit)
-- TypeScript (strict mode)
-- [Allure Report](https://allurereport.org/) — rich, historical test reporting
-- ESLint + Prettier — code quality and formatting
-- GitHub Actions — CI pipeline with Allure report published to GitHub Pages
+| Concern | Tool |
+|---|---|
+| Browser automation | [Playwright](https://playwright.dev/) (Chromium, Firefox, WebKit) |
+| Language | TypeScript (strict mode) |
+| Reporting | [Allure Report](https://allurereport.org/) + Playwright HTML report |
+| Code quality | ESLint + Prettier |
+| CI/CD | GitHub Actions → Allure report published to GitHub Pages |
 
-## Project Structure
+## Architecture
+
+The suite follows a layered **Page Object Model**: tests never touch locators directly, locators never touch assertions, and environment/test data are isolated from both.
 
 ```
-src/
-  config/     # Environment configuration
-  data/       # Test data factories
-  fixtures/   # Custom Playwright fixtures (page objects, authenticated session)
-  pages/      # Page Object Model classes
-tests/
-  e2e/        # Test specs, grouped by feature
-.github/
-  workflows/  # CI pipeline
+qa-portofolio/
+├── src/
+│   ├── config/         # Environment resolution (env.ts) — single source of truth for BASE_URL/credentials
+│   ├── types/           # Shared domain types (e.g. NewEmployee)
+│   ├── data/            # Test data factories — unique names, collision-free dates
+│   ├── pages/            # Page Object Model — one class per screen, barrel-exported via index.ts
+│   │   ├── BasePage.ts       # Shared behaviour all page objects inherit
+│   │   ├── LoginPage.ts
+│   │   ├── DashboardPage.ts
+│   │   ├── PimPage.ts
+│   │   └── LeavePage.ts
+│   └── fixtures/         # Custom Playwright fixtures — inject page objects, provide authenticatedTest
+├── tests/
+│   └── e2e/              # Test specs, one file per feature, consuming fixtures (never raw Playwright test)
+├── .github/workflows/     # CI pipeline definition
+├── playwright.config.ts
+├── tsconfig.json
+└── eslint.config.js
 ```
+
+**Why this shape:**
+- **`pages/`** isolates every selector behind a typed class — a DOM change means editing one file, not every spec that touches that screen.
+- **`fixtures/`** wires page objects into Playwright's dependency-injection model (`pages.fixture.ts`) and exposes `authenticatedTest`, so specs that need a logged-in session never duplicate login steps.
+- **`config/`** and **`data/`** keep environment concerns and generated test data out of both page objects and specs, so each layer has exactly one reason to change.
 
 ## Getting Started
 
@@ -82,7 +105,9 @@ Set these repository secrets if targeting a non-default environment:
 |--------|-----------|
 | Login | Valid login, invalid credentials, empty submission |
 | PIM | Add employee, search with no matching records |
-| Leave | Apply leave with a valid date range |
+| Leave | Submitting without entitlement is correctly blocked (see note below) |
+
+> **Note on the Leave suite:** the public OrangeHRM demo account carries no assigned leave entitlement, so a successful leave application cannot be exercised against it. Rather than asserting an outcome the environment can never produce, the test verifies the deterministic, environment-correct behavior instead: the UI reports an insufficient balance once a date range is selected.
 
 ## Roadmap
 

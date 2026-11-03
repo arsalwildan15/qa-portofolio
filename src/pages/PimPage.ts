@@ -1,10 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
-
-export interface NewEmployee {
-  firstName: string;
-  lastName: string;
-}
+import { type NewEmployee } from '../types/employee';
 
 export class PimPage extends BasePage {
   readonly addEmployeeLink: Locator;
