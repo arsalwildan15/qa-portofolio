@@ -50,7 +50,17 @@ LEGEND SIMBOL SKENARIO
 
   API ENDPOINT (CONFIRMED):
     POST /web/index.php/auth/validate
-    - Kredensial valid atau invalid → selalu 302 (redirect server-side)
+    - Kredensial valid        → 302, Location: /dashboard/index,
+                                 Set-Cookie: orangehrm=<id>; path=/web;
+                                 secure; HttpOnly; SameSite=Lax
+    - Kredensial invalid      → 302, Location: /auth/login,
+                                 TIDAK ADA Set-Cookie sama sekali (session
+                                 baru tidak dibuat — dibuktikan via
+                                 response.headersArray(), bukan hanya
+                                 response.headers() yang MENYEMBUNYIKAN
+                                 header set-cookie saat ada duplikat/multi-
+                                 value. Lihat CATATAN TEKNIS PLAYWRIGHT di
+                                 bawah.)
     - Tidak ada 401/403 — pola session PHP klasik
     - Username 255/256 karakter tidak memicu 5xx (TC-LOGIN-17/18)
     - Username tidak punya atribut maxlength di client — browser menerima
@@ -61,6 +71,28 @@ LEGEND SIMBOL SKENARIO
     - Whitespace-only input (hanya spasi) DI-trim oleh client menjadi
       kosong, diblokir validasi "Required" sebelum sempat submit
       (TC-LOGIN-15/16)
+
+  GET /web/index.php/dashboard/index
+    - Sesi aktif              → 200 (TC-LOGIN-06)
+    - Tanpa sesi / sesi mati  → 302 ke /auth/login (TC-LOGIN-02/25/39)
+
+  POST /web/index.php/auth/logout
+    - Selalu 302, Location: /auth/login (TC-LOGIN-04)
+
+  GET /web/index.php/pim/viewPimModule (tanpa sesi)
+    - 302 ke /auth/login, bukan 200 dengan data employee (TC-LOGIN-26)
+
+  [CATATAN TEKNIS PLAYWRIGHT] response.headers() vs headersArray()
+    Playwright's `response.headers()` mengembalikan objek flat {name:
+    value} — jika ada header dengan nama sama muncul berkali-kali (seperti
+    Set-Cookie saat cookie multiple), hanya satu yang tersisa atau bisa
+    hilang. Untuk verifikasi Set-Cookie yang akurat, WAJIB pakai
+    `await response.headersArray()` lalu filter manual
+    `h.name.toLowerCase() === 'set-cookie'`. Untuk membaca flag HttpOnly/
+    Secure/SameSite secara terstruktur (bukan parsing string), gunakan
+    `await context.cookies()` — Playwright mem-parsing flag tsb jadi field
+    boolean/string yang jauh lebih reliable daripada regex ke header
+    mentah.
 
   [TEMUAN PENTING] USERNAME TIDAK CASE-SENSITIVE
     Asumsi awal (dari pengalaman app lain) adalah username case-sensitive.
@@ -85,27 +117,52 @@ No.  Test Case ID   Status   Skenario / Deskripsi
  1   TC-LOGIN-01    [DONE]   TC-LOGIN-01-Verify-Valid-Credentials-Redirect-To-Dashboard.spec.ts
                              (+) Verify Valid Credentials Redirect to Dashboard
                              -> Fill Username = "Admin", Password = "admin123".
+                             -> Intercept POST /auth/validate.
                              -> Click "Login".
-                             Verify: URL mengandung "/dashboard/index".
-                             Verify: Heading "Dashboard" visible.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 302.
+                             -> Verify header Location mengandung "/dashboard/index".
+                             -> Verify header Set-Cookie (via headersArray())
+                                mengandung "orangehrm=" dan "HttpOnly".
+                             -> Verify context.cookies(): cookie "orangehrm"
+                                punya httpOnly=true, secure=true, sameSite="Lax".
+                             [UI VERIFICATION]
+                             -> Verify URL mengandung "/dashboard/index".
+                             -> Verify Heading "Dashboard" visible.
 
  2   TC-LOGIN-02    [DONE]   TC-LOGIN-02-Verify-Dashboard-Not-Accessible-Without-Login.spec.ts
                              (+) Verify Dashboard Redirects to Login When Not Authenticated
                              -> Tanpa login, navigate langsung ke /dashboard/index.
-                             Verify: URL redirect ke "/auth/login".
-                             Verify: Heading "Login" visible.
+                             -> Intercept GET /auth/login.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200 (halaman
+                                login benar-benar di-serve, bukan error page).
+                             [UI VERIFICATION]
+                             -> Verify URL redirect ke "/auth/login".
+                             -> Verify Heading "Login" visible.
 
  3   TC-LOGIN-03    [DONE]   TC-LOGIN-03-Verify-Login-Page-Elements-Visible.spec.ts
                              (+) Verify Login Page Renders All Required Elements
-                             Verify: Heading "Login", input Username/Password
-                                     (visible & enabled), button "Login"
-                                     (visible & enabled), "Forgot your
-                                     password?", kotak kredensial demo.
+                             [API VERIFICATION]
+                             -> Verify GET /auth/login response.status() === 200.
+                             -> Verify header Content-Type mengandung "text/html".
+                             [UI VERIFICATION]
+                             -> Verify Heading "Login", input Username/Password
+                                (visible & enabled), button "Login"
+                                (visible & enabled), "Forgot your
+                                password?", kotak kredensial demo.
 
  4   TC-LOGIN-04    [DONE]   TC-LOGIN-04-Verify-Logout-Redirects-To-Login-Page.spec.ts
                              (+) Verify Logout Redirects Back to Login Page
-                             -> Login -> klik user dropdown -> klik "Logout".
-                             Verify: URL kembali ke "/auth/login".
+                             -> Login -> klik user dropdown.
+                             -> Intercept POST /auth/logout.
+                             -> Klik "Logout".
+                             [API VERIFICATION]
+                             -> Verify response.status() === 302.
+                             -> Verify header Location mengandung "/auth/login".
+                             [UI VERIFICATION]
+                             -> Verify URL kembali ke "/auth/login".
+                             -> Verify Heading "Login" visible.
 
  5   TC-LOGIN-05    [DONE]   TC-LOGIN-05-Verify-Password-Field-Masked.spec.ts
                              (+) Verify Password Input Is Masked (type=password)
@@ -114,9 +171,14 @@ No.  Test Case ID   Status   Skenario / Deskripsi
 
  6   TC-LOGIN-06    [DONE]   TC-LOGIN-06-Verify-Session-Persists-After-Page-Refresh.spec.ts
                              (+) Verify Session Persists After Page Refresh
-                             -> Login -> page.reload().
-                             Verify: URL tetap "/dashboard/index" (bukan
-                                     redirect ke login).
+                             -> Login -> intercept GET /dashboard/index ->
+                                page.reload().
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200 (bukan
+                                redirect ke login — kontras dengan
+                                TC-LOGIN-25 setelah logout).
+                             [UI VERIFICATION]
+                             -> Verify URL tetap "/dashboard/index".
 
 ================================================================================
   GROUP 2 — NEGATIVE CASES (Invalid Input)
@@ -124,17 +186,33 @@ No.  Test Case ID   Status   Skenario / Deskripsi
 
  7   TC-LOGIN-07    [DONE]   TC-LOGIN-07-Verify-Invalid-Username-Shows-Error.spec.ts
                              (-) Verify Invalid Username Shows Error Message
-                             Verify: Error ".oxd-alert--error" = "Invalid
-                                     credentials". URL tetap di "/auth/login".
+                             -> Intercept POST /auth/validate.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 302.
+                             -> Verify header Location mengandung "/auth/login".
+                             -> Verify TIDAK ADA header Set-Cookie sama sekali
+                                (via headersArray() — session tidak dibuat).
+                             [UI VERIFICATION]
+                             -> Verify Error ".oxd-alert--error" = "Invalid
+                                credentials". URL tetap di "/auth/login".
 
  8   TC-LOGIN-08    [DONE]   TC-LOGIN-08-Verify-Invalid-Password-Shows-Error.spec.ts
                              (-) Verify Invalid Password Shows Error Message
-                             Verify: Error "Invalid credentials" visible.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 302, Location ke
+                                "/auth/login", TIDAK ADA Set-Cookie.
+                             [UI VERIFICATION]
+                             -> Verify Error "Invalid credentials" visible.
 
  9   TC-LOGIN-09    [DONE]   TC-LOGIN-09-Verify-Both-Fields-Invalid-Shows-Error.spec.ts
                              (-) Verify Both Invalid Username and Password Shows Error
-                             Verify: Error generik "Invalid credentials" —
-                                     tidak membocorkan field mana yang salah.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 302, Location ke
+                                "/auth/login" (sama persis dengan kasus satu
+                                field salah — tidak ada differential response).
+                             [UI VERIFICATION]
+                             -> Verify Error generik "Invalid credentials" —
+                                tidak membocorkan field mana yang salah.
 
 10   TC-LOGIN-10    [DONE]   TC-LOGIN-10-Verify-Empty-Username-Shows-Validation.spec.ts
                              (-) Verify Empty Username Shows Required Validation
@@ -221,15 +299,28 @@ No.  Test Case ID   Status   Skenario / Deskripsi
 
 25   TC-LOGIN-25    [DONE]   TC-LOGIN-25-Verify-Session-Invalidated-After-Logout.spec.ts
                              (S) Verify Session Token Is Invalidated After Logout
-                             -> Logout -> navigate langsung ke /dashboard/index.
-                             Verify: redirect ke "/auth/login" (sesi lama
-                                     tidak bisa dipakai ulang).
+                             -> Logout -> intercept GET /dashboard/index ->
+                                navigate langsung ke /dashboard/index.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 302 (BUKAN 200 —
+                                kontras langsung dengan TC-LOGIN-06 saat sesi
+                                masih aktif; membuktikan sesi lama benar-benar
+                                tidak bisa dipakai ulang di sisi server).
+                             [UI VERIFICATION]
+                             -> Verify redirect ke "/auth/login".
 
 26   TC-LOGIN-26    [DONE]   TC-LOGIN-26-Verify-Direct-URL-Access-After-Logout-Redirects.spec.ts
                              (S) Verify Protected URL Cannot Be Accessed After Logout
-                             -> Logout -> navigate ke /pim/viewPimModule.
-                             Verify: redirect ke "/auth/login". Data employee
-                                     TIDAK ter-expose.
+                             -> Logout -> intercept GET /pim/viewPimModule ->
+                                navigate ke /pim/viewPimModule.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 302 (server
+                                menolak request, bukan cuma client-side
+                                redirect — data tidak sempat dikirim sama
+                                sekali).
+                             [UI VERIFICATION]
+                             -> Verify redirect ke "/auth/login". Data employee
+                                TIDAK ter-expose.
 
 27   TC-LOGIN-27    [DONE]   TC-LOGIN-27-Verify-HTML-Injection-In-Username.spec.ts
                              (S) Verify HTML Injection in Username Is Not Rendered
@@ -302,10 +393,15 @@ No.  Test Case ID   Status   Skenario / Deskripsi
 
 39   TC-LOGIN-39    [DONE]   TC-LOGIN-39-Verify-Dashboard-Not-Accessible-After-Cookie-Deleted.spec.ts
                              (!) Verify Dashboard Not Accessible After Session Cookie Deleted
-                             -> Login -> context.clearCookies() -> navigate
-                                ke /dashboard/index.
-                             Verify: redirect ke "/auth/login". Heading
-                                     "Dashboard" TIDAK ter-expose sebelumnya.
+                             -> Login -> context.clearCookies() -> intercept
+                                GET /dashboard/index -> navigate ke sana.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 302 (server
+                                menolak di level request, bukan baru
+                                di-redirect setelah render client-side).
+                             [UI VERIFICATION]
+                             -> Verify redirect ke "/auth/login". Heading
+                                "Dashboard" TIDAK ter-expose sebelumnya.
 
 40   TC-LOGIN-40    [DONE]   TC-LOGIN-40-Verify-Forgot-Password-Link-Navigates.spec.ts
                              (!) Verify "Forgot your password?" Link Is Functional
@@ -368,6 +464,20 @@ No.  Test Case ID   Status   Skenario / Deskripsi
   5. TC-LOGIN-37 (brute force) TIDAK memakai delay antar percobaan karena
      modul Login tidak melakukan mutasi data — 5 percobaan beruntun aman
      untuk demo publik ini (dikonfirmasi tidak menyebabkan error/hang).
+
+  6. [PELAJARAN] Saat menambahkan verifikasi API dengan pola
+       const [response] = await Promise.all([
+         page.waitForResponse(...),
+         loginPage.login(...),
+       ]);
+     WAJIB pastikan halaman login sudah di-load lebih dulu
+     (`await loginPage.goto()`) SEBELUM blok Promise.all ini. Tanpa itu,
+     `page` masih kosong (about:blank), locator .fill() di dalam
+     loginPage.login() akan menggantung menunggu elemen yang tidak pernah
+     ada, dan seluruh Promise.all timeout di 30 detik — errornya muncul di
+     baris waitForResponse, BUKAN di baris fill(), sehingga gampang
+     disalahartikan sebagai server lambat/rate-limited. Ditemukan &
+     diperbaiki di TC-LOGIN-07/08/09 saat menambah verifikasi header.
 
 ================================================================================
   END OF DOCUMENT
