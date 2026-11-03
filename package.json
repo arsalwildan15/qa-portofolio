@@ -1,18 +1,33 @@
 {
   "name": "qa-portofolio",
   "version": "1.0.0",
-  "description": "QA automation suite using Playwright + TypeScript",
+  "description": "Professional E2E automation suite for OrangeHRM (https://opensource-demo.orangehrmlive.com) built with Playwright + TypeScript, Allure reporting, and CI/CD.",
   "private": true,
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
-    "report": "playwright show-report"
+    "test:chromium": "playwright test --project=chromium",
+    "report:html": "playwright show-report",
+    "report:allure:generate": "allure generate allure-results --clean -o allure-report",
+    "report:allure:open": "allure open allure-report",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "allure-commandline": "^2.32.0",
+    "allure-playwright": "^3.0.9",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2",
     "typescript": "^5.7.2"
   }
 }
