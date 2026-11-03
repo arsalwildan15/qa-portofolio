@@ -33,7 +33,9 @@ qa-portofolio/
 │   │   ├── DashboardPage.ts
 │   │   ├── PimPage.ts
 │   │   └── LeavePage.ts
-│   └── fixtures/         # Custom Playwright fixtures — inject page objects, provide authenticatedTest
+│   ├── fixtures/         # Custom Playwright fixtures — inject page objects, provide authenticatedTest
+│   └── utils/
+│       └── testReport.ts # Step logging + end-of-test summary report + auto console-error check
 ├── tests/
 │   ├── login/            # One module = one folder. Specs are named by test case ID.
 │   └── e2e/              # Cross-cutting / not-yet-split specs (PIM, Leave)
@@ -51,6 +53,24 @@ qa-portofolio/
 - **`config/`** and **`data/`** keep environment concerns and generated test data out of both page objects and specs, so each layer has exactly one reason to change.
 - **`tests/<module>/`** mirrors the application's menu structure. Each spec file is named `TC-<MODULE>-<NN>-Verify-<Name>.spec.ts`, one test case per file, tagged by scenario type in its JSDoc header: `(+)` positive, `(-)` negative, `(B)` boundary, `(S)` security, `(!)` edge case.
 - **`docs/TC-<Module>.txt`** is the readable counterpart to each `tests/<module>/` folder — same test case IDs, same scenario legend, meant for anyone who wants to review coverage without reading TypeScript.
+
+## Test Execution & Reporting
+
+Every spec file starts with a structured JSDoc header (TC ID, title, module, category, target env, file path, purpose, and a copy-pasteable `RUN COMMAND`), so any single test case can be run and understood in isolation.
+
+At runtime, each test case uses the shared `TestReport` utility (`src/utils/testReport.ts`) instead of raw `expect()` calls:
+
+- **Step-by-step logging** — every action prints `[STEP n] description...` to the console as it happens.
+- **End-of-test summary block** — a formatted report (TC ID, env, duration, step count, a numbered ✓/✗ checklist with detail lines, optional findings, a failed-checks recap, and a final `RINGKASAN`/`STATUS PASSED|FAILED` line).
+- **Soft assertions** — checks use `expect.soft()`, so one failing check doesn't abort the test; every remaining step and check still runs and gets reported before Playwright marks the test failed.
+- **Automatic console-error check** — passing `page` into `TestReport` attaches `page.on('console')`/`page.on('pageerror')` listeners and appends a pass/fail check ("no browser console errors") to every TC's summary, with no per-file wiring needed.
+- **API-level verification** — applied to the TCs that are representative of each unique server behavior (status codes, redirect headers, `Set-Cookie`/`HttpOnly`/`Secure`/`SameSite` flags), rather than duplicated across every TC where it wouldn't add new coverage.
+
+Run a single TC with the `RUN COMMAND` from its own file header, e.g.:
+
+```bash
+npx playwright test tests/login/TC-LOGIN-01-Verify-Valid-Credentials-Redirect-To-Dashboard.spec.ts --project=chromium --headed
+```
 
 ## Getting Started
 
