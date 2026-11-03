@@ -1,17 +1,38 @@
-import { test, expect } from '../../src/fixtures/pages.fixture';
-import { env } from '../../src/config/env';
-
 /**
- * TC-LOGIN-31 (!) Edge case
- * Verify login works when credentials are typed character-by-character
- * (pressSequentially) rather than set in one shot via fill() — exercises
- * any keyup/input-event-driven validation the form may have.
+ * ================================================================================
+ * TC-LOGIN-31 — Verify Login With Sequential Keystrokes
+ * Modul    : Login
+ * Kategori : Edge Case (!)
+ * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
+ * File     : TC-LOGIN-31-Verify-Login-With-Sequential-Keystrokes.spec.ts
+ * Path     : tests/login/
+ * ================================================================================
+ *
+ * TUJUAN:
+ *   Memverifikasi login berhasil saat kredensial diketik karakter per
+ *   karakter (pressSequentially), bukan di-set sekaligus via fill() —
+ *   menguji validasi apapun yang berbasis event keyup/input.
+ *
+ * RUN COMMAND:
+ *   npx playwright test tests/login/TC-LOGIN-31-Verify-Login-With-Sequential-Keystrokes.spec.ts --project=chromium --headed
+ * ================================================================================
  */
+
+import { test } from '../../src/fixtures/pages.fixture';
+import { env } from '../../src/config/env';
+import { TestReport } from '../../src/utils/testReport';
+
 test('TC-LOGIN-31: login works with character-by-character input', async ({ page, loginPage }) => {
+  const report = new TestReport('TC-LOGIN-31', 'Login With Sequential Keystrokes', env.baseURL);
+
+  report.step('Navigate ke login, ketik Username dan Password karakter per karakter');
   await loginPage.goto();
   await loginPage.usernameInput.pressSequentially(env.username);
   await loginPage.passwordInput.pressSequentially(env.password);
   await loginPage.loginButton.click();
 
-  await expect(page).toHaveURL(/dashboard\/index/);
+  report.step('Verify login berhasil dan redirect ke dashboard');
+  report.check('URL mengandung "/dashboard/index"', /dashboard\/index/.test(page.url()));
+
+  report.print();
 });

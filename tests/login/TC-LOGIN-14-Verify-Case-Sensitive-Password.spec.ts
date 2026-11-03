@@ -1,18 +1,42 @@
-import { test, expect } from '../../src/fixtures/pages.fixture';
-import { env } from '../../src/config/env';
-
 /**
- * TC-LOGIN-14 (-) Negative
- * Verify the password is case-sensitive — flipping the case of the first
- * character must be rejected.
+ * ================================================================================
+ * TC-LOGIN-14 — Verify Case-Sensitive Password
+ * Modul    : Login
+ * Kategori : Negative (-)
+ * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
+ * File     : TC-LOGIN-14-Verify-Case-Sensitive-Password.spec.ts
+ * Path     : tests/login/
+ * ================================================================================
+ *
+ * TUJUAN:
+ *   Memverifikasi password BENAR-BENAR case-sensitive (berbeda dengan
+ *   username di TC-LOGIN-13) — membalik huruf pertama saja sudah cukup
+ *   membuat login gagal.
+ *
+ * RUN COMMAND:
+ *   npx playwright test tests/login/TC-LOGIN-14-Verify-Case-Sensitive-Password.spec.ts --project=chromium --headed
+ * ================================================================================
  */
-test('TC-LOGIN-14: password is case-sensitive', async ({ loginPage }) => {
-  const flippedCasePassword =
-    env.password.charAt(0).toUpperCase() + env.password.slice(1);
 
+import { test } from '../../src/fixtures/pages.fixture';
+import { env } from '../../src/config/env';
+import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
+
+test('TC-LOGIN-14: password is case-sensitive', async ({ loginPage }) => {
+  const report = new TestReport('TC-LOGIN-14', 'Case-Sensitive Password', env.baseURL);
+
+  const flippedCasePassword = env.password.charAt(0).toUpperCase() + env.password.slice(1);
+
+  report.step(`Navigate ke login, fill Password dengan huruf pertama di-flip case: "${flippedCasePassword}"`);
   await loginPage.goto();
   await loginPage.login(env.username, flippedCasePassword);
 
-  await expect(loginPage.errorMessage).toBeVisible();
-  await expect(loginPage.errorMessage).toContainText('Invalid credentials');
+  report.step('Verify hasil login ditolak');
+  report.check('Error "Invalid credentials" visible', await isVisibleWithWait(loginPage.errorMessage));
+  report.check(
+    'Error berisi "Invalid credentials"',
+    (await loginPage.errorMessage.textContent())?.includes('Invalid credentials') ?? false,
+  );
+
+  report.print();
 });

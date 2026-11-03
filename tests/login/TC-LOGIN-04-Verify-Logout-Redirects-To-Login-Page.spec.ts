@@ -1,24 +1,58 @@
-import { authenticatedTest as test, expect } from '../../src/fixtures/pages.fixture';
-
 /**
- * TC-LOGIN-04 (+) Positive
- * Verify logout redirects the user back to the login page, with the
- * logout request itself returning a 302 to /auth/login and the
- * resulting login page being properly served (200).
+ * ================================================================================
+ * TC-LOGIN-04 — Verify Logout Redirects To Login Page
+ * Modul    : Login
+ * Kategori : Positive (+)
+ * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
+ * File     : TC-LOGIN-04-Verify-Logout-Redirects-To-Login-Page.spec.ts
+ * Path     : tests/login/
+ * ================================================================================
+ *
+ * TUJUAN:
+ *   Memverifikasi klik "Logout" dari dropdown user mengirim
+ *   POST /auth/logout yang membalas 302 ke /auth/login, dan UI benar-benar
+ *   berpindah ke halaman login.
+ *
+ * RUN COMMAND:
+ *   npx playwright test tests/login/TC-LOGIN-04-Verify-Logout-Redirects-To-Login-Page.spec.ts --project=chromium --headed
+ * ================================================================================
  */
+
+import { authenticatedTest as test } from '../../src/fixtures/pages.fixture';
+import { env } from '../../src/config/env';
+import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
+
 test('TC-LOGIN-04: logout redirects back to login page', async ({ page, dashboardPage }) => {
+  const report = new TestReport('TC-LOGIN-04', 'Logout Redirects To Login Page', env.baseURL);
+
+  report.step('Login sudah dilakukan via fixture, klik user dropdown');
   await dashboardPage.userDropdown.click();
 
+  report.step('Intercept POST /auth/logout, klik menu "Logout"');
   const [logoutResponse] = await Promise.all([
     page.waitForResponse((res) => res.url().includes('/auth/logout')),
     dashboardPage.logoutMenuItem.click(),
   ]);
 
-  // [API VERIFICATION]
-  expect(logoutResponse.status()).toBe(302);
-  expect(logoutResponse.headers()['location']).toContain('/auth/login');
+  report.step('Verify response /auth/logout');
+  report.check(
+    'response.status() === 302',
+    logoutResponse.status() === 302,
+    `status=${logoutResponse.status()}`,
+  );
+  const location = logoutResponse.headers()['location'] ?? '';
+  report.check(
+    'Header Location mengandung "/auth/login"',
+    location.includes('/auth/login'),
+    `location="${location}"`,
+  );
 
-  // [UI VERIFICATION]
-  await expect(page).toHaveURL(/auth\/login/);
-  await expect(page.getByRole('heading', { name: 'Login' })).toBeVisible();
+  report.step('Verify UI: URL dan heading Login');
+  report.check('URL mengandung "/auth/login"', /auth\/login/.test(page.url()));
+  report.check(
+    'Heading "Login" visible',
+    await isVisibleWithWait(page.getByRole('heading', { name: 'Login' })),
+  );
+
+  report.print();
 });

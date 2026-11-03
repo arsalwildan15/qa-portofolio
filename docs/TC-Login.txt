@@ -457,6 +457,22 @@ No.  Test Case ID   Status   Skenario / Deskripsi
 
   3. Jalankan satu TC:
        npx playwright test tests/login/TC-LOGIN-01-*.spec.ts --project=chromium
+       (RUN COMMAND spesifik per TC ada di JSDoc header masing-masing file
+       .spec.ts, termasuk flag --headed untuk observasi visual.)
+
+  7. [FORMAT REPORTING] Setiap file .spec.ts memakai `TestReport` dari
+     src/utils/testReport.ts (step logging + summary block). Saat
+     dijalankan, setiap TC mencetak ke console:
+       - [STEP n] ... untuk setiap langkah eksekusi.
+       - Blok summary di akhir: header TC ID/judul/Env/Mulai/Durasi/
+         Langkah, daftar HASIL VERIFIKASI bernomor dengan simbol check
+         (lolos) / cross (gagal) dan detail opsional, section opsional
+         TEMUAN/OBSERVASI dan CHECK YANG GAGAL, lalu RINGKASAN pass/fail
+         dan STATUS PASSED/FAILED.
+     Checks dicatat via `report.check()` yang internal memakai
+     `expect.soft()` — satu check gagal TIDAK menghentikan eksekusi TC;
+     semua step dan check sisanya tetap jalan dan ter-report, Playwright
+     baru menandai test gagal di akhir.
 
   4. Target adalah demo publik OrangeHRM — TC destructive (create/delete
      data) TIDAK ada di modul Login, jadi tidak perlu cleanup.
