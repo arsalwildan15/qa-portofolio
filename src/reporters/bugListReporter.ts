@@ -56,6 +56,21 @@ interface BugRow {
 export default class BugListReporter implements Reporter {
   private readonly pendingRows: BugRow[] = [];
 
+  async onBegin(): Promise<void> {
+    if (await this.fileExists(BUG_LIST_PATH)) return;
+
+    const fs = await import('node:fs/promises');
+    await fs.mkdir(path.dirname(BUG_LIST_PATH), { recursive: true });
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Bug List');
+    this.writeHeader(sheet);
+    sheet.columns.forEach((column) => {
+      column.width = 30;
+    });
+    await workbook.xlsx.writeFile(BUG_LIST_PATH);
+  }
+
   onTestEnd(test: TestCase, result: TestResult): void {
     if (result.status !== 'failed' && result.status !== 'timedOut') return;
 
