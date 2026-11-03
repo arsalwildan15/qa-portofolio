@@ -108,7 +108,7 @@ Set these repository secrets if targeting a non-default environment:
 
 | Module | Scenarios | Docs |
 |--------|-----------|------|
-| Login | 11 TCs — positive, negative, boundary, security, edge (see `tests/login/`) | [docs/TC-Login.txt](docs/TC-Login.txt) |
+| Login | 40 TCs — positive, negative, boundary, security, edge (see `tests/login/`) | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | PIM | Add employee, search with no matching records | — |
 | Leave | Submitting without entitlement is correctly blocked (see note below) | — |
 
