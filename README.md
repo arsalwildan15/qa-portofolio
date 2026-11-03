@@ -35,22 +35,42 @@ qa-portofolio/
 │   │   ├── EmployeeListPage.ts
 │   │   ├── AddEmployeePage.ts
 │   │   ├── PersonalDetailsPage.ts
+│   │   ├── ContactDetailsPage.ts
+│   │   ├── JobPage.ts
+│   │   ├── EmergencyContactsPage.ts
+│   │   ├── DependentsPage.ts
+│   │   ├── ImmigrationPage.ts
+│   │   ├── SalaryPage.ts
+│   │   ├── ReportToPage.ts
+│   │   ├── QualificationsPage.ts
+│   │   ├── MembershipsPage.ts
 │   │   └── LeavePage.ts
 │   ├── fixtures/         # Custom Playwright fixtures — inject page objects, provide authenticatedTest
 │   ├── utils/
-│   │   └── testReport.ts # Step logging + end-of-test summary report + auto console-error check
+│   │   ├── testReport.ts # Step logging + end-of-test summary report + auto console-error check
+│   │   └── createTestEmployee.ts # Shared Add Employee helper, retries on Employee Id collision
 │   └── reporters/
 │       └── bugListReporter.ts # Custom Playwright reporter — appends failed TCs to docs/Bug-List.xlsx
 ├── tests/
 │   ├── login/            # One module = one folder. Specs are named by test case ID.
 │   ├── pim/              # One subfolder per PIM screen (not flat — each screen has its own specs)
-│   │   ├── employee-list/
-│   │   ├── add-employee/
-│   │   └── personal-details/
+│   │   ├── employee-list/        # Phase 1
+│   │   ├── add-employee/         # Phase 1
+│   │   ├── personal-details/     # Phase 1
+│   │   ├── contact-details/      # Phase 2
+│   │   ├── job/                  # Phase 2
+│   │   ├── emergency-contacts/   # Phase 2
+│   │   ├── dependents/           # Phase 2
+│   │   ├── immigration/          # Phase 2
+│   │   ├── salary/                # Phase 2
+│   │   ├── report-to/             # Phase 2
+│   │   ├── qualifications/        # Phase 2
+│   │   └── memberships/           # Phase 2
 │   └── e2e/              # Cross-cutting / not-yet-split specs (PIM smoke test, Leave)
 ├── docs/                 # Human-readable test case documentation, one file per module
 │   ├── TC-Login.txt
 │   ├── TC-PIM.txt
+│   ├── TC-PIM-Phase2.txt
 │   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
 ├── .github/workflows/     # CI pipeline definition
 ├── playwright.config.ts
@@ -156,7 +176,8 @@ Set these repository secrets if targeting a non-default environment:
 | Module | Scenarios | Docs |
 |--------|-----------|------|
 | Login | 40 TCs — positive, negative, boundary, security, edge (see `tests/login/`) | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| PIM (Phase 1) | 52 TCs across Employee List (14), Add Employee (26), Personal Details (12) — positive, negative, boundary, security, edge (see `tests/pim/`). Phase 2/3 (other PIM tabs, Configuration, Reports) not yet covered. | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| PIM (Phase 1) | 52 TCs across Employee List (14), Add Employee (26), Personal Details (12) — positive, negative, boundary, security, edge (see `tests/pim/`). | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| PIM (Phase 2) | 67 TCs across the remaining 9 Personal Details sub-tabs: Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications, Memberships (see `tests/pim/`). Phase 3 (Configuration, Reports) not yet covered. | [docs/TC-PIM-Phase2.txt](docs/TC-PIM-Phase2.txt) |
 | Leave | Submitting without entitlement is correctly blocked (see note below) | — |
 
 > **Note on the Leave suite:** the public OrangeHRM demo account carries no assigned leave entitlement, so a successful leave application cannot be exercised against it. Rather than asserting an outcome the environment can never produce, the test verifies the deterministic, environment-correct behavior instead: the UI reports an insufficient balance once a date range is selected.

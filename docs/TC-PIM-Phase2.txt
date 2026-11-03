@@ -1,0 +1,362 @@
+================================================================================
+  DAFTAR TEST CASE — PIM FASE 2
+  (CONTACT DETAILS, EMERGENCY CONTACTS, DEPENDENTS, IMMIGRATION, JOB,
+   SALARY, REPORT-TO, QUALIFICATIONS, MEMBERSHIPS)
+  Modul    : PIM — Personnel Information Management
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/pim/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+  [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+  [TEMUAN]      = TC yang hasilnya didokumentasikan via report.finding() karena
+                   perilaku ambigu/environment-dependent, bukan pass/fail tegas
+
+  FORMAT ID  : TC-PIM-<SECTION>-NN
+  FOLDER     : tests/pim/<subfolder>/ — satu subfolder per sub-tab Personal
+               Details, sama konvensi dengan Fase 1:
+               TC-PIM-CONTACT-*        -> tests/pim/contact-details/
+               TC-PIM-JOB-*            -> tests/pim/job/
+               TC-PIM-EMERGENCY-*      -> tests/pim/emergency-contacts/
+               TC-PIM-DEPENDENT-*      -> tests/pim/dependents/
+               TC-PIM-IMMIGRATION-*    -> tests/pim/immigration/
+               TC-PIM-SALARY-*         -> tests/pim/salary/
+               TC-PIM-REPORTTO-*       -> tests/pim/report-to/
+               TC-PIM-QUALIFICATION-*  -> tests/pim/qualifications/
+               TC-PIM-MEMBERSHIP-*     -> tests/pim/memberships/
+
+  CAKUPAN FASE 2: 9 sub-tab Personal Details yang belum dicakup Fase 1.
+  BELUM DICAKUP (Fase 3): Configuration (Optional/Custom Fields, Data Import,
+  Reporting Methods, Termination Reasons), Reports.
+
+================================================================================
+  CATATAN TEKNIS — PIM FASE 2
+  Dikonfirmasi via Playwright discovery run langsung terhadap OrangeHRM OS 5.9
+================================================================================
+
+  URL TIAP TAB (CONFIRMED — 2 slug BEDA dari tebakan nama field di UI):
+    Contact Details      : /web/index.php/pim/contactDetails/empNumber/<N>
+                            [TEMUAN] BUKAN "viewContactDetails" seperti 7 tab
+                            lain — satu-satunya slug tanpa prefix "view".
+    Emergency Contacts   : /web/index.php/pim/viewEmergencyContacts/empNumber/<N>
+    Dependents           : /web/index.php/pim/viewDependents/empNumber/<N>
+    Immigration           : /web/index.php/pim/viewImmigration/empNumber/<N>
+    Job                   : /web/index.php/pim/viewJobDetails/empNumber/<N>
+    Salary                : /web/index.php/pim/viewSalaryList/empNumber/<N>
+    Report-to             : /web/index.php/pim/viewReportToDetails/empNumber/<N>
+                            [TEMUAN] BUKAN "viewReportToList" seperti dugaan
+                            awal dari pola nama tab lain.
+    Qualifications        : /web/index.php/pim/viewQualifications/empNumber/<N>
+    Memberships           : /web/index.php/pim/viewMemberships/empNumber/<N>
+
+  [TEMUAN KRITIS] HELPER createTestEmployee() — src/utils/createTestEmployee.ts
+    Sesi implementasi ini (gabungan Fase 1 + Fase 2) sudah membuat RATUSAN
+    employee di demo publik lewat berulang kali run test. Auto-generated
+    Employee Id (sequential) MULAI COLLIDE — Add Employee diam-diam diblokir
+    client-side dengan "Employee Id already exists" (TC-PIM-ADD-08, Fase 1),
+    membuat `page.waitForResponse()` menunggu POST yang TIDAK PERNAH terkirim
+    sampai timeout 60-90 detik. Awalnya disangka "server lambat", setelah
+    screenshot diperiksa ternyata murni validasi ID collision, BUKAN masalah
+    performa jaringan. Semua TC Fase 2 yang butuh employee baru WAJIB pakai
+    `createTestEmployee(page, addEmployeePage, prefix)` yang retry otomatis
+    (clear Employee Id, biarkan client re-generate, max 3x percobaan) —
+    jangan tulis ulang logic Add Employee manual di TC baru.
+
+  [TEMUAN] Save di tab Job memicu DUA PUT endpoint sekaligus:
+    PUT /api/v2/pim/employees/<N>/job-details
+    PUT /api/v2/pim/employees/<N>/employment-contract
+    (TC-PIM-JOB-08) — beda dari Contact Details/Add Employee yang cuma 1
+    endpoint per Save.
+
+  [TEMUAN] "Job Specification" di tab Job BUKAN text input — field itu
+    read-only menampilkan "Not Defined" (slot dokumen, bukan field teks).
+    Memilih Job Title tertentu memicu GET
+    /api/v2/admin/job-titles/<id>/specification yang 404 kalau job title
+    tsb belum punya dokumen spesifikasi — console error 404 ini REAL dan
+    REPRODUCIBLE (dikonfirmasi 2x berturut-turut), bukan noise server.
+    TC-PIM-JOB-01 sengaja dibiarkan FAILED oleh console-error check karena
+    ini temuan sah yang layak masuk Bug-List.xlsx, bukan disembunyikan.
+
+  [TEMUAN] PUT contactDetails mengembalikan response body dengan KEY yang
+    benar (street1, city, dst) tapi SEMUA VALUE null, bukan echo data yang
+    baru disimpan (beda dari POST Add Employee di Fase 1 yang echo data
+    input). TC-PIM-CONTACT-01 disesuaikan untuk cek struktur key, bukan
+    value, dan temuan ini dicatat via report.finding().
+
+  [TEMUAN] Contact Details: SEMUA field opsional (TC-PIM-CONTACT-02) dan
+    Work Email TIDAK divalidasi format sama sekali — string "not-an-email"
+    diterima tanpa error (TC-PIM-CONTACT-03).
+
+  [TEMUAN] Pola input tersembunyi di belakang <span> (ditemukan pertama
+    kali di Fase 1 untuk Create Login Details & Gender) BERULANG di
+    Immigration: radio Document (Passport/Visa) juga native input
+    tersembunyi di belakang <span class="oxd-radio-input">. ImmigrationPage
+    menyediakan clickPassportRadio()/clickVisaRadio() untuk menangani ini
+    (TC-PIM-IMMIGRATION-06).
+
+  [TEMUAN] Emergency Contacts punya validasi CROSS-FIELD yang tidak biasa:
+    submit kosong menghasilkan TEPAT 3 error — 2x "Required" (Name,
+    Relationship) + "At least one phone number is required" (validasi OR
+    gabungan 3 kolom telepon Home/Mobile/Work, bukan satu per satu)
+    (TC-PIM-EMERGENCY-02/03).
+
+  [TEMUAN] Report-to: field Name BUKAN free text, melainkan autocomplete
+    yang me-resolve ke employee sungguhan via pencarian async (muncul
+    "Searching...." dulu sebelum hasil asli) — TC XSS/SQLi standar tidak
+    relevan di sini karena tidak bisa submit teks arbitrer; TC Fase 2 untuk
+    Report-to fokus ke pencarian nama tidak ditemukan, validasi required,
+    dan independensi 2 list (Supervisors vs Subordinates) sebagai gantinya.
+    Submit kosong = TEPAT 2 error "Required" (Name + Reporting Method).
+
+  [TEMUAN] Qualifications TERNYATA punya 5 sub-section (bukan cuma "Work
+    Experience" + "Education" seperti dugaan awal): Work Experience,
+    Education, Skills, Languages, License — plus Attachments terpisah (6
+    tombol "+ Add" total). Fase 2 fokus mendalam di Work Experience, 1 TC
+    representatif untuk Education (TC-PIM-QUALIFICATION-07), Skills/
+    Languages/License BELUM dicakup — kandidat Fase 3 lanjutan kalau
+    diperlukan.
+
+  [LESSON] Pelajaran proses: validasi awal untuk field Job Specification
+    sempat salah diasumsikan sebagai text input biasa (diambil dari pola
+    field lain) sebelum diverifikasi live dan ternyata read-only. Sama
+    seperti lesson Fase 1 soal "jangan asumsikan nama query param dari
+    label UI" — selalu verifikasi struktur field sebelum menulis locator.
+
+================================================================================
+  TEST CASES
+================================================================================
+
+No.  Test Case ID            Status   Kategori              Skenario
+---  -----------------------  -------  --------------------  --------------------
+
+================================================================================
+  GROUP 1 — CONTACT DETAILS (8 TC)
+  Folder: tests/pim/contact-details/
+================================================================================
+
+ 1   TC-PIM-CONTACT-01  [DONE]  Positive (+)            Save lengkap (Address/
+                                                          Telephone/Email)
+ 2   TC-PIM-CONTACT-02  [DONE]  Edge Case (!) [TEMUAN]   Save kosong tetap sukses
+                                                          (semua field opsional)
+ 3   TC-PIM-CONTACT-03  [DONE]  Negative (-) [TEMUAN]    Email format invalid
+                                                          tidak divalidasi
+ 4   TC-PIM-CONTACT-04  [DONE]  Boundary (B)             Street1 500 karakter
+ 5   TC-PIM-CONTACT-05  [DONE]  Security (S)             XSS payload di Street1
+ 6   TC-PIM-CONTACT-06  [DONE]  Security (S)             SQL injection di City
+ 7   TC-PIM-CONTACT-07  [DONE]  Edge Case (!) [TEMUAN]   Navigasi tanpa save,
+                                                          tidak ada warning
+ 8   TC-PIM-CONTACT-08  [DONE]  Positive (+)             Upload Attachment
+                                                          (representatif Fase 2)
+
+================================================================================
+  GROUP 2 — JOB (8 TC)
+  Folder: tests/pim/job/
+================================================================================
+
+ 9   TC-PIM-JOB-01       [DONE]  Positive (+) [TEMUAN]   Edit Job Title ->
+                                                          console 404 reproducible
+10   TC-PIM-JOB-02       [DONE]  Positive (+)             Edit semua dropdown
+                                                          sekaligus
+11   TC-PIM-JOB-03       [DONE]  Positive (+)             Joined Date format valid
+12   TC-PIM-JOB-04       [DONE]  Negative (-)             Joined Date format salah
+13   TC-PIM-JOB-05       [DONE]  Edge Case (!) [TEMUAN]   Joined Date masa depan
+14   TC-PIM-JOB-06       [DONE]  Edge Case (!)            Employment Status
+                                                          reflect ke Employee List
+15   TC-PIM-JOB-07       [DONE]  Edge Case (!)            Save tanpa perubahan
+                                                          tetap idempotent
+16   TC-PIM-JOB-08       [DONE]  Positive (+) [API]       Save memicu 2 endpoint
+                                                          (job-details +
+                                                          employment-contract)
+
+================================================================================
+  GROUP 3 — EMERGENCY CONTACTS (8 TC)
+  Folder: tests/pim/emergency-contacts/
+================================================================================
+
+17   TC-PIM-EMERGENCY-01  [DONE]  Positive (+)            Add contact lengkap
+18   TC-PIM-EMERGENCY-02  [DONE]  Negative (-)             Submit kosong -> 3 error
+                                                           (termasuk cross-field
+                                                           phone)
+19   TC-PIM-EMERGENCY-03  [DONE]  Negative (-)             Name+Relationship tanpa
+                                                           phone -> ditolak
+20   TC-PIM-EMERGENCY-04  [DONE]  Boundary (B)             Name 300 karakter
+21   TC-PIM-EMERGENCY-05  [DONE]  Security (S)             XSS di Name
+22   TC-PIM-EMERGENCY-06  [DONE]  Security (S)             SQL injection di
+                                                           Relationship
+23   TC-PIM-EMERGENCY-07  [DONE]  Edge Case (!)            Cancel membatalkan modal
+24   TC-PIM-EMERGENCY-08  [DONE]  Positive (+)             Lebih dari 1 contact
+                                                           bisa ditambah
+
+================================================================================
+  GROUP 4 — DEPENDENTS (7 TC)
+  Folder: tests/pim/dependents/
+================================================================================
+
+25   TC-PIM-DEPENDENT-01  [DONE]  Positive (+)            Add dependent lengkap
+26   TC-PIM-DEPENDENT-02  [DONE]  Negative (-)             Submit kosong -> required
+27   TC-PIM-DEPENDENT-03  [DONE]  Boundary (B)             Name 300 karakter
+28   TC-PIM-DEPENDENT-04  [DONE]  Security (S)             XSS di Name
+29   TC-PIM-DEPENDENT-05  [DONE]  Security (S)             SQL injection di Name
+30   TC-PIM-DEPENDENT-06  [DONE]  Edge Case (!)            Cancel membatalkan modal
+31   TC-PIM-DEPENDENT-07  [DONE]  Edge Case (!) [TEMUAN]   Date of Birth masa depan
+
+================================================================================
+  GROUP 5 — IMMIGRATION (8 TC)
+  Folder: tests/pim/immigration/
+================================================================================
+
+32   TC-PIM-IMMIGRATION-01  [DONE]  Positive (+)          Add record (Passport)
+                                                           lengkap
+33   TC-PIM-IMMIGRATION-02  [DONE]  Negative (-)           Submit kosong -> 1
+                                                           "Required" (Document)
+34   TC-PIM-IMMIGRATION-03  [DONE]  Boundary (B)           Number 300 karakter
+35   TC-PIM-IMMIGRATION-04  [DONE]  Security (S)           XSS di Issued By
+36   TC-PIM-IMMIGRATION-05  [DONE]  Security (S)           SQL injection di
+                                                           Issued By
+37   TC-PIM-IMMIGRATION-06  [DONE]  Edge Case (!)          Radio Document
+                                                           eksklusif (hidden-span
+                                                           pattern)
+38   TC-PIM-IMMIGRATION-07  [DONE]  Edge Case (!)          Cancel membatalkan modal
+39   TC-PIM-IMMIGRATION-08  [DONE]  Positive (+) [API]     Save -> POST
+                                                           immigration-records
+
+================================================================================
+  GROUP 6 — SALARY (7 TC)
+  Folder: tests/pim/salary/
+================================================================================
+
+40   TC-PIM-SALARY-01  [DONE]  Positive (+)                Add komponen gaji
+                                                            lengkap
+41   TC-PIM-SALARY-02  [DONE]  Negative (-)                 Submit kosong ->
+                                                            required
+42   TC-PIM-SALARY-03  [DONE]  Boundary (B) [TEMUAN]        Amount negatif
+                                                            diterima tanpa validasi
+43   TC-PIM-SALARY-04  [DONE]  Negative (-)                 Amount bukan angka
+44   TC-PIM-SALARY-05  [DONE]  Security (S)                 XSS di Comments
+45   TC-PIM-SALARY-06  [DONE]  Edge Case (!)                Cancel membatalkan
+                                                            modal
+46   TC-PIM-SALARY-07  [DONE]  Positive (+)                 Lebih dari 1
+                                                            komponen gaji
+
+================================================================================
+  GROUP 7 — REPORT-TO (7 TC)
+  Folder: tests/pim/report-to/
+================================================================================
+
+47   TC-PIM-REPORTTO-01  [DONE]  Positive (+)               Add Supervisor
+48   TC-PIM-REPORTTO-02  [DONE]  Negative (-)                Submit kosong -> 2
+                                                             "Required"
+49   TC-PIM-REPORTTO-03  [DONE]  Positive (+)                Add Subordinate
+50   TC-PIM-REPORTTO-04  [DONE]  Negative (-)                Cari nama tidak ada ->
+                                                             no option, submit
+                                                             diblokir
+51   TC-PIM-REPORTTO-05  [DONE]  Edge Case (!)               Cancel membatalkan
+                                                             modal
+52   TC-PIM-REPORTTO-06  [DONE]  Positive (+)                Supervisors dan
+                                                             Subordinates independen
+53   TC-PIM-REPORTTO-07  [DONE]  Positive (+) [API]          Save -> POST endpoint
+                                                             report-to
+
+================================================================================
+  GROUP 8 — QUALIFICATIONS (7 TC)
+  Folder: tests/pim/qualifications/
+================================================================================
+
+54   TC-PIM-QUALIFICATION-01  [DONE]  Positive (+)           Add Work Experience
+55   TC-PIM-QUALIFICATION-02  [DONE]  Negative (-)            Submit kosong ->
+                                                              required
+56   TC-PIM-QUALIFICATION-03  [DONE]  Boundary (B)            Company 300 karakter
+57   TC-PIM-QUALIFICATION-04  [DONE]  Security (S)            XSS di Company
+58   TC-PIM-QUALIFICATION-05  [DONE]  Security (S)            SQL injection di Job
+                                                              Title
+59   TC-PIM-QUALIFICATION-06  [DONE]  Edge Case (!)           Cancel membatalkan
+                                                              modal
+60   TC-PIM-QUALIFICATION-07  [DONE]  Positive (+)            Add Education
+                                                              (representatif
+                                                              sub-section lain)
+
+================================================================================
+  GROUP 9 — MEMBERSHIPS (7 TC)
+  Folder: tests/pim/memberships/
+================================================================================
+
+61   TC-PIM-MEMBERSHIP-01  [DONE]  Positive (+)               Add membership
+                                                               lengkap
+62   TC-PIM-MEMBERSHIP-02  [DONE]  Negative (-)                Submit kosong ->
+                                                               required
+63   TC-PIM-MEMBERSHIP-03  [DONE]  Boundary (B) [TEMUAN]       Amount negatif
+                                                               diterima
+64   TC-PIM-MEMBERSHIP-04  [DONE]  Negative (-)                Amount bukan angka
+65   TC-PIM-MEMBERSHIP-05  [DONE]  Edge Case (!) [TEMUAN]      Renewal Date sebelum
+                                                               Commence Date
+66   TC-PIM-MEMBERSHIP-06  [DONE]  Edge Case (!)               Cancel membatalkan
+                                                               modal
+67   TC-PIM-MEMBERSHIP-07  [DONE]  Positive (+) [API]          Save -> POST endpoint
+                                                               membership
+
+================================================================================
+  SUMMARY
+================================================================================
+
+  Total Test Cases Fase 2 : 67
+  Contact Details  : 8        Salary          : 7
+  Job              : 8        Report-to       : 7
+  Emergency Contacts: 8       Qualifications  : 7
+  Dependents       : 7        Memberships     : 7
+  Immigration      : 8
+
+  Hard check() (pass/fail tegas) : ~58 TC
+  finding() (dokumentasi, bukan pass/fail tegas) : ~9 TC — validasi dimensi/
+    format yang genuinely ambigu (email format, Amount negatif, tanggal masa
+    depan, urutan tanggal, field kosong diterima, response PUT tidak echo
+    data, console 404 Job Specification).
+
+================================================================================
+  CATATAN EKSEKUSI
+================================================================================
+
+  1. Semua TC Fase 2 pakai page object baru di src/pages/: ContactDetailsPage,
+     JobPage, EmergencyContactsPage, DependentsPage, ImmigrationPage,
+     SalaryPage, ReportToPage, QualificationsPage, MembershipsPage —
+     diinjeksikan via src/fixtures/pages.fixture.ts.
+
+  2. [WAJIB] Semua TC yang butuh employee baru pakai
+     src/utils/createTestEmployee.ts, BUKAN duplikasi logic Add Employee
+     manual — helper ini retry otomatis kalau Employee Id auto-generate
+     collide (lihat Catatan Teknis di atas).
+
+  3. Jalankan seluruh modul PIM Fase 2:
+       npx playwright test tests/pim/contact-details tests/pim/job tests/pim/emergency-contacts tests/pim/dependents tests/pim/immigration tests/pim/salary tests/pim/report-to tests/pim/qualifications tests/pim/memberships --project=chromium
+
+  4. Jalankan satu tab saja, contoh Immigration:
+       npx playwright test tests/pim/immigration --project=chromium
+
+  5. Jalankan satu TC: RUN COMMAND spesifik ada di JSDoc header tiap file.
+
+  6. [FORMAT REPORTING] Sama persis dengan Fase 1/Login: TestReport dari
+     src/utils/testReport.ts, console-error check otomatis via `page`
+     sebagai argumen ke-4.
+
+  7. [BUG LIST OTOMATIS] TC yang gagal otomatis masuk ke docs/Bug-List.xlsx.
+     Review manual tetap diperlukan sebelum menganggap semua entri sebagai
+     bug nyata vs noise infrastruktur (lihat README untuk detail).
+
+  8. Target adalah demo publik OrangeHRM — semua TC positive di Fase 2
+     BERSIFAT DESTRUCTIF/MUTATIF (menambah record emergency contact,
+     dependent, immigration, salary, dst ke employee yang dibuat). Tidak
+     ada cleanup otomatis.
+
+================================================================================
+  END OF DOCUMENT
+================================================================================

@@ -8,6 +8,15 @@ import {
   EmployeeListPage,
   AddEmployeePage,
   PersonalDetailsPage,
+  ContactDetailsPage,
+  JobPage,
+  EmergencyContactsPage,
+  DependentsPage,
+  ImmigrationPage,
+  SalaryPage,
+  ReportToPage,
+  QualificationsPage,
+  MembershipsPage,
 } from '../pages';
 
 interface Pages {
@@ -18,6 +27,15 @@ interface Pages {
   employeeListPage: EmployeeListPage;
   addEmployeePage: AddEmployeePage;
   personalDetailsPage: PersonalDetailsPage;
+  contactDetailsPage: ContactDetailsPage;
+  jobPage: JobPage;
+  emergencyContactsPage: EmergencyContactsPage;
+  dependentsPage: DependentsPage;
+  immigrationPage: ImmigrationPage;
+  salaryPage: SalaryPage;
+  reportToPage: ReportToPage;
+  qualificationsPage: QualificationsPage;
+  membershipsPage: MembershipsPage;
 }
 
 export const test = base.extend<Pages>({
@@ -41,6 +59,33 @@ export const test = base.extend<Pages>({
   },
   personalDetailsPage: async ({ page }, use) => {
     await use(new PersonalDetailsPage(page));
+  },
+  contactDetailsPage: async ({ page }, use) => {
+    await use(new ContactDetailsPage(page));
+  },
+  jobPage: async ({ page }, use) => {
+    await use(new JobPage(page));
+  },
+  emergencyContactsPage: async ({ page }, use) => {
+    await use(new EmergencyContactsPage(page));
+  },
+  dependentsPage: async ({ page }, use) => {
+    await use(new DependentsPage(page));
+  },
+  immigrationPage: async ({ page }, use) => {
+    await use(new ImmigrationPage(page));
+  },
+  salaryPage: async ({ page }, use) => {
+    await use(new SalaryPage(page));
+  },
+  reportToPage: async ({ page }, use) => {
+    await use(new ReportToPage(page));
+  },
+  qualificationsPage: async ({ page }, use) => {
+    await use(new QualificationsPage(page));
+  },
+  membershipsPage: async ({ page }, use) => {
+    await use(new MembershipsPage(page));
   },
 });
 

@@ -29,10 +29,11 @@ LEGEND SIMBOL SKENARIO
                TC-PIM-PD-*    -> tests/pim/personal-details/
 
   CAKUPAN FASE 1 (modul ini): Employee List, Add Employee, Personal Details tab.
-  BELUM DICAKUP (Fase 2/3 — lihat README Roadmap): Contact Details, Emergency
-  Contacts, Dependents, Immigration, Job, Salary, Report-to, Qualifications,
-  Memberships, Configuration (Optional/Custom Fields, Data Import, Reporting
-  Methods, Termination Reasons), Reports.
+  FASE 2 (lihat docs/TC-PIM-Phase2.txt): Contact Details, Emergency Contacts,
+  Dependents, Immigration, Job, Salary, Report-to, Qualifications, Memberships
+  — sudah selesai, 67 TC.
+  BELUM DICAKUP (Fase 3 — lihat README Roadmap): Configuration (Optional/
+  Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports.
 
 ================================================================================
   CATATAN TEKNIS — PIM
