@@ -34,13 +34,16 @@ qa-portofolio/
 │   │   ├── PimPage.ts
 │   │   └── LeavePage.ts
 │   ├── fixtures/         # Custom Playwright fixtures — inject page objects, provide authenticatedTest
-│   └── utils/
-│       └── testReport.ts # Step logging + end-of-test summary report + auto console-error check
+│   ├── utils/
+│   │   └── testReport.ts # Step logging + end-of-test summary report + auto console-error check
+│   └── reporters/
+│       └── bugListReporter.ts # Custom Playwright reporter — appends failed TCs to docs/Bug-List.xlsx
 ├── tests/
 │   ├── login/            # One module = one folder. Specs are named by test case ID.
 │   └── e2e/              # Cross-cutting / not-yet-split specs (PIM, Leave)
 ├── docs/                 # Human-readable test case documentation, one file per module
-│   └── TC-Login.txt
+│   ├── TC-Login.txt
+│   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
 ├── .github/workflows/     # CI pipeline definition
 ├── playwright.config.ts
 ├── tsconfig.json
@@ -71,6 +74,20 @@ Run a single TC with the `RUN COMMAND` from its own file header, e.g.:
 ```bash
 npx playwright test tests/login/TC-LOGIN-01-Verify-Valid-Credentials-Redirect-To-Dashboard.spec.ts --project=chromium --headed
 ```
+
+> **Note:** the custom reporters (bug list included) are registered in `playwright.config.ts`'s `reporter` array. Overriding it on the CLI with `--reporter=<name>` replaces that whole array, so a bare `npx playwright test` (no `--reporter` flag) is what keeps the bug list reporter active.
+
+## Automatic Bug List (`docs/Bug-List.xlsx`)
+
+Every time a test case **fails**, a custom Playwright reporter (`src/reporters/bugListReporter.ts`) appends one draft row to `docs/Bug-List.xlsx` — same column layout used for manual bug tracking (`Bug ID`, `Summary`, `Category`, `Scope`, `Environment`, `Modul`, `Steps to Reproduce`, `Expected Result`, `Actual Result`, `Priority`, `Attachment`, `Detected On`, `Detected By`, `Status`, `Assigned To`, `Notes`, `Script Test Case`).
+
+What's filled in automatically vs. left for QA review:
+
+| Filled automatically | Left as `[ISI MANUAL]` for QA review |
+|---|---|
+| Bug ID (auto-incrementing `BG-XXX`), Summary, Category, Scope, Environment, Modul, Steps to Reproduce (from the `[STEP n]` log), Actual Result (from the failing assertion), Attachment (relative path to the auto-captured screenshot/video), Detected On, Detected By, Status (`Open`), Script Test Case | Expected Result, Priority |
+
+The file is created on first failure and only touched when a test fails — a fully green run leaves it untouched. It is **not** a replacement for human triage: Expected Result and Priority require judgment the failure alone can't provide, so they're explicitly flagged rather than guessed.
 
 ## Getting Started
 

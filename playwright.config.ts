@@ -11,6 +11,7 @@ export default defineConfig({
     ['list'],
     ['html', { open: 'never' }],
     ['allure-playwright', { resultsDir: 'allure-results' }],
+    ['./src/reporters/bugListReporter.ts'],
   ],
   use: {
     baseURL: env.baseURL,
