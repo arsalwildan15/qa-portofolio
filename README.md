@@ -71,6 +71,7 @@ qa-portofolio/
 │   ├── TC-Login.txt
 │   ├── TC-PIM.txt
 │   ├── TC-PIM-Phase2.txt
+│   ├── PIM-Findings-Summary.txt  # Cross-phase digest of exploration findings (both PIM phases)
 │   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
 ├── .github/workflows/     # CI pipeline definition
 ├── playwright.config.ts
