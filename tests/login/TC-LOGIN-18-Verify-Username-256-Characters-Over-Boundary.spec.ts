@@ -26,7 +26,7 @@ test('TC-LOGIN-18: username with 256 characters does not crash the server', asyn
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-18', 'Username 256 Characters Over Boundary', env.baseURL);
+  const report = new TestReport('TC-LOGIN-18', 'Username 256 Characters Over Boundary', env.baseURL, page);
 
   report.step('Navigate ke login, verify input username tidak punya atribut maxlength');
   await loginPage.goto();

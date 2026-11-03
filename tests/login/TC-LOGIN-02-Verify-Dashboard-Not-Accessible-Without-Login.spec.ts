@@ -27,6 +27,7 @@ test('TC-LOGIN-02: dashboard redirects to login when not authenticated', async (
     'TC-LOGIN-02',
     'Dashboard Not Accessible Without Login',
     env.baseURL,
+    page,
   );
 
   report.step('Navigate langsung ke /dashboard/index tanpa login, intercept GET /auth/login');

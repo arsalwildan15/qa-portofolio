@@ -23,20 +23,24 @@
 
 import { test } from '../../src/fixtures/pages.fixture';
 import { env } from '../../src/config/env';
-import { TestReport } from '../../src/utils/testReport';
+import { TestReport, urlMatchesWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-13: username is case-insensitive (documented finding)', async ({
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-13', 'Username Is Case-Insensitive', env.baseURL);
+  const report = new TestReport('TC-LOGIN-13', 'Username Is Case-Insensitive', env.baseURL, page);
 
   report.step(`Navigate ke login, fill Username = "${env.username.toLowerCase()}" (lowercase)`);
   await loginPage.goto();
   await loginPage.login(env.username.toLowerCase(), env.password);
 
   report.step('Verify hasil login');
-  report.check('URL mengandung "/dashboard/index"', /dashboard\/index/.test(page.url()));
+  report.check(
+    'URL mengandung "/dashboard/index"',
+    await urlMatchesWithWait(page, /dashboard\/index/),
+    `url=${page.url()}`,
+  );
 
   report.finding(
     'Username case-sensitivity',

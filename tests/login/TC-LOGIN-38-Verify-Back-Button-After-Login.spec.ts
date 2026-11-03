@@ -24,7 +24,7 @@ import { env } from '../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-38: browser back button after login stays consistent', async ({ page }) => {
-  const report = new TestReport('TC-LOGIN-38', 'Back Button After Login', env.baseURL);
+  const report = new TestReport('TC-LOGIN-38', 'Back Button After Login', env.baseURL, page);
 
   report.step('Dari session yang sudah authenticated di dashboard, tekan tombol Back browser');
   await page.goBack();

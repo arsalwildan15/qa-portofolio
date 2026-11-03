@@ -25,7 +25,7 @@ test('TC-LOGIN-21: SQL injection payload in username is rejected', async ({
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-21', 'SQL Injection In Username Is Rejected', env.baseURL);
+  const report = new TestReport('TC-LOGIN-21', 'SQL Injection In Username Is Rejected', env.baseURL, page);
 
   report.step(`Navigate ke login, fill Username = "' OR '1'='1", Password = "anything", klik Login`);
   await loginPage.goto();

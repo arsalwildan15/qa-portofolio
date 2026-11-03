@@ -27,7 +27,7 @@ test('TC-LOGIN-09: both invalid username and password shows error', async ({
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-09', 'Both Fields Invalid Shows Error', env.baseURL);
+  const report = new TestReport('TC-LOGIN-09', 'Both Fields Invalid Shows Error', env.baseURL, page);
 
   report.step('Navigate ke halaman login');
   await loginPage.goto();

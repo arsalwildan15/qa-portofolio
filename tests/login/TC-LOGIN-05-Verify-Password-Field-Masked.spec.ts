@@ -22,8 +22,8 @@ import { test } from '../../src/fixtures/pages.fixture';
 import { env } from '../../src/config/env';
 import { TestReport } from '../../src/utils/testReport';
 
-test('TC-LOGIN-05: password input is masked', async ({ loginPage }) => {
-  const report = new TestReport('TC-LOGIN-05', 'Password Field Masked', env.baseURL);
+test('TC-LOGIN-05: password input is masked', async ({ page, loginPage }) => {
+  const report = new TestReport('TC-LOGIN-05', 'Password Field Masked', env.baseURL, page);
 
   report.step('Navigate ke halaman login');
   await loginPage.goto();

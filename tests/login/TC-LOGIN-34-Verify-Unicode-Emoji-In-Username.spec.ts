@@ -25,7 +25,7 @@ test('TC-LOGIN-34: unicode and emoji in username do not crash the server', async
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-34', 'Unicode Emoji In Username', env.baseURL);
+  const report = new TestReport('TC-LOGIN-34', 'Unicode Emoji In Username', env.baseURL, page);
 
   report.step('Navigate ke login, fill Username = "Admin😀🔥", Password valid, klik Login');
   await loginPage.goto();

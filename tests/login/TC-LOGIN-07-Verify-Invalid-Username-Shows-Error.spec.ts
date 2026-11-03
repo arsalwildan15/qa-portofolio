@@ -23,7 +23,7 @@ import { env } from '../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-07: invalid username shows error message', async ({ page, loginPage }) => {
-  const report = new TestReport('TC-LOGIN-07', 'Invalid Username Shows Error', env.baseURL);
+  const report = new TestReport('TC-LOGIN-07', 'Invalid Username Shows Error', env.baseURL, page);
 
   report.step('Navigate ke halaman login');
   await loginPage.goto();

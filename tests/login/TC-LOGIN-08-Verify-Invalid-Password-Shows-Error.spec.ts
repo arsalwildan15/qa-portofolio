@@ -23,7 +23,7 @@ import { env } from '../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-08: invalid password shows error message', async ({ page, loginPage }) => {
-  const report = new TestReport('TC-LOGIN-08', 'Invalid Password Shows Error', env.baseURL);
+  const report = new TestReport('TC-LOGIN-08', 'Invalid Password Shows Error', env.baseURL, page);
 
   report.step('Navigate ke halaman login');
   await loginPage.goto();

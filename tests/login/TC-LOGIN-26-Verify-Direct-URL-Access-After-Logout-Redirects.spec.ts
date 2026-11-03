@@ -27,7 +27,7 @@ test('TC-LOGIN-26: protected URL redirects to login after logout', async ({
   page,
   dashboardPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-26', 'Direct URL Access After Logout Redirects', env.baseURL);
+  const report = new TestReport('TC-LOGIN-26', 'Direct URL Access After Logout Redirects', env.baseURL, page);
 
   report.step('Logout dari session yang sudah authenticated');
   await dashboardPage.logout();

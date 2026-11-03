@@ -25,7 +25,7 @@ test('TC-LOGIN-35: RTL Arabic characters in username do not crash the server', a
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-35', 'Arabic RTL Characters In Username', env.baseURL);
+  const report = new TestReport('TC-LOGIN-35', 'Arabic RTL Characters In Username', env.baseURL, page);
 
   report.step('Navigate ke login, fill Username = "مستخدم" (Arabic), Password valid, klik Login');
   await loginPage.goto();

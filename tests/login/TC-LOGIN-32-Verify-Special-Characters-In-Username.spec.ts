@@ -25,7 +25,7 @@ test('TC-LOGIN-32: special characters in username do not crash the server', asyn
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-32', 'Special Characters In Username', env.baseURL);
+  const report = new TestReport('TC-LOGIN-32', 'Special Characters In Username', env.baseURL, page);
 
   report.step('Navigate ke login, fill Username = "Admin@#$%^&*()", Password valid, klik Login');
   await loginPage.goto();

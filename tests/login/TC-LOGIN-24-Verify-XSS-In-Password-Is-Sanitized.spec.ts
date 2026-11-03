@@ -22,7 +22,7 @@ import { env } from '../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-24: XSS payload in password is not executed', async ({ page, loginPage }) => {
-  const report = new TestReport('TC-LOGIN-24', 'XSS In Password Is Sanitized', env.baseURL);
+  const report = new TestReport('TC-LOGIN-24', 'XSS In Password Is Sanitized', env.baseURL, page);
 
   let dialogFired = false;
   page.on('dialog', async (dialog) => {

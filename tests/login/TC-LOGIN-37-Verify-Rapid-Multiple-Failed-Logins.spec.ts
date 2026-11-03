@@ -29,7 +29,7 @@ test('TC-LOGIN-37: rapid repeated failed logins do not crash the server', async 
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-37', 'Rapid Multiple Failed Logins', env.baseURL);
+  const report = new TestReport('TC-LOGIN-37', 'Rapid Multiple Failed Logins', env.baseURL, page);
 
   report.step('Navigate ke login, jalankan 5x percobaan login gagal berturut-turut');
   await loginPage.goto();

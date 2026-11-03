@@ -24,7 +24,7 @@ import { env } from '../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-06: session persists after page refresh', async ({ page }) => {
-  const report = new TestReport('TC-LOGIN-06', 'Session Persists After Page Refresh', env.baseURL);
+  const report = new TestReport('TC-LOGIN-06', 'Session Persists After Page Refresh', env.baseURL, page);
 
   report.step('Login sudah dilakukan via fixture, intercept GET /dashboard/index, reload halaman');
   const [response] = await Promise.all([

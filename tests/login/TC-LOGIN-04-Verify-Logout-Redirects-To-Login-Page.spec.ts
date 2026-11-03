@@ -20,10 +20,10 @@
 
 import { authenticatedTest as test } from '../../src/fixtures/pages.fixture';
 import { env } from '../../src/config/env';
-import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, urlMatchesWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-04: logout redirects back to login page', async ({ page, dashboardPage }) => {
-  const report = new TestReport('TC-LOGIN-04', 'Logout Redirects To Login Page', env.baseURL);
+  const report = new TestReport('TC-LOGIN-04', 'Logout Redirects To Login Page', env.baseURL, page);
 
   report.step('Login sudah dilakukan via fixture, klik user dropdown');
   await dashboardPage.userDropdown.click();
@@ -48,7 +48,11 @@ test('TC-LOGIN-04: logout redirects back to login page', async ({ page, dashboar
   );
 
   report.step('Verify UI: URL dan heading Login');
-  report.check('URL mengandung "/auth/login"', /auth\/login/.test(page.url()));
+  report.check(
+    'URL mengandung "/auth/login"',
+    await urlMatchesWithWait(page, /auth\/login/),
+    `url=${page.url()}`,
+  );
   report.check(
     'Heading "Login" visible',
     await isVisibleWithWait(page.getByRole('heading', { name: 'Login' })),

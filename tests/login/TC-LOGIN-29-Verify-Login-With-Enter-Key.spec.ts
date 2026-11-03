@@ -22,7 +22,7 @@ import { env } from '../../src/config/env';
 import { TestReport } from '../../src/utils/testReport';
 
 test('TC-LOGIN-29: login can be submitted via Enter key', async ({ page, loginPage }) => {
-  const report = new TestReport('TC-LOGIN-29', 'Login With Enter Key', env.baseURL);
+  const report = new TestReport('TC-LOGIN-29', 'Login With Enter Key', env.baseURL, page);
 
   report.step('Navigate ke login, fill credentials valid, tekan Enter di field password');
   await loginPage.goto();

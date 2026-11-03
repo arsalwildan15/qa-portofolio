@@ -474,6 +474,26 @@ No.  Test Case ID   Status   Skenario / Deskripsi
      semua step dan check sisanya tetap jalan dan ter-report, Playwright
      baru menandai test gagal di akhir.
 
+  8. [CONSOLE ERROR CHECK] Semua 40 TC meneruskan `page` sebagai argumen
+     ke-4 `new TestReport(id, title, env, page)`. Dengan ini, TestReport
+     otomatis memasang listener `page.on('console')` (type 'error') dan
+     `page.on('pageerror')` (uncaught exception), lalu menambahkan SATU
+     check tambahan "Tidak ada console error di browser" di akhir summary
+     (dalam `print()`) — tidak perlu ditulis manual per file. Dikonfirmasi
+     via full run: demo OrangeHRM tidak punya console error bawaan, jadi
+     check ini aman diterapkan ke semua TC tanpa false-fail, termasuk
+     skenario XSS/SQL injection/null-byte yang sengaja mengirim payload
+     aneh.
+
+  9. API-level verification (cek response.status()/headers() via
+     waitForResponse) SENGAJA hanya diterapkan ke TC yang representatif
+     per skenario unik (21 dari 40 TC — lihat daftar di CATATAN TEKNIS).
+     TC lain yang murni validasi client-side (misal TC-10/11/12/15/16
+     yang membuktikan request TIDAK pernah terkirim) atau murni perilaku
+     UI/browser (TC-05, TC-30, TC-38) tidak diberi cek API karena tidak
+     ada network request relevan untuk diverifikasi — menambahkannya
+     hanya akan menduplikasi assertion yang sudah dibuktikan di TC lain.
+
   4. Target adalah demo publik OrangeHRM — TC destructive (create/delete
      data) TIDAK ada di modul Login, jadi tidak perlu cleanup.
 

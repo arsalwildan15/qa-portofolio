@@ -22,7 +22,7 @@ import { env } from '../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-27: HTML injection in username is not rendered', async ({ page, loginPage }) => {
-  const report = new TestReport('TC-LOGIN-27', 'HTML Injection In Username', env.baseURL);
+  const report = new TestReport('TC-LOGIN-27', 'HTML Injection In Username', env.baseURL, page);
 
   report.step('Navigate ke login, fill Username = "<h1>Hacked</h1>", Password = "admin123", klik Login');
   await loginPage.goto();

@@ -19,17 +19,21 @@
 
 import { test } from '../../src/fixtures/pages.fixture';
 import { env } from '../../src/config/env';
-import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, urlMatchesWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-40: "Forgot your password?" link is functional', async ({ page, loginPage }) => {
-  const report = new TestReport('TC-LOGIN-40', 'Forgot Password Link Navigates', env.baseURL);
+  const report = new TestReport('TC-LOGIN-40', 'Forgot Password Link Navigates', env.baseURL, page);
 
   report.step('Navigate ke login, klik link "Forgot your password?"');
   await loginPage.goto();
   await loginPage.forgotPasswordLink.click();
 
   report.step('Verify URL berubah ke requestPasswordResetCode dan heading "Reset Password" tampil');
-  report.check('URL mengandung "/auth/requestPasswordResetCode"', /auth\/requestPasswordResetCode/.test(page.url()));
+  report.check(
+    'URL mengandung "/auth/requestPasswordResetCode"',
+    await urlMatchesWithWait(page, /auth\/requestPasswordResetCode/),
+    `url=${page.url()}`,
+  );
   report.check(
     'Heading "Reset Password" visible',
     await isVisibleWithWait(page.getByRole('heading', { name: 'Reset Password' })),

@@ -23,7 +23,7 @@ import { env } from '../../src/config/env';
 import { TestReport } from '../../src/utils/testReport';
 
 test('TC-LOGIN-36: null byte in username does not bypass auth', async ({ page, loginPage }) => {
-  const report = new TestReport('TC-LOGIN-36', 'Null Byte In Username', env.baseURL);
+  const report = new TestReport('TC-LOGIN-36', 'Null Byte In Username', env.baseURL, page);
 
   report.step('Navigate ke login, fill Username = "<username>\\u0000", Password valid, klik Login');
   await loginPage.goto();

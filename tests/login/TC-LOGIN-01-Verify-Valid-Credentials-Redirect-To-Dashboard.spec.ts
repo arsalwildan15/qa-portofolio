@@ -21,7 +21,7 @@
 
 import { test } from '../../src/fixtures/pages.fixture';
 import { env } from '../../src/config/env';
-import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, urlMatchesWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-01: valid credentials redirect to dashboard', async ({
   page,
@@ -29,7 +29,7 @@ test('TC-LOGIN-01: valid credentials redirect to dashboard', async ({
   loginPage,
   dashboardPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-01', 'Valid Credentials Redirect To Dashboard', env.baseURL);
+  const report = new TestReport('TC-LOGIN-01', 'Valid Credentials Redirect To Dashboard', env.baseURL, page);
 
   report.step('Buka halaman login');
   await loginPage.goto();
@@ -75,7 +75,11 @@ test('TC-LOGIN-01: valid credentials redirect to dashboard', async ({
   );
 
   report.step('Verify UI: URL dan heading Dashboard');
-  report.check('URL mengandung "/dashboard/index"', /dashboard\/index/.test(page.url()));
+  report.check(
+    'URL mengandung "/dashboard/index"',
+    await urlMatchesWithWait(page, /dashboard\/index/),
+    `url=${page.url()}`,
+  );
   report.check('Heading "Dashboard" visible', await isVisibleWithWait(dashboardPage.heading));
 
   report.print();

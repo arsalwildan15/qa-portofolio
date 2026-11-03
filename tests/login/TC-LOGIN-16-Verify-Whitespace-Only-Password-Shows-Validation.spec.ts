@@ -30,6 +30,7 @@ test('TC-LOGIN-16: whitespace-only password shows validation error', async ({
     'TC-LOGIN-16',
     'Whitespace-Only Password Shows Validation',
     env.baseURL,
+    page,
   );
 
   report.step('Navigate ke login, monitor POST /auth/validate');

@@ -23,7 +23,7 @@ import { env } from '../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-11: empty password shows required validation', async ({ page, loginPage }) => {
-  const report = new TestReport('TC-LOGIN-11', 'Empty Password Shows Validation', env.baseURL);
+  const report = new TestReport('TC-LOGIN-11', 'Empty Password Shows Validation', env.baseURL, page);
 
   report.step('Navigate ke halaman login, isi Username saja (Password kosong)');
   await loginPage.goto();

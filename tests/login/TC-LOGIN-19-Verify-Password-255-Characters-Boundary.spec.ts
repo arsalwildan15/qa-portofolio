@@ -25,7 +25,7 @@ test('TC-LOGIN-19: password with 255 characters does not crash the server', asyn
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-19', 'Password 255 Characters Boundary', env.baseURL);
+  const report = new TestReport('TC-LOGIN-19', 'Password 255 Characters Boundary', env.baseURL, page);
 
   report.step('Navigate ke login, fill Username valid, Password = 255x "a", klik Login');
   await loginPage.goto();

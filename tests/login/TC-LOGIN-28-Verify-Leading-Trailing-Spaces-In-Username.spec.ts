@@ -26,7 +26,7 @@ test('TC-LOGIN-28: username with leading/trailing spaces is not trimmed', async 
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-28', 'Leading Trailing Spaces In Username', env.baseURL);
+  const report = new TestReport('TC-LOGIN-28', 'Leading Trailing Spaces In Username', env.baseURL, page);
 
   report.step(`Navigate ke login, fill Username = "  ${env.username}  " (spasi depan/belakang), klik Login`);
   await loginPage.goto();

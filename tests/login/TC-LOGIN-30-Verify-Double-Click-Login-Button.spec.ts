@@ -25,7 +25,7 @@ test('TC-LOGIN-30: double click on Login button does not submit twice', async ({
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-30', 'Double-Click Login Button', env.baseURL);
+  const report = new TestReport('TC-LOGIN-30', 'Double-Click Login Button', env.baseURL, page);
 
   report.step('Navigate ke login, fill Username dan Password valid');
   await loginPage.goto();

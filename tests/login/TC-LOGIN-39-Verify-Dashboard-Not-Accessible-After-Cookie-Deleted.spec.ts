@@ -28,7 +28,7 @@ test('TC-LOGIN-39: dashboard not accessible after session cookie is deleted', as
   page,
   context,
 }) => {
-  const report = new TestReport('TC-LOGIN-39', 'Dashboard Not Accessible After Cookie Deleted', env.baseURL);
+  const report = new TestReport('TC-LOGIN-39', 'Dashboard Not Accessible After Cookie Deleted', env.baseURL, page);
 
   report.step('Hapus semua cookie dari session yang sudah authenticated');
   await context.clearCookies();

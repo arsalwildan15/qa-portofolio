@@ -25,7 +25,7 @@ test('TC-LOGIN-33: extremely long password does not freeze or crash', async ({
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-33', 'Very Long Password', env.baseURL);
+  const report = new TestReport('TC-LOGIN-33', 'Very Long Password', env.baseURL, page);
 
   report.step('Navigate ke login, fill Password = 1000x "a", klik Login');
   await loginPage.goto();

@@ -30,6 +30,7 @@ test('TC-LOGIN-15: whitespace-only username shows validation error', async ({
     'TC-LOGIN-15',
     'Whitespace-Only Username Shows Validation',
     env.baseURL,
+    page,
   );
 
   report.step('Navigate ke login, monitor POST /auth/validate');

@@ -22,8 +22,8 @@ import { test } from '../../src/fixtures/pages.fixture';
 import { env } from '../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
 
-test('TC-LOGIN-14: password is case-sensitive', async ({ loginPage }) => {
-  const report = new TestReport('TC-LOGIN-14', 'Case-Sensitive Password', env.baseURL);
+test('TC-LOGIN-14: password is case-sensitive', async ({ page, loginPage }) => {
+  const report = new TestReport('TC-LOGIN-14', 'Case-Sensitive Password', env.baseURL, page);
 
   const flippedCasePassword = env.password.charAt(0).toUpperCase() + env.password.slice(1);
 

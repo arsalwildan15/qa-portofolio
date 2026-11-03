@@ -24,7 +24,7 @@ import { env } from '../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
 
 test('TC-LOGIN-03: login page renders all required elements', async ({ page, loginPage }) => {
-  const report = new TestReport('TC-LOGIN-03', 'Login Page Elements Visible', env.baseURL);
+  const report = new TestReport('TC-LOGIN-03', 'Login Page Elements Visible', env.baseURL, page);
 
   report.step('Navigate ke /auth/login');
   const response = await page.goto('/web/index.php/auth/login');

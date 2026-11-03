@@ -25,7 +25,7 @@ test('TC-LOGIN-12: empty username and password shows two validation messages', a
   page,
   loginPage,
 }) => {
-  const report = new TestReport('TC-LOGIN-12', 'Both Empty Fields Shows Two Validations', env.baseURL);
+  const report = new TestReport('TC-LOGIN-12', 'Both Empty Fields Shows Two Validations', env.baseURL, page);
 
   report.step('Navigate ke halaman login, langsung klik "Login" tanpa isi apapun');
   await loginPage.goto();

@@ -21,8 +21,8 @@ import { test } from '../../src/fixtures/pages.fixture';
 import { env } from '../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../src/utils/testReport';
 
-test('TC-LOGIN-20: single character username is handled correctly', async ({ loginPage }) => {
-  const report = new TestReport('TC-LOGIN-20', 'Single Character Username', env.baseURL);
+test('TC-LOGIN-20: single character username is handled correctly', async ({ page, loginPage }) => {
+  const report = new TestReport('TC-LOGIN-20', 'Single Character Username', env.baseURL, page);
 
   report.step('Navigate ke login, fill Username = "A", Password valid, klik Login');
   await loginPage.goto();

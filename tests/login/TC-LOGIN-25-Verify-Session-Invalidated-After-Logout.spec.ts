@@ -23,7 +23,7 @@ import { env } from '../../src/config/env';
 import { TestReport } from '../../src/utils/testReport';
 
 test('TC-LOGIN-25: session is invalidated after logout', async ({ page, dashboardPage }) => {
-  const report = new TestReport('TC-LOGIN-25', 'Session Invalidated After Logout', env.baseURL);
+  const report = new TestReport('TC-LOGIN-25', 'Session Invalidated After Logout', env.baseURL, page);
 
   report.step('Logout dari session yang sudah authenticated');
   await dashboardPage.logout();
