@@ -1,14 +1,16 @@
 ================================================================================
-  RINGKASAN TEMUAN — PIM FASE 1 & FASE 2
-  Konsolidasi dari docs/TC-PIM.txt dan docs/TC-PIM-Phase2.txt
+  RINGKASAN TEMUAN — PIM FASE 1, FASE 2 & FASE 3
+  Konsolidasi dari docs/TC-PIM.txt, docs/TC-PIM-Phase2.txt, docs/TC-PIM-Phase3.txt
   Project  : qa-portofolio
 ================================================================================
 
-Dokumen ini adalah ringkasan cepat semua temuan eksplorasi dari kedua fase
-PIM yang sudah diimplementasikan. Detail teknis lengkap (locator, API
-endpoint, Catatan Eksekusi) tetap ada di masing-masing dokumen sumber:
+Dokumen ini adalah ringkasan cepat semua temuan eksplorasi dari ketiga fase
+PIM yang sudah diimplementasikan (148 TC total, PIM 100% tercakup). Detail
+teknis lengkap (locator, API endpoint, Catatan Eksekusi) tetap ada di
+masing-masing dokumen sumber:
   - docs/TC-PIM.txt          (Fase 1: Employee List, Add Employee, Personal Details)
   - docs/TC-PIM-Phase2.txt   (Fase 2: 9 tab Personal Details lainnya)
+  - docs/TC-PIM-Phase3.txt   (Fase 3: Configuration + Reports)
 
 ================================================================================
   FASE 1 — EMPLOYEE LIST, ADD EMPLOYEE, PERSONAL DETAILS (52 TC)
@@ -124,8 +126,74 @@ endpoint, Catatan Eksekusi) tetap ada di masing-masing dokumen sumber:
      dugaan awal): Work Experience, Education, Skills, Languages,
      License — plus Attachments terpisah (6 tombol "+ Add" total). Fase 2
      hanya mendalami Work Experience secara penuh dan 1 TC representatif
-     untuk Education; Skills/Languages/License BELUM dicakup — kandidat
-     perluasan Fase 3.
+     untuk Education; Skills/Languages/License BELUM dicakup. CATATAN:
+     ini TIDAK diselesaikan oleh Fase 3 (lihat bawah) karena Fase 3
+     ternyata scope-nya berbeda (Configuration + Reports di PIM, bukan
+     sub-section Qualifications ini): masih kandidat perluasan terpisah
+     kalau diperlukan.
+
+================================================================================
+  FASE 3: PIM CONFIGURATION & REPORTS (29 TC)
+================================================================================
+
+  1. [KOREKSI SCOPE] Dugaan awal menempatkan "Configuration" dan "Reports"
+     di bawah modul Admin (terpisah dari PIM). Setelah dieksplorasi live,
+     ternyata keduanya adalah TAB di dalam PIM sendiri (muncul di top nav
+     PIM begitu salah satu tab PIM dibuka, bukan di sidebar Admin). Modul
+     Admin punya struktur sendiri yang sama sekali berbeda (User
+     Management, Job, Organization, Qualifications, Nationalities,
+     Corporate Branding, Configuration dengan 8 sub-item) dan TIDAK
+     tersentuh oleh Fase 3 ini: kandidat Fase 4 terpisah kalau
+     diperlukan. Pelajaran: dugaan awal yang "masuk akal" tetap harus
+     diverifikasi live sebelum dieksekusi, bukan diasumsikan dari nama.
+
+  2. [TEMUAN: UX] Form "Add" di Reports (Report Name + Selection
+     Criteria + Display Fields) silently no-op kalau Save diklik tanpa
+     menambah satu pun Display Field lewat tombol "+": TIDAK ada request
+     POST terkirim DAN TIDAK ada pesan error apa pun yang muncul ke user.
+     Form tetap diam di halaman yang sama tanpa penjelasan. Ini kontradiksi
+     dengan dugaan awal bahwa cuma Report Name yang wajib diisi.
+
+  3. [POLA UI BARU] Toggle switch di Optional Fields pakai struktur OXD
+     yang beda dari checkbox/radio yang sudah ditemukan di fase
+     sebelumnya: input native disembunyikan di belakang
+     <span class="oxd-switch-input">. Klik ke <span> ini WORK, tapi klik
+     ke <div class="oxd-switch-wrapper"> (satu level di atasnya) TIDAK
+     mengubah state sama sekali. Klik pertama ke span juga kadang tidak
+     teregister kalau dilakukan tepat saat row baru menjadi visible (race
+     hydrasi Vue): ditangani dengan retry sampai 3x di page object.
+
+  4. [TEMUAN: SHARED STATE] Toggle Optional Fields (SSN/SIN/Nick Name/dst)
+     bersifat SITE-WIDE: mempengaruhi seluruh instance demo publik, bukan
+     per-session/per-user. Semua TC di area ini membaca state live sebelum
+     toggle dan MENGEMBALIKAN ke state semula di akhir test, supaya tidak
+     mengganggu TC lain yang kebetulan berjalan setelahnya atau pengguna
+     demo publik lain.
+
+  5. [TEMUAN: KONSISTENSI SERVER] Persistensi toggle Optional Fields
+     setelah reload TIDAK KONSISTEN di demo publik ini: PUT
+     /api/v2/pim/optional-field selalu sukses (200) dengan urutan kode
+     yang identik, tapi efek setelah reload kadang persist kadang tidak,
+     diverifikasi berkali-kali secara live dengan kode yang sama persis.
+     Kemungkinan eventual-consistency di sisi server demo bersama,
+     didokumentasikan via report.finding(), bukan dipaksakan jadi
+     report.check() pass/fail tegas.
+
+  6. [VALIDASI TIDAK KONSISTEN ANTAR FITUR SERUPA] 3 fitur CRUD master
+     data yang strukturnya identik (Custom Fields, Reporting Methods,
+     Termination Reasons) ternyata beda perilaku untuk nama duplikat:
+     Custom Fields dan Reporting Methods menolak dengan pesan error
+     eksplisit ("Already exists"), sementara Termination Reasons diam-diam
+     memblokir submit TANPA pesan error sama sekali: pola yang sama
+     dengan temuan Fase 1 soal Employee Id (validasi berbeda untuk
+     komponen yang terlihat serupa).
+
+  7. [NOISE INFRASTRUKTUR, BUKAN BUG] Satu kali kegagalan 500 + uncaught
+     exception muncul pada TC boundary nama Custom Field 200 karakter,
+     TAPI hanya terjadi saat dijalankan paralel bareng TC lain (beban
+     server tinggi), tidak pernah reproduce saat dijalankan sendirian
+     berkali-kali. Didokumentasikan sebagai kemungkinan race condition di
+     sisi server demo bersama, bukan defect validasi panjang nama.
 
 ================================================================================
   BENANG MERAH ANTAR FASE
@@ -134,17 +202,34 @@ endpoint, Catatan Eksekusi) tetap ada di masing-masing dokumen sumber:
   - Pola "jangan asumsikan, verifikasi langsung" terbukti berulang kali
     membongkar kesalahan tebakan: nama slug URL, nama query param API,
     tipe field (dropdown vs text), lokasi klik yang benar untuk
-    input tersembunyi. Setiap TC yang "tampak jelas" dari nama UI-nya
-    tetap diverifikasi live sebelum ditulis.
-  - Infrastruktur demo publik bersama (ratusan employee dibuat sepanjang
-    sesi Fase 1+2) adalah sumber kegagalan paling sering disalahartikan
-    sebagai "server lambat" — padahal 2 dari 3 kejadian besar ternyata
-    validasi client-side (duplicate ID) atau bug aplikasi nyata (404
-    Job Specification), bukan jaringan/performa server.
+    input tersembunyi, bahkan lokasi menu itu sendiri (Configuration dan
+    Reports disangka ada di Admin, ternyata di PIM). Setiap TC yang
+    "tampak jelas" dari nama UI-nya tetap diverifikasi live sebelum
+    ditulis, dan rencana scope pun tetap diverifikasi ulang kalau ada
+    indikasi dugaan awal salah.
+  - Infrastruktur demo publik bersama (ratusan employee dan record master
+    data dibuat sepanjang sesi Fase 1-3) adalah sumber kegagalan paling
+    sering disalahartikan sebagai "server lambat": padahal mayoritas
+    kejadian besar ternyata validasi client-side (duplicate ID), bug
+    aplikasi nyata (404 Job Specification), atau race condition murni di
+    beban paralel (500 di Custom Fields), bukan jaringan/performa server
+    semata.
+  - Pola hidden-input-di-belakang-elemen-custom (checkbox/radio di Fase 1,
+    radio Immigration di Fase 2, switch Optional Fields di Fase 3) terus
+    muncul di komponen OXD yang berbeda-beda: library ini konsisten
+    menyembunyikan native input di belakang elemen custom-styled untuk
+    styling, tapi locator role-based tetap harus diarahkan klik ke elemen
+    custom tersebut, bukan ke input aslinya.
+  - Validasi tidak konsisten antar fitur yang terlihat serupa adalah pola
+    berulang paling sering ditemukan: Employee Id (Fase 1, field beda
+    komponen beda validasi), duplicate-name handling (Fase 3, 3 fitur
+    CRUD identik struktur tapi beda perilaku). Jangan asumsikan dua
+    komponen UI yang terlihat sama akan berperilaku sama.
   - Temuan yang tidak bisa dipastikan "benar/salah" secara tegas
-    (format email tidak divalidasi, response tidak echo data, dsb)
-    didokumentasikan via `report.finding()`, bukan dipaksakan jadi
-    `report.check()` dengan asumsi hasil yang "seharusnya".
+    (format email tidak divalidasi, response tidak echo data, persistensi
+    toggle tidak konsisten, dsb) didokumentasikan via `report.finding()`,
+    bukan dipaksakan jadi `report.check()` dengan asumsi hasil yang
+    "seharusnya".
 
 ================================================================================
   END OF DOCUMENT
