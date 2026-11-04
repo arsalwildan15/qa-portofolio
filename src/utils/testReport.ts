@@ -110,6 +110,9 @@ export class TestReport {
   /** Records a verification result. Failing checks do not halt the test. */
   check(label: string, passed: boolean, detail?: string): void {
     this.checks.push({ label, passed, detail });
+    if (!passed) {
+      console.log(`[CHECK_FAIL] ${label}${detail ? ` | ${detail}` : ''}`);
+    }
     expect.soft(passed, label).toBeTruthy();
   }
 

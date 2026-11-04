@@ -27,6 +27,11 @@ const HEADERS = [
   'Script Test Case',
 ] as const;
 
+interface FailedCheck {
+  label: string;
+  detail: string;
+}
+
 interface BugRow {
   bugId: string;
   summary: string;
@@ -50,12 +55,13 @@ interface BugRow {
 
 /**
  * Appends one row per failed test case to docs/Bug-List.xlsx so a failing
- * run leaves behind a draft bug report, not just a red CI check. Fields
- * that can't be known from the failure alone (Expected Result, Severity,
- * Priority) are left as an explicit "[ISI MANUAL]" placeholder for QA
- * review, rather than guessed — Severity (technical impact) and Priority
- * (how urgently it should be fixed) are judgment calls a failing
- * assertion alone can't make.
+ * run leaves behind a draft bug report, not just a red CI check. Summary,
+ * Scope, Steps to Reproduce, Expected/Actual Result, Severity and Priority
+ * are all derived from the `[CHECK_FAIL]` log lines TestReport.check()
+ * emits for every failing check (label + detail) — these are suggestions
+ * a human should still spot-check, not a substitute for triage, since
+ * Severity/Priority in particular are classified by keyword heuristics
+ * rather than real judgment of business impact.
  */
 export default class BugListReporter implements Reporter {
   private readonly pendingRows: BugRow[] = [];
@@ -79,22 +85,24 @@ export default class BugListReporter implements Reporter {
     if (result.status !== 'failed' && result.status !== 'timedOut') return;
 
     const modul = this.extractModul(test.location.file);
+    const failedChecks = this.extractFailedChecks(result);
     const steps = this.extractSteps(result);
-    const actualResult = this.extractActualResult(result);
+    const scope = this.classifyScope(failedChecks);
+    const { severity, priority } = this.classifySeverityAndPriority(failedChecks);
     const attachment = this.extractAttachment(result);
 
     this.pendingRows.push({
       bugId: '', // assigned when writing, after reading the current last ID
-      summary: test.title,
+      summary: this.buildSummary(modul, failedChecks, test.title),
       category: 'Bug',
-      scope: 'E2E',
+      scope,
       environment: env.baseURL,
       modul,
       stepsToReproduce: steps,
-      expectedResult: '[ISI MANUAL]',
-      actualResult,
-      severity: '[ISI MANUAL]',
-      priority: '[ISI MANUAL]',
+      expectedResult: this.buildExpectedResult(failedChecks),
+      actualResult: this.buildActualResult(failedChecks),
+      severity,
+      priority,
       attachment,
       detectedOn: new Date().toLocaleDateString('id-ID', {
         day: 'numeric',
@@ -219,25 +227,134 @@ export default class BugListReporter implements Reporter {
   }
 
   private extractModul(filePath: string): string {
-    const match = /tests[/\\]([^/\\]+)[/\\]/.exec(filePath);
-    const folder = match?.[1] ?? 'unknown';
-    return folder.charAt(0).toUpperCase() + folder.slice(1);
+    const match = /tests[/\\]([^/\\]+)[/\\]([^/\\]+)[/\\]/.exec(filePath);
+    if (match) return `${this.titleCase(match[1] ?? '')} - ${this.titleCase(match[2] ?? '')}`;
+
+    const topLevel = /tests[/\\]([^/\\]+)[/\\]/.exec(filePath);
+    return this.titleCase(topLevel?.[1] ?? 'unknown');
   }
 
+  private titleCase(slug: string): string {
+    if (slug.toUpperCase() === 'PIM') return 'PIM';
+    return slug
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  /** Renumbered, plain-sentence steps (no "[STEP n]" prefix or trailing "..."). */
   private extractSteps(result: TestResult): string {
-    const output = result.stdout
+    const lines = this.stdoutLines(result).filter((line) => line.startsWith('[STEP'));
+    if (lines.length === 0) return '[ISI MANUAL]';
+
+    return lines
+      .map((line, i) => {
+        const text = line.replace(/^\[STEP \d+\]\s*/, '').replace(/\.{3}$/, '').trim();
+        return `${i + 1}. ${text}.`;
+      })
+      .join('\n');
+  }
+
+  /** Parses every `[CHECK_FAIL] <label> | <detail>` line TestReport.check() emits. */
+  private extractFailedChecks(result: TestResult): FailedCheck[] {
+    const lines = this.stdoutLines(result).filter((line) => line.startsWith('[CHECK_FAIL]'));
+    const checks = lines.map((line) => {
+      const body = line.replace(/^\[CHECK_FAIL\]\s*/, '');
+      const [label = '', detail = ''] = body.split(/\s\|\s/);
+      return { label: label.trim(), detail: detail.trim() };
+    });
+    if (checks.length > 0) return checks;
+
+    // Fallback for failures that never reach a TestReport.check() call
+    // (e.g. a raw exception thrown mid-test) — use Playwright's own error.
+    const firstError = result.errors[0];
+    if (!firstError) return [];
+    const message = (firstError.message ?? String(firstError.value))
+      .replace(/\u001b\[[0-9;]*m/g, '')
+      .trim();
+    return [{ label: 'Unexpected error', detail: message }];
+  }
+
+  private stdoutLines(result: TestResult): string[] {
+    return result.stdout
       .map((chunk) => chunk.toString())
       .join('')
       .split('\n')
-      .filter((line) => line.trim().startsWith('[STEP'))
-      .map((line) => line.trim());
-    return output.length > 0 ? output.join('\n') : '[ISI MANUAL]';
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
   }
 
-  private extractActualResult(result: TestResult): string {
-    const firstError = result.errors[0];
-    if (!firstError) return '[ISI MANUAL]';
-    return (firstError.message ?? String(firstError.value)).replace(/\u001b\[[0-9;]*m/g, '').trim();
+  private buildSummary(modul: string, failedChecks: FailedCheck[], fallbackTitle: string): string {
+    const first = failedChecks[0];
+    if (!first) return `${modul}: ${fallbackTitle}`;
+    const core = first.detail ? `${first.label} — ${this.truncate(first.detail, 90)}` : first.label;
+    return this.truncate(`${modul}: ${core}`, 160);
+  }
+
+  private buildExpectedResult(failedChecks: FailedCheck[]): string {
+    if (failedChecks.length === 0) return '[ISI MANUAL]';
+    return failedChecks
+      .map((c) => (/^[A-Z]/.test(c.label) ? c.label : c.label.charAt(0).toUpperCase() + c.label.slice(1)))
+      .map((label) => (label.endsWith('.') ? label : `${label}.`))
+      .join('\n');
+  }
+
+  private buildActualResult(failedChecks: FailedCheck[]): string {
+    if (failedChecks.length === 0) return '[ISI MANUAL]';
+    return failedChecks
+      .map((c) => {
+        if (!c.detail) return `Check "${c.label}" gagal (detail tidak tersedia dari assertion).`;
+        if (this.isConsoleRelated(c))
+          return `Console browser mencatat error: ${c.detail}`;
+        if (this.isApiRelated(c)) return `Response API: ${c.detail}`;
+        return c.detail;
+      })
+      .join('\n');
+  }
+
+  /** FE / BE / FE & BE, from keyword patterns in the failed checks' text. */
+  private classifyScope(failedChecks: FailedCheck[]): string {
+    if (failedChecks.length === 0) return 'FE';
+    const isFE = failedChecks.some((c) => this.isConsoleRelated(c) || this.isUiRelated(c));
+    const isBE = failedChecks.some((c) => this.isApiRelated(c));
+    if (isFE && isBE) return 'FE & BE';
+    if (isBE) return 'BE';
+    return 'FE';
+  }
+
+  /**
+   * Keyword-based Severity/Priority suggestion — a starting point for QA
+   * triage, not a final classification. Priority mirrors Severity by
+   * default since business urgency needs context this reporter doesn't
+   * have.
+   */
+  private classifySeverityAndPriority(failedChecks: FailedCheck[]): { severity: string; priority: string } {
+    if (failedChecks.length === 0) return { severity: '[ISI MANUAL]', priority: '[ISI MANUAL]' };
+
+    const text = failedChecks.map((c) => `${c.label} ${c.detail}`).join(' ').toLowerCase();
+    const highPattern = /xss|sql injection|sqli|crash|uncaught exception|data (hilang|corrupt|rusak)|bypass (auth|login)|\b5\d{2}\b/;
+    const mediumPattern = /\b422\b|\b400\b|\bnull\b|tidak (ter)?valid|validasi (longgar|gagal)|salah simpan|tidak sesuai|inkonsisten/;
+
+    const severity = highPattern.test(text) ? 'High' : mediumPattern.test(text) ? 'Medium' : 'Low';
+    return { severity, priority: severity };
+  }
+
+  private isConsoleRelated(c: FailedCheck): boolean {
+    return /console|render|uncaught exception/i.test(`${c.label} ${c.detail}`);
+  }
+
+  private isUiRelated(c: FailedCheck): boolean {
+    return /\bui\b|visual|tampil|layout|css/i.test(`${c.label} ${c.detail}`);
+  }
+
+  private isApiRelated(c: FailedCheck): boolean {
+    return /\bapi\b|status\s*=|endpoint|response|\b(get|post|put|patch|delete)\b.*\/|\bhttp\b/i.test(
+      `${c.label} ${c.detail}`,
+    );
+  }
+
+  private truncate(text: string, max: number): string {
+    return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
   }
 
   private extractAttachment(result: TestResult): string {
