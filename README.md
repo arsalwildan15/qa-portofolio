@@ -44,6 +44,12 @@ qa-portofolio/
 │   │   ├── ReportToPage.ts
 │   │   ├── QualificationsPage.ts
 │   │   ├── MembershipsPage.ts
+│   │   ├── OptionalFieldsPage.ts
+│   │   ├── CustomFieldsPage.ts
+│   │   ├── DataImportPage.ts
+│   │   ├── ReportingMethodsPage.ts
+│   │   ├── TerminationReasonsPage.ts
+│   │   ├── PimReportsPage.ts
 │   │   └── LeavePage.ts
 │   ├── fixtures/         # Custom Playwright fixtures: inject page objects, provide authenticatedTest
 │   ├── utils/
@@ -65,13 +71,16 @@ qa-portofolio/
 │   │   ├── salary/                # Phase 2
 │   │   ├── report-to/             # Phase 2
 │   │   ├── qualifications/        # Phase 2
-│   │   └── memberships/           # Phase 2
+│   │   ├── memberships/           # Phase 2
+│   │   ├── configuration/         # Phase 3: Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons
+│   │   └── reports/               # Phase 3
 │   └── e2e/              # Cross-cutting / not-yet-split specs (PIM smoke test, Leave)
 ├── docs/                 # Human-readable test case documentation, one file per module
 │   ├── TC-Login.txt
 │   ├── TC-PIM.txt
 │   ├── TC-PIM-Phase2.txt
-│   ├── PIM-Findings-Summary.txt  # Cross-phase digest of exploration findings (both PIM phases)
+│   ├── TC-PIM-Phase3.txt
+│   ├── PIM-Findings-Summary.txt  # Cross-phase digest of exploration findings (all PIM phases)
 │   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
 ├── .github/workflows/     # CI pipeline definition
 ├── playwright.config.ts
@@ -199,7 +208,8 @@ Set these repository secrets if targeting a non-default environment:
 |--------|-----------|------|
 | Login | 40 TCs: positive, negative, boundary, security, edge | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | PIM (Phase 1) | 52 TCs: Employee List (14), Add Employee (26), Personal Details (12) | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
-| PIM (Phase 2) | 67 TCs across the remaining 9 Personal Details tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications, Memberships). Phase 3 (Configuration, Reports) not yet covered. | [docs/TC-PIM-Phase2.txt](docs/TC-PIM-Phase2.txt) |
+| PIM (Phase 2) | 67 TCs across the remaining 9 Personal Details tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications, Memberships) | [docs/TC-PIM-Phase2.txt](docs/TC-PIM-Phase2.txt) |
+| PIM (Phase 3) | 29 TCs across the PIM Configuration tabs (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons) and Reports. Closes out full PIM coverage. | [docs/TC-PIM-Phase3.txt](docs/TC-PIM-Phase3.txt) |
 | Leave | Submitting without entitlement is correctly blocked (see note below) | N/A |
 
 > **Note on the Leave suite:** the public demo account has no assigned leave entitlement, so a successful application can't be exercised. Instead the test verifies the deterministic behavior that's actually there: an insufficient-balance message once a date range is selected.

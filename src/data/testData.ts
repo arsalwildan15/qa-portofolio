@@ -3,6 +3,11 @@ export function uniqueEmployeeName(prefix: string): { firstName: string; lastNam
   return { firstName: prefix, lastName: `QA${suffix}` };
 }
 
+/** Collision-free name for master data created against the shared demo (custom fields, reporting methods, termination reasons, reports). */
+export function uniqueName(prefix: string): string {
+  return `${prefix}_${Date.now().toString().slice(-6)}`;
+}
+
 /**
  * Returns a leave date, offset by a run-unique number of days into the future to avoid
  * colliding with dates used by earlier test runs against the shared OrangeHRM demo

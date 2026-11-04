@@ -1,0 +1,311 @@
+================================================================================
+  DAFTAR TEST CASE: PIM FASE 3
+  (CONFIGURATION: OPTIONAL FIELDS, CUSTOM FIELDS, DATA IMPORT,
+   REPORTING METHODS, TERMINATION REASONS; REPORTS)
+  Modul    : PIM: Personnel Information Management
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/pim/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+  [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+  [TEMUAN]      = TC yang hasilnya didokumentasikan via report.finding() karena
+                   perilaku ambigu/environment-dependent, bukan pass/fail tegas
+
+  FORMAT ID  : TC-PIM-<SECTION>-NN
+  FOLDER     : satu subfolder per halaman Configuration, plus tests/pim/reports/:
+               TC-PIM-OPTFIELD-*     -> tests/pim/configuration/optional-fields/
+               TC-PIM-CUSTOMFIELD-*  -> tests/pim/configuration/custom-fields/
+               TC-PIM-DATAIMPORT-*   -> tests/pim/configuration/data-import/
+               TC-PIM-REPORTMETHOD-* -> tests/pim/configuration/reporting-methods/
+               TC-PIM-TERMREASON-*   -> tests/pim/configuration/termination-reasons/
+               TC-PIM-REPORT-*       -> tests/pim/reports/
+
+  CAKUPAN FASE 3: menuntaskan 2 tab PIM yang belum dicakup Fase 1/2:
+  "Configuration" (5 sub-halaman) dan "Reports". Dengan ini, semua tab top-level
+  PIM (Employee List, Add Employee, Personal Details + 9 sub-tab, Configuration,
+  Reports) sudah tercakup 100%.
+
+================================================================================
+  CATATAN TEKNIS: PIM FASE 3
+  Dikonfirmasi via Playwright discovery run langsung terhadap OrangeHRM OS 5.9
+================================================================================
+
+  [KOREKSI SCOPE] Eksplorasi awal salah menduga "Configuration" dan "Reports"
+    ada di modul Admin (terpisah dari PIM). Setelah dieksplorasi live, ternyata
+    keduanya adalah TAB di dalam PIM sendiri (muncul di top nav PIM, bukan di
+    sidebar Admin). Modul Admin punya struktur sendiri yang sama sekali
+    berbeda (User Management, Job, Organization, Qualifications, Nationalities,
+    Corporate Branding, Configuration dengan 8 sub-item) dan TIDAK dicakup di
+    Fase 3 ini, kandidat Fase 4 terpisah kalau diperlukan.
+
+  URL TIAP HALAMAN (CONFIRMED):
+    Optional Fields    : /web/index.php/pim/configurePim
+    Custom Fields       : /web/index.php/pim/listCustomFields
+    Data Import         : /web/index.php/pim/pimCsvImport
+    Reporting Methods   : /web/index.php/pim/viewReportingMethods
+    Termination Reasons : /web/index.php/pim/viewTerminationReasons
+    Reports (list)      : /web/index.php/pim/viewDefinedPredefinedReports
+    Reports (add form)  : /web/index.php/pim/definePredefinedReport
+
+  [POLA UI] Toggle di Optional Fields pakai struktur switch OXD yang beda dari
+    checkbox/radio biasa: input native disembunyikan di belakang
+    <span class="oxd-switch-input">. Klik ke <span> ini WORK, tapi klik ke
+    <div class="oxd-switch-wrapper"> (satu level di atasnya) TIDAK mengubah
+    state sama sekali (dikonfirmasi live, beda dari dugaan awal). Selain itu,
+    klik pertama ke span kadang tidak teregister kalau dilakukan tepat saat
+    row baru menjadi visible (race hydrasi Vue), jadi OptionalFieldsPage.toggle()
+    retry sampai 3x sambil mengecek state benar-benar berubah.
+
+  [TEMUAN] Toggle Optional Fields (SSN/SIN/Nick Name/dst) bersifat SITE-WIDE
+    (mempengaruhi seluruh instance demo, bukan per-session). Semua TC di area
+    ini membaca state live sebelum toggle dan MENGEMBALIKAN ke state tersebut
+    di akhir, supaya tidak mengganggu TC lain yang berjalan setelahnya.
+
+  [TEMUAN] Persistensi toggle Optional Fields setelah reload TIDAK KONSISTEN
+    di demo publik ini: langkah toggle + PUT /api/v2/pim/optional-field selalu
+    sukses (200) dengan urutan kode yang identik, tapi efek setelah reload
+    kadang persist kadang tidak, diverifikasi berkali-kali secara live. Ini
+    kemungkinan eventual-consistency/flakiness di sisi server demo bersama,
+    bukan bug di test (logic toggle diverifikasi benar secara independen).
+    Dicatat via report.finding() di TC-PIM-OPTFIELD-01/02, bukan report.check()
+    yang keras, supaya tidak jadi false-negative berulang.
+
+  [TEMUAN] Behavior saat Name/Field Name duplikat TIDAK KONSISTEN antar 3
+    fitur CRUD sederhana ini walau struktur form-nya identik:
+      - Custom Fields  : ditolak dengan error eksplisit "Already exists"
+        (TC-PIM-CUSTOMFIELD-04), deterministik.
+      - Reporting Methods : juga ditolak dengan error eksplisit "Already
+        exists" (TC-PIM-REPORTMETHOD-03), sama seperti Custom Fields.
+      - Termination Reasons : TIDAK ADA error eksplisit yang muncul di UI,
+        TAPI entry kedua juga TIDAK ikut tersimpan (jumlah row dengan nama
+        sama tetap 1 setelah percobaan ke-2), silently blocked tanpa
+        feedback ke user, beda dari 2 fitur lain yang transparan
+        (TC-PIM-TERMREASON-03, dicatat via report.finding()).
+
+  [TEMUAN, PERLU VERIFIKASI ULANG] Field Name custom field 200 karakter sempat
+    memicu 500 + uncaught exception di console saat test ini dijalankan
+    BERBARENGAN (parallel) dengan TC lain yang juga menulis ke custom-fields.
+    Saat diisolasi dan dijalankan sendirian, response selalu bersih tanpa
+    error. Kemungkinan besar race condition server saat ada concurrent write
+    ke endpoint yang sama, bukan defect yang terkait panjang Field Name itu
+    sendiri (TC-PIM-CUSTOMFIELD-05).
+
+  [TEMUAN] Data Import punya link "Download" sample CSV di halamannya sendiri
+    dengan skema kolom resmi: first_name,middle_name,last_name,employee_id,
+    other_id,driver's_license_no,license_expiry_date,gender,marital_status,
+    nationality,date_of_birth,address_street_1,address_street_2,city,
+    state/province,zip/postal_code,country,home_telephone,mobile,
+    work_telephone,work_email,other_email. Hanya first_name dan last_name
+    compulsory (dikonfirmasi via upload sukses dengan field lain kosong).
+    Endpoint upload: POST /api/v2/pim/csv-import, response body memberi
+    meta.success/meta.failed per baris (TC-PIM-DATAIMPORT-01).
+
+  [TEMUAN KRITIS] Form Add Report (definePredefinedReport) TERNYATA mewajibkan
+    minimal 1 Display Field (via tombol "+" di section Display Fields), BUKAN
+    cuma Report Name seperti dugaan awal dari field mana yang bertanda
+    required (*) di UI. Klik Save dengan hanya Report Name terisi (tanpa
+    Display Field) SILENT NO-OP: tidak ada POST terkirim, DAN tidak ada pesan
+    error apa pun yang terlihat di UI (bukan validasi eksplisit, murni tombol
+    tidak bereaksi). Ini genuine UX issue, didokumentasikan sebagai temuan di
+    TC-PIM-REPORT-04, bukan cuma dianggap "berhasil ditolak dengan benar".
+    Endpoint save yang benar: POST /api/v2/pim/reports/defined.
+
+  [TEMUAN] Dropdown "Select Display Field Group" di form Reports pakai label
+    singkat "Personal" untuk grup field Personal Details, BUKAN "Personal
+    Details" seperti nama tab aslinya di PIM (opsi lengkap: Personal, Contact
+    Details, Emergency Contacts, Dependents, Immigration, Job, Salary,
+    Subordinates, Supervisors, Work Experience, Education, Skills, Languages,
+    License, Memberships, Custom Fields).
+
+  [TEMUAN] Field "Report Name" filter di list Reports adalah autocomplete
+    async (sama pola dengan Report-to di Fase 2: muncul opsi "Searching...."
+    sesaat sebelum hasil asli), bukan text filter biasa. Harus tunggu hasil
+    autocomplete resolve dulu sebelum klik opsi, baru klik Search.
+
+  [LESSON] Pelajaran proses: scope Fase 3 sempat salah diasumsikan ada di
+    modul Admin berdasarkan nama menu yang mirip ("Configuration", "Reports").
+    Setelah dieksplorasi live, ternyata itu dua fitur yang sama sekali
+    berbeda: PIM > Configuration/Reports (scope Fase 3 yang benar) vs
+    Admin > Configuration (8 sub-item berbeda total, bagian dari modul Admin
+    yang terpisah). Sama seperti lesson Fase 1/2: nama menu yang terdengar
+    sama tidak selalu merujuk ke fitur/lokasi yang sama, selalu verifikasi
+    struktur navigasi live sebelum menulis TC.
+
+================================================================================
+  TEST CASES
+================================================================================
+
+No.  Test Case ID              Status   Kategori              Skenario
+---  -------------------------  -------  --------------------  --------------------
+
+================================================================================
+  GROUP 1: OPTIONAL FIELDS (3 TC)
+  Folder: tests/pim/configuration/optional-fields/
+================================================================================
+
+ 1   TC-PIM-OPTFIELD-01  [DONE]  Positive (+) [TEMUAN]    Toggle SSN field,
+                                                           persist setelah reload
+                                                           tidak konsisten
+ 2   TC-PIM-OPTFIELD-02  [DONE]  Positive (+) [TEMUAN]     Toggle Nick Name,
+                                                           amati efek di Personal
+                                                           Details
+ 3   TC-PIM-OPTFIELD-03  [DONE]  Edge Case (!)             Double toggle sebelum
+                                                           Save = net no-op
+
+================================================================================
+  GROUP 2: CUSTOM FIELDS (6 TC)
+  Folder: tests/pim/configuration/custom-fields/
+================================================================================
+
+ 4   TC-PIM-CUSTOMFIELD-01  [DONE]  Positive (+)            Add custom field valid
+ 5   TC-PIM-CUSTOMFIELD-02  [DONE]  Negative (-)             Submit kosong ->
+                                                              3 required
+ 6   TC-PIM-CUSTOMFIELD-03  [DONE]  Positive (+)             Delete custom field
+ 7   TC-PIM-CUSTOMFIELD-04  [DONE]  Negative (-)             Field Name duplikat
+                                                              ditolak "Already
+                                                              exists"
+ 8   TC-PIM-CUSTOMFIELD-05  [DONE]  Boundary (B) [TEMUAN]    Field Name 200
+                                                              karakter
+ 9   TC-PIM-CUSTOMFIELD-06  [DONE]  Security (S)             XSS di Field Name
+
+================================================================================
+  GROUP 3: DATA IMPORT (4 TC)
+  Folder: tests/pim/configuration/data-import/
+================================================================================
+
+10   TC-PIM-DATAIMPORT-01  [DONE]  Positive (+) [API]        Upload CSV valid,
+                                                              meta.success === 1
+11   TC-PIM-DATAIMPORT-02  [DONE]  Boundary (B)               File > 1MB ditolak
+12   TC-PIM-DATAIMPORT-03  [DONE]  Negative (-)                File bukan CSV
+                                                              ditolak
+13   TC-PIM-DATAIMPORT-04  [DONE]  Negative (-)                Submit tanpa file
+                                                              -> required
+
+================================================================================
+  GROUP 4: REPORTING METHODS (5 TC)
+  Folder: tests/pim/configuration/reporting-methods/
+================================================================================
+
+14   TC-PIM-REPORTMETHOD-01  [DONE]  Positive (+)             Add reporting
+                                                               method valid
+15   TC-PIM-REPORTMETHOD-02  [DONE]  Negative (-)              Submit kosong ->
+                                                               required
+16   TC-PIM-REPORTMETHOD-03  [DONE]  Negative (-)              Name duplikat
+                                                               ditolak
+17   TC-PIM-REPORTMETHOD-04  [DONE]  Positive (+)              Delete reporting
+                                                               method
+18   TC-PIM-REPORTMETHOD-05  [DONE]  Security (S)              XSS di Name
+
+================================================================================
+  GROUP 5: TERMINATION REASONS (5 TC)
+  Folder: tests/pim/configuration/termination-reasons/
+================================================================================
+
+19   TC-PIM-TERMREASON-01  [DONE]  Positive (+)               Add termination
+                                                               reason valid
+20   TC-PIM-TERMREASON-02  [DONE]  Negative (-)                Submit kosong ->
+                                                               required
+21   TC-PIM-TERMREASON-03  [DONE]  Edge Case (!) [TEMUAN]      Name duplikat
+                                                               silently blocked
+                                                               (tanpa error UI,
+                                                               beda dari
+                                                               Reporting Methods)
+22   TC-PIM-TERMREASON-04  [DONE]  Positive (+)                Delete termination
+                                                               reason
+23   TC-PIM-TERMREASON-05  [DONE]  Security (S)                XSS di Name
+
+================================================================================
+  GROUP 6: REPORTS (6 TC)
+  Folder: tests/pim/reports/
+================================================================================
+
+24   TC-PIM-REPORT-01  [DONE]  Positive (+)                   Search report
+                                                               existing via
+                                                               autocomplete
+25   TC-PIM-REPORT-02  [DONE]  Positive (+) [API]              Add report (Name +
+                                                               Display Field)
+26   TC-PIM-REPORT-03  [DONE]  Negative (-)                    Submit kosong ->
+                                                               required
+27   TC-PIM-REPORT-04  [DONE]  Negative (-) [TEMUAN]           Save tanpa Display
+                                                               Field = silent
+                                                               no-op, tanpa error
+28   TC-PIM-REPORT-05  [DONE]  Edge Case (!)                   Cancel membatalkan
+                                                               form
+29   TC-PIM-REPORT-06  [DONE]  Positive (+)                    Delete report
+
+================================================================================
+  SUMMARY
+================================================================================
+
+  Total Test Cases Fase 3 : 29
+  Optional Fields     : 3        Reporting Methods    : 5
+  Custom Fields       : 6        Termination Reasons  : 5
+  Data Import         : 4        Reports              : 6
+
+  Hard check() (pass/fail tegas)                  : ~24 TC
+  finding() (dokumentasi, bukan pass/fail tegas)  : ~5 TC: persistensi toggle
+    Optional Fields tidak konsisten, efek cross-screen Nick Name toggle, Field
+    Name 200 karakter (hasil berbeda antara parallel vs isolated run), Name
+    duplikat di Termination Reasons silently blocked tanpa error UI, Save
+    Reports tanpa Display Field silent no-op.
+
+  Dengan Fase 3 selesai: PIM module (Employee List, Add Employee, Personal
+  Details + 9 sub-tab, Configuration, Reports) sudah 100% tercakup. Modul
+  Admin terpisah (ditemukan saat eksplorasi awal Fase 3, 23+ sub-halaman:
+  User Management, Job, Organization, Qualifications, Nationalities,
+  Corporate Branding, Configuration) BELUM dicakup, kandidat Fase 4 terpisah.
+
+================================================================================
+  CATATAN EKSEKUSI
+================================================================================
+
+  1. Semua TC Fase 3 pakai page object baru di src/pages/: OptionalFieldsPage,
+     CustomFieldsPage, DataImportPage, ReportingMethodsPage,
+     TerminationReasonsPage, PimReportsPage, diinjeksikan via
+     src/fixtures/pages.fixture.ts.
+
+  2. [PENTING] TC di area Optional Fields mengubah konfigurasi SITE-WIDE
+     (bukan per-employee/per-session). Setiap TC di area ini membaca state
+     live sebelum mengubah, dan mengembalikan ke state tersebut di akhir
+     test, supaya tidak mengganggu TC lain. Jangan jalankan TC Optional
+     Fields secara manual lalu interrupt di tengah jalan (Ctrl+C) karena
+     langkah restore di akhir bisa terlewat.
+
+  3. Jalankan seluruh modul Fase 3:
+       npx playwright test tests/pim/configuration tests/pim/reports --project=chromium
+
+  4. Jalankan satu area saja, contoh Custom Fields:
+       npx playwright test tests/pim/configuration/custom-fields --project=chromium
+
+  5. Jalankan satu TC: RUN COMMAND spesifik ada di JSDoc header tiap file.
+
+  6. [FORMAT REPORTING] Sama persis dengan Fase 1/2: TestReport dari
+     src/utils/testReport.ts, console-error check otomatis via `page`
+     sebagai argumen ke-4.
+
+  7. [BUG LIST OTOMATIS] TC yang gagal otomatis masuk ke docs/Bug-List.xlsx,
+     dan otomatis ter-close kalau TC yang sama lulus di run berikutnya (lihat
+     README bagian "Auto-close on retest"). Review manual tetap diperlukan
+     sebelum menganggap semua entri sebagai bug nyata vs noise infrastruktur.
+
+  8. Target adalah demo publik OrangeHRM: TC positive di area Custom Fields,
+     Reporting Methods, Termination Reasons, dan Reports BERSIFAT
+     DESTRUKTIF/MUTATIF (menambah record baru yang persist). Tidak ada
+     cleanup otomatis untuk area-area ini (beda dari Optional Fields yang
+     memang didesain self-restoring karena site-wide).
+
+================================================================================
+  END OF DOCUMENT
+================================================================================

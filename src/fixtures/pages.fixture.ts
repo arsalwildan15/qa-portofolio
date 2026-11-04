@@ -17,6 +17,12 @@ import {
   ReportToPage,
   QualificationsPage,
   MembershipsPage,
+  OptionalFieldsPage,
+  CustomFieldsPage,
+  DataImportPage,
+  ReportingMethodsPage,
+  TerminationReasonsPage,
+  PimReportsPage,
 } from '../pages';
 
 interface Pages {
@@ -36,6 +42,12 @@ interface Pages {
   reportToPage: ReportToPage;
   qualificationsPage: QualificationsPage;
   membershipsPage: MembershipsPage;
+  optionalFieldsPage: OptionalFieldsPage;
+  customFieldsPage: CustomFieldsPage;
+  dataImportPage: DataImportPage;
+  reportingMethodsPage: ReportingMethodsPage;
+  terminationReasonsPage: TerminationReasonsPage;
+  pimReportsPage: PimReportsPage;
 }
 
 export const test = base.extend<Pages>({
@@ -86,6 +98,24 @@ export const test = base.extend<Pages>({
   },
   membershipsPage: async ({ page }, use) => {
     await use(new MembershipsPage(page));
+  },
+  optionalFieldsPage: async ({ page }, use) => {
+    await use(new OptionalFieldsPage(page));
+  },
+  customFieldsPage: async ({ page }, use) => {
+    await use(new CustomFieldsPage(page));
+  },
+  dataImportPage: async ({ page }, use) => {
+    await use(new DataImportPage(page));
+  },
+  reportingMethodsPage: async ({ page }, use) => {
+    await use(new ReportingMethodsPage(page));
+  },
+  terminationReasonsPage: async ({ page }, use) => {
+    await use(new TerminationReasonsPage(page));
+  },
+  pimReportsPage: async ({ page }, use) => {
+    await use(new PimReportsPage(page));
   },
 });
 
