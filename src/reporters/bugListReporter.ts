@@ -58,7 +58,7 @@ interface BugRow {
  * run leaves behind a draft bug report, not just a red CI check. Summary,
  * Scope, Steps to Reproduce, Expected/Actual Result, Severity and Priority
  * are all derived from the `[CHECK_FAIL]` log lines TestReport.check()
- * emits for every failing check (label + detail) — these are suggestions
+ * emits for every failing check (label + detail). These are suggestions
  * a human should still spot-check, not a substitute for triage, since
  * Severity/Priority in particular are classified by keyword heuristics
  * rather than real judgment of business impact.
@@ -136,7 +136,7 @@ export default class BugListReporter implements Reporter {
     let nextBugNumber = this.getNextBugNumber(sheet);
     for (const row of this.pendingRows) {
       const key = this.bugKey(row);
-      // Same bug (same script + summary) already logged and still open —
+      // Same bug (same script + summary) already logged and still open:
       // skip, don't duplicate. Only log again if the prior entry was Closed
       // (a regression), or if this bug was never logged before.
       if (openStatusByKey.get(key) === true) continue;
@@ -245,7 +245,7 @@ export default class BugListReporter implements Reporter {
   /** Renumbered, plain-sentence steps (no "[STEP n]" prefix or trailing "..."). */
   private extractSteps(result: TestResult): string {
     const lines = this.stdoutLines(result).filter((line) => line.startsWith('[STEP'));
-    if (lines.length === 0) return '[ISI MANUAL]';
+    if (lines.length === 0) return '[FILL MANUALLY]';
 
     return lines
       .map((line, i) => {
@@ -266,7 +266,7 @@ export default class BugListReporter implements Reporter {
     if (checks.length > 0) return checks;
 
     // Fallback for failures that never reach a TestReport.check() call
-    // (e.g. a raw exception thrown mid-test) — use Playwright's own error.
+    // (e.g. a raw exception thrown mid-test): use Playwright's own error.
     const firstError = result.errors[0];
     if (!firstError) return [];
     const message = (firstError.message ?? String(firstError.value))
@@ -287,12 +287,12 @@ export default class BugListReporter implements Reporter {
   private buildSummary(modul: string, failedChecks: FailedCheck[], fallbackTitle: string): string {
     const first = failedChecks[0];
     if (!first) return `${modul}: ${fallbackTitle}`;
-    const core = first.detail ? `${first.label} — ${this.truncate(first.detail, 90)}` : first.label;
+    const core = first.detail ? `${first.label}: ${this.truncate(first.detail, 90)}` : first.label;
     return this.truncate(`${modul}: ${core}`, 160);
   }
 
   private buildExpectedResult(failedChecks: FailedCheck[]): string {
-    if (failedChecks.length === 0) return '[ISI MANUAL]';
+    if (failedChecks.length === 0) return '[FILL MANUALLY]';
     return failedChecks
       .map((c) => (/^[A-Z]/.test(c.label) ? c.label : c.label.charAt(0).toUpperCase() + c.label.slice(1)))
       .map((label) => (label.endsWith('.') ? label : `${label}.`))
@@ -300,13 +300,13 @@ export default class BugListReporter implements Reporter {
   }
 
   private buildActualResult(failedChecks: FailedCheck[]): string {
-    if (failedChecks.length === 0) return '[ISI MANUAL]';
+    if (failedChecks.length === 0) return '[FILL MANUALLY]';
     return failedChecks
       .map((c) => {
-        if (!c.detail) return `Check "${c.label}" gagal (detail tidak tersedia dari assertion).`;
+        if (!c.detail) return `Check "${c.label}" failed (no detail available from the assertion).`;
         if (this.isConsoleRelated(c))
-          return `Console browser mencatat error: ${c.detail}`;
-        if (this.isApiRelated(c)) return `Response API: ${c.detail}`;
+          return `Browser console error: ${c.detail}`;
+        if (this.isApiRelated(c)) return `API response: ${c.detail}`;
         return c.detail;
       })
       .join('\n');
@@ -323,17 +323,21 @@ export default class BugListReporter implements Reporter {
   }
 
   /**
-   * Keyword-based Severity/Priority suggestion — a starting point for QA
+   * Keyword-based Severity/Priority suggestion, a starting point for QA
    * triage, not a final classification. Priority mirrors Severity by
    * default since business urgency needs context this reporter doesn't
    * have.
    */
   private classifySeverityAndPriority(failedChecks: FailedCheck[]): { severity: string; priority: string } {
-    if (failedChecks.length === 0) return { severity: '[ISI MANUAL]', priority: '[ISI MANUAL]' };
+    if (failedChecks.length === 0) return { severity: '[FILL MANUALLY]', priority: '[FILL MANUALLY]' };
 
+    // Keywords cover both English and Indonesian since spec files currently
+    // mix both languages in their step()/check() text.
     const text = failedChecks.map((c) => `${c.label} ${c.detail}`).join(' ').toLowerCase();
-    const highPattern = /xss|sql injection|sqli|crash|uncaught exception|data (hilang|corrupt|rusak)|bypass (auth|login)|\b5\d{2}\b/;
-    const mediumPattern = /\b422\b|\b400\b|\bnull\b|tidak (ter)?valid|validasi (longgar|gagal)|salah simpan|tidak sesuai|inkonsisten/;
+    const highPattern =
+      /xss|sql injection|sqli|crash|uncaught exception|data (loss|lost|corrupt|hilang|rusak)|bypass (auth|login)|\b5\d{2}\b/;
+    const mediumPattern =
+      /\b422\b|\b400\b|\bnull\b|not valid|invalid|validation (bypassed|failed|loose)|incorrectly saved|inconsistent|tidak (ter)?valid|validasi (longgar|gagal)|salah simpan|tidak sesuai|inkonsisten/;
 
     const severity = highPattern.test(text) ? 'High' : mediumPattern.test(text) ? 'Medium' : 'Low';
     return { severity, priority: severity };
