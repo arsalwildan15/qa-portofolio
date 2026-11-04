@@ -17,6 +17,13 @@ export class VacanciesPage extends BasePage {
   readonly saveButton: Locator;
   readonly cancelButton: Locator;
   readonly fieldErrors: Locator;
+  /**
+   * [TEMUAN] Status aktif/inaktif pada form Add/Edit Vacancy adalah TOGGLE
+   * SWITCH berlabel teks "Active" di sampingnya (bukan dropdown "Status"
+   * seperti filter di halaman list), confirmed via live discovery run:
+   * payload PUT/POST vacancy membawa field boolean "status" (true/false).
+   */
+  readonly activeStatusToggle: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -40,6 +47,9 @@ export class VacanciesPage extends BasePage {
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.cancelButton = page.getByRole('button', { name: 'Cancel' });
     this.fieldErrors = page.locator('.oxd-input-group .oxd-text--span');
+    this.activeStatusToggle = page
+      .locator('p.oxd-text', { hasText: 'Active' })
+      .locator('xpath=following-sibling::div//input[@type="checkbox"]');
   }
 
   async goto(): Promise<void> {
@@ -48,6 +58,34 @@ export class VacanciesPage extends BasePage {
 
   async gotoAddForm(): Promise<void> {
     await this.page.goto('/web/index.php/recruitment/addJobVacancy');
+  }
+
+  /**
+   * [TEMUAN PENTING] Edit Vacancy memakai URL dan FORM yang SAMA dengan
+   * Add Vacancy (/web/index.php/recruitment/addJobVacancy/<id>), bukan
+   * halaman/URL terpisah. Dikonfirmasi live lewat klik icon pensil di row
+   * list: browser diarahkan ke addJobVacancy/<id>, bukan addJobVacancy
+   * polos.
+   */
+  async gotoEditForm(id: number): Promise<void> {
+    await this.page.goto(`/web/index.php/recruitment/addJobVacancy/${id}`);
+  }
+
+  /**
+   * Row actions pada list (dikonfirmasi live lewat innerHTML): index 0 =
+   * trash/delete icon, index 1 = pencil/edit icon.
+   */
+  async openEditFromRow(row: Locator): Promise<void> {
+    await row.locator('button').nth(1).click();
+  }
+
+  async deleteFromRow(row: Locator): Promise<void> {
+    await row.locator('button').nth(0).click();
+  }
+
+  /** Toggles the Active/Inactive switch. Confirmed live: unchecked -> payload status:false. */
+  async toggleActiveStatus(): Promise<void> {
+    await this.activeStatusToggle.click({ force: true });
   }
 
   async selectDropdownOption(select: Locator, optionText: string): Promise<void> {
