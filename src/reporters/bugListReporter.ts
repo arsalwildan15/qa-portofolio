@@ -380,7 +380,7 @@ export default class BugListReporter implements Reporter {
     // mix both languages in their step()/check() text.
     const text = failedChecks.map((c) => `${c.label} ${c.detail}`).join(' ').toLowerCase();
     const highPattern =
-      /xss|sql injection|sqli|crash|uncaught exception|data (loss|lost|corrupt|hilang|rusak)|bypass (auth|login)|\b5\d{2}\b|file.*(diterima|accepted|uploaded).*(exe|apk|executable|seharusnya ditolak)|unrestricted file upload/;
+      /xss|sql injection|sqli|crash|uncaught exception|data (loss|lost|corrupt|hilang|rusak)|bypass (auth|login)|\b5\d{2}\b|unrestricted file upload|(?=.*(exe|apk|executable))(?=.*(diterima|accepted|uploaded|not rejected))/;
     const mediumPattern =
       /\b422\b|\b400\b|\bnull\b|not valid|invalid|validation (bypassed|failed|loose)|incorrectly saved|inconsistent|tidak (ter)?valid|validasi (longgar|gagal)|salah simpan|tidak sesuai|inkonsisten/;
 

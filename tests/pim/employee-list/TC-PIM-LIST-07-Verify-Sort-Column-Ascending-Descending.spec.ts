@@ -9,19 +9,15 @@
  * ================================================================================
  *
  * TUJUAN:
- *   Memverifikasi klik header kolom "Id" mengubah sortOrder di request API
- *   antara ASC dan DESC secara bergantian.
+ *   Memverifikasi sort kolom "Id" (Ascending dan Descending) mengubah
+ *   sortOrder pada request GET /api/v2/pim/employees sesuai yang dipilih.
  *
- * CATATAN: locator header kolom "Id" terbukti tidak stabil saat dieksplorasi
- * langsung — substring match salah tangkap "Middle" (mengandung "id"),
- * accessible name punya trailing space yang gagal exact-match, dan
- * getByText(exact) pun tidak match sel ini secara konsisten. Klik pada sel
- * header (`headerCellByIndex(1)`, posisi "Id" yang stabil dari beberapa kali
- * dump DOM) juga tidak terbukti memicu request sort dalam window waktu yang
- * wajar — ada kemungkinan elemen pemicu sort sebenarnya adalah child
- * tersembunyi berbeda dari yang dicoba. TC ini didokumentasikan sebagai
- * finding, bukan hard-fail, karena elemen pemicu sort yang pasti belum
- * teridentifikasi — perlu investigasi manual lebih lanjut.
+ * [RESOLVED] Sebelumnya TC ini didokumentasikan sebagai finding karena
+ *   elemen pemicu sort belum teridentifikasi. Dikonfirmasi live: sort
+ *   BUKAN klik langsung pada header cell/teks, melainkan klik ikon kecil
+ *   `.oxd-table-header-sort-icon` (panah atas-bawah) yang membuka dropdown
+ *   berisi opsi "Ascending"/"Descending" eksplisit. Lihat
+ *   EmployeeListPage.sortByColumn().
  *
  * RUN COMMAND:
  *   npx playwright test tests/pim/employee-list/TC-PIM-LIST-07-Verify-Sort-Column-Ascending-Descending.spec.ts --project=chromium --headed
@@ -30,39 +26,35 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
+import { TestReport } from '../../../src/utils/testReport';
 
-test('TC-PIM-LIST-07: clicking a sortable column header toggles sort order', async ({
+test('TC-PIM-LIST-07: sorting the Id column toggles sort order between Ascending and Descending', async ({
   page,
   employeeListPage,
 }) => {
   const report = new TestReport('TC-PIM-LIST-07', 'Sort Column Ascending Descending', env.baseURL, page);
 
-  report.step('Navigate ke Employee List, tunggu tabel render, klik header kolom "Id" (index 1)');
+  report.step('Navigate ke Employee List, klik ikon sort kolom "Id" (index 1), pilih "Ascending"');
   await employeeListPage.goto();
-  const idHeader = employeeListPage.headerCellByIndex(1);
-  await isVisibleWithWait(idHeader, 15_000);
-  const headerText = await idHeader.textContent();
-  report.check('Header index 1 berisi teks "Id"', (headerText ?? '').trim() === 'Id', `text="${headerText}"`);
+  await page.waitForTimeout(1000);
 
-  await idHeader.click();
-  const sortTriggered = await page
-    .waitForResponse(
-      (r) => r.url().includes('/api/v2/pim/employees') && r.request().method() === 'GET' && r.url().includes('sortField'),
-      { timeout: 8_000 },
-    )
-    .then((resp) => new URL(resp.url()).searchParams.get('sortOrder'))
-    .catch(() => null);
+  const [ascResp] = await Promise.all([
+    page.waitForResponse((r) => r.url().includes('/api/v2/pim/employees') && r.url().includes('sortField')),
+    employeeListPage.sortByColumn(1, 'Ascending'),
+  ]);
+  const ascOrder = new URL(ascResp.url()).searchParams.get('sortOrder');
+  await page.waitForTimeout(800); // let the table/header re-render settle before sorting again
 
-  report.finding(
-    'Elemen pemicu sort kolom "Id"',
-    sortTriggered !== null
-      ? `Klik langsung pada sel header cukup untuk memicu sort (sortOrder="${sortTriggered}").`
-      : 'Klik pada sel header TIDAK memicu request sort baru dalam 8 detik — elemen pemicu sort ' +
-        'yang sebenarnya kemungkinan child tersembunyi berbeda, belum teridentifikasi secara ' +
-        'konklusif dalam sesi eksplorasi ini. Butuh investigasi manual (DevTools) untuk TC ini.',
-  );
-  report.check('TC dijalankan tanpa exception', true);
+  report.step('Pilih sort "Descending" pada kolom yang sama');
+  const [descResp] = await Promise.all([
+    page.waitForResponse((r) => r.url().includes('/api/v2/pim/employees') && r.url().includes('sortField')),
+    employeeListPage.sortByColumn(1, 'Descending'),
+  ]);
+  const descOrder = new URL(descResp.url()).searchParams.get('sortOrder');
+
+  report.step('Verify: sortOrder berubah sesuai pilihan (ASC lalu DESC)');
+  report.check('sortOrder === "ASC" setelah pilih Ascending', ascOrder === 'ASC', `sortOrder=${ascOrder}`);
+  report.check('sortOrder === "DESC" setelah pilih Descending', descOrder === 'DESC', `sortOrder=${descOrder}`);
 
   report.print();
 });

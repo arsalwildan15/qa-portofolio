@@ -16,6 +16,11 @@
  *   dirender komponen berbeda dengan validasi berbeda, jadi tetap perlu
  *   diverifikasi live, bukan diasumsikan sama.
  *
+ * [POLA UI] Berbeda dari Add Employee, <input type="file"> di Personal
+ *   Details TIDAK melekat ke DOM sampai foto (img.employee-image) diklik
+ *   dulu (dikonfirmasi live: count 0 sebelum klik, 1 sesudah). Pakai
+ *   PersonalDetailsPage.revealFileInput() untuk ini.
+ *
  * RUN COMMAND:
  *   npx playwright test tests/pim/personal-details/TC-PIM-PD-13-Verify-Exe-Renamed-As-Jpg-Upload-Security.spec.ts --project=chromium --headed
  * ================================================================================
@@ -41,15 +46,8 @@ test('TC-PIM-PD-13: re-uploading an exe renamed to .jpg from Personal Details', 
   await page.waitForURL(/viewPersonalDetails/, { timeout: 20_000 });
   await personalDetailsPage.waitUntilLoaded();
 
-  const uploadCount = await personalDetailsPage.fileInput.count();
-  if (uploadCount === 0) {
-    report.finding('File input tidak ditemukan di Personal Details', 'Kemungkinan perlu klik "Choose File" button dulu untuk reveal input, lihat TC-PIM-PD-10.');
-    report.check('TC dijalankan tanpa exception', true);
-    report.print();
-    return;
-  }
-
-  report.step('Upload file executable yang di-rename jadi .jpg sebagai foto profil');
+  report.step('Klik foto profil untuk reveal file input, lalu upload file executable yang di-rename jadi .jpg');
+  await personalDetailsPage.revealFileInput();
   await personalDetailsPage.fileInput.setInputFiles({
     name: 'reupload-spoofed.jpg',
     mimeType: 'image/jpeg',

@@ -47,15 +47,19 @@ LEGEND SIMBOL SKENARIO
 
   CAKUPAN: dengan ketiga fase ini, semua tab top-level PIM (Employee List,
   Add Employee, Personal Details + 9 sub-tab, Configuration, Reports) sudah
-  tercakup 100% (156 TC total, termasuk 8 TC security file upload lintas
+  tercakup 100% (159 TC total, termasuk 8 TC security file upload lintas
   4 titik upload yang berbeda, ditambahkan setelah Fase 3, lihat Catatan
-  Teknis "SECURITY: FILE UPLOAD VALIDATION" di bawah).
+  Teknis "SECURITY: FILE UPLOAD VALIDATION" di bawah). Semua 5 sub-section
+  Qualifications (Work Experience, Education, Skills, Languages, License)
+  juga sudah tercakup (TC-PIM-QUALIFICATION-01 s/d 10), dan TC-PIM-LIST-07
+  (sort kolom) sudah di-resolve dari finding jadi hard-check penuh. PIM
+  tidak lagi punya gap/finding yang didokumentasikan sebagai "belum
+  tuntas" atau "inconclusive".
 
   BELUM DICAKUP: modul Admin (terpisah dari PIM, 23+ sub-halaman: User
   Management, Job, Organization, Qualifications, Nationalities, Corporate
-  Branding, Configuration), kandidat fase terpisah kalau diperlukan.
-  Qualifications tab juga punya 3 sub-section (Skills/Languages/License)
-  yang belum didalami penuh (lihat Fase 2, finding #10).
+  Branding, Configuration), kandidat fase terpisah kalau diperlukan. Ini
+  di LUAR scope PIM, bukan gap di dalam PIM itu sendiri.
 
 ================================================================================
   CATATAN TEKNIS: FASE 1 (EMPLOYEE LIST, ADD EMPLOYEE, PERSONAL DETAILS)
@@ -131,13 +135,17 @@ LEGEND SIMBOL SKENARIO
     semua kondisi layar/loading.
     Modal konfirmasi delete: tombol "Yes, Delete" / "No, Cancel" (dikonfirmasi
     teks persis, beda dari asumsi awal "Yes"/"No" polos).
-    [TEMUAN BELUM TUNTAS] Header kolom sort (mis. "Id") punya trailing space
-    di accessible name, dan filter hasText:'Id' ikut mencocokkan substring di
-    dalam "Middle" (dari "First (& Middle) Name"). exact:true maupun
-    getByText(exact) tetap gagal isolasi satu elemen. TC-PIM-LIST-07
-    sementara didokumentasikan sebagai finding (elemen trigger sort belum
-    teridentifikasi pasti), bukan hard-fail, butuh investigasi manual
-    DevTools lebih lanjut di sesi terpisah.
+    [RESOLVED] Header kolom sort (mis. "Id") punya trailing space di
+    accessible name, dan filter hasText:'Id' ikut mencocokkan substring di
+    dalam "Middle" (dari "First (& Middle) Name"), jadi locator header-nya
+    sendiri memang tidak reliable untuk isolasi. TAPI akar masalah
+    sebenarnya TC-PIM-LIST-07 bukan di situ: sort BUKAN klik langsung pada
+    header, melainkan klik ikon kecil `.oxd-table-header-sort-icon` (panah
+    atas-bawah) di dalam header cell yang membuka dropdown berisi opsi
+    "Ascending"/"Descending" eksplisit, dikonfirmasi live via sortOrder di
+    query param response. EmployeeListPage.sortByColumn() menangani pola
+    ini, scoped ke header cell by index (bukan by text) sehingga masalah
+    substring-match di atas tidak relevan lagi.
 
   LOCATORS & PERILAKU KONFIRMASI (PersonalDetailsPage.ts):
     Form Personal Details TERISI ASYNC setelah navigasi, URL berubah ke
@@ -241,14 +249,19 @@ LEGEND SIMBOL SKENARIO
     dan independensi 2 list (Supervisors vs Subordinates) sebagai gantinya.
     Submit kosong = TEPAT 2 error "Required" (Name + Reporting Method).
 
-  [TEMUAN] Qualifications TERNYATA punya 5 sub-section (bukan cuma "Work
+  [RESOLVED] Qualifications TERNYATA punya 5 sub-section (bukan cuma "Work
     Experience" + "Education" seperti dugaan awal): Work Experience,
     Education, Skills, Languages, License, plus Attachments terpisah (6
-    tombol "+ Add" total). Fase 2 fokus mendalam di Work Experience, 1 TC
-    representatif untuk Education (TC-PIM-QUALIFICATION-07), Skills/
-    Languages/License BELUM dicakup, kandidat perluasan terpisah kalau
-    diperlukan (BUKAN diselesaikan oleh Fase 3, scope Fase 3 ternyata beda,
-    lihat bawah).
+    tombol "+ Add" total). Fase 2 awalnya fokus mendalam di Work
+    Experience, dengan 1 TC representatif untuk Education
+    (TC-PIM-QUALIFICATION-07); Skills/Languages/License ditambahkan
+    belakangan (TC-PIM-QUALIFICATION-08/09/10) untuk menutup gap ini.
+    [POLA UI BEDA] Skills/Languages/License TERNYATA dirender sebagai
+    form INLINE langsung di bawah section-nya (bukan modal popup seperti
+    Work Experience/Education), dikonfirmasi live via screenshot. Field
+    Languages (Language/Fluency/Competency) semuanya dropdown, License
+    (License Type, License Number, Issued Date, Expiry Date) campuran
+    dropdown+teks+tanggal.
 
   [LESSON] Pelajaran proses: validasi awal untuk field Job Specification
     sempat salah diasumsikan sebagai text input biasa (diambil dari pola
@@ -371,40 +384,48 @@ LEGEND SIMBOL SKENARIO
   meminta eksplorasi security untuk file upload (exe/apk disguised sebagai
   gambar). Diuji di 4 titik upload berbeda: foto profil Add Employee, foto
   profil Personal Details, Attachments di Contact Details, dan Data Import.
+  (Modul: PIM - Add Employee dan PIM - Personal Details sama-sama
+  terdampak bug ini, lihat bawah.)
 
-  [BUG NYATA DIKONFIRMASI] Upload foto profil di Add Employee HANYA
-    memvalidasi EKSTENSI nama file, BUKAN konten/magic bytes file itu
-    sendiri. File executable (header PE "MZ...") atau Android APK (header
-    ZIP "PK..") yang di-rename jadi .jpg LOLOS validasi tanpa error apa
-    pun, dan berhasil tersimpan via POST /api/v2/pim/employees (status
-    200, dikonfirmasi live dengan 2 jenis file berbeda: TC-PIM-ADD-28,
-    TC-PIM-ADD-29). Baseline pembanding (TC-PIM-ADD-31): file .exe dengan
-    ekstensi ASLI (tanpa rename) memang DITOLAK dengan pesan "File type
-    not allowed", jadi validasinya ADA tapi bisa di-bypass dengan rename
-    ekstensi sederhana, bukan sama sekali tidak tervalidasi.
+  [BUG NYATA DIKONFIRMASI] Upload foto profil (Add Employee MAUPUN
+    Personal Details) HANYA memvalidasi EKSTENSI nama file, BUKAN
+    konten/magic bytes file itu sendiri. File executable (header PE
+    "MZ...") atau Android APK (header ZIP "PK..") yang di-rename jadi
+    .jpg LOLOS validasi tanpa error apa pun, dan berhasil tersimpan:
+    Add Employee via POST /api/v2/pim/employees (status 200, dikonfirmasi
+    live dengan 2 jenis file berbeda: TC-PIM-ADD-28, TC-PIM-ADD-29),
+    Personal Details re-upload juga lolos tanpa error (TC-PIM-PD-13).
+    Baseline pembanding (TC-PIM-ADD-31): file .exe dengan ekstensi ASLI
+    (tanpa rename) memang DITOLAK dengan pesan "File type not allowed",
+    jadi validasinya ADA tapi bisa di-bypass dengan rename ekstensi
+    sederhana, bukan sama sekali tidak tervalidasi.
 
   [TEMUAN POSITIF] Trik double-extension ("photo.jpg.exe", ekstensi
     TERAKHIR tetap .exe) TIDAK bisa bypass validasi (TC-PIM-ADD-30):
     validator ternyata cek ekstensi TERAKHIR yang sebenarnya, bukan
     tertipu substring ".jpg" di tengah nama file.
 
-  [TEMUAN POSITIF, BUG TIDAK MELUAS] 3 titik upload lain yang diuji
-    TERNYATA TIDAK kena bug yang sama:
+  [TEMUAN CAMPURAN] Dari 4 titik upload lain yang diuji, bug validasi-
+    cuma-ekstensi SPESIFIK ke upload foto profil (Add Employee DAN
+    Personal Details), TIDAK meluas ke Attachments maupun Data Import:
+      - Personal Details re-upload foto (TC-PIM-PD-13): [BUG, SAMA
+        PERSIS] exe-renamed-.jpg JUGA diterima tanpa error, sama seperti
+        Add Employee. Awalnya sempat inconclusive karena <input
+        type="file"> tidak melekat ke DOM sampai foto (img.employee-image)
+        diklik dulu (RESOLVED via PersonalDetailsPage.revealFileInput());
+        setelah itu diperbaiki, bug-nya terbukti nyata dan konsisten di
+        titik upload ini juga.
       - Attachments di Contact Details (TC-PIM-CONTACT-09): exe ditolak
         dengan benar, "File type not allowed".
       - Data Import (TC-PIM-DATAIMPORT-05): exe-renamed-.csv ditolak
         server dengan response 400, bukan diproses.
       - Baseline Data Import exe murni (TC-PIM-DATAIMPORT-06): ditolak
         dengan benar.
-    Jadi bug validasi-cuma-ekstensi ini SPESIFIK ke upload foto profil
-    Add Employee, bukan pola umum di semua fitur upload PIM.
-
-  [INCONCLUSIVE] TC-PIM-PD-13 (re-upload foto dari Personal Details):
-    file input tidak ditemukan di halaman (count 0), kemungkinan perlu
-    klik tombol "Choose File" dulu untuk reveal input (limitasi yang
-    sama dengan TC-PIM-PD-10 lama). Belum bisa dipastikan apakah bug
-    yang sama berulang di titik upload ini, perlu investigasi UI
-    terpisah untuk benar-benar reveal input-nya dulu.
+    Kesimpulan revisi: bug ini SPESIFIK ke KEDUA titik upload FOTO
+    PROFIL (Add Employee + Personal Details), kemungkinan keduanya
+    berbagi komponen upload foto yang sama di balik layar, TAPI TIDAK
+    meluas ke upload dokumen generik (Attachments) atau bulk data
+    (Data Import) yang pakai komponen/validasi berbeda.
 
   [PELAJARAN DEBUGGING] Dua TC awalnya sempat timeout/hang 60 detik
     (TC-PIM-ADD-28, TC-PIM-DATAIMPORT-05) yang semula terlihat seperti
@@ -419,11 +440,14 @@ LEGEND SIMBOL SKENARIO
     untuk investigasi ini).
 
   [KLASIFIKASI SEVERITY] Heuristik otomatis di bugListReporter.ts
-    awalnya memberi Severity "Low" untuk BG-001/BG-002 (bug ini), padahal
-    unrestricted file upload adalah risiko yang dikenal luas (OWASP) dan
-    bukan cuma cosmetic/console-only. Severity/Priority dikoreksi manual
-    ke "High" dengan catatan di kolom Notes, dan pattern regex classifier
-    ditambah supaya pola serupa ke depan otomatis terklasifikasi benar.
+    awalnya memberi Severity "Low" untuk BG-001/BG-002/BG-003 (bug ini,
+    termasuk temuan TC-PIM-PD-13 yang menyusul), padahal unrestricted
+    file upload adalah risiko yang dikenal luas (OWASP) dan bukan cuma
+    cosmetic/console-only. Pattern regex classifier diperbaiki 2x (percobaan
+    pertama masih gagal karena urutan kata dalam teks label/detail tidak
+    konsisten, diperbaiki pakai lookahead agar urutan tidak masalah),
+    supaya pola serupa ke depan otomatis terklasifikasi "High" dengan
+    benar tanpa perlu koreksi manual setiap kali.
 
 ================================================================================
   TEST CASES
@@ -662,7 +686,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                                               report-to
 
 ================================================================================
-  FASE 2 - GROUP 8: QUALIFICATIONS (7 TC)
+  FASE 2 - GROUP 8: QUALIFICATIONS (10 TC)
   Folder: tests/pim/qualifications/
 ================================================================================
 
@@ -678,24 +702,30 @@ No.  Test Case ID      Status   Kategori           Skenario
 118   TC-PIM-QUALIFICATION-07  [DONE]  Positive (+)            Add Education
                                                                (representatif
                                                                sub-section lain)
+119    TC-PIM-QUALIFICATION-08  [DONE]  Positive (+)            Add Skill
+                                                               (menutup gap Fase 2)
+120    TC-PIM-QUALIFICATION-09  [DONE]  Positive (+)            Add Language
+                                                               (menutup gap Fase 2)
+121    TC-PIM-QUALIFICATION-10  [DONE]  Positive (+)            Add License
+                                                               (menutup gap Fase 2)
 
 ================================================================================
   FASE 2 - GROUP 9: MEMBERSHIPS (7 TC)
   Folder: tests/pim/memberships/
 ================================================================================
 
-119   TC-PIM-MEMBERSHIP-01  [DONE]  Positive (+)               Add membership
+122   TC-PIM-MEMBERSHIP-01  [DONE]  Positive (+)               Add membership
                                                                 lengkap
-120   TC-PIM-MEMBERSHIP-02  [DONE]  Negative (-)                Submit kosong ->
+123   TC-PIM-MEMBERSHIP-02  [DONE]  Negative (-)                Submit kosong ->
                                                                 required
-121   TC-PIM-MEMBERSHIP-03  [DONE]  Boundary (B) [TEMUAN]       Amount negatif
+124   TC-PIM-MEMBERSHIP-03  [DONE]  Boundary (B) [TEMUAN]       Amount negatif
                                                                 diterima
-122   TC-PIM-MEMBERSHIP-04  [DONE]  Negative (-)                Amount bukan angka
-123   TC-PIM-MEMBERSHIP-05  [DONE]  Edge Case (!) [TEMUAN]      Renewal Date sebelum
+125   TC-PIM-MEMBERSHIP-04  [DONE]  Negative (-)                Amount bukan angka
+126   TC-PIM-MEMBERSHIP-05  [DONE]  Edge Case (!) [TEMUAN]      Renewal Date sebelum
                                                                 Commence Date
-124   TC-PIM-MEMBERSHIP-06  [DONE]  Edge Case (!)               Cancel membatalkan
+127   TC-PIM-MEMBERSHIP-06  [DONE]  Edge Case (!)               Cancel membatalkan
                                                                 modal
-125   TC-PIM-MEMBERSHIP-07  [DONE]  Positive (+) [API]          Save -> POST endpoint
+128   TC-PIM-MEMBERSHIP-07  [DONE]  Positive (+) [API]          Save -> POST endpoint
                                                                 membership
 
 ================================================================================
@@ -703,13 +733,13 @@ No.  Test Case ID      Status   Kategori           Skenario
   Folder: tests/pim/configuration/optional-fields/
 ================================================================================
 
-126   TC-PIM-OPTFIELD-01  [DONE]  Positive (+) [TEMUAN]    Toggle SSN field,
+129   TC-PIM-OPTFIELD-01  [DONE]  Positive (+) [TEMUAN]    Toggle SSN field,
                                                             persist setelah reload
                                                             tidak konsisten
-127   TC-PIM-OPTFIELD-02  [DONE]  Positive (+) [TEMUAN]     Toggle Nick Name,
+130   TC-PIM-OPTFIELD-02  [DONE]  Positive (+) [TEMUAN]     Toggle Nick Name,
                                                             amati efek di Personal
                                                             Details
-128   TC-PIM-OPTFIELD-03  [DONE]  Edge Case (!)             Double toggle sebelum
+131   TC-PIM-OPTFIELD-03  [DONE]  Edge Case (!)             Double toggle sebelum
                                                             Save = net no-op
 
 ================================================================================
@@ -717,32 +747,32 @@ No.  Test Case ID      Status   Kategori           Skenario
   Folder: tests/pim/configuration/custom-fields/
 ================================================================================
 
-129   TC-PIM-CUSTOMFIELD-01  [DONE]  Positive (+)            Add custom field valid
-130   TC-PIM-CUSTOMFIELD-02  [DONE]  Negative (-)             Submit kosong ->
+132   TC-PIM-CUSTOMFIELD-01  [DONE]  Positive (+)            Add custom field valid
+133   TC-PIM-CUSTOMFIELD-02  [DONE]  Negative (-)             Submit kosong ->
                                                               3 required
-131   TC-PIM-CUSTOMFIELD-03  [DONE]  Positive (+)             Delete custom field
-132   TC-PIM-CUSTOMFIELD-04  [DONE]  Negative (-)             Field Name duplikat
+134   TC-PIM-CUSTOMFIELD-03  [DONE]  Positive (+)             Delete custom field
+135   TC-PIM-CUSTOMFIELD-04  [DONE]  Negative (-)             Field Name duplikat
                                                               ditolak "Already
                                                               exists"
-133   TC-PIM-CUSTOMFIELD-05  [DONE]  Boundary (B) [TEMUAN]    Field Name 200
+136   TC-PIM-CUSTOMFIELD-05  [DONE]  Boundary (B) [TEMUAN]    Field Name 200
                                                               karakter
-134   TC-PIM-CUSTOMFIELD-06  [DONE]  Security (S)             XSS di Field Name
+137   TC-PIM-CUSTOMFIELD-06  [DONE]  Security (S)             XSS di Field Name
 
 ================================================================================
   FASE 3 - GROUP 3: DATA IMPORT (6 TC)
   Folder: tests/pim/configuration/data-import/
 ================================================================================
 
-135   TC-PIM-DATAIMPORT-01  [DONE]  Positive (+) [API]        Upload CSV valid,
+138   TC-PIM-DATAIMPORT-01  [DONE]  Positive (+) [API]        Upload CSV valid,
                                                               meta.success === 1
-136   TC-PIM-DATAIMPORT-02  [DONE]  Boundary (B)               File > 1MB ditolak
-137   TC-PIM-DATAIMPORT-03  [DONE]  Negative (-)                File bukan CSV
+139   TC-PIM-DATAIMPORT-02  [DONE]  Boundary (B)               File > 1MB ditolak
+140   TC-PIM-DATAIMPORT-03  [DONE]  Negative (-)                File bukan CSV
                                                               ditolak
-138   TC-PIM-DATAIMPORT-04  [DONE]  Negative (-)                Submit tanpa file
+141   TC-PIM-DATAIMPORT-04  [DONE]  Negative (-)                Submit tanpa file
                                                               -> required
-139    TC-PIM-DATAIMPORT-05  [DONE]  Security (S)                Exe di-rename .csv
+142    TC-PIM-DATAIMPORT-05  [DONE]  Security (S)                Exe di-rename .csv
                                                               ditolak (status 400)
-140    TC-PIM-DATAIMPORT-06  [DONE]  Security (S)                Baseline: .exe ekstensi
+143    TC-PIM-DATAIMPORT-06  [DONE]  Security (S)                Baseline: .exe ekstensi
                                                               asli ditolak
 
 ================================================================================
@@ -750,68 +780,68 @@ No.  Test Case ID      Status   Kategori           Skenario
   Folder: tests/pim/configuration/reporting-methods/
 ================================================================================
 
-141   TC-PIM-REPORTMETHOD-01  [DONE]  Positive (+)             Add reporting
+144   TC-PIM-REPORTMETHOD-01  [DONE]  Positive (+)             Add reporting
                                                                method valid
-142   TC-PIM-REPORTMETHOD-02  [DONE]  Negative (-)              Submit kosong ->
+145   TC-PIM-REPORTMETHOD-02  [DONE]  Negative (-)              Submit kosong ->
                                                                required
-143   TC-PIM-REPORTMETHOD-03  [DONE]  Negative (-)              Name duplikat
+146   TC-PIM-REPORTMETHOD-03  [DONE]  Negative (-)              Name duplikat
                                                                ditolak
-144   TC-PIM-REPORTMETHOD-04  [DONE]  Positive (+)              Delete reporting
+147   TC-PIM-REPORTMETHOD-04  [DONE]  Positive (+)              Delete reporting
                                                                method
-145   TC-PIM-REPORTMETHOD-05  [DONE]  Security (S)              XSS di Name
+148   TC-PIM-REPORTMETHOD-05  [DONE]  Security (S)              XSS di Name
 
 ================================================================================
   FASE 3 - GROUP 5: TERMINATION REASONS (5 TC)
   Folder: tests/pim/configuration/termination-reasons/
 ================================================================================
 
-146   TC-PIM-TERMREASON-01  [DONE]  Positive (+)               Add termination
+149   TC-PIM-TERMREASON-01  [DONE]  Positive (+)               Add termination
                                                                reason valid
-147   TC-PIM-TERMREASON-02  [DONE]  Negative (-)                Submit kosong ->
+150   TC-PIM-TERMREASON-02  [DONE]  Negative (-)                Submit kosong ->
                                                                required
-148   TC-PIM-TERMREASON-03  [DONE]  Edge Case (!) [TEMUAN]      Name duplikat
+151   TC-PIM-TERMREASON-03  [DONE]  Edge Case (!) [TEMUAN]      Name duplikat
                                                                silently blocked
                                                                (tanpa error UI,
                                                                beda dari
                                                                Reporting Methods)
-149   TC-PIM-TERMREASON-04  [DONE]  Positive (+)                Delete termination
+152   TC-PIM-TERMREASON-04  [DONE]  Positive (+)                Delete termination
                                                                reason
-150   TC-PIM-TERMREASON-05  [DONE]  Security (S)                XSS di Name
+153   TC-PIM-TERMREASON-05  [DONE]  Security (S)                XSS di Name
 
 ================================================================================
   FASE 3 - GROUP 6: REPORTS (6 TC)
   Folder: tests/pim/reports/
 ================================================================================
 
-151   TC-PIM-REPORT-01  [DONE]  Positive (+)                   Search report
+154   TC-PIM-REPORT-01  [DONE]  Positive (+)                   Search report
                                                                existing via
                                                                autocomplete
-152   TC-PIM-REPORT-02  [DONE]  Positive (+) [API]              Add report (Name +
+155   TC-PIM-REPORT-02  [DONE]  Positive (+) [API]              Add report (Name +
                                                                Display Field)
-153   TC-PIM-REPORT-03  [DONE]  Negative (-)                    Submit kosong ->
+156   TC-PIM-REPORT-03  [DONE]  Negative (-)                    Submit kosong ->
                                                                required
-154   TC-PIM-REPORT-04  [DONE]  Negative (-) [TEMUAN]           Save tanpa Display
+157   TC-PIM-REPORT-04  [DONE]  Negative (-) [TEMUAN]           Save tanpa Display
                                                                Field = silent
                                                                no-op, tanpa error
-155   TC-PIM-REPORT-05  [DONE]  Edge Case (!)                   Cancel membatalkan
+158   TC-PIM-REPORT-05  [DONE]  Edge Case (!)                   Cancel membatalkan
                                                                form
-156   TC-PIM-REPORT-06  [DONE]  Positive (+)                   Delete report
+159   TC-PIM-REPORT-06  [DONE]  Positive (+)                   Delete report
 
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase) : 156
+  Total Test Cases (semua fase) : 159
 
   Fase 1 : 57
     Employee List    : 14
-    Add Employee     : 30 (termasuk 4 TC security file upload, lihat Fase 4)
+    Add Employee     : 30 (termasuk 4 TC security file upload)
     Personal Details : 13 (termasuk 1 TC security file upload)
 
-  Fase 2 : 68
+  Fase 2 : 71
     Contact Details   : 9 (termasuk 1 TC security file upload)  Salary          : 7
     Job               : 8        Report-to       : 7
-    Emergency Contacts: 8        Qualifications  : 7
+    Emergency Contacts: 8        Qualifications  : 10 (semua 5 sub-section)
     Dependents        : 7        Memberships     : 7
     Immigration       : 8
 
@@ -820,20 +850,22 @@ No.  Test Case ID      Status   Kategori           Skenario
     Custom Fields       : 6        Termination Reasons  : 5
     Data Import         : 6 (termasuk 2 TC security file upload)  Reports : 6
 
-  Dengan Fase 3 selesai: PIM module (Employee List, Add Employee, Personal
-  Details + 9 sub-tab, Configuration, Reports) sudah 100% tercakup. Modul
-  Admin terpisah (23+ sub-halaman: User Management, Job, Organization,
-  Qualifications, Nationalities, Corporate Branding, Configuration) BELUM
-  dicakup, kandidat Fase 4 terpisah.
+  PIM module (Employee List, Add Employee, Personal Details + 9 sub-tab
+  termasuk semua 5 sub-section Qualifications, Configuration, Reports)
+  sudah 100% tercakup, TANPA finding/gap yang masih terbuka. Modul Admin
+  terpisah (23+ sub-halaman: User Management, Job, Organization,
+  Qualifications, Nationalities, Corporate Branding, Configuration) ada
+  di LUAR scope PIM, kandidat fase terpisah kalau diperlukan.
 
-  Hard check() (pass/fail tegas) : ~124 TC
-  finding() (dokumentasi, bukan pass/fail tegas) : ~24 TC, dipakai untuk
+  Hard check() (pass/fail tegas) : ~130 TC
+  finding() (dokumentasi, bukan pass/fail tegas) : ~22 TC, dipakai untuk
     perilaku yang genuinely ambigu/environment-dependent: validasi dimensi
     foto, upload ekstensi palsu, warning navigasi unsaved, payload Employee
-    Id, batas Custom Field, format/future/extreme DOB, elemen trigger sort,
-    email format, response PUT tidak echo data, console 404 Job
-    Specification, Amount negatif, urutan tanggal, persistensi toggle
-    Optional Fields, duplicate-name Termination Reasons, silent no-op Reports.
+    Id, batas Custom Field, format/future/extreme DOB, email format,
+    response PUT tidak echo data, console 404 Job Specification, Amount
+    negatif, urutan tanggal, persistensi toggle Optional Fields,
+    duplicate-name Termination Reasons, silent no-op Reports. (TC-PIM-LIST-07
+    tidak lagi di sini, sudah jadi hard check() penuh.)
 
 ================================================================================
   CATATAN EKSEKUSI

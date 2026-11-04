@@ -14,6 +14,18 @@ export class QualificationsPage extends BasePage {
   readonly educationLevelSelect: Locator;
   readonly educationYearInput: Locator;
   readonly educationGpaInput: Locator;
+  // Skills form fields (rendered inline below the section, not a modal)
+  readonly skillSelect: Locator;
+  readonly yearsOfExperienceInput: Locator;
+  // Languages form fields (also inline, not a modal)
+  readonly languageSelect: Locator;
+  readonly fluencySelect: Locator;
+  readonly competencySelect: Locator;
+  // License form fields (also inline, not a modal)
+  readonly licenseTypeSelect: Locator;
+  readonly licenseNumberInput: Locator;
+  readonly issuedDateInput: Locator;
+  readonly expiryDateInput: Locator;
   readonly saveButton: Locator;
   readonly cancelButton: Locator;
   readonly fieldErrors: Locator;
@@ -38,6 +50,20 @@ export class QualificationsPage extends BasePage {
     this.educationGpaInput = page
       .locator('.oxd-input-group', { has: page.getByText('GPA/Score', { exact: true }) })
       .locator('input');
+    const byLabelSelect = (label: string) =>
+      page.locator('.oxd-input-group', { has: page.getByText(label, { exact: true }) }).locator('.oxd-select-text');
+    this.skillSelect = byLabelSelect('Skill');
+    this.yearsOfExperienceInput = byLabel('Years of Experience');
+    this.languageSelect = byLabelSelect('Language');
+    this.fluencySelect = byLabelSelect('Fluency');
+    this.competencySelect = byLabelSelect('Competency');
+    this.licenseTypeSelect = byLabelSelect('License Type');
+    this.licenseNumberInput = byLabel('License Number');
+    // Same date-input selector as Work Experience's From/To Date, but these
+    // are never both on screen at once (only one "+ Add" form is open at a
+    // time), so reusing index 0/1 here is unambiguous.
+    this.issuedDateInput = dateInputs.nth(0);
+    this.expiryDateInput = dateInputs.nth(1);
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.cancelButton = page.getByRole('button', { name: 'Cancel' });
     this.fieldErrors = page.locator('.oxd-input-group .oxd-text--span');
@@ -53,6 +79,18 @@ export class QualificationsPage extends BasePage {
 
   async openAddEducation(): Promise<void> {
     await this.addButtons.nth(1).click();
+  }
+
+  async openAddSkill(): Promise<void> {
+    await this.addButtons.nth(2).click();
+  }
+
+  async openAddLanguage(): Promise<void> {
+    await this.addButtons.nth(3).click();
+  }
+
+  async openAddLicense(): Promise<void> {
+    await this.addButtons.nth(4).click();
   }
 
   async selectDropdownOption(select: Locator, optionText: string): Promise<void> {

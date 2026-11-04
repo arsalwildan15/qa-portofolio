@@ -98,6 +98,25 @@ export class EmployeeListPage extends BasePage {
     return this.page.locator('.oxd-table-header-cell').nth(columnIndex);
   }
 
+  /**
+   * Sorting is NOT a direct click on the header cell/text: each sortable
+   * header has a small `.oxd-table-header-sort-icon` (an up/down arrow)
+   * that opens a dropdown with "Ascending"/"Descending" options, confirmed
+   * live via the resulting GET's `sortOrder` query param. Clicking the
+   * header cell or its text directly does not trigger any sort request.
+   */
+  async sortByColumn(columnIndex: number, direction: 'Ascending' | 'Descending'): Promise<void> {
+    const headerCell = this.headerCellByIndex(columnIndex);
+    const dropdown = headerCell.locator('.oxd-table-header-sort-dropdown');
+    // Wait for any lingering dropdown from a previous sort to fully close
+    // before reopening it — clicking the icon again while the prior
+    // dropdown/table re-render is still settling is flaky (confirmed live:
+    // calling this twice back-to-back intermittently fails to open the menu).
+    await dropdown.waitFor({ state: 'hidden', timeout: 3_000 }).catch(() => {});
+    await headerCell.locator('.oxd-table-header-sort-icon').click();
+    await headerCell.getByText(direction, { exact: true }).click();
+  }
+
   pageButton(pageNumber: number): Locator {
     return this.page.getByRole('button', { name: String(pageNumber), exact: true });
   }

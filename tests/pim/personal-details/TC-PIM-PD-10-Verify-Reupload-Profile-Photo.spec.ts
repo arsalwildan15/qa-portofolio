@@ -12,6 +12,14 @@
  *   Memverifikasi mengganti foto profil employee yang sudah ada dari
  *   halaman Personal Details berhasil (foto baru ter-upload).
  *
+ * [POLA UI] <input type="file"> TIDAK melekat ke DOM sampai foto
+ *   (img.employee-image) diklik dulu (dikonfirmasi live: count 0 sebelum
+ *   klik, 1 sesudah). Pakai PersonalDetailsPage.revealFileInput().
+ *
+ * [API] Save foto profil memicu PUT /api/v2/pim/employees/<N>/picture,
+ *   endpoint TERPISAH dari PUT .../personal-details (yang dipakai field
+ *   teks lain) — dikonfirmasi live via network listener.
+ *
  * RUN COMMAND:
  *   npx playwright test tests/pim/personal-details/TC-PIM-PD-10-Verify-Reupload-Profile-Photo.spec.ts --project=chromium --headed
  * ================================================================================
@@ -20,7 +28,7 @@
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
-import { uniqueEmployeeName } from '../../../src/data/testData';
+import { createTestEmployee } from '../../../src/utils/createTestEmployee';
 
 const TINY_PNG_BASE64 =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
@@ -31,31 +39,26 @@ test('TC-PIM-PD-10: re-uploading a profile photo from Personal Details succeeds'
   personalDetailsPage,
 }) => {
   const report = new TestReport('TC-PIM-PD-10', 'Reupload Profile Photo', env.baseURL, page);
-  const employee = uniqueEmployeeName('QaPdReupload');
 
-  report.step('Buat employee baru, navigate ke Personal Details');
-  await addEmployeePage.goto();
-  await addEmployeePage.fillName(employee.firstName, employee.lastName);
-  await addEmployeePage.save();
+  report.step('Buat employee baru (retry otomatis kalau Employee Id collide), navigate ke Personal Details');
+  await createTestEmployee(page, addEmployeePage, 'QaPdReupload');
   await page.waitForURL(/viewPersonalDetails/, { timeout: 20_000 });
   await personalDetailsPage.waitUntilLoaded();
 
-  report.step('Upload ulang foto profil baru dari Personal Details');
-  const uploadCount = await personalDetailsPage.fileInput.count();
-  if (uploadCount === 0) {
-    report.finding('File input tidak ditemukan di Personal Details', 'Kemungkinan perlu klik "Choose File" button dulu untuk reveal input.');
-    report.check('TC dijalankan tanpa exception', true);
-    report.print();
-    return;
-  }
-
+  report.step('Klik foto profil untuk reveal file input, upload foto baru, lalu Save');
+  await personalDetailsPage.revealFileInput();
   await personalDetailsPage.fileInput.setInputFiles({
     name: 'new-avatar.png',
     mimeType: 'image/png',
     buffer: Buffer.from(TINY_PNG_BASE64, 'base64'),
   });
-  await page.waitForTimeout(1000);
-  report.check('Upload foto baru tidak menimbulkan error', true);
+  const [resp] = await Promise.all([
+    page.waitForResponse((r) => r.url().includes('/picture') && r.request().method() === 'PUT'),
+    personalDetailsPage.save(),
+  ]);
+
+  report.step('Verify: PUT employees/<N>/picture berhasil');
+  report.check('[API] status === 200', resp.status() === 200, `status=${resp.status()}`);
 
   report.print();
 });

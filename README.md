@@ -77,7 +77,7 @@ qa-portofolio/
 │   └── e2e/              # Cross-cutting / not-yet-split specs (PIM smoke test, Leave)
 ├── docs/                 # Human-readable test case documentation, one file per module
 │   ├── TC-Login.txt
-│   ├── TC-PIM.txt        # All 156 PIM TCs, full module coverage plus file-upload security
+│   ├── TC-PIM.txt        # All 159 PIM TCs, full module coverage plus file-upload security
 │   ├── PIM-Findings-Summary.txt  # Digest of exploration findings across the whole PIM suite
 │   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
 ├── .github/workflows/     # CI pipeline definition
@@ -205,7 +205,7 @@ Set these repository secrets if targeting a non-default environment:
 | Module | Scenarios | Docs |
 |--------|-----------|------|
 | Login | 40 TCs: positive, negative, boundary, security, edge | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| PIM | 156 TCs, full module coverage: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs (2 confirmed bugs: extension-only validation lets an executable disguised as a photo through) | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| PIM | 159 TCs, full module coverage with no open gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs (2 confirmed bugs: extension-only validation lets an executable disguised as a photo through on both profile-photo upload points) | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Leave | Submitting without entitlement is correctly blocked (see note below) | N/A |
 
 > **Note on the Leave suite:** the public demo account has no assigned leave entitlement, so a successful application can't be exercised. Instead the test verifies the deterministic behavior that's actually there: an insufficient-balance message once a date range is selected.

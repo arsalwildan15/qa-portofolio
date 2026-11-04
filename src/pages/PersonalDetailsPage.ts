@@ -16,6 +16,7 @@ export class PersonalDetailsPage extends BasePage {
   readonly femaleRadio: Locator;
   readonly saveButton: Locator;
   readonly fileInput: Locator;
+  readonly employeeImage: Locator;
   readonly removePhotoButton: Locator;
   readonly fieldErrors: Locator;
 
@@ -52,7 +53,11 @@ export class PersonalDetailsPage extends BasePage {
     this.maleRadio = page.getByRole('radio', { name: 'Male', exact: true });
     this.femaleRadio = page.getByRole('radio', { name: 'Female', exact: true });
     this.saveButton = page.getByRole('button', { name: 'Save' }).first();
+    // The <input type="file"> is not attached to the DOM until the photo
+    // (img.employee-image) is clicked — confirmed live: input[type="file"]
+    // count is 0 before clicking it, 1 after. Use revealFileInput() first.
     this.fileInput = page.locator('input[type="file"]');
+    this.employeeImage = page.locator('img.employee-image');
     this.removePhotoButton = page.locator('.employee-image button');
     this.fieldErrors = page.locator('.oxd-input-group .oxd-text--span');
   }
@@ -92,5 +97,11 @@ export class PersonalDetailsPage extends BasePage {
 
   async save(): Promise<void> {
     await this.saveButton.click();
+  }
+
+  /** Clicks the profile photo to attach the hidden file input to the DOM. */
+  async revealFileInput(): Promise<void> {
+    await this.employeeImage.click();
+    await this.fileInput.waitFor({ state: 'attached', timeout: 5_000 });
   }
 }

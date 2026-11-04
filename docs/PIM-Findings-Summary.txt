@@ -5,8 +5,9 @@
 ================================================================================
 
 Dokumen ini adalah ringkasan cepat semua temuan eksplorasi dari seluruh
-suite PIM yang sudah diimplementasikan (156 TC total, PIM 100% tercakup:
-Employee List, Add Employee, Personal Details + 9 sub-tab, Configuration,
+suite PIM yang sudah diimplementasikan (159 TC total, PIM 100% tercakup
+tanpa gap/finding terbuka: Employee List, Add Employee, Personal Details
++ 9 sub-tab termasuk semua 5 sub-section Qualifications, Configuration,
 Reports, plus 8 TC security file upload lintas fitur). Detail teknis
 lengkap (locator, API endpoint, Catatan Eksekusi) tetap ada di dokumen
 sumber: docs/TC-PIM.txt.
@@ -198,27 +199,60 @@ sumber: docs/TC-PIM.txt.
   SECURITY: FILE UPLOAD VALIDATION (CROSS-CUTTING, 8 TC)
 ================================================================================
 
-  1. [BUG NYATA, TERKONFIRMASI] Upload foto profil di Add Employee HANYA
-     memvalidasi ekstensi nama file, bukan konten/magic bytes file itu
-     sendiri. File executable (.exe) atau Android APK yang di-rename jadi
-     .jpg LOLOS validasi tanpa error dan berhasil tersimpan (POST 200).
-     Baseline pembanding membuktikan file .exe dengan ekstensi asli
-     memang ditolak, jadi ini murni soal validasi yang bisa di-bypass
-     dengan rename sederhana, bukan validasi yang tidak ada sama sekali.
+  1. [BUG NYATA, TERKONFIRMASI DI 2 TITIK] Upload foto profil (Add
+     Employee MAUPUN Personal Details) HANYA memvalidasi ekstensi nama
+     file, bukan konten/magic bytes file itu sendiri. File executable
+     (.exe) atau Android APK yang di-rename jadi .jpg LOLOS validasi
+     tanpa error dan berhasil tersimpan (POST 200), terkonfirmasi di
+     kedua titik upload foto. Baseline pembanding membuktikan file .exe
+     dengan ekstensi asli memang ditolak, jadi ini murni soal validasi
+     yang bisa di-bypass dengan rename sederhana, bukan validasi yang
+     tidak ada sama sekali.
 
   2. [TEMUAN POSITIF] Trik double-extension ("photo.jpg.exe") TIDAK bisa
      bypass, validator cek ekstensi TERAKHIR yang sebenarnya.
 
-  3. [TEMUAN POSITIF, BUG TIDAK MELUAS] 3 titik upload lain yang diuji
-     (Attachments Contact Details, Data Import) TERNYATA TIDAK kena bug
-     yang sama, keduanya menolak file executable dengan benar. Bug ini
-     spesifik ke upload foto profil Add Employee.
+  3. [TEMUAN CAMPURAN] Dari 4 titik upload lain yang diuji, bug ini
+     meluas ke Personal Details re-upload (sama persis seperti Add
+     Employee), TAPI TIDAK meluas ke Attachments Contact Details maupun
+     Data Import (keduanya menolak file executable dengan benar). Jadi
+     bug ini spesifik ke KEDUA titik upload FOTO PROFIL, bukan ke semua
+     fitur upload PIM.
 
-  4. [PELAJARAN DEBUGGING] 2 TC sempat terlihat seperti bug hang/DoS
-     aplikasi, tapi setelah diisolasi ternyata bug di test kita sendiri:
-     `textContent()` tanpa timeout pada locator yang cocok nol elemen
-     auto-retry sampai default ~30s. Pelajaran: isolasi dulu sebelum
-     menyimpulkan hang = bug aplikasi.
+  4. [PELAJARAN DEBUGGING] Beberapa TC sempat terlihat seperti bug
+     hang/DoS aplikasi, tapi setelah diisolasi ternyata bug di test kita
+     sendiri: `textContent()` tanpa timeout pada locator yang cocok nol
+     elemen auto-retry sampai default ~30s. Pelajaran: isolasi dulu
+     sebelum menyimpulkan hang = bug aplikasi.
+
+  5. [TEMUAN] <input type="file"> di Personal Details TIDAK melekat ke
+     DOM sampai foto (img.employee-image) diklik dulu (count 0 sebelum
+     klik, 1 sesudah), ini yang awalnya membuat TC-PIM-PD-13 inconclusive
+     sebelum ditemukan pola klik-dulu-nya, dan juga membuat TC-PIM-PD-10
+     (reupload foto) lama memakai endpoint yang salah untuk verifikasi
+     (PUT .../picture, bukan .../personal-details).
+
+================================================================================
+  PENUTUPAN GAP/FINDING LAMA (3 ITEM)
+================================================================================
+
+  1. [RESOLVED] TC-PIM-LIST-07 (sort kolom Employee List) tadinya
+     finding, elemen trigger sort belum teridentifikasi. Ternyata sort
+     BUKAN klik langsung header, melainkan klik ikon kecil
+     `.oxd-table-header-sort-icon` yang membuka dropdown Ascending/
+     Descending eksplisit. Sekarang hard check() penuh via
+     EmployeeListPage.sortByColumn().
+
+  2. [RESOLVED] Qualifications Skills/Languages/License (3 dari 5
+     sub-section) yang belum dicakup sejak Fase 2, ditambahkan sebagai
+     TC-PIM-QUALIFICATION-08/09/10. Ditemukan: ketiganya pakai form
+     INLINE (bukan modal popup seperti Work Experience/Education).
+
+  3. [RESOLVED] TC-PIM-PD-13 (upload security Personal Details) tadinya
+     inconclusive karena <input type="file"> tidak melekat ke DOM
+     sampai foto diklik dulu. Setelah ditemukan pola klik-dulu-nya, bug
+     yang sama dengan Add Employee terkonfirmasi juga ada di sini (lihat
+     Security finding #1/#3 di atas).
 
 ================================================================================
   BENANG MERAH ANTAR FASE
