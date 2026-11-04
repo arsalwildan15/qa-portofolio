@@ -5,10 +5,11 @@
 ================================================================================
 
 Dokumen ini adalah ringkasan cepat semua temuan eksplorasi dari seluruh
-suite PIM yang sudah diimplementasikan (148 TC total, PIM 100% tercakup:
+suite PIM yang sudah diimplementasikan (156 TC total, PIM 100% tercakup:
 Employee List, Add Employee, Personal Details + 9 sub-tab, Configuration,
-Reports). Detail teknis lengkap (locator, API endpoint, Catatan Eksekusi)
-tetap ada di dokumen sumber: docs/TC-PIM.txt.
+Reports, plus 8 TC security file upload lintas fitur). Detail teknis
+lengkap (locator, API endpoint, Catatan Eksekusi) tetap ada di dokumen
+sumber: docs/TC-PIM.txt.
 
 ================================================================================
   FASE 1 — EMPLOYEE LIST, ADD EMPLOYEE, PERSONAL DETAILS (52 TC)
@@ -192,6 +193,32 @@ tetap ada di dokumen sumber: docs/TC-PIM.txt.
      server tinggi), tidak pernah reproduce saat dijalankan sendirian
      berkali-kali. Didokumentasikan sebagai kemungkinan race condition di
      sisi server demo bersama, bukan defect validasi panjang nama.
+
+================================================================================
+  SECURITY: FILE UPLOAD VALIDATION (CROSS-CUTTING, 8 TC)
+================================================================================
+
+  1. [BUG NYATA, TERKONFIRMASI] Upload foto profil di Add Employee HANYA
+     memvalidasi ekstensi nama file, bukan konten/magic bytes file itu
+     sendiri. File executable (.exe) atau Android APK yang di-rename jadi
+     .jpg LOLOS validasi tanpa error dan berhasil tersimpan (POST 200).
+     Baseline pembanding membuktikan file .exe dengan ekstensi asli
+     memang ditolak, jadi ini murni soal validasi yang bisa di-bypass
+     dengan rename sederhana, bukan validasi yang tidak ada sama sekali.
+
+  2. [TEMUAN POSITIF] Trik double-extension ("photo.jpg.exe") TIDAK bisa
+     bypass, validator cek ekstensi TERAKHIR yang sebenarnya.
+
+  3. [TEMUAN POSITIF, BUG TIDAK MELUAS] 3 titik upload lain yang diuji
+     (Attachments Contact Details, Data Import) TERNYATA TIDAK kena bug
+     yang sama, keduanya menolak file executable dengan benar. Bug ini
+     spesifik ke upload foto profil Add Employee.
+
+  4. [PELAJARAN DEBUGGING] 2 TC sempat terlihat seperti bug hang/DoS
+     aplikasi, tapi setelah diisolasi ternyata bug di test kita sendiri:
+     `textContent()` tanpa timeout pada locator yang cocok nol elemen
+     auto-retry sampai default ~30s. Pelajaran: isolasi dulu sebelum
+     menyimpulkan hang = bug aplikasi.
 
 ================================================================================
   BENANG MERAH ANTAR FASE
