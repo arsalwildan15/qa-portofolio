@@ -124,8 +124,15 @@ export default class BugListReporter implements Reporter {
       this.writeHeader(sheet);
     }
 
+    const openStatusByKey = this.getOpenStatusByKey(sheet);
     let nextBugNumber = this.getNextBugNumber(sheet);
     for (const row of this.pendingRows) {
+      const key = this.bugKey(row);
+      // Same bug (same script + summary) already logged and still open —
+      // skip, don't duplicate. Only log again if the prior entry was Closed
+      // (a regression), or if this bug was never logged before.
+      if (openStatusByKey.get(key) === true) continue;
+
       row.bugId = `BG-${String(nextBugNumber).padStart(3, '0')}`;
       sheet.addRow(HEADERS.map((header) => this.fieldFor(row, header)));
       nextBugNumber += 1;
@@ -136,6 +143,34 @@ export default class BugListReporter implements Reporter {
     });
 
     await workbook.xlsx.writeFile(BUG_LIST_PATH);
+  }
+
+  /** Identifies "the same bug" as the same test script + same test title. */
+  private bugKey(row: Pick<BugRow, 'scriptTestCase' | 'summary'>): string {
+    return `${row.scriptTestCase}::${row.summary}`;
+  }
+
+  /**
+   * Maps each existing bug key to whether its most recent row is still open
+   * (any status other than "Closed" counts as open). Rows are scanned in
+   * sheet order, so a later row for the same key overrides an earlier one.
+   */
+  private getOpenStatusByKey(sheet: ExcelJS.Worksheet): Map<string, boolean> {
+    const scriptCol = HEADERS.indexOf('Script Test Case') + 1;
+    const summaryCol = HEADERS.indexOf('Summary') + 1;
+    const statusCol = HEADERS.indexOf('Status') + 1;
+    const result = new Map<string, boolean>();
+
+    sheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return;
+      const script = String(row.getCell(scriptCol).value ?? '');
+      const summary = String(row.getCell(summaryCol).value ?? '');
+      const status = String(row.getCell(statusCol).value ?? '');
+      if (!script && !summary) return;
+      result.set(`${script}::${summary}`, status.trim().toLowerCase() !== 'closed');
+    });
+
+    return result;
   }
 
   private fieldFor(row: BugRow, header: (typeof HEADERS)[number]): string {

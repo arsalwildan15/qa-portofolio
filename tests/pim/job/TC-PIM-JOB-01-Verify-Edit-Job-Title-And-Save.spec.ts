@@ -16,10 +16,12 @@
  * [BUG SITUS — bukan bug test] Tab Job memicu console error 404 asli dari
  * OrangeHRM sendiri (resource gagal dimuat) setiap kali dibuka, tertangkap
  * oleh console-error check otomatis di TestReport. Ini dikonfirmasi 404
- * sungguhan dari aplikasi, bukan false positive. Ditandai test.fail() agar
- * CI tetap hijau selama bug ini belum diperbaiki OrangeHRM — kalau suatu
- * saat test ini tiba-tiba PASS, Playwright akan menandainya sebagai anomali
- * yang perlu dicek (kemungkinan bug-nya sudah di-fix di sisi OrangeHRM).
+ * sungguhan dari aplikasi, bukan false positive. Test ini SENGAJA dibiarkan
+ * FAILED (bukan test.fail()) supaya defect ini konsisten tercatat di
+ * docs/Bug-List.xlsx setiap kali direproduksi, dan supaya Allure report
+ * mencerminkan temuan defect yang sebenarnya alih-alih 100% hijau palsu.
+ * Status "failed" di sini adalah bukti suite ini menemukan bug nyata, bukan
+ * indikasi kualitas suite yang buruk.
  *
  * RUN COMMAND:
  *   npx playwright test tests/pim/job/TC-PIM-JOB-01-Verify-Edit-Job-Title-And-Save.spec.ts --project=chromium --headed
@@ -37,7 +39,6 @@ test('TC-PIM-JOB-01: editing Job Title dropdown and saving succeeds', async ({
   jobPage,
 }, testInfo) => {
   testInfo.setTimeout(60_000);
-  test.fail(true, 'Known OrangeHRM site bug: Job tab throws a real console 404 on every load (see JSDoc header above)');
   const report = new TestReport('TC-PIM-JOB-01', 'Edit Job Title And Save', env.baseURL, page);
 
   report.step('Buat employee baru (retry otomatis kalau Employee Id collide), navigate ke tab Job');

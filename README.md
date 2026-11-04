@@ -120,6 +120,14 @@ What's filled in automatically vs. left for QA review:
 
 The file is created empty (header only) on the very first test run and only appended to when a test fails — a fully green run leaves it unchanged. It is **not** a replacement for human triage: Expected Result, Severity, and Priority require judgment the failure alone can't provide, so they're explicitly flagged rather than guessed.
 
+**Dedup on regression runs:** a bug is identified by its test script + test title. If that same test fails again on a later run, the reporter checks the existing row's `Status`:
+- Still **Open** (or any non-`Closed` status) — no new row is added. Same bug, no duplicate.
+- **Closed** — a new row with a new `BG-XXX` ID is added, since a fix that was verified closed and is now failing again is a regression worth tracking separately from the original report.
+
+This means re-running the suite repeatedly doesn't flood the sheet with copies of the same unresolved bug — only genuinely new failures or regressions add rows.
+
+> **Why a known, unfixed site bug is left failing rather than marked `test.fail()`:** a test case that always fails due to a genuine third-party defect (e.g. `TC-PIM-JOB-01`, see its JSDoc header) is intentionally left as a real `FAILED` result instead of being wrapped in Playwright's `test.fail()` annotation. `test.fail()` would make the test report as "passed", which would both hide the finding from the Allure pass-rate chart and silently exclude it from `Bug-List.xlsx` (the reporter only logs `failed`/`timedOut` results). A QA portfolio's value is in *surfacing* defects, so a documented, reproducible failure is the more honest signal than an artificially green suite.
+
 ## Getting Started
 
 ### 1. Install dependencies
