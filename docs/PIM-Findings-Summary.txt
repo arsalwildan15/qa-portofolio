@@ -1,16 +1,14 @@
 ================================================================================
-  RINGKASAN TEMUAN — PIM FASE 1, FASE 2 & FASE 3
-  Konsolidasi dari docs/TC-PIM.txt, docs/TC-PIM-Phase2.txt, docs/TC-PIM-Phase3.txt
+  RINGKASAN TEMUAN — PIM (SEMUA FASE)
+  Konsolidasi dari docs/TC-PIM.txt
   Project  : qa-portofolio
 ================================================================================
 
-Dokumen ini adalah ringkasan cepat semua temuan eksplorasi dari ketiga fase
-PIM yang sudah diimplementasikan (148 TC total, PIM 100% tercakup). Detail
-teknis lengkap (locator, API endpoint, Catatan Eksekusi) tetap ada di
-masing-masing dokumen sumber:
-  - docs/TC-PIM.txt          (Fase 1: Employee List, Add Employee, Personal Details)
-  - docs/TC-PIM-Phase2.txt   (Fase 2: 9 tab Personal Details lainnya)
-  - docs/TC-PIM-Phase3.txt   (Fase 3: Configuration + Reports)
+Dokumen ini adalah ringkasan cepat semua temuan eksplorasi dari seluruh
+suite PIM yang sudah diimplementasikan (148 TC total, PIM 100% tercakup:
+Employee List, Add Employee, Personal Details + 9 sub-tab, Configuration,
+Reports). Detail teknis lengkap (locator, API endpoint, Catatan Eksekusi)
+tetap ada di dokumen sumber: docs/TC-PIM.txt.
 
 ================================================================================
   FASE 1 — EMPLOYEE LIST, ADD EMPLOYEE, PERSONAL DETAILS (52 TC)
