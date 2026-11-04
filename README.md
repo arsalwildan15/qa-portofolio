@@ -135,7 +135,9 @@ Every auto-filled value here is a **suggestion to speed up triage, not a final v
 
 This means re-running the suite repeatedly doesn't flood the sheet with copies of the same unresolved bug: only genuinely new failures or regressions add rows.
 
-The file is created empty (header only) on the very first test run and only appended to when a test fails: a fully green run leaves it unchanged.
+**Auto-close on retest:** if a test case that previously failed now passes, every still-`Open` row for that script is automatically set to `Closed`, with a note appended to `Notes` (`Auto-closed: retest passed on <date>`) recording when and why. A test passing clean is treated as resolving every previously reported finding for that script, so no manual bookkeeping is needed to keep `Status` accurate as bugs get fixed.
+
+The file is created empty (header only) on the very first test run. A run only touches it further when there's something to record: a new failure, a regression, or a bug being auto-closed. A fully green run with nothing previously open leaves it unchanged.
 
 > **Why a known, unfixed site bug is left failing rather than marked `test.fail()`:** a test case that always fails due to a genuine third-party defect (e.g. `TC-PIM-JOB-01`, see its JSDoc header) is intentionally left as a real `FAILED` result instead of being wrapped in Playwright's `test.fail()` annotation. `test.fail()` would make the test report as "passed", which would both hide the finding from the Allure pass-rate chart and silently exclude it from `Bug-List.xlsx` (the reporter only logs `failed`/`timedOut` results). A QA portfolio's value is in *surfacing* defects, so a documented, reproducible failure is the more honest signal than an artificially green suite.
 

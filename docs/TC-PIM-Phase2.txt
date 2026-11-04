@@ -83,10 +83,15 @@ LEGEND SIMBOL SKENARIO
     read-only menampilkan "Not Defined" (slot dokumen, bukan field teks).
     Memilih Job Title tertentu memicu GET
     /api/v2/admin/job-titles/<id>/specification yang 404 kalau job title
-    tsb belum punya dokumen spesifikasi — console error 404 ini REAL dan
-    REPRODUCIBLE (dikonfirmasi 2x berturut-turut), bukan noise server.
-    TC-PIM-JOB-01 sengaja dibiarkan FAILED oleh console-error check karena
-    ini temuan sah yang layak masuk Bug-List.xlsx, bukan disembunyikan.
+    tsb belum punya dokumen spesifikasi. Console error 404 ini REAL (bug
+    aplikasi, bukan noise server), tapi reproduksinya TIDAK deterministik:
+    TC-PIM-JOB-01 memilih opsi dropdown ke-2 tanpa nama spesifik, jadi
+    hasilnya tergantung Job Title mana yang kebetulan ada di posisi itu
+    (diobservasi FAILED mayoritas run, PASSED 1x saat 4 Nov 2026). TC ini
+    sengaja dibiarkan FAILED oleh console-error check saat direproduksi
+    karena ini temuan sah yang layak masuk Bug-List.xlsx, bukan
+    disembunyikan (lihat README "Auto-close on retest" untuk mekanisme
+    Status-nya).
 
   [TEMUAN] PUT contactDetails mengembalikan response body dengan KEY yang
     benar (street1, city, dst) tapi SEMUA VALUE null, bukan echo data yang
@@ -165,7 +170,7 @@ No.  Test Case ID            Status   Kategori              Skenario
 ================================================================================
 
  9   TC-PIM-JOB-01       [DONE]  Positive (+) [TEMUAN]   Edit Job Title ->
-                                                          console 404 reproducible
+                                                          console 404 intermittent
 10   TC-PIM-JOB-02       [DONE]  Positive (+)             Edit semua dropdown
                                                           sekaligus
 11   TC-PIM-JOB-03       [DONE]  Positive (+)             Joined Date format valid

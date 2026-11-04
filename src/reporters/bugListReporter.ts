@@ -65,6 +65,7 @@ interface BugRow {
  */
 export default class BugListReporter implements Reporter {
   private readonly pendingRows: BugRow[] = [];
+  private readonly passedScripts = new Set<string>();
 
   async onBegin(): Promise<void> {
     if (await this.fileExists(BUG_LIST_PATH)) return;
@@ -82,6 +83,10 @@ export default class BugListReporter implements Reporter {
   }
 
   onTestEnd(test: TestCase, result: TestResult): void {
+    if (result.status === 'passed') {
+      this.passedScripts.add(path.basename(test.location.file));
+      return;
+    }
     if (result.status !== 'failed' && result.status !== 'timedOut') return;
 
     const modul = this.extractModul(test.location.file);
@@ -104,7 +109,7 @@ export default class BugListReporter implements Reporter {
       severity,
       priority,
       attachment,
-      detectedOn: new Date().toLocaleDateString('id-ID', {
+      detectedOn: new Date().toLocaleDateString('en-GB', {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
@@ -118,7 +123,8 @@ export default class BugListReporter implements Reporter {
   }
 
   async onEnd(): Promise<void> {
-    if (this.pendingRows.length === 0) return;
+    if (this.pendingRows.length === 0 && this.passedScripts.size === 0) return;
+    if (!(await this.fileExists(BUG_LIST_PATH)) && this.pendingRows.length === 0) return;
 
     const workbook = new ExcelJS.Workbook();
     let sheet: ExcelJS.Worksheet;
@@ -131,6 +137,8 @@ export default class BugListReporter implements Reporter {
       sheet = workbook.addWorksheet('Bug List');
       this.writeHeader(sheet);
     }
+
+    const closedCount = this.closeResolvedBugs(sheet);
 
     const openStatusByKey = this.getOpenStatusByKey(sheet);
     let nextBugNumber = this.getNextBugNumber(sheet);
@@ -146,11 +154,48 @@ export default class BugListReporter implements Reporter {
       nextBugNumber += 1;
     }
 
+    if (this.pendingRows.length === 0 && closedCount === 0) return;
+
     sheet.columns.forEach((column) => {
       column.width = 30;
     });
 
     await workbook.xlsx.writeFile(BUG_LIST_PATH);
+  }
+
+  /**
+   * Closes every still-open row whose Script Test Case now passed in this
+   * run. A test that passes clean is treated as resolving every previously
+   * reported finding for that script. Returns how many rows were closed.
+   */
+  private closeResolvedBugs(sheet: ExcelJS.Worksheet): number {
+    if (this.passedScripts.size === 0) return 0;
+
+    const scriptCol = HEADERS.indexOf('Script Test Case') + 1;
+    const statusCol = HEADERS.indexOf('Status') + 1;
+    const notesCol = HEADERS.indexOf('Notes') + 1;
+    const today = new Date().toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+
+    let closedCount = 0;
+    sheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return;
+      const script = String(row.getCell(scriptCol).value ?? '');
+      const status = String(row.getCell(statusCol).value ?? '');
+      if (!this.passedScripts.has(script)) return;
+      if (status.trim().toLowerCase() === 'closed') return;
+
+      row.getCell(statusCol).value = 'Closed';
+      const existingNotes = String(row.getCell(notesCol).value ?? '').trim();
+      const closeNote = `Auto-closed: retest passed on ${today}`;
+      row.getCell(notesCol).value = existingNotes ? `${existingNotes}\n${closeNote}` : closeNote;
+      closedCount += 1;
+    });
+
+    return closedCount;
   }
 
   /** Identifies "the same bug" as the same test script + same test title. */

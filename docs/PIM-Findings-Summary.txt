@@ -79,10 +79,17 @@ endpoint, Catatan Eksekusi) tetap ada di masing-masing dokumen sumber:
      ternyata read-only (menampilkan "Not Defined", bukan field teks).
      Memilih Job Title tertentu memicu GET
      .../job-titles/<id>/specification yang mengembalikan 404 kalau job
-     title tsb belum punya dokumen spesifikasi — console error ini REAL
-     dan REPRODUCIBLE (dikonfirmasi 2x berturut-turut terpisah), bukan
-     noise server. TC-PIM-JOB-01 ditandai `test.fail()` supaya CI tetap
-     hijau tapi temuannya tidak disembunyikan/dihapus.
+     title tsb belum punya dokumen spesifikasi. Console error ini REAL
+     (bug aplikasi, bukan noise server), tapi reproduksinya TIDAK 100%
+     deterministik: TC-PIM-JOB-01 memilih opsi dropdown ke-2 tanpa nama
+     spesifik, jadi hasilnya tergantung Job Title mana yang kebetulan ada
+     di posisi itu saat run (diobservasi FAILED di 4 dari 5 run, PASSED
+     1x saat 4 Nov 2026 ketika opsi yang kepilih kebetulan sudah punya
+     dokumen spesifikasi). Test ini sengaja dibiarkan FAILED (bukan
+     `test.fail()`) saat direproduksi, supaya temuannya tercatat otomatis
+     di docs/Bug-List.xlsx (lihat README "Auto-close on retest" untuk cara
+     Status row-nya menyesuaikan saat test kebetulan passed, tanpa berarti
+     bug-nya sudah fix permanen).
 
   5. [API] PUT contactDetails mengembalikan response body dengan KEY yang
      benar (street1, city, dst) tapi SEMUA VALUE bernilai null — tidak
