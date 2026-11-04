@@ -50,11 +50,15 @@ qa-portofolio/
 │   │   ├── ReportingMethodsPage.ts
 │   │   ├── TerminationReasonsPage.ts
 │   │   ├── PimReportsPage.ts
-│   │   └── LeavePage.ts
+│   │   ├── LeavePage.ts
+│   │   ├── VacanciesPage.ts
+│   │   └── CandidatesPage.ts
 │   ├── fixtures/         # Custom Playwright fixtures: inject page objects, provide authenticatedTest
 │   ├── utils/
 │   │   ├── testReport.ts # Step logging + end-of-test summary report + auto console-error check
-│   │   └── createTestEmployee.ts # Shared Add Employee helper, retries on Employee Id collision
+│   │   ├── createTestEmployee.ts # Shared Add Employee helper, retries on Employee Id collision
+│   │   ├── createTestCandidate.ts # Shared Add Candidate helper, extracts id from the POST response body
+│   │   └── advanceCandidateStatus.ts # Shared status-transition helpers (shortlist, schedule interview)
 │   └── reporters/
 │       └── bugListReporter.ts # Custom Playwright reporter: appends failed TCs to docs/Bug-List.xlsx
 ├── tests/
@@ -74,10 +78,15 @@ qa-portofolio/
 │   │   ├── memberships/
 │   │   ├── configuration/        # Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons
 │   │   └── reports/
+│   ├── recruitment/      # One subfolder per Recruitment screen
+│   │   ├── vacancies/
+│   │   ├── candidates/
+│   │   └── status-workflow/      # Candidate status state-machine transitions
 │   └── e2e/              # Cross-cutting / not-yet-split specs (PIM smoke test, Leave)
 ├── docs/                 # Human-readable test case documentation, one file per module
 │   ├── TC-Login.txt
 │   ├── TC-PIM.txt        # All 159 PIM TCs, full module coverage plus file-upload security
+│   ├── TC-Recruitment.txt # All 30 Recruitment TCs: Vacancies, Candidates, status workflow
 │   ├── PIM-Findings-Summary.txt  # Digest of exploration findings across the whole PIM suite
 │   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
 ├── .github/workflows/     # CI pipeline definition
@@ -206,6 +215,7 @@ Set these repository secrets if targeting a non-default environment:
 |--------|-----------|------|
 | Login | 40 TCs: positive, negative, boundary, security, edge | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | PIM | 159 TCs, full module coverage with no open gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs (2 confirmed bugs: extension-only validation lets an executable disguised as a photo through on both profile-photo upload points) | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| Recruitment | 30 TCs: Vacancies (8), Candidates including resume upload (13), candidate status workflow state machine (9). 1 confirmed bug (resume upload accepts an executable disguised as a .pdf, same extension-only validation pattern as PIM) plus a documented intermittent client-side rendering bug (Application Stage/Candidate History cards occasionally stuck loading forever with no underlying API error) | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Leave | Submitting without entitlement is correctly blocked (see note below) | N/A |
 
 > **Note on the Leave suite:** the public demo account has no assigned leave entitlement, so a successful application can't be exercised. Instead the test verifies the deterministic behavior that's actually there: an insufficient-balance message once a date range is selected.

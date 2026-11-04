@@ -8,6 +8,11 @@ export function uniqueName(prefix: string): string {
   return `${prefix}_${Date.now().toString().slice(-6)}`;
 }
 
+/** Collision-free email for Recruitment candidates created against the shared demo. */
+export function uniqueEmail(prefix: string): string {
+  return `${prefix}${Date.now().toString().slice(-6)}@example.com`.toLowerCase();
+}
+
 /**
  * Returns a leave date, offset by a run-unique number of days into the future to avoid
  * colliding with dates used by earlier test runs against the shared OrangeHRM demo

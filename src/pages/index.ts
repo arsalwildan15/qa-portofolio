@@ -21,3 +21,5 @@ export { DataImportPage } from './DataImportPage';
 export { ReportingMethodsPage } from './ReportingMethodsPage';
 export { TerminationReasonsPage } from './TerminationReasonsPage';
 export { PimReportsPage } from './PimReportsPage';
+export { VacanciesPage } from './VacanciesPage';
+export { CandidatesPage } from './CandidatesPage';

@@ -23,6 +23,8 @@ import {
   ReportingMethodsPage,
   TerminationReasonsPage,
   PimReportsPage,
+  VacanciesPage,
+  CandidatesPage,
 } from '../pages';
 
 interface Pages {
@@ -48,6 +50,8 @@ interface Pages {
   reportingMethodsPage: ReportingMethodsPage;
   terminationReasonsPage: TerminationReasonsPage;
   pimReportsPage: PimReportsPage;
+  vacanciesPage: VacanciesPage;
+  candidatesPage: CandidatesPage;
 }
 
 export const test = base.extend<Pages>({
@@ -116,6 +120,12 @@ export const test = base.extend<Pages>({
   },
   pimReportsPage: async ({ page }, use) => {
     await use(new PimReportsPage(page));
+  },
+  vacanciesPage: async ({ page }, use) => {
+    await use(new VacanciesPage(page));
+  },
+  candidatesPage: async ({ page }, use) => {
+    await use(new CandidatesPage(page));
   },
 });
 

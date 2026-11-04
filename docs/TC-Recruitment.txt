@@ -1,0 +1,361 @@
+================================================================================
+  DAFTAR TEST CASE: RECRUITMENT
+  Modul    : Recruitment (Vacancies, Candidates, Status Workflow)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/recruitment/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+  [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+  [TEMUAN]      = TC yang hasilnya didokumentasikan via report.finding() karena
+                   perilaku ambigu/environment-dependent, bukan pass/fail tegas
+
+  FORMAT ID  : TC-RECRUITMENT-<SECTION>-NN
+  FOLDER     : satu subfolder per screen, tests/recruitment/<subfolder>/:
+               TC-RECRUITMENT-VACANCY-*  -> tests/recruitment/vacancies/
+               TC-RECRUITMENT-CANDIDATE-* -> tests/recruitment/candidates/
+               TC-RECRUITMENT-STATUS-*    -> tests/recruitment/status-workflow/
+
+  CAKUPAN: Vacancies (list, Add Vacancy, search), Candidates (list, Add
+  Candidate termasuk upload Resume, delete), security upload Resume (3 TC,
+  pola sama dengan PIM-ADD-28/29 dan PIM-DATAIMPORT-05/06), dan alur status
+  candidate end-to-end (Application Initiated -> Shortlisted -> Interview
+  Scheduled -> Rejected/Interview Failed), total 30 TC.
+
+  BELUM DICAKUP: modul "My Info"-nya Recruitment (kandidat sisi karyawan),
+  export/print data candidate, dan integrasi email notification (demo
+  publik tidak punya mailbox yang bisa diverifikasi). Di LUAR scope saat
+  ini, bukan gap yang disengaja diabaikan.
+
+================================================================================
+  CATATAN TEKNIS
+  Dikonfirmasi via Playwright discovery run langsung terhadap OrangeHRM OS 5.9
+================================================================================
+
+  URL VACANCIES LIST      : /web/index.php/recruitment/viewJobVacancy
+                             ([PENTING] BUKAN /viewVacancyList, itu 404)
+  URL ADD VACANCY          : /web/index.php/recruitment/addJobVacancy
+  URL CANDIDATES LIST      : /web/index.php/recruitment/viewCandidates
+  URL ADD CANDIDATE        : /web/index.php/recruitment/addCandidate
+  URL CANDIDATE DETAIL     : /web/index.php/recruitment/addCandidate/<id>
+                             (form yang SAMA dengan Add Candidate, dipakai
+                             ulang untuk detail/edit, dibedakan dari ada/
+                             tidaknya kartu "Application Stage" dan
+                             "Candidate History" di bawahnya)
+  URL CHANGE STATUS FORM   : /web/index.php/recruitment/changeCandidateVacancyStatus
+                             ?candidateId=<id>&selectedAction=<N>
+  Framework                 : Vue 3 + OXD Design System, sama dengan PIM.
+
+  LOCATORS & PERILAKU KONFIRMASI (VacanciesPage.ts):
+    Vacancy Name (form Add)  : .oxd-input-group berlabel "Vacancy Name"
+                                persis -> input text biasa.
+    Hiring Manager (form Add): [TEMUAN PENTING] Field WAJIB (required),
+                                async autocomplete (getByPlaceholder('Type
+                                for hints...')), menampilkan placeholder
+                                "Searching...." sementara sebelum hasil
+                                asli muncul. Kalau field ini dikosongkan,
+                                Save gagal DIAM-DIAM secara client-side
+                                (pesan "Required"), dan page.waitForResponse
+                                menunggu POST yang TIDAK PERNAH terkirim,
+                                persis terlihat seperti server lambat/hang
+                                padahal sebenarnya bug di test (field wajib
+                                belum diisi), bukan masalah app atau infra.
+                                Root-cause ini ditemukan setelah 3 TC gagal
+                                dengan gejala "timeout 45s" yang identik.
+    Vacancy filter (list)    : [TEMUAN PENTING] Filter "Vacancy" di halaman
+                                LIST adalah DROPDOWN berisi daftar nama
+                                vacancy yang sudah ada ("-- Select --" +
+                                chevron), BUKAN text input bebas, berbeda
+                                dari field "Vacancy Name" di form Add yang
+                                memang text input. Jangan disamakan hanya
+                                karena nama labelnya mirip.
+
+  API ENDPOINT VACANCIES (CONFIRMED):
+    POST /api/v2/recruitment/vacancies -> status 200 saat sukses.
+
+  LOCATORS & PERILAKU KONFIRMASI (CandidatesPage.ts):
+    Full Name (form Add)     : First/Middle/Last Name via
+                                page.getByPlaceholder(...), BUKAN lewat
+                                .oxd-input-group text match (match ganda/
+                                strict-mode violation karena label "Full
+                                Name" muncul di beberapa tempat).
+    Email                    : Divalidasi format client-side, pesan error
+                                persis "Expected format: admin@example.com",
+                                POST TIDAK PERNAH terkirim kalau format
+                                salah (dikonfirmasi hard check, bukan lagi
+                                asumsi).
+    Resume (file input)      : Menerima .docx/.doc/.odt/.pdf/.rtf/.txt,
+                                maksimal 1MB (pesan error persis
+                                "Attachment Size Exceeded" kalau lebih, dan
+                                "File type not allowed" untuk ekstensi di
+                                luar whitelist).
+    Candidate Name (filter   : [TEMUAN] Autocomplete yang HANYA menerima
+    list)                      value hasil pilih dari suggestion-nya
+                                sendiri; mengetik nama candidate yang baru
+                                saja dibuat sering belum punya suggestion
+                                (field jadi "Invalid"), jadi TIDAK RELIABLE
+                                untuk mencari candidate yang baru dibuat di
+                                test yang sama. Dipakai gotoLastPage()
+                                sebagai gantinya untuk kasus itu (list demo
+                                ini punya 75+ record seeded + terus
+                                bertambah, candidate baru selalu muncul di
+                                halaman TERAKHIR, bukan halaman pertama).
+    [SPA ROUTING QUIRK]        Setelah Save sukses (POST 200) di Add
+                                Candidate, URL bar TIDAK berubah jadi
+                                /addCandidate/<id>, tetap di /addCandidate.
+                                Id candidate WAJIB diambil dari response
+                                body (body.data.id), bukan dari page.url().
+
+  API ENDPOINT CANDIDATES (CONFIRMED):
+    POST   /api/v2/recruitment/candidates               -> create, body
+           {"data":{"id":N,...}}
+    DELETE /api/v2/recruitment/candidates  (body {"ids":[N]})
+           -> [PENTING] BUKAN DELETE ke /candidates/<id> (itu 405 Method
+           Not Allowed), tapi DELETE ke /candidates dengan body berisi
+           array ids. Ditemukan lewat intersepsi request UI langsung
+           setelah asumsi awal /candidates/<id> gagal dengan 405.
+
+  SECURITY: RESUME UPLOAD VALIDATION (TC-RECRUITMENT-CANDIDATE-11/12/13,
+  pola sama dengan TC-PIM-ADD-28/29 dan TC-PIM-DATAIMPORT-05/06):
+    [BUG DIKONFIRMASI] File executable (header PE "MZ") yang di-rename
+    jadi .pdf LOLOS validasi dan diterima sebagai Resume (POST 200),
+    persis pola yang sama dengan upload foto profil employee di PIM:
+    validasi HANYA mengecek ekstensi nama file, BUKAN konten/magic bytes
+    file itu sendiri. Dibandingkan dengan TC-RECRUITMENT-CANDIDATE-12 yang
+    membuktikan file .exe dengan ekstensi ASLI (tidak di-rename) memang
+    ditolak ("File type not allowed"), dan TC-13 yang membuktikan file
+    .png (tipe salah tapi bukan spoofing) juga ditolak. Jadi validasinya
+    memang ADA dan berfungsi, tapi gampang di-bypass dengan rename
+    ekstensi, murni masalah validasi ekstensi vs konten, sama persis
+    dengan finding di modul PIM.
+
+  STATUS WORKFLOW STATE MACHINE (dikonfirmasi live end-to-end):
+
+    Application Initiated --(Shortlist, action=2)--> Shortlisted
+    Application Initiated --(Reject)--> Rejected [TERMINAL]
+    Shortlisted --(Schedule Interview, action=4)--> Interview Scheduled
+    Shortlisted --(Reject)--> Rejected [TERMINAL]
+    Interview Scheduled --(Mark Interview Passed)--> (belum dieksplorasi
+                                                        lebih lanjut)
+    Interview Scheduled --(Mark Interview Failed)--> Interview Failed
+    Interview Scheduled --(Reject)--> Rejected [TERMINAL]
+    Interview Failed --(Reject)--> Rejected [TERMINAL]
+    Rejected = TERMINAL, tidak ada tombol aksi lain.
+
+    [PENTING] Field "Current Status" di SEMUA form konfirmasi perubahan
+    status (Shortlist, Reject, Schedule Interview, Mark Interview
+    Passed/Failed) adalah TAMPILAN READ-ONLY, BUKAN dropdown yang bisa
+    diubah manual.
+
+    [PENTING] Sekadar NAVIGASI ke URL changeCandidateVacancyStatus (lewat
+    page.goto langsung atau klik tombol aksi) TIDAK mengubah status apa
+    pun. Form konfirmasi harus benar-benar di-klik Save, baru status
+    berubah. Dikonfirmasi lewat capture request nyata:
+      PUT /api/v2/recruitment/candidates/<id>/shortlist
+      PUT /api/v2/recruitment/candidates/<id>/shedule-interview (typo
+          "shedule" ini ASLI dari aplikasi, bukan typo di test)
+      POST/PUT lain untuk Reject dan Mark Interview Failed/Passed (method
+          HTTP persisnya PUT, BUKAN POST seperti asumsi awal; semua TC di
+          suite ini memfilter method() !== 'GET', bukan method() ===
+          'POST', supaya tidak rapuh terhadap detail method HTTP).
+
+    Schedule Interview form fields: Candidate/Vacancy/Hiring Manager/
+    Current Status (semua readonly), Interview Title (wajib, text),
+    Interviewer (wajib, ASYNC AUTOCOMPLETE sama persis dengan Hiring
+    Manager di Add Vacancy: harus tunggu placeholder "Searching...."
+    hilang dulu sebelum klik opsi asli), opsional "+ Add Another", Date
+    (wajib, format yyyy-dd-mm), Time, Notes.
+
+    [TEMUAN PENTING: TIMING, BUKAN BUG] Tombol aksi status (Reject/
+    Shortlist/Schedule Interview/dst) di halaman detail TIDAK langsung
+    muncul begitu halaman selesai load. Tombol-tombol ini di-render dari
+    response GET terpisah ke /api/v2/recruitment/candidates/<id>/actions/
+    allowed yang datang ASYNC, lag sekitar 2 detik dari render awal
+    halaman. Kalau test langsung cek tombol tanpa tunggu minimal ~2-3
+    detik setelah gotoDetail(), tombolnya akan terlihat "tidak ada" padahal
+    sebenarnya cuma belum selesai loading. Ini BUKAN bug stuck-loading di
+    bawah ini, ini cuma lag render normal yang butuh wait lebih panjang
+    (semua TC di suite ini pakai waitForTimeout(3000) setelah gotoDetail()
+    sebelum interaksi dengan tombol aksi, untuk menghindari false-negative
+    ini, dan tetap stabil meski di bawah beban serial run).
+
+  [BUG DIKONFIRMASI] STUCK LOADING: APPLICATION STAGE / CANDIDATE HISTORY
+  (TC-RECRUITMENT-STATUS-09):
+    Kartu "Application Stage" dan "Candidate History" di halaman detail
+    candidate kadang STUCK di loading spinner SELAMANYA, bahkan setelah
+    reload penuh, padahal SEMUA API call yang mendasarinya (GET candidate
+    detail, GET actions/allowed, GET history, GET vacancies) kembali
+    dengan status 200, tanpa console error atau page error apa pun. Bug
+    rendering client-side yang genuine.
+      - BUKAN karena demo shared yang lambat: direproduksi juga di reload
+        yang sama berkali-kali pada candidate yang sama.
+      - BUKAN spesifik ke candidate yang baru "Mark Interview Passed":
+        direproduksi juga pada candidate yang belum pernah disentuh sama
+        sekali (termasuk candidate yang BARU SAJA dibuat di sesi test ini
+        sendiri, sebelum status action apa pun dijalankan).
+      - TIDAK 100% reproducible on demand: sample candidate yang sama bisa
+        loading normal di satu run, dan stuck di run lain. Pada sample 6
+        candidate ID yang dites berulang kali di sesi ini, rasio stuck
+        bervariasi antara 2/6 sampai 3/6 per run, tidak ada pola id/waktu
+        yang konsisten membedakan yang stuck vs yang tidak.
+      - Trigger pastinya TIDAK berhasil dipersempit lebih jauh dari temuan
+        awal (yang sudah mengesampingkan "disebabkan Mark Interview
+        Passed" dan "khusus data lama"); kesimpulan tambahan di sesi ini
+        hanya memperkuat bahwa bug ini genuinely intermiten di level
+        rendering client-side, bukan menunjukkan kondisi pemicu baru yang
+        bisa direproduksi deterministik.
+    TC-RECRUITMENT-STATUS-09 men-sample beberapa candidate ID (bukan 1 ID
+    hardcode) dan mencatat hasilnya lewat report.finding() + report.check()
+    (bukan test.fail()), supaya hasil run jujur apa adanya: tetap PASSED
+    kalau kebetulan tidak reproduce di run itu, dan temuan tercatat natural
+    kalau reproduce.
+
+  [TEMUAN: SHARED-DEMO FLAKINESS DI BAWAH BEBAN SERIAL] Saat seluruh 9 TC
+  status-workflow dijalankan berurutan (serial, satu demi satu) dalam satu
+  batch, 2-3 TC acak (berbeda-beda TC tiap run, tidak konsisten yang mana)
+  kadang timeout menunggu response API padahal TC yang SAMA PERSIS lulus
+  bersih saat dijalankan sendirian. Pola ini konsisten dengan temuan
+  flakiness shared-demo yang sudah didokumentasikan di sesi PIM
+  sebelumnya: demo publik ini melambat di bawah beban berurutan yang
+  tinggi (banyak create candidate + banyak status transition dalam waktu
+  singkat). Bukan bug di test maupun di aplikasi, murni karakteristik
+  environment demo publik bersama.
+
+================================================================================
+  TEST CASES: VACANCIES (8 TC)
+================================================================================
+
+  NO  ID                              KATEGORI  DESKRIPSI                                    STATUS
+  --  ------------------------------  --------  -------------------------------------------  -------
+  01  TC-RECRUITMENT-VACANCY-01       (+)       Add Vacancy valid [API]                       [DONE]
+  02  TC-RECRUITMENT-VACANCY-02       (-)       Submit kosong -> validasi Required             [DONE]
+  03  TC-RECRUITMENT-VACANCY-03       (B)       Vacancy Name sangat panjang [TEMUAN]           [DONE]
+  04  TC-RECRUITMENT-VACANCY-04       (S)       XSS payload di Vacancy Name                    [DONE]
+  05  TC-RECRUITMENT-VACANCY-05       (S)       SQL injection payload di Vacancy Name           [DONE]
+  06  TC-RECRUITMENT-VACANCY-06       (!)       Cancel membatalkan form                        [DONE]
+  07  TC-RECRUITMENT-VACANCY-07       (+)       Search vacancy di list (dropdown filter)        [DONE]
+  08  TC-RECRUITMENT-VACANCY-08       (+)       Vacancy baru muncul di dropdown Add Candidate   [DONE]
+
+================================================================================
+  TEST CASES: CANDIDATES (13 TC)
+================================================================================
+
+  NO  ID                               KATEGORI  DESKRIPSI                                       STATUS
+  --  -------------------------------  --------  ----------------------------------------------  -------
+  01  TC-RECRUITMENT-CANDIDATE-01      (+)       Add Candidate valid + resume [API]                [DONE]
+  02  TC-RECRUITMENT-CANDIDATE-02      (-)       Submit kosong -> validasi Required                [DONE]
+  03  TC-RECRUITMENT-CANDIDATE-03      (-)       Format email invalid ditolak                      [DONE]
+  04  TC-RECRUITMENT-CANDIDATE-04      (B)       First Name 300 karakter [TEMUAN]                  [DONE]
+  05  TC-RECRUITMENT-CANDIDATE-05      (S)       XSS payload di Notes                              [DONE]
+  06  TC-RECRUITMENT-CANDIDATE-06      (S)       SQL injection payload di Keywords                 [DONE]
+  07  TC-RECRUITMENT-CANDIDATE-07      (B)       Resume >1MB ditolak                                [DONE]
+  08  TC-RECRUITMENT-CANDIDATE-08      (+)       Candidate baru muncul di list                      [DONE]
+  09  TC-RECRUITMENT-CANDIDATE-09      (+)       Delete candidate [API]                             [DONE]
+  10  TC-RECRUITMENT-CANDIDATE-10      (!)       Cancel membatalkan form                            [DONE]
+  11  TC-RECRUITMENT-CANDIDATE-11      (S)       [BUG] Exe di-rename .pdf diterima sbg Resume       [DONE]
+  12  TC-RECRUITMENT-CANDIDATE-12      (S)       Exe ekstensi asli ditolak (baseline)                [DONE]
+  13  TC-RECRUITMENT-CANDIDATE-13      (-)       File .png ditolak sbg Resume                       [DONE]
+
+================================================================================
+  TEST CASES: STATUS WORKFLOW (9 TC)
+================================================================================
+
+  NO  ID                             KATEGORI  DESKRIPSI                                          STATUS
+  --  -----------------------------  --------  -------------------------------------------------  -------
+  01  TC-RECRUITMENT-STATUS-01       (+)       Candidate baru = Application Initiated + aksi awal  [DONE]
+  02  TC-RECRUITMENT-STATUS-02       (+)       Shortlist -> status Shortlisted [API]                [DONE]
+  03  TC-RECRUITMENT-STATUS-03       (+)       Shortlisted -> Reject -> terminal [API]              [DONE]
+  04  TC-RECRUITMENT-STATUS-04       (+)       Shortlisted -> Schedule Interview valid [API]        [DONE]
+  05  TC-RECRUITMENT-STATUS-05       (-)       Schedule Interview submit kosong -> validasi         [DONE]
+  06  TC-RECRUITMENT-STATUS-06       (+)       Interview Scheduled -> Reject [API]                  [DONE]
+  07  TC-RECRUITMENT-STATUS-07       (+)       Interview Scheduled -> Mark Interview Failed (fresh) [DONE]
+  08  TC-RECRUITMENT-STATUS-08       (+)       Candidate History mencatat transisi status           [DONE]
+  09  TC-RECRUITMENT-STATUS-09       (+)       [BUG, TEMUAN] Application Stage stuck loading sample [DONE]
+
+================================================================================
+  SUMMARY
+================================================================================
+
+  Total TC: 30 (Vacancies 8, Candidates 13, Status Workflow 9)
+
+  Hard check() (pass/fail tegas) : 26 TC
+  finding() (dokumentasi, bukan pass/fail tegas) : 4 TC, dipakai untuk
+    perilaku genuinely ambigu/environment-dependent: Vacancy Name sangat
+    panjang (TC-VACANCY-03), First Name 300 karakter (TC-CANDIDATE-04),
+    dan sample stuck-loading Application Stage (TC-STATUS-09, tetap
+    menghasilkan 1 hard check "TC dijalankan tanpa exception" plus
+    beberapa finding kondisional).
+
+  TC yang SENGAJA dibiarkan FAILED kalau bug reproduce (bukan
+  test.fail()): TC-RECRUITMENT-CANDIDATE-11 (exe-as-pdf resume upload
+  bypass, bug nyata, polanya sama dengan TC-PIM-ADD-28).
+
+================================================================================
+  CATATAN EKSEKUSI
+================================================================================
+
+  1. Semua TC pakai page object di src/pages/, diinjeksikan via
+     src/fixtures/pages.fixture.ts: VacanciesPage, CandidatesPage.
+
+  2. [WAJIB] TC yang butuh candidate baru pakai
+     src/utils/createTestCandidate.ts (unik via uniqueEmployeeName +
+     uniqueEmail), dan TC yang butuh candidate di status tertentu pakai
+     src/utils/advanceCandidateStatus.ts (shortlistCandidate,
+     scheduleInterviewForCandidate), BUKAN duplikasi logic manual.
+
+  3. Jalankan seluruh modul Recruitment:
+       npx playwright test tests/recruitment --project=chromium
+
+  4. Jalankan satu area saja:
+       npx playwright test tests/recruitment/vacancies --project=chromium
+       npx playwright test tests/recruitment/candidates --project=chromium
+       npx playwright test tests/recruitment/status-workflow --project=chromium
+
+  5. Jalankan satu TC: RUN COMMAND spesifik ada di JSDoc header tiap file.
+
+  6. [DISARANKAN] Jalankan tests/recruitment/status-workflow dengan
+     --workers=1 (serial). Area ini membuat beberapa candidate dan
+     melakukan beberapa transisi status berantai per TC, dan di bawah
+     paralelisasi tinggi bisa memperparah flakiness shared-demo yang
+     sudah didokumentasikan di atas.
+
+  7. [FORMAT REPORTING] Sama persis dengan PIM: setiap TC pakai TestReport
+     dari src/utils/testReport.ts (step logging + summary block +
+     console-error check otomatis via `page` sebagai argumen ke-4).
+
+  8. [BUG LIST OTOMATIS] Test case yang gagal otomatis masuk ke
+     docs/Bug-List.xlsx via src/reporters/bugListReporter.ts, dan otomatis
+     ter-close kalau TC yang sama lulus di run berikutnya. Review manual
+     tetap diperlukan untuk membedakan bug nyata vs noise shared-demo
+     flakiness (lihat Catatan Teknis di atas).
+
+  9. Target adalah demo publik OrangeHRM, modul Recruitment BERSIFAT
+     DESTRUKTIF/MUTATIF (membuat vacancy dan candidate baru, mengubah
+     status candidate, setiap kali TC positive dijalankan). Tidak ada
+     cleanup otomatis; ini demo publik bersama yang di-reset berkala oleh
+     OrangeHRM sendiri, bukan environment terisolasi.
+
+ 10. [PELAJARAN] Jangan asumsikan method HTTP (PUT vs POST) dari pola
+     endpoint lain di aplikasi yang sama, selalu verifikasi lewat
+     intersepsi request nyata. Jangan asumsikan field filter di halaman
+     LIST sama tipe-nya dengan field bernama sama di form ADD (tipe
+     dropdown vs text input bisa berbeda meski label identik). Tombol aksi
+     status yang "tidak terlihat" segera setelah halaman detail dibuka
+     seringkali cuma lag render async ~2 detik, bukan bug ataupun berarti
+     allowed-actions-nya kosong, verifikasi dengan menunggu lebih lama
+     sebelum menyimpulkan.
+
+================================================================================
+  END OF DOCUMENT
+================================================================================
