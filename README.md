@@ -80,66 +80,66 @@ qa-portofolio/
 ```
 
 **Why this shape:**
-- **`pages/`** isolates every selector behind a typed class: a DOM change means editing one file, not every spec that touches that screen.
-- **`fixtures/`** wires page objects into Playwright's dependency-injection model (`pages.fixture.ts`) and exposes `authenticatedTest`, so specs that need a logged-in session never duplicate login steps.
-- **`config/`** and **`data/`** keep environment concerns and generated test data out of both page objects and specs, so each layer has exactly one reason to change.
-- **`tests/<module>/`** mirrors the application's menu structure. Each spec file is named `TC-<MODULE>-<NN>-Verify-<Name>.spec.ts`, one test case per file, tagged by scenario type in its JSDoc header: `(+)` positive, `(-)` negative, `(B)` boundary, `(S)` security, `(!)` edge case. A module with multiple distinct screens (e.g. PIM: Employee List, Add Employee, Personal Details) gets one subfolder per screen instead of a flat file list, so the file tree itself communicates scope.
-- **`docs/TC-<Module>.txt`** is the readable counterpart to each `tests/<module>/` folder: same test case IDs, same scenario legend, meant for anyone who wants to review coverage without reading TypeScript.
+- **`pages/`**: every selector lives behind a typed class, so a DOM change means editing one file, not every spec that touches that screen.
+- **`fixtures/`**: wires page objects into Playwright's dependency-injection model and exposes `authenticatedTest`, so specs needing a logged-in session never duplicate login steps.
+- **`config/`** and **`data/`**: keep environment and test data out of both page objects and specs, so each layer has one reason to change.
+- **`tests/<module>/`**: mirrors the app's menu structure. One spec per test case, named `TC-<MODULE>-<NN>-Verify-<Name>.spec.ts`, tagged in its JSDoc header by scenario type: `(+)` positive, `(-)` negative, `(B)` boundary, `(S)` security, `(!)` edge case. A module with several screens (e.g. PIM) gets one subfolder per screen instead of a flat file list.
+- **`docs/TC-<Module>.txt`**: the readable counterpart to each `tests/<module>/` folder, same TC IDs and scenario legend, for reviewing coverage without reading TypeScript.
 
 ## Test Execution & Reporting
 
-Every spec file starts with a structured JSDoc header (TC ID, title, module, category, target env, file path, purpose, and a copy-pasteable `RUN COMMAND`), so any single test case can be run and understood in isolation.
+Every spec starts with a JSDoc header (TC ID, title, module, category, env, file path, purpose, and a copy-pasteable `RUN COMMAND`), so any single test case can be run and understood on its own.
 
-At runtime, each test case uses the shared `TestReport` utility (`src/utils/testReport.ts`) instead of raw `expect()` calls:
+Each test uses the shared `TestReport` utility (`src/utils/testReport.ts`) instead of raw `expect()`:
 
-- **Step-by-step logging**: every action prints `[STEP n] description...` to the console as it happens.
-- **End-of-test summary block**: a formatted report (TC ID, env, duration, step count, a numbered ✓/✗ checklist with detail lines, optional findings, a failed-checks recap, and a final `RINGKASAN`/`STATUS PASSED|FAILED` line).
-- **Soft assertions**: checks use `expect.soft()`, so one failing check doesn't abort the test; every remaining step and check still runs and gets reported before Playwright marks the test failed.
-- **Automatic console-error check**: passing `page` into `TestReport` attaches `page.on('console')`/`page.on('pageerror')` listeners and appends a pass/fail check ("no browser console errors") to every TC's summary, with no per-file wiring needed.
-- **API-level verification**: applied to the TCs that are representative of each unique server behavior (status codes, redirect headers, `Set-Cookie`/`HttpOnly`/`Secure`/`SameSite` flags), rather than duplicated across every TC where it wouldn't add new coverage.
+- **Step logging**: every action prints `[STEP n] description...` as it happens.
+- **Summary block**: TC ID, env, duration, step count, a numbered pass/fail checklist, optional findings, and a final pass/fail line.
+- **Soft assertions**: checks use `expect.soft()`, so one failing check doesn't stop the test; everything still runs and gets reported.
+- **Automatic console-error check**: passing `page` into `TestReport` wires up `page.on('console')`/`page.on('pageerror')` and adds a pass/fail check to every TC's summary, no per-file setup needed.
+- **API-level verification**: applied to the TCs representative of each unique server behavior (status codes, redirect headers, cookie flags), not duplicated everywhere it wouldn't add new coverage.
 
-Run a single TC with the `RUN COMMAND` from its own file header, e.g.:
+Run a single TC with its own `RUN COMMAND`, e.g.:
 
 ```bash
 npx playwright test tests/login/TC-LOGIN-01-Verify-Valid-Credentials-Redirect-To-Dashboard.spec.ts --project=chromium --headed
 ```
 
-> **Note:** the custom reporters (bug list included) are registered in `playwright.config.ts`'s `reporter` array. Overriding it on the CLI with `--reporter=<name>` replaces that whole array, so a bare `npx playwright test` (no `--reporter` flag) is what keeps the bug list reporter active.
+> **Note:** custom reporters are registered in `playwright.config.ts`'s `reporter` array. The CLI flag `--reporter=<name>` replaces that whole array, so run a bare `npx playwright test` (no `--reporter` flag) to keep the bug list reporter active.
 
 ## Automatic Bug List (`docs/Bug-List.xlsx`)
 
-Every time a test case **fails**, a custom Playwright reporter (`src/reporters/bugListReporter.ts`) appends one draft row to `docs/Bug-List.xlsx`: same column layout used for manual bug tracking (`Bug ID`, `Summary`, `Category`, `Scope`, `Environment`, `Modul`, `Steps to Reproduce`, `Expected Result`, `Actual Result`, `Severity`, `Priority`, `Attachment`, `Detected On`, `Detected By`, `Status`, `Assigned To`, `Notes`, `Script Test Case`).
+Every time a test case **fails**, `src/reporters/bugListReporter.ts` appends one draft row to `docs/Bug-List.xlsx`, using the same column layout as manual bug tracking: `Bug ID`, `Summary`, `Category`, `Scope`, `Environment`, `Modul`, `Steps to Reproduce`, `Expected Result`, `Actual Result`, `Severity`, `Priority`, `Attachment`, `Detected On`, `Detected By`, `Status`, `Assigned To`, `Notes`, `Script Test Case`.
 
-Every field is derived from the `[CHECK_FAIL] <label> | <detail>` log line `TestReport.check()` emits for each failing check, plus the `[STEP n]` log for reproduction steps:
+Every field comes from the `[CHECK_FAIL] <label> | <detail>` log line `TestReport.check()` emits on each failing check, plus the `[STEP n]` log for reproduction steps:
 
 | Column | How it's derived |
 |---|---|
 | Bug ID | Auto-incrementing `BG-XXX` |
-| Summary | `<Modul>: <first failed check's label: detail>`, truncated to a single concise line |
+| Summary | `<Modul>: <first failed check>`, truncated to one line |
 | Category | `Bug` |
-| Scope | `FE` / `BE` / `FE & BE`, from keyword patterns (`console`, `render`, `ui` → FE; `api`, `status=`, HTTP verbs, `response` → BE) in the failed checks' text |
+| Scope | `FE` / `BE` / `FE & BE`, from keyword patterns (console/UI → FE, API/HTTP → BE) |
 | Environment | `BASE_URL` |
 | Modul | `<Module> - <Screen>` from the spec's folder path (e.g. `PIM - Job`) |
-| Steps to Reproduce | Renumbered, plain-sentence `[STEP n]` log lines |
-| Expected Result | The failed check's own label: since every `check()` label is already phrased as the expected condition (e.g. "Tidak ada console error di browser") |
-| Actual Result | The failed check's `detail`, prefixed with context (`Browser console error: ...` / `API response: ...`) when recognizable |
-| Severity / Priority | Keyword-heuristic suggestion (`High`/`Medium`/`Low`): e.g. XSS/crash/5xx → High, invalid data/4xx → Medium, console-only/cosmetic → Low. Priority mirrors Severity by default. |
+| Steps to Reproduce | Renumbered `[STEP n]` lines |
+| Expected Result | The failed check's own label (already phrased as the expected condition) |
+| Actual Result | The failed check's detail, prefixed with context when recognizable (`Browser console error: ...` / `API response: ...`) |
+| Severity / Priority | Keyword-heuristic suggestion (`High`/`Medium`/`Low`), e.g. XSS/crash/5xx → High, invalid data/4xx → Medium, console-only/cosmetic → Low. Priority mirrors Severity by default. |
 | Attachment | Relative path to the auto-captured screenshot/video |
 | Detected On / Detected By / Status | Run date, `git config user.name`, `Open` |
 
-Every auto-filled value here is a **suggestion to speed up triage, not a final verdict**: Severity/Priority in particular are classified from keyword patterns, not real judgment of business impact, so they're worth a human spot-check before a report goes out. If a failing test never calls `TestReport.check()` (a raw thrown exception), the reporter falls back to Playwright's own error message instead.
+These values are **suggestions for faster triage, not a final verdict**. Severity/Priority come from keyword patterns, not real business-impact judgment, so a human spot-check is still worthwhile before the report goes out. If a failing test never calls `TestReport.check()` (a raw exception), the reporter falls back to Playwright's own error message.
 
-**Dedup on regression runs:** a bug is identified by its test script + test title. If that same test fails again on a later run, the reporter checks the existing row's `Status`:
-- Still **Open** (or any non-`Closed` status): no new row is added. Same bug, no duplicate.
-- **Closed**: a new row with a new `BG-XXX` ID is added, since a fix that was verified closed and is now failing again is a regression worth tracking separately from the original report.
+**Dedup on regression runs:** a bug is identified by its test script + title. If the same test fails again, the reporter checks the existing row's `Status`:
+- Still **Open**: no new row, same bug.
+- **Closed**: a new row is added, since a fix verified closed and now failing again is a separate regression.
 
-This means re-running the suite repeatedly doesn't flood the sheet with copies of the same unresolved bug: only genuinely new failures or regressions add rows.
+So re-running the suite doesn't flood the sheet with duplicates, only new failures or regressions add rows.
 
-**Auto-close on retest:** if a test case that previously failed now passes, every still-`Open` row for that script is automatically set to `Closed`, with a note appended to `Notes` (`Auto-closed: retest passed on <date>`) recording when and why. A test passing clean is treated as resolving every previously reported finding for that script, so no manual bookkeeping is needed to keep `Status` accurate as bugs get fixed.
+**Auto-close on retest:** when a previously failing test passes again, every still-`Open` row for that script is set to `Closed`, with a note (`Auto-closed: retest passed on <date>`) recording when. A clean pass is treated as resolving every finding previously reported for that script, so `Status` stays accurate without manual bookkeeping.
 
-The file is created empty (header only) on the very first test run. A run only touches it further when there's something to record: a new failure, a regression, or a bug being auto-closed. A fully green run with nothing previously open leaves it unchanged.
+The file starts empty (header only) and is only touched when there's something to record: a new failure, a regression, or an auto-close. A fully green run with nothing previously open leaves it unchanged.
 
-> **Why a known, unfixed site bug is left failing rather than marked `test.fail()`:** a test case that always fails due to a genuine third-party defect (e.g. `TC-PIM-JOB-01`, see its JSDoc header) is intentionally left as a real `FAILED` result instead of being wrapped in Playwright's `test.fail()` annotation. `test.fail()` would make the test report as "passed", which would both hide the finding from the Allure pass-rate chart and silently exclude it from `Bug-List.xlsx` (the reporter only logs `failed`/`timedOut` results). A QA portfolio's value is in *surfacing* defects, so a documented, reproducible failure is the more honest signal than an artificially green suite.
+> **Why a known site bug is left failing instead of using `test.fail()`:** a TC that always fails due to a genuine third-party defect (e.g. `TC-PIM-JOB-01`, see its JSDoc header) is intentionally left as a real `FAILED` result. `test.fail()` would report it as "passed", hiding the finding from Allure's pass rate and silently excluding it from `Bug-List.xlsx` (the reporter only logs `failed`/`timedOut`). A documented failure is a more honest signal of this suite's value than an artificially green one.
 
 ## Getting Started
 
@@ -197,12 +197,12 @@ Set these repository secrets if targeting a non-default environment:
 
 | Module | Scenarios | Docs |
 |--------|-----------|------|
-| Login | 40 TCs: positive, negative, boundary, security, edge (see `tests/login/`) | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| PIM (Phase 1) | 52 TCs across Employee List (14), Add Employee (26), Personal Details (12): positive, negative, boundary, security, edge (see `tests/pim/`). | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
-| PIM (Phase 2) | 67 TCs across the remaining 9 Personal Details sub-tabs: Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications, Memberships (see `tests/pim/`). Phase 3 (Configuration, Reports) not yet covered. | [docs/TC-PIM-Phase2.txt](docs/TC-PIM-Phase2.txt) |
+| Login | 40 TCs: positive, negative, boundary, security, edge | [docs/TC-Login.txt](docs/TC-Login.txt) |
+| PIM (Phase 1) | 52 TCs: Employee List (14), Add Employee (26), Personal Details (12) | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| PIM (Phase 2) | 67 TCs across the remaining 9 Personal Details tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications, Memberships). Phase 3 (Configuration, Reports) not yet covered. | [docs/TC-PIM-Phase2.txt](docs/TC-PIM-Phase2.txt) |
 | Leave | Submitting without entitlement is correctly blocked (see note below) | N/A |
 
-> **Note on the Leave suite:** the public OrangeHRM demo account carries no assigned leave entitlement, so a successful leave application cannot be exercised against it. Rather than asserting an outcome the environment can never produce, the test verifies the deterministic, environment-correct behavior instead: the UI reports an insufficient balance once a date range is selected.
+> **Note on the Leave suite:** the public demo account has no assigned leave entitlement, so a successful application can't be exercised. Instead the test verifies the deterministic behavior that's actually there: an insufficient-balance message once a date range is selected.
 
 ## Roadmap
 
