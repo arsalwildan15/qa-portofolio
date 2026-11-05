@@ -45,8 +45,10 @@ test('TC-RECRUITMENT-SECURITY-01: cross-candidate access via ID manipulation (ID
 
   report.step('[API] PUT status action untuk candidate id milik "TC lain" (candidate A) dari sesi ini');
   const statusUrl = `${env.baseURL}/web/index.php/api/v2/recruitment/candidates/${candidateA.candidateId}/shortlist`;
-  const statusResp = await page.request.put(statusUrl, { data: {} }).catch((e) => ({ status: () => -1, _err: e }) as any);
-  const canMutateA = typeof statusResp.status === 'function' ? statusResp.status() : -1;
+  const statusResp = await page.request
+    .put(statusUrl, { data: {} })
+    .catch((): { status: () => number } => ({ status: () => -1 }));
+  const canMutateA = statusResp.status();
 
   report.check('TC dijalankan tanpa exception', true);
 

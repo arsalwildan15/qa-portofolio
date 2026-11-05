@@ -52,8 +52,9 @@ test('TC-RECRUITMENT-SECURITY-04: 2 concurrent status-transition PUT requests fo
   const interviewUrl = `${env.baseURL}/web/index.php/api/v2/recruitment/candidates/${candidateId}/shedule-interview`;
 
   report.step('[API] Kirim keduanya SECARA PARALEL via Promise.all (bukan berurutan)');
+  const failedRequest = (): { status: () => number } => ({ status: () => -1 });
   const [rejectResp, interviewResp] = await Promise.all([
-    page.request.put(rejectUrl, { data: { note: 'QA race condition reject' } }).catch((e) => ({ status: () => -1, _err: e }) as any),
+    page.request.put(rejectUrl, { data: { note: 'QA race condition reject' } }).catch(failedRequest),
     page.request
       .post(interviewUrl, {
         data: {
@@ -64,10 +65,10 @@ test('TC-RECRUITMENT-SECURITY-04: 2 concurrent status-transition PUT requests fo
           interviewerEmpNumbers: [69],
         },
       })
-      .catch((e) => ({ status: () => -1, _err: e }) as any),
+      .catch(failedRequest),
   ]);
-  const rejectStatus = typeof rejectResp.status === 'function' ? rejectResp.status() : -1;
-  const interviewStatus = typeof interviewResp.status === 'function' ? interviewResp.status() : -1;
+  const rejectStatus = rejectResp.status();
+  const interviewStatus = interviewResp.status();
   report.check('Kedua request PUT selesai tanpa exception jaringan (status code terbaca)', rejectStatus !== -1 && interviewStatus !== -1, `reject=${rejectStatus}, interview=${interviewStatus}`);
 
   report.step('[API] GET detail candidate setelah keduanya selesai, cek status akhir konsisten');
@@ -82,7 +83,7 @@ test('TC-RECRUITMENT-SECURITY-04: 2 concurrent status-transition PUT requests fo
   const historyUrl = `${env.baseURL}/web/index.php/api/v2/recruitment/candidates/${candidateId}/vacancy-history`;
   const historyResp = await page.request.get(historyUrl).catch(() => null);
   const historyBody = historyResp && historyResp.status() === 200 ? await historyResp.json().catch(() => null) : null;
-  const historyEntries: any[] = Array.isArray(historyBody?.data) ? historyBody.data : [];
+  const historyEntries: unknown[] = Array.isArray(historyBody?.data) ? historyBody.data : [];
   const historyMentionsReject = historyEntries.some((e) => JSON.stringify(e).toLowerCase().includes('reject'));
   const historyMentionsInterview = historyEntries.some((e) => JSON.stringify(e).toLowerCase().includes('interview'));
 
