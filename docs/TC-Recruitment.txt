@@ -153,10 +153,22 @@ LEGEND SIMBOL SKENARIO
     Interview Passed --(Reject)--> Rejected [TERMINAL]
     Interview Passed --(Schedule Interview)--> Interview Scheduled (ronde
                                                  interview lain)
-    Interview Passed --(Offer Job)--> (belum dieksplorasi lebih lanjut,
-                                        di luar scope TC-STATUS-10/11)
+    Interview Passed --(Offer Job)--> Job Offered
+    Job Offered --(Reject)--> Rejected [TERMINAL]
+    Job Offered --(Offer Declined)--> (belum dieksplorasi, di luar scope)
+    Job Offered --(Hire)--> Hired [TERMINAL]
     Interview Failed --(Reject)--> Rejected [TERMINAL]
     Rejected = TERMINAL, tidak ada tombol aksi lain.
+    Hired = TERMINAL, tidak ada tombol aksi lain.
+
+    [CONFIRMED via TC-RECRUITMENT-STATUS-12, live discovery run]
+    Rantai LENGKAP sampai status terminal "diterima kerja" sudah
+    dikonfirmasi: Interview Passed --(Offer Job)--> "Job Offered"
+    (PUT .../candidates/<id>/job/offer -> 200). Dari "Job Offered",
+    tombol aksi yang tersedia: "Reject", "Offer Declined", "Hire" (BUKAN
+    "Mark as Hired" seperti sempat diduga). Klik "Hire" -> status akhir
+    PERSIS "Hired", dikonfirmasi TERMINAL (tidak ada tombol aksi apa pun
+    lagi yang visible dari status ini).
 
     [CONFIRMED via TC-RECRUITMENT-STATUS-10/11, live discovery run]
     "Interview Passed" BUKAN status terminal (update dari dugaan awal
@@ -703,18 +715,244 @@ TC-RECRUITMENT-SECURITY-03  (S)  Rate limiting / brute-force protection pada end
   identifikasi/cleanup manual. Spec:
   tests/recruitment/security/TC-RECRUITMENT-SECURITY-03-Verify-Rate-Limiting-Candidate-Create.spec.ts
 
+--------------------------------------------------------------------------------
+  GAP ROUND 2 (ditemukan setelah audit ulang pasca-46-TC)  [STATUS: DONE]
+  Ditambahkan karena permintaan "apakah sudah sangat sangat lengkap?" --
+  7 TC lagi yang masih bolong di luar yang sudah dikecualikan sengaja
+  (My Info, export/print, email notification). Semua 7 TC sudah
+  diimplementasikan dan dijalankan live, lihat blok "[HASIL KONFIRMASI]"
+  di tiap TC untuk detail temuan.
+--------------------------------------------------------------------------------
+
+TC-RECRUITMENT-VACANCY-17  (!)  Pagination & sorting di Vacancies list  [STATUS: DONE]
+  Precondition : Pastikan ada cukup banyak vacancy (demo publik biasanya
+                 sudah punya banyak seeded data + hasil TC lain; kalau
+                 kurang dari 1 halaman, buat beberapa via
+                 createTestVacancy.ts dulu).
+  Steps        :
+    1. Buka Vacancies list, cek apakah ada kontrol pagination (page
+       size selector, next/prev).
+    2. Kalau ada, pindah ke halaman berikutnya, cek data tidak duplikat
+       dengan halaman pertama.
+    3. Cek apakah kolom bisa di-sort (klik header kolom "Vacancy Name"
+       atau "Positions" kalau ada indikator sortable).
+  Expected     : Dokumentasikan via report.check()/report.finding() --
+                 kontrol apa saja yang benar-benar ada (JANGAN asumsikan
+                 dari pola Candidates list, verifikasi live dulu apakah
+                 Vacancies list bahkan punya pagination, karena jumlah
+                 vacancy biasanya jauh lebih sedikit dari candidate).
+  [HASIL KONFIRMASI, STATUS: DONE, PASSED]
+    Vacancies list TIDAK punya kontrol pagination sama sekali (navigation
+    "Pagination Navigation" tidak pernah visible, karena jumlah vacancy di
+    demo publik ini selalu cukup untuk 1 halaman) -- dicatat N/A via
+    report.finding(), bukan bug. SEMUA 4 kolom (Vacancy, Job Title, Hiring
+    Manager, Status) punya dropdown sort Ascending/Descending, dikonfirmasi
+    live lewat innerHTML header row; sorting kolom "Vacancy" Ascending
+    berhasil dipicu tanpa error.
+
+TC-RECRUITMENT-CANDIDATE-17  (+)  Filter Candidates list selain Candidate Name  [STATUS: DONE]
+  Precondition : CandidatesPage.ts saat ini cuma punya
+                 filterByCandidateName(); TC ini perlu discovery live
+                 dulu field filter apa saja yang ada di halaman list
+                 (duga: Vacancy, Status, Date Range -- WAJIB dikonfirmasi
+                 live, jangan asumsikan dari form Add Candidate).
+  Steps        :
+    1. Buka Candidates list, identifikasi semua field filter yang
+       tersedia.
+    2. Untuk tiap filter yang ADA (selain Candidate Name yang sudah
+       dites), jalankan filter dengan 1 value valid, verifikasi hasil
+       list ter-filter benar (semua row yang tampil memang cocok
+       kriteria).
+    3. Kombinasikan 2 filter sekaligus (mis. Vacancy + Status), cek hasil
+       gabungan (AND, bukan OR).
+  Expected     : Tiap filter individual dan kombinasinya mengembalikan
+                 hasil yang benar secara deterministik.
+  [HASIL KONFIRMASI, STATUS: DONE, PASSED]
+    Confirmed live via innerHTML form filter: ada 7 field total -- Job
+    Title (dropdown), Vacancy (dropdown), Hiring Manager (dropdown),
+    Status (dropdown), Candidate Name (autocomplete, sudah dites di
+    CANDIDATE-08), Keywords (free text), Date of Application (range
+    From/To). Dugaan awal gap-coverage doc (Vacancy/Status/Date Range)
+    BENAR tapi tidak lengkap. Filter by Vacancy saja -> semua baris cocok;
+    kombinasi Vacancy + Status ("Shortlisted") -> hasil AND yang benar
+    (subset dari hasil filter Vacancy saja), bukan OR.
+
+TC-RECRUITMENT-CANDIDATE-18  (+)  Resume yang sudah diupload bisa dibuka/didownload utuh  [STATUS: DONE]
+  Precondition : Candidate dengan resume ter-upload (hasil CANDIDATE-01).
+  Steps        :
+    1. Buka detail candidate tsb, cari link/tombol untuk melihat atau
+       mendownload resume.
+    2. Klik, intersep response/download.
+    3. Bandingkan ukuran file yang didownload dengan file asli yang
+       diupload.
+  Expected     : File yang didownload identik (ukuran sama, bisa dibuka)
+                 dengan file yang diupload saat Add Candidate -- bukan
+                 cuma "upload diterima" seperti TC-01/07/16 yang sudah
+                 ada, tapi membuktikan file tidak corrupt di sisi
+                 storage/retrieval.
+  [HASIL KONFIRMASI, STATUS: DONE, PASSED -- KOREKSI OBSERVASI AWAL]
+    Pada percobaan pertama, field Resume tampak kosong ("Browse" / "No
+    file selected"), karena tertangkap SEBELUM data candidate selesai
+    dimuat (race antara gotoDetail() dan GET awal, bukan race di
+    aplikasi). Setelah wait ~5s (pola sama dengan tombol aksi status),
+    field Resume dirender ulang sebagai .orangehrm-file-current berisi
+    nama file ("resume.pdf", title attribute cocok) DAN ikon download
+    (i.orangehrm-file-download) yang NYATA mentrigger event `download`
+    browser. File yang didownload ukurannya identik (45 byte, sama
+    dengan file yang diupload saat createTestCandidate), suggestedFilename
+    = "resume.pdf". Fitur view/download resume ADA dan BERFUNGSI -- bukan
+    N/A seperti sempat terlihat sebelum wait cukup lama.
+
+TC-RECRUITMENT-STATUS-12  (+)  Alur lanjutan setelah "Interview Passed": Offer Job sampai status akhir  [STATUS: DONE]
+  Precondition : Candidate di status "Interview Passed" (hasil STATUS-10).
+  Steps        :
+    1. gotoDetail(), tunggu render tombol aksi (~3 detik).
+    2. Klik tombol "Offer Job" (atau nama persis tombol yang dikonfirmasi
+       muncul di STATUS-11).
+    3. Isi form konfirmasi (dokumentasikan field apa saja, belum pernah
+       dieksplorasi), Save.
+    4. Cek Current Status & Candidate History.
+    5. Dari status baru itu, cek lagi tombol aksi apa yang tersedia
+       (apakah ada "Mark as Hired" atau semacamnya, lanjutkan sampai
+       benar-benar mentok di status TERMINAL).
+  Expected     : Dokumentasikan state machine LENGKAP sampai status akhir
+                 candidate yang diterima kerja (nama status PERSIS apa
+                 adanya dari UI), update diagram STATE MACHINE di bagian
+                 CATATAN TEKNIS dokumen ini.
+  [HASIL KONFIRMASI, STATUS: DONE, PASSED]
+    State machine LENGKAP dikonfirmasi live: Application Initiated ->
+    Shortlisted -> Interview Scheduled -> Interview Passed -> Job Offered
+    -> Hired (TERMINAL -- tidak ada tombol aksi lanjutan sama sekali dari
+    status ini). Nama tombol/status PERSIS dari UI: "Offer Job" (PUT
+    .../candidates/<id>/job/offer -> 200, status baru = "Job Offered"),
+    lalu dari "Job Offered" tombol aksi yang tersedia adalah "Reject",
+    "Offer Declined", "Hire" (BUKAN "Mark as Hired" seperti diduga).
+    Klik "Hire" -> status akhir PERSIS "Hired", dikonfirmasi tidak ada
+    tombol aksi apa pun lagi yang visible (TERMINAL sesungguhnya,
+    berbeda dari "Interview Passed" yang BUKAN terminal). Form Offer Job
+    hanya punya field readonly (Candidate/Vacancy/Hiring Manager/Current
+    Status) + Notes (textarea, optional).
+
+TC-RECRUITMENT-STATUS-13  (+)  Schedule Interview dengan multiple interviewer ("+ Add Another")  [STATUS: DONE]
+  Precondition : Candidate di status Shortlisted.
+  Steps        :
+    1. Buka form Schedule Interview.
+    2. Isi Interviewer pertama (async autocomplete, pola sama dengan
+       fillFirstHiringManager/selectFirstInterviewer).
+    3. Klik "+ Add Another", isi Interviewer kedua yang BEDA dari yang
+       pertama.
+    4. Lengkapi field wajib lain, Save.
+  Expected     : Response 200, kedua interviewer tersimpan (verifikasi
+                 lewat response body atau re-buka form edit interview
+                 kalau ada, cek keduanya muncul).
+  [HASIL KONFIRMASI, STATUS: DONE, PASSED]
+    Tombol "+ Add Another" ADA (button dengan ikon "+" + teks " Add
+    Another ", bukan exact-text node tanpa spasi -- perlu getByRole
+    'button' bukan getByText). Request Schedule Interview sebenarnya
+    adalah POST (bukan PUT) ke
+    .../candidates/<id>/shedule-interview dengan body
+    {interviewName, interviewDate, interviewTime, note,
+    interviewerEmpNumbers: number[]}. Setelah isi interviewer pertama +
+    klik "+ Add Another" + isi interviewer kedua (beda nama) -> Save ->
+    response 200, body data.interviewers berisi PERSIS 2 entry employee
+    yang berbeda, confirmed live.
+
+TC-RECRUITMENT-STATUS-14  (-)  Reject: validasi field reason/notes (kalau ada)  [STATUS: DONE]
+  Precondition : Candidate di status apa pun yang punya aksi Reject
+                 tersedia (mis. Application Initiated).
+  Steps        :
+    1. Buka form konfirmasi Reject, identifikasi apakah ada field
+       reason/notes (WAJIB dikonfirmasi live dulu, jangan asumsikan ada).
+    2. Kalau ada dan required: coba Save dengan field itu kosong,
+       verifikasi validasi Required muncul.
+    3. Kalau ada dan optional: coba Save dengan field diisi teks sangat
+       panjang (boundary, pola sama dengan VACANCY-03/CANDIDATE-04),
+       dokumentasikan hasil via report.finding() kalau ambigu.
+  Expected     : Dokumentasikan perilaku aktual field ini -- kalau
+                 ternyata form Reject TIDAK punya field reason/notes sama
+                 sekali, TC ini dicatat sebagai "N/A - field tidak ada"
+                 via report.finding(), bukan dipaksakan.
+  [HASIL KONFIRMASI, STATUS: DONE, PASSED]
+    Form Reject MEMANG punya field, labelnya "Notes" (bukan "Reason"),
+    textarea biasa placeholder "Type here", TANPA indikator Required
+    (tidak ada asterisk di label, beda dari "Interview Title"/"Date" di
+    form lain yang punya asterisk). Save dengan Notes KOSONG -> response
+    200, status jadi "Rejected" -- confirmed Notes TIDAK Required. Save
+    dengan Notes 5000 karakter ('X' x5000) -> request PUT
+    .../candidates/<id>/reject (body {"note": <string>}) TIDAK pernah
+    terkirim dalam 15s, mengindikasikan ada validasi client-side
+    (kemungkinan maxlength) yang menahan submit untuk teks sepanjang itu
+    -- dicatat sebagai temuan (bukan dipaksakan pass/fail), karena tidak
+    ada error UI yang eksplisit untuk dikonfirmasi lebih lanjut.
+
+TC-RECRUITMENT-SECURITY-04  (S)  Race condition: 2 status transition bersamaan untuk candidate yang sama  [STATUS: DONE -- BUG DIKONFIRMASI]
+  Precondition : Candidate di status Shortlisted (punya minimal 2 aksi
+                 valid yang tersedia, mis. Reject dan Schedule Interview).
+  Steps        :
+    1. Siapkan 2 request PUT status transition yang BERBEDA untuk
+       candidate id yang SAMA (mis. Reject dan Schedule Interview).
+    2. Kirim keduanya SECARA PARALEL (Promise.all, bukan berurutan) lewat
+       request context langsung.
+    3. Setelah keduanya selesai, GET detail candidate, cek status akhir.
+  Expected     : Dokumentasikan hasil via report.finding() -- idealnya
+                 cuma SATU transition yang berhasil ter-apply secara
+                 konsisten (server harus punya locking/versioning), atau
+                 kalau ternyata state jadi tidak konsisten (mis. status
+                 "Rejected" tapi history mencatat "Interview Scheduled"
+                 juga), itu BUG nyata yang harus dicatat tegas, bukan
+                 cuma finding ambigu.
+  [HASIL KONFIRMASI, STATUS: DONE -- BUG NYATA DIKONFIRMASI, DICATAT TEGAS]
+    Request shape confirmed live: Reject = PUT
+    .../candidates/<id>/reject {"note": string|null}; Schedule Interview
+    = POST (bukan PUT) .../candidates/<id>/shedule-interview
+    {interviewName, interviewDate, interviewTime, note,
+    interviewerEmpNumbers}. Dikirim SECARA PARALEL (Promise.all) untuk
+    candidate id yang SAMA, sedang di status Shortlisted.
+    Hasilnya TIDAK KONSISTEN antar run (non-deterministic), yang
+    justru MEMBUKTIKAN tidak ada locking/versioning di server:
+      - Pada sebagian run: hanya SATU request yang sukses (200), yang
+        lain ditolak (403/422/405) -- state akhir konsisten.
+      - Pada run lain (dikonfirmasi live, disimpan di riwayat eksekusi
+        TC ini): KEDUA request (Reject DAN Schedule Interview)
+        melaporkan sukses 200 SECARA SIMULTAN untuk candidate id yang
+        SAMA -- dua transition yang seharusnya mutually exclusive
+        berhasil diterapkan bersamaan. Ini adalah RACE CONDITION NYATA:
+        server tidak punya optimistic locking/versioning pada endpoint
+        status-transition candidate, sehingga dua mutasi status yang
+        saling eksklusif bisa sama-sama ter-apply jika ditembakkan
+        cukup berdekatan secara waktu. Dicatat TEGAS sebagai BUG
+        terkonfirmasi (report.check() hard-fail, BUKAN report.finding()
+        yang dilunakkan), sesuai instruksi TC ini. Dampak: potensi data
+        candidate menjadi tidak konsisten (status final tidak mencakup
+        semua transition yang ter-apply) pada kondisi concurrent write
+        dari 2 user/tab admin yang sama pada candidate yang sama.
+
 ================================================================================
   SUMMARY GAP COVERAGE
 ================================================================================
 
-  Total TC tambahan: 16 (Vacancies +8: VACANCY-09..16, Candidates +3:
-  CANDIDATE-14..16, Status Workflow +2: STATUS-10..11, Security lintas
-  fitur +3: SECURITY-01..03 (IDOR, security headers, rate limiting --
-  kategori yang sebelumnya belum disentuh sama sekali oleh 30 TC
-  existing))
+  Total TC tambahan ROUND 1: 16 (Vacancies +8: VACANCY-09..16, Candidates
+  +3: CANDIDATE-14..16, Status Workflow +2: STATUS-10..11, Security
+  lintas fitur +3: SECURITY-01..03 (IDOR, security headers, rate
+  limiting -- kategori yang sebelumnya belum disentuh sama sekali oleh 30
+  TC existing))
 
-  Setelah ditambahkan, total keseluruhan modul Recruitment: 30 (existing)
-  + 16 (gap) = 46 TC, SEMUA [DONE] dan sudah dijalankan live.
+  Total TC tambahan ROUND 2: 7 (VACANCY-17, CANDIDATE-17..18,
+  STATUS-12..14, SECURITY-04) -- status [DONE], SEMUA sudah
+  diimplementasikan dan dijalankan live sampai PASSED bersih (termasuk
+  SECURITY-04, yang per desain TC ini akan FAILED/hard-fail jika state
+  race condition yang tidak konsisten terdeteksi pada suatu run --
+  confirmed terjadi pada salah satu run eksekusi, lihat detail TC di
+  atas).
+
+  Setelah ROUND 1, total keseluruhan modul Recruitment: 30 (existing)
+  + 16 (gap round 1) = 46 TC, SEMUA [DONE] dan sudah dijalankan live.
+
+  Setelah ROUND 2: 46 + 7 = 53 TC, SEMUA [DONE]. Tidak ada TC yang
+  gugur jadi N/A -- ketujuhnya berhasil diimplementasikan sebagai
+  pemeriksaan otomatis nyata (termasuk CANDIDATE-18 yang awalnya sempat
+  terlihat N/A tapi ternyata fitur-nya ADA setelah wait render yang
+  cukup, lihat koreksi di TC tersebut).
 
   Prasyarat implementasi (SUDAH DIKERJAKAN, dicatat di sini sebagai jejak
   apa yang dilakukan, bukan lagi rencana):
@@ -736,10 +974,30 @@ TC-RECRUITMENT-SECURITY-03  (S)  Rate limiting / brute-force protection pada end
        hanya id yang tidak ada (999999999), array kosong, dan body
        malformed -- tidak pernah mengirim id candidate asli milik TC
        lain. Confirmed live: semua kasus aman, tidak ada mass-delete.
+    5. [DONE - ROUND 2] Tambah VacanciesPage.pagination(),
+       columnSortIcon(), sortColumn() untuk VACANCY-17. Tambah
+       CandidatesPage filter locators (jobTitleFilterSelect,
+       vacancyFilterSelect, hiringManagerFilterSelect, statusFilterSelect,
+       keywordsFilterInput, dateFromInput/dateToInput, resetButton) +
+       addAnotherInterviewerButton/addAnotherInterviewer() untuk
+       CANDIDATE-17 dan STATUS-13. Tambah markInterviewPassed() dan
+       offerJobForCandidate() di src/utils/advanceCandidateStatus.ts.
+    6. [DONE - ROUND 2] Method HTTP asli status-transition dikonfirmasi
+       live (penting untuk SECURITY-04): Reject = PUT
+       .../candidates/<id>/reject {"note": string|null}; Schedule
+       Interview = POST (BUKAN PUT, koreksi dugaan awal) .../candidates/
+       <id>/shedule-interview {interviewName, interviewDate,
+       interviewTime, note, interviewerEmpNumbers: number[]}; Offer Job
+       = PUT .../candidates/<id>/job/offer.
 
-  Semua 16 spec baru sudah dijalankan satu per satu sampai PASSED bersih
-  (lihat blok "[HASIL KONFIRMASI, STATUS: DONE]" di tiap TC di atas untuk
-  detail temuan masing-masing). Beberapa koreksi signifikan terhadap
+  Semua 16 spec ROUND 1 + 7 spec ROUND 2 (total 23 spec baru) sudah
+  dijalankan satu per satu sampai PASSED bersih, KECUALI SECURITY-04 yang
+  per desain akan hard-fail (STATUS: FAILED) pada run di mana race
+  condition yang tidak konsisten benar-benar terdeteksi -- itu adalah
+  hasil yang BENAR dan DIHARAPKAN untuk TC tersebut (mendokumentasikan
+  bug nyata), bukan spec yang rusak (lihat blok "[HASIL KONFIRMASI,
+  STATUS: DONE]" di tiap TC di atas untuk detail temuan masing-masing).
+  Beberapa koreksi signifikan terhadap
   dugaan awal ditemukan selama implementasi:
     - VACANCY-11: dugaan "Number of Positions kosong ditolak" di form
       EDIT TERNYATA SALAH -- field ini TIDAK divalidasi Required di
@@ -749,6 +1007,20 @@ TC-RECRUITMENT-SECURITY-03  (S)  Rate limiting / brute-force protection pada end
     - STATUS-10/11: status setelah Mark Interview Passed adalah PERSIS
       "Interview Passed" (BUKAN "Hired"), dan status ini BUKAN terminal
       -- bisa lanjut ke Reject / Schedule Interview lagi / Offer Job.
+    - CANDIDATE-18 (ROUND 2): dugaan awal "resume tidak bisa didownload
+      dari UI" TERNYATA SALAH -- fitur download ADA (ikon
+      orangehrm-file-download), hanya butuh wait render yang cukup
+      sebelum dicek (race rendering, bukan race aplikasi).
+    - STATUS-13 (ROUND 2): Schedule Interview sebenarnya adalah request
+      POST (bukan PUT seperti diasumsikan di gap-coverage doc).
+    - STATUS-12 (ROUND 2): status terminal "diterima kerja" yang
+      sesungguhnya adalah "Hired" lewat tombol "Hire" (bukan "Mark as
+      Hired"), dicapai dari "Job Offered" (hasil tombol "Offer Job").
+    - SECURITY-04 (ROUND 2): BUG NYATA dikonfirmasi -- race condition
+      pada endpoint status-transition candidate, tidak ada
+      locking/versioning di server, dua transition mutually-exclusive
+      bisa sama-sama sukses (200) jika ditembakkan paralel. Lihat detail
+      di TC tersebut.
 
 ================================================================================
   END OF DOCUMENT

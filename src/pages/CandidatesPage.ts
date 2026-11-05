@@ -28,6 +28,23 @@ export class CandidatesPage extends BasePage {
   // List page filters
   readonly candidateNameFilterInput: Locator;
   readonly searchButton: Locator;
+  /**
+   * [TEMUAN] Candidates list filter form, confirmed live via innerHTML,
+   * punya 7 field total: Job Title (dropdown), Vacancy (dropdown),
+   * Hiring Manager (dropdown), Status (dropdown), Candidate Name
+   * (autocomplete, sudah ada method filterByCandidateName()), Keywords
+   * (free text), Date of Application (range: From/To date pickers).
+   */
+  readonly jobTitleFilterSelect: Locator;
+  readonly vacancyFilterSelect: Locator;
+  readonly hiringManagerFilterSelect: Locator;
+  readonly statusFilterSelect: Locator;
+  readonly keywordsFilterInput: Locator;
+  readonly dateFromInput: Locator;
+  readonly dateToInput: Locator;
+  readonly resetButton: Locator;
+  // "+ Add Another" interviewer row (Schedule Interview form)
+  readonly addAnotherInterviewerButton: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -73,6 +90,23 @@ export class CandidatesPage extends BasePage {
     // page context matters when this locator is used (goto() called first).
     this.candidateNameFilterInput = page.getByPlaceholder('Type for hints...');
     this.searchButton = page.getByRole('button', { name: 'Search' });
+
+    const byFilterLabel = (label: string) =>
+      page
+        .locator('.oxd-input-group', { has: page.getByText(label, { exact: true }) })
+        .locator('.oxd-select-text');
+    this.jobTitleFilterSelect = byFilterLabel('Job Title');
+    this.vacancyFilterSelect = byFilterLabel('Vacancy');
+    this.hiringManagerFilterSelect = byFilterLabel('Hiring Manager');
+    this.statusFilterSelect = byFilterLabel('Status');
+    this.keywordsFilterInput = page
+      .locator('.oxd-input-group', { has: page.getByText('Keywords', { exact: true }) })
+      .locator('input');
+    this.dateFromInput = page.getByPlaceholder('From');
+    this.dateToInput = page.getByPlaceholder('To');
+    this.resetButton = page.getByRole('button', { name: 'Reset' });
+
+    this.addAnotherInterviewerButton = page.getByRole('button', { name: 'Add Another' });
   }
 
   async goto(): Promise<void> {
@@ -173,5 +207,42 @@ export class CandidatesPage extends BasePage {
     await this.page.waitForTimeout(500);
     const options = this.page.locator('.oxd-autocomplete-option');
     if ((await options.count()) > 0) await options.first().click();
+  }
+
+  /**
+   * Clicks "+ Add Another" to reveal a second Interviewer autocomplete row,
+   * then fills it picking a DIFFERENT suggestion than index 0 (used for the
+   * first interviewer) so the two interviewers are distinct.
+   */
+  async addAnotherInterviewer(): Promise<void> {
+    await this.addAnotherInterviewerButton.click();
+    await this.page.waitForTimeout(500);
+    const inputs = this.page.getByPlaceholder('Type for hints...');
+    const secondInput = inputs.nth(1);
+    await secondInput.fill('a');
+    await this.page.waitForTimeout(500);
+    await this.page.getByText('Searching....').waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
+    await this.page.waitForTimeout(500);
+    const options = this.page.locator('.oxd-autocomplete-option');
+    const count = await options.count();
+    if (count > 1) await options.nth(1).click();
+    else if (count > 0) await options.first().click();
+  }
+
+  /** Selects a dropdown option in one of the list filter fields by text. */
+  async selectFilterOption(select: Locator, optionText: string): Promise<void> {
+    await select.click();
+    const option = this.page.getByRole('option').filter({ hasText: optionText }).first();
+    await option.waitFor({ state: 'visible' });
+    await option.click();
+  }
+
+  /** Reads the first real (non-placeholder) option's text for a filter dropdown, without selecting it. */
+  async firstFilterOptionText(select: Locator): Promise<string> {
+    await select.click();
+    const option = this.page.getByRole('option').nth(1);
+    const text = (await option.textContent())?.trim() ?? '';
+    await this.page.keyboard.press('Escape');
+    return text;
   }
 }

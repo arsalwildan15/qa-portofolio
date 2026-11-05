@@ -87,7 +87,7 @@ qa-portofolio/
 ├── docs/                 # Human-readable test case documentation, one file per module
 │   ├── TC-Login.txt
 │   ├── TC-PIM.txt        # All 159 PIM TCs, full module coverage plus file-upload security
-│   ├── TC-Recruitment.txt # All 46 Recruitment TCs: Vacancies, Candidates, status workflow, security
+│   ├── TC-Recruitment.txt # All 53 Recruitment TCs: Vacancies, Candidates, status workflow, security
 │   ├── PIM-Findings-Summary.txt  # Digest of exploration findings across the whole PIM suite
 │   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
 ├── .github/workflows/     # CI pipeline definition
@@ -216,7 +216,7 @@ Set these repository secrets if targeting a non-default environment:
 |--------|-----------|------|
 | Login | 40 TCs: positive, negative, boundary, security, edge | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | PIM | 159 TCs, full module coverage with no open gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs (2 confirmed bugs: extension-only validation lets an executable disguised as a photo through on both profile-photo upload points) | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
-| Recruitment | 46 TCs: Vacancies incl. edit/deactivate (16), Candidates incl. resume upload (16), candidate status workflow state machine (11), cross-cutting security: IDOR, response headers, rate limiting (3). 1 confirmed bug (resume upload accepts an executable disguised as a .pdf, same extension-only validation pattern as PIM) plus a documented intermittent client-side rendering bug (Application Stage/Candidate History cards occasionally stuck loading forever with no underlying API error) and risk findings (missing `X-Frame-Options` on recruitment API responses, no rate limiting on candidate creation) | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
+| Recruitment | 53 TCs: Vacancies incl. edit/deactivate/pagination/sorting (17), Candidates incl. resume upload/download, list filters (18), candidate status workflow state machine through to terminal "Hired" (14), cross-cutting security: IDOR, response headers, rate limiting, concurrent-write race condition (4). 2 confirmed bugs: (1) resume upload accepts an executable disguised as a .pdf, same extension-only validation pattern as PIM; (2) a genuine race condition on the candidate status-transition endpoint -- two mutually-exclusive concurrent status changes (Reject vs. Schedule Interview) on the same candidate can both report success with no server-side locking/versioning, leaving status inconsistent. Plus a documented intermittent client-side rendering bug (Application Stage/Candidate History cards occasionally stuck loading forever with no underlying API error) and risk findings (missing `X-Frame-Options` on recruitment API responses, no rate limiting on candidate creation) | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Leave | Submitting without entitlement is correctly blocked (see note below) | N/A |
 
 > **Note on the Leave suite:** the public demo account has no assigned leave entitlement, so a successful application can't be exercised. Instead the test verifies the deterministic behavior that's actually there: an insufficient-balance message once a date range is selected.

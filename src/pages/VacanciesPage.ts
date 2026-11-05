@@ -128,4 +128,34 @@ export class VacanciesPage extends BasePage {
   rowByName(name: string): Locator {
     return this.tableRows.filter({ hasText: name });
   }
+
+  /**
+   * [TEMUAN] Vacancies list TIDAK punya kontrol pagination (page size
+   * selector / next-prev) seperti Candidates list -- dikonfirmasi live:
+   * `getByRole('navigation', { name: 'Pagination Navigation' })` tidak
+   * visible sama sekali di halaman ini, karena jumlah vacancy pada demo
+   * publik ini jauh lebih sedikit daripada candidate (selalu cukup 1
+   * halaman). Kolom header (Vacancy, Job Title, Hiring Manager, Status)
+   * SEMUANYA punya ikon sort (Ascending/Descending dropdown), confirmed
+   * live via innerHTML header row.
+   */
+  pagination(): Locator {
+    return this.page.getByRole('navigation', { name: 'Pagination Navigation' });
+  }
+
+  /** Column header sort icon (Ascending/Descending dropdown trigger). */
+  columnSortIcon(columnName: string): Locator {
+    return this.page
+      .locator('.oxd-table-header-cell', { hasText: columnName })
+      .locator('.oxd-table-header-sort-icon');
+  }
+
+  /**
+   * Opens a column's sort dropdown and picks "Ascending" or "Descending".
+   */
+  async sortColumn(columnName: string, direction: 'Ascending' | 'Descending'): Promise<void> {
+    const headerCell = this.page.locator('.oxd-table-header-cell', { hasText: columnName });
+    await headerCell.locator('.oxd-table-header-sort-icon').click();
+    await headerCell.getByText(direction, { exact: true }).click();
+  }
 }
