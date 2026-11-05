@@ -7,6 +7,8 @@
 
 End-to-end test automation suite for the [OrangeHRM demo application](https://opensource-demo.orangehrmlive.com/), built with **Playwright + TypeScript** following the Page Object Model, with **Allure** reporting and a **GitHub Actions** CI/CD pipeline.
 
+**Live Allure report:** https://arsalwildan15.github.io/qa-portofolio/ (published automatically on every push to `main`)
+
 ## Tech Stack
 
 | Concern | Tool |
@@ -89,6 +91,7 @@ qa-portofolio/
 │   ├── TC-PIM.txt        # All 159 PIM TCs, full module coverage plus file-upload security
 │   ├── TC-Recruitment.txt # All 53 Recruitment TCs: Vacancies, Candidates, status workflow, security
 │   ├── PIM-Findings-Summary.txt  # Digest of exploration findings across the whole PIM suite
+│   ├── TC-Regression-Allure-Guide.txt # How to run a full regression and view the Allure HTML report
 │   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
 ├── .github/workflows/     # CI pipeline definition
 ├── playwright.config.ts
@@ -203,7 +206,17 @@ npm run format       # prettier --write
 
 ## CI/CD
 
-Every push/PR to `main` runs type-check, lint, and the full Playwright suite on GitHub Actions. The Allure report is published to GitHub Pages on every push to `main`.
+GitHub Actions workflow: [`.github/workflows/playwright.yml`](.github/workflows/playwright.yml).
+
+**Triggers:** push to `main`, pull requests targeting `main`, and manual dispatch.
+
+**`test` job** (ubuntu-latest): checkout → setup Node 20 → `npm ci` → install Playwright browsers → type-check → lint → run the full Playwright suite (all 3 browsers) → generate the Allure report → upload the Playwright HTML report and the Allure report as artifacts. Runs `if: always()` from the Allure/upload steps onward, so a report is still produced even when some test cases fail (e.g. a confirmed app bug left intentionally failing).
+
+**`publish-report` job**: runs after `test` completes (success or not), only on `main`, and deploys the generated Allure report to GitHub Pages.
+
+**Live report:** **https://arsalwildan15.github.io/qa-portofolio/** — updates automatically after every successful `publish-report` run on `main`. See [docs/TC-Regression-Allure-Guide.txt](docs/TC-Regression-Allure-Guide.txt) for how to generate and view the same report locally.
+
+> **One-time setup note:** `publish-report` needs GitHub Pages enabled with **Source: GitHub Actions** (repo Settings → Pages → Build and deployment). Without that, the job fails with no further configuration possible from the workflow itself.
 
 Set these repository secrets if targeting a non-default environment:
 - `BASE_URL`
