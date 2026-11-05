@@ -1,0 +1,154 @@
+================================================================================
+  PANDUAN: RUNNING REGRESSION & MELIHAT ALLURE REPORT
+  Project  : qa-portofolio
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+================================================================================
+
+RINGKASAN JAWABAN CEPAT
+  TIDAK, menjalankan regression TIDAK otomatis membuka/menghasilkan Allure
+  report. `npx playwright test` hanya menulis data MENTAH (JSON per TC)
+  ke folder allure-results/. Report HTML yang enak dibaca (grafik pass/
+  fail, trend, kategori, attachment screenshot/video/trace per TC) harus
+  di-generate lewat perintah TERPISAH setelah run selesai. Ada 2 cara,
+  dijelaskan di bawah.
+
+================================================================================
+  1. APA YANG SUDAH TERPASANG (tidak perlu instalasi tambahan)
+================================================================================
+
+  - Reporter allure-playwright sudah terdaftar di playwright.config.ts:
+      reporter: [
+        ['list'],
+        ['html', { open: 'never' }],
+        ['allure-playwright', { resultsDir: 'allure-results' }],
+        ['./src/reporters/bugListReporter.ts'],
+      ]
+    Artinya SETIAP kali `npx playwright test` dijalankan (apa pun
+    scope-nya -- 1 file, 1 folder, atau seluruh suite), 4 reporter ini
+    jalan bersamaan:
+      a. list        -> output ringkas di terminal saat run
+      b. html         -> Playwright's own HTML report (folder
+                          playwright-report/), TIDAK auto-open
+      c. allure-playwright -> tulis data mentah ke allure-results/
+      d. bugListReporter  -> update docs/Bug-List.xlsx otomatis untuk TC
+                          yang FAILED
+
+  - allure-commandline (CLI `allure`) sudah ada di devDependencies DAN
+    terpasang global di sistem (dikonfirmasi `npx allure --version`
+    -> 2.46.1, serta `allure` tersedia langsung di PATH).
+
+  - Script shortcut sudah ada di package.json:
+      npm run test                    -> jalankan semua TC (semua
+                                          browser: chromium, firefox,
+                                          webkit)
+      npm run test:chromium           -> jalankan semua TC, chromium saja
+      npm run report:html             -> buka Playwright's own HTML
+                                          report (playwright-report/)
+      npm run report:allure:generate  -> generate Allure HTML report dari
+                                          allure-results/ ke folder
+                                          allure-report/ (--clean, jadi
+                                          folder lama ditimpa bersih)
+      npm run report:allure:open      -> buka Allure HTML report yang
+                                          sudah di-generate di browser
+
+================================================================================
+  2. CARA MENJALANKAN REGRESSION
+================================================================================
+
+  Pilihan A -- seluruh suite, semua browser (paling lengkap, paling lama):
+      npm run test
+
+  Pilihan B -- seluruh suite, chromium saja (direkomendasikan untuk
+  regression harian, jauh lebih cepat, cukup untuk validasi fungsional):
+      npm run test:chromium
+
+  Pilihan C -- satu modul saja:
+      npx playwright test tests/login --project=chromium
+      npx playwright test tests/pim --project=chromium
+      npx playwright test tests/recruitment --project=chromium
+
+  [PENTING] Modul Recruitment BERSIFAT MUTATIF ke demo publik (membuat
+  vacancy/candidate baru, mengubah status candidate setiap TC positive
+  dijalankan). Disarankan jalankan tests/recruitment/status-workflow
+  dengan --workers=1 (serial) untuk menghindari flakiness shared-demo di
+  bawah beban paralel tinggi (sudah didokumentasikan di
+  docs/TC-Recruitment.txt).
+
+  Setelah run selesai, folder allure-results/ akan berisi data TERBARU
+  (ditambahkan/ditimpa per TC-result, bukan dihapus bersih otomatis --
+  lihat CATATAN di bagian 4 kalau mau regression report yang 100% bersih
+  tanpa campuran run lama).
+
+================================================================================
+  3. CARA MELIHAT ALLURE REPORT SETELAH REGRESSION SELESAI
+================================================================================
+
+  CARA 1 -- Generate lalu Open (2 langkah terpisah, report tersimpan
+  sebagai file statis di allure-report/, enak untuk di-share/di-archive):
+      npm run report:allure:generate
+      npm run report:allure:open
+
+    Langkah pertama membaca allure-results/ dan membuat folder
+    allure-report/ berisi HTML+assets statis. Langkah kedua menjalankan
+    local web server sementara dan membuka report itu di browser default.
+
+  CARA 2 -- Serve langsung (1 perintah, generate+buka otomatis, TAPI
+  report-nya TIDAK tersimpan permanen sebagai file, hanya untuk preview
+  cepat):
+      npx allure serve allure-results
+
+    Perintah ini generate report ke folder temporary, langsung start
+    server, dan otomatis membuka browser begitu siap. Report hilang
+    begitu proses di-stop (Ctrl+C). Cocok dipakai kalau cuma mau lihat
+    sekali tanpa perlu disimpan/dikirim ke orang lain.
+
+  REKOMENDASI:
+    - Dipakai sendiri/cepat cek hasil run      -> Cara 2 (`allure serve`)
+    - Mau disimpan/dilampirkan ke laporan/CI    -> Cara 1 (generate lalu
+                                                    open, commit folder
+                                                    allure-report/ keluar
+                                                    dari git kalau tidak
+                                                    perlu di-track, atau
+                                                    upload sebagai CI
+                                                    artifact)
+
+================================================================================
+  4. CATATAN TEKNIS
+================================================================================
+
+  - allure-results/ TIDAK otomatis dibersihkan sebelum run baru. Kalau
+    mau laporan regression yang murni hasil run TERAKHIR saja (tanpa
+    tercampur run-run sebelumnya), hapus folder allure-results/ dulu
+    sebelum menjalankan test:
+        rm -rf allure-results   (bash)  /  Remove-Item -Recurse -Force
+        allure-results   (PowerShell)
+    lalu baru jalankan npm run test / test:chromium.
+
+  - `report:allure:generate` sudah pakai flag --clean, jadi folder
+    allure-report/ (hasil generate) SELALU ditimpa bersih setiap
+    generate ulang -- yang TIDAK auto-bersih adalah allure-results/
+    (sumber data mentahnya), bukan allure-report/ (hasil akhirnya).
+
+  - Playwright's own HTML report (folder playwright-report/, dibuka
+    lewat `npm run report:html`) adalah report TERPISAH dari Allure,
+    datanya sama (hasil run yang sama) tapi format/fitur beda (Allure
+    punya kategori, trend history antar-run, dan tampilan lebih rapi
+    untuk dipresentasikan; Playwright's own report lebih ringan dan
+    bawaan tanpa perlu CLI tambahan).
+
+  - docs/Bug-List.xlsx (via bugListReporter.ts) ter-update OTOMATIS saat
+    `npx playwright test` dijalankan -- TC yang FAILED masuk ke situ,
+    dan TC yang tadinya FAILED lalu lulus di run berikutnya otomatis
+    di-close. Ini terjadi SETIAP kali test dijalankan, tidak perlu
+    perintah tambahan, beda dengan Allure report yang butuh langkah
+    generate manual seperti di atas.
+
+  - Untuk CI/CD (.github/workflows/), kalau mau Allure report juga
+    muncul otomatis di setiap run CI (bukan cuma lokal), perlu tambahan
+    step di workflow untuk generate + publish (mis. ke GitHub Pages atau
+    sebagai artifact) -- BELUM ada di pipeline saat ini, ini di luar
+    scope dokumen ini, tapi dicatat sebagai follow-up kalau diperlukan.
+
+================================================================================
+  END OF DOCUMENT
+================================================================================
