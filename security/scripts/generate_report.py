@@ -949,55 +949,60 @@ def _istilah(width):
     """Glossary of terms/fields used in the detail PDFs, for SCA/SAST/GITLEAKS/TRIVY only."""
     data = [
         ("UMUM", "Severity (C / H / M / L)",
-         "Critical / High / Medium / Low, usually derived from the CVSS score or rule severity. Low findings "
-         "are still listed in the detail PDF."),
+         "Critical / High / Medium / Low, umumnya diturunkan dari CVSS score atau rule severity. Status repo "
+         "dan ringkasan .txt memakai threshold <b>Medium+</b>; Low tetap tercantum di PDF detail."),
         ("", "CVE / CWE",
-         "<b>CVE</b> = public identifier for one specific vulnerability in a given software version. "
-         "<b>CWE</b> = weakness category (e.g. CWE-89 SQL Injection, CWE-22 Path Traversal, CWE-798 "
+         "<b>CVE</b> = identifier publik untuk satu vulnerability spesifik pada versi software tertentu. "
+         "<b>CWE</b> = kategori weakness (mis. CWE-89 SQL Injection, CWE-22 Path Traversal, CWE-798 "
          "Hard-coded Credentials)."),
         ("", "False positive",
-         "A finding that is not actually exploitable in the application's context. Must be validated manually "
-         "before being ignored, and the ignore must include a justification."),
+         "Finding yang tidak benar-benar exploitable di konteks aplikasi. Wajib divalidasi manual sebelum "
+         "di-ignore, dan ignore harus disertai justifikasi."),
         ("SCA", "Introduced through",
-         "The dependency path from the project to the vulnerable package. More than one level = <b>transitive "
-         "dependency</b>; remediate by upgrading the <b>direct dependency</b> that pulls it in."),
+         "Dependency path dari project ke vulnerable package. Path lebih dari satu level = <b>transitive "
+         "dependency</b>; remediation dilakukan dengan upgrade <b>direct dependency</b> yang membawanya."),
         ("", "Fixed in",
-         "Minimum package version that already contains the patch. Empty = no fix available (mitigate or "
-         "switch library)."),
-        ("", "CVSS score",
-         "Base score 0.0&ndash;10.0 from the CVSS v3.x/v4 standard."),
+         "Versi minimum package yang sudah mengandung patch. Kosong = no fix available (mitigasi atau ganti "
+         "library)."),
+        ("", "CVSS score / vector",
+         "Base score 0.0&ndash;10.0 beserta vector string (AV, AC, PR, UI, S, C/I/A) dari standar CVSS v3.x/v4."),
         ("", "Exploit maturity",
-         "Public exploit availability: No Known Exploit, Proof of Concept, Functional, Mature. The more mature, "
-         "the higher the likelihood of exploitation."),
+         "Ketersediaan exploit publik: No Known Exploit, Proof of Concept, Functional, Mature. Makin mature, "
+         "makin tinggi likelihood exploitation."),
         ("SAST", "Location / data flow",
-         "The vulnerable file:line and the taint flow <b>source &rarr; sink</b> (untrusted input reaching a "
-         "dangerous operation without sanitization)."),
+         "File:line yang rentan dan taint flow <b>source &rarr; sink</b> (input tidak tepercaya mencapai "
+         "operasi berbahaya tanpa sanitasi)."),
         ("", "Rule",
-         "Snyk Code rule ID that triggered, e.g. javascript/Sqli, go/PT (Path Traversal)."),
-        ("GITLEAKS", "Rule / Entropy",
-         "<b>Rule</b> = the detector that matched (e.g. generic-api-key, private-key, jwt). <b>Entropy</b> = "
-         "Shannon entropy of the matched value; the higher it is, the more likely it is a real secret (not a "
-         "placeholder)."),
+         "ID rule Snyk Code yang terpicu, mis. javascript/Sqli, go/PT (Path Traversal)."),
+        ("GITLEAKS", "Masih ada di kode",
+         "File berisi secret masih ada di HEAD branch yang di-scan. <b>Prioritaskan</b> (rotate + remove)."),
+        ("", "Hanya di history",
+         "File sudah dihapus dari HEAD, tapi secret masih bisa di-retrieve dari git history. <b>Tetap harus "
+         "di-rotate.</b>"),
+        ("", "Rule / Entropy",
+         "<b>Rule</b> = detector yang cocok (mis. generic-api-key, private-key, jwt). <b>Entropy</b> = Shannon "
+         "entropy nilai yang cocok; makin tinggi, makin mungkin secret asli (bukan placeholder)."),
         ("", "First introducing commit",
-         "Commit, author, and timestamp when the secret first entered the history, for investigation and to "
-         "determine the exposure window."),
+         "Commit, author, dan timestamp saat secret pertama kali masuk ke history, untuk investigasi dan "
+         "menentukan exposure window."),
         ("TRIVY", "Pass / Fail",
-         "Number of Dockerfile policy checks satisfied (PASS) and violated (FAIL)."),
+         "Jumlah policy check Dockerfile yang terpenuhi (PASS) dan yang dilanggar (FAIL)."),
         ("", "Check ID (DS-xxxx)",
-         "Trivy policy ID for Dockerfiles, e.g. DS-0001 unpinned :latest, DS-0002 run as root, DS-0026 no "
+         "ID policy Trivy untuk Dockerfile, mis. DS-0001 unpinned :latest, DS-0002 run as root, DS-0026 tanpa "
          "HEALTHCHECK."),
         ("", "File-level finding",
-         "A finding with no line number because the violation is a missing instruction (e.g. USER, HEALTHCHECK)."),
+         "Finding tanpa line number karena yang dilanggar adalah instruksi yang tidak didefinisikan (mis. USER, "
+         "HEALTHCHECK)."),
     ]
     S_UMUM = ParagraphStyle("umum", parent=S_CELL, fontSize=7.5, textColor=INK_SOFT)
 
     def label(t):
         if not t:
             return ""
-        return Paragraph("<b>ALL SCANS</b>", S_UMUM) if t == "UMUM" else _type_label_full(t)
+        return Paragraph("<b>SEMUA SCAN</b>", S_UMUM) if t == "UMUM" else _type_label_full(t)
 
     rows = [[label(t), Paragraph(f"<b>{i}</b>", S_CELL), Paragraph(a, S_CELL)] for t, i, a in data]
-    return _tabel(["JENIS SCAN", "Term", "Meaning"], rows, [90, 125, width - 90 - 125])
+    return _tabel(["Jenis scan", "Istilah", "Arti"], rows, [90, 125, width - 90 - 125])
 
 
 def _badges(counts):
@@ -1129,7 +1134,7 @@ def build_summary_pdf(out_path: Path, run_name: str, target: str, branch: str,
         Paragraph("KETERANGAN", S_CAT), *_legend(width),
         PageBreak(),
         Paragraph("ISTILAH PER TOOL", S_CAT),
-        Paragraph("Glossary of terms and fields that appear in each tool's detail PDF.", S_SMALL),
+        Paragraph("Glossary istilah dan field yang muncul di PDF detail tiap jenis scan.", S_SMALL),
         Spacer(1, 4), _istilah(width),
         PageBreak(),
         _target_card(target, branch, status_key, failed_reasons, total, tool_rows, width),
