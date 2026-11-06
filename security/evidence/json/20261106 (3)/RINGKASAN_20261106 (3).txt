@@ -1,0 +1,10 @@
+OrangeHRM source-code security scan recap - 06 November 2026
+Repo: orangehrm/orangehrm (branch: main)
+
+Summary (medium severity and above):
+
+- orangehrm/orangehrm/main:
+   - SCA: 5 Critical + 36 High + 64 Medium
+   - SAST: 1 High + 11 Medium
+   - Gitleaks: 358 secret(s)
+   - Trivy: 1 High

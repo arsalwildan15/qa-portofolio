@@ -1,0 +1,10 @@
+{
+  "org": null,
+  "branch": "main",
+  "scaReason": "[WinError 2] The system cannot find the file specified (exit code: None)",
+  "sastReason": "[WinError 2] The system cannot find the file specified (exit code: None)",
+  "gitleaksReason": null,
+  "trivyReason": null,
+  "trivyApplicable": true,
+  "gitWarning": null
+}

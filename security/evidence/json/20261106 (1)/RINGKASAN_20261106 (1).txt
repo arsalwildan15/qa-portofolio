@@ -1,0 +1,13 @@
+OrangeHRM source-code security scan recap - 06 November 2026
+Repo: orangehrm/orangehrm (branch: main)
+
+Summary (medium severity and above):
+
+- orangehrm/orangehrm/main:
+   - Gitleaks: 358 secret(s)
+   - Trivy: 1 High
+
+Failed scans (results INCOMPLETE, NOT the same as safe):
+   - orangehrm/orangehrm/main:
+   - SCA -- [WinError 2] The system cannot find the file specified (exit code: None)
+   - SAST -- [WinError 2] The system cannot find the file specified (exit code: None)

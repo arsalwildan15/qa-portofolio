@@ -1,0 +1,13 @@
+OrangeHRM source-code security scan recap - 06 November 2026
+Repo: orangehrm/orangehrm (branch: main)
+
+Summary (medium severity and above):
+
+- orangehrm/orangehrm/main:
+   - SCA: 5 Critical + 36 High + 64 Medium
+   - Gitleaks: 358 secret(s)
+   - Trivy: 1 High
+
+Failed scans (results INCOMPLETE, NOT the same as safe):
+   - orangehrm/orangehrm/main:
+   - SAST -- ERROR   Connection reset (SNYK-CLI-0027) (exit code: 2)
