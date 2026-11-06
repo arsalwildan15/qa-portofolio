@@ -120,6 +120,15 @@ S_PILL = ParagraphStyle("pill", parent=S_CELL, fontSize=7, leading=8.5, alignmen
 S_SEL = ParagraphStyle("sel", parent=S_SMALL, leading=10.5, textColor=INK)
 S_SELM = ParagraphStyle("selm", parent=S_MONO, fontSize=7, leading=9)
 S_CMD = ParagraphStyle("cmd", parent=S_CELL, fontName="Courier", fontSize=8, textColor=INK)
+S_TGT = ParagraphStyle("tgt", parent=styles["Normal"], fontSize=10, textColor=INK,
+                       fontName="Helvetica-Bold", leading=13)
+
+# Scan type -> (badge label/color already in TYPE_INFO, Snyk product sub-label for the
+# per-repo card, same wording as the reference's _type_label()).
+TYPE_SUBLABEL = {"SCA": "Snyk Open Source", "SAST": "Snyk Code", "GITLEAKS": "local scan", "TRIVY": "local scan"}
+
+BADGES_W = 4 * 34 + 3 * 4
+WARNA_SECRET = "#B45309"
 
 
 def esc(t) -> str:
@@ -982,8 +991,97 @@ def _istilah(width):
     return _tabel(["Scan type", "Term", "Meaning"], rows, [90, 125, width - 90 - 125])
 
 
+def _badges(counts):
+    """Four [number][letter] badge pairs, like the Issues column on snyk.io (ported from
+    the reference's _badges())."""
+    cells, style = [], [
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ]
+    widths = []
+    for i, s in enumerate(SEV_ORDER):
+        n = counts.get(s, 0)
+        num_bg = SNYK_LIGHT[s] if n else ZERO_NUM_BG
+        num_fg = SNYK_DARK[s] if n else ZERO_NUM_FG
+        let_bg = SNYK_DARK[s] if n else ZERO_LET_BG
+        c = len(cells)
+        cells += [Paragraph(f'<font color="{num_fg}">{n}</font>', S_NUM),
+                  Paragraph(SEV_ABBR[s], S_PILL)]
+        widths += [21, 13]
+        style += [("BACKGROUND", (c, 0), (c, 0), colors.HexColor(num_bg)),
+                  ("BACKGROUND", (c + 1, 0), (c + 1, 0), colors.HexColor(let_bg))]
+        if i < 3:
+            cells.append("")
+            widths.append(4)
+    t = Table([cells], colWidths=widths, hAlign="RIGHT")
+    t.setStyle(TableStyle(style))
+    return t
+
+
+def _type_label_full(tipe):
+    """Colored tool pill + its Snyk product / local-scan sub-label underneath (ported
+    from the reference's _type_label())."""
+    label, color = TYPE_INFO.get(tipe, (tipe, "#52606D"))
+    sub = TYPE_SUBLABEL.get(tipe, "local scan")
+    return Table([[_pill(label, color, 64)],
+                  [Paragraph(f'<font color="#52606D" size="6.5">{sub}</font>', S_CELL)]],
+                 style=[("LEFTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (-1, -1), 0),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 0)], hAlign="LEFT")
+
+
+def _target_card(target_label, branch, status_key, total, tool_rows, width):
+    """Per-repo/branch status card (ported from the reference's _target_block()): a header
+    bar with the repo name, branch, status pill, and total severity badges, followed by one
+    row per tool that ran (SCA/SAST/GITLEAKS/TRIVY), each with its own severity/secret count.
+
+    tool_rows: list of (tipe, project_name, counts) where counts is either a severity dict
+    (SCA/SAST/TRIVY) or {"secret": N} (GITLEAKS).
+    """
+    status_label, status_hex = STATUS[status_key][0], STATUS_HEX[status_key]
+    judul = esc(target_label)
+    if branch:
+        judul += f' <font color="#52606D" size="8.5" face="Helvetica">&nbsp;branch: {esc(branch)}</font>'
+    pill_w, type_w, pad = 92, 78, 7
+    badge_col = BADGES_W + 2 * pad
+    mid_w = width - type_w - badge_col
+    judul_w = type_w + mid_w - 2 * pad
+    header = Table([[Paragraph(judul, S_TGT), _pill(status_label, status_hex, pill_w)]],
+                   colWidths=[judul_w - pill_w, pill_w],
+                   style=[("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                          ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                          ("VALIGN", (0, 0), (-1, -1), "MIDDLE")])
+    rows = [[header, "", _badges(total)],
+            [Paragraph("JENIS SCAN", S_HCELL), Paragraph("PROJECT", S_HCELL),
+             Paragraph("ISSUES", ParagraphStyle("hi", parent=S_HCELL, alignment=2))]]
+    style = [
+        ("SPAN", (0, 0), (1, 0)),
+        ("BACKGROUND", (0, 0), (-1, 0), CHIP_BG),
+        ("LINEBEFORE", (0, 0), (0, -1), 3, colors.HexColor(status_hex)),
+        ("LINEBELOW", (0, 1), (-1, 1), 0.5, LINE),
+        ("BOX", (0, 0), (-1, -1), 0.75, CARD_LINE),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), pad), ("RIGHTPADDING", (0, 0), (-1, -1), pad),
+        ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, 0), 7), ("BOTTOMPADDING", (0, 0), (-1, 0), 7),
+    ]
+    for tipe, proj, counts in tool_rows:
+        if tipe == "GITLEAKS":
+            n = counts.get("secret", 0)
+            kanan = Paragraph(f'<font color="{WARNA_SECRET if n else STATUS_HEX["safe"]}"><b>{n} Secret</b></font>',
+                              ParagraphStyle("glk", parent=S_CELL, alignment=2))
+        else:
+            kanan = _badges(counts)
+        rows.append([_type_label_full(tipe), Paragraph(esc(proj), S_CELL), kanan])
+        style.append(("LINEBELOW", (0, len(rows) - 1), (-1, len(rows) - 1), 0.25, LINE))
+    t = Table(rows, colWidths=[type_w, mid_w, badge_col], hAlign="LEFT")
+    t.setStyle(TableStyle(style))
+    return t
+
+
 def build_summary_pdf(out_path: Path, run_name: str, target: str, branch: str,
-                       total: dict, status_key: str, failed_reasons: list[str]):
+                       total: dict, status_key: str, failed_reasons: list[str],
+                       tool_rows: list[tuple]):
     width = A4[0] - 30 * mm
     doc = SimpleDocTemplate(str(out_path), pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
                             topMargin=15 * mm, bottomMargin=15 * mm, title="Security Scan Summary")
@@ -1005,6 +1103,8 @@ def build_summary_pdf(out_path: Path, run_name: str, target: str, branch: str,
         Paragraph("ISTILAH PER TOOL", S_CAT),
         Paragraph("Glossary of terms and fields that appear in each tool's detail PDF.", S_SMALL),
         Spacer(1, 4), _istilah(width),
+        PageBreak(),
+        _target_card(target, branch, status_key, total, tool_rows, width),
     ]
     doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
 
@@ -1051,6 +1151,7 @@ def main() -> int:
     total = {s: 0 for s in SEV_ORDER}
     failed_reasons = []
     has_findings = False
+    tool_rows = []
 
     # --- SCA ---
     sca_json = repo_dir / "snyk_sca_result.json"
@@ -1062,6 +1163,7 @@ def main() -> int:
         has_findings = True
     if status.get("scaReason"):
         failed_reasons.append("SCA")
+    tool_rows.append(("SCA", project, sev_sca))
     if sca_findings:
         out = pdf_repo_dir / "orangehrm_SCA.pdf"
         build_sca_pdf(sca_findings, f"{target} ({branch})", project, out)
@@ -1079,6 +1181,7 @@ def main() -> int:
         has_findings = True
     if status.get("sastReason"):
         failed_reasons.append("SAST")
+    tool_rows.append(("SAST", project, sev_sast))
     if sast_findings:
         out = pdf_repo_dir / "orangehrm_SAST.pdf"
         build_sast_pdf(sast_findings, f"{target} ({branch})", project, out)
@@ -1093,6 +1196,7 @@ def main() -> int:
         has_findings = True
     if status.get("gitleaksReason"):
         failed_reasons.append("Gitleaks")
+    tool_rows.append(("GITLEAKS", project, {"secret": secret_count or 0}))
     if gitleaks_groups:
         out = pdf_repo_dir / "orangehrm_gitleaks.pdf"
         build_gitleaks_pdf(gitleaks_groups, secret_count, gitleaks_info, f"{target} ({branch})", project, out)
@@ -1112,6 +1216,7 @@ def main() -> int:
             has_findings = True
         if status.get("trivyReason"):
             failed_reasons.append("Trivy")
+        tool_rows.append(("TRIVY", project, sev_trivy))
         if trivy_findings:
             out = pdf_repo_dir / "orangehrm_trivy.pdf"
             build_trivy_pdf(trivy_findings, trivy_info, f"{target} ({branch})", project, out)
@@ -1130,7 +1235,7 @@ def main() -> int:
         status_key = "safe"
 
     summary_pdf = pdf_run_dir / f"RINGKASAN_{run_name}.pdf"
-    build_summary_pdf(summary_pdf, run_name, target, branch, total, status_key, failed_reasons)
+    build_summary_pdf(summary_pdf, run_name, target, branch, total, status_key, failed_reasons, tool_rows)
     print(f"\nWrote summary: {summary_pdf}")
     return 0
 
