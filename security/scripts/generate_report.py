@@ -880,27 +880,27 @@ def _legend(width):
     rows = [[Paragraph("JENIS SCAN", S_HCELL), Paragraph("SCOPE &amp; REMEDIATION", S_HCELL),
              Paragraph("COMMAND", S_HCELL)]]
     jenis = [
-        ("SCA", "Software Composition Analysis: the dependency tree from the manifest/lockfile (package.json, "
-                "pom.xml, etc.) is matched against a vulnerability database (CVE). <b>Remediation:</b> upgrade to "
-                "the version in \"Fixed in\" after checking the upgrade path on snyk.io. For a <b>transitive "
-                "dependency</b> (see \"Introduced through\"), upgrade the direct dependency that pulls it in. "
-                "Pick the nearest safe version, check for breaking changes, then regression test. If there is no "
-                "fix / it is not exploitable, mitigate or ignore with a documented justification.",
+        ("SCA", "Software Composition Analysis: dependency tree dari manifest/lockfile (go.mod, package.json, "
+                "pom.xml, dll) dicocokkan dengan vulnerability database (CVE). <b>Remediation:</b> upgrade ke "
+                "versi di \"Fixed in\" setelah cek rekomendasi upgrade path di snyk.io. Untuk <b>transitive "
+                "dependency</b> (lihat \"Introduced through\"), upgrade <b>direct dependency</b>-nya. Pilih versi "
+                "aman terdekat, cek breaking change, lalu regression test. Bila no fix / not exploitable, "
+                "mitigasi atau ignore dengan justifikasi.",
          "snyk test --all-projects"),
-        ("SAST", "Static Application Security Testing: the source code is analyzed with data-flow / taint "
-                 "analysis for vulnerability patterns (SQL injection, XSS, path traversal, hardcoded secrets). "
-                 "<b>Remediation:</b> validate the source &rarr; sink data flow at the reported location (it can "
-                 "be a false positive), then fix it, e.g. parameterized queries, input validation, output "
-                 "encoding. If it is a false positive, ignore with a documented justification.",
+        ("SAST", "Static Application Security Testing: source code dianalisis dengan data-flow / taint "
+                 "analysis untuk pola kerentanan (SQL injection, XSS, path traversal, hardcoded secret). "
+                 "<b>Remediation:</b> validasi data flow source &rarr; sink di lokasi yang ditunjuk (bisa false "
+                 "positive), lalu perbaiki, mis. parameterized query, input validation, output encoding. Bila "
+                 "false positive, ignore dengan justifikasi.",
          "snyk code test"),
-        ("GITLEAKS", "Secret scanning (regex + entropy) for passwords, tokens, API keys, and private keys across "
-                     "<b>the entire git history</b>, including commits that have since been removed from HEAD. "
-                     "Secret values are redacted. <b>Remediation:</b> treat as compromised: rotate/revoke first, "
-                     "then move the secret into an environment variable / secret manager.",
+        ("GITLEAKS", "<i>Semua repo.</i> Secret scanning (regex + entropy) untuk password, token, API key, dan "
+                     "private key di <b>seluruh git history</b>, termasuk yang sudah dihapus dari HEAD. Secret "
+                     "value di-redact. <b>Remediation:</b> treat as compromised: rotate/revoke dulu, lalu "
+                     "pindahkan ke environment variable / secret manager.",
          "gitleaks git --redact"),
-        ("TRIVY", "<i>Repos with a Dockerfile.</i> IaC misconfiguration scanning: the Dockerfile is evaluated "
-                  "against security best-practice checks, e.g. container running as root, unpinned base image "
-                  "(:latest), no HEALTHCHECK. <b>Remediation:</b> follow the \"Resolution\" on each finding.",
+        ("TRIVY", "<i>Repo yang punya Dockerfile.</i> IaC misconfiguration scanning: Dockerfile dievaluasi "
+                  "terhadap security best-practice checks, mis. container run as root, unpinned base image "
+                  "(:latest), tanpa HEALTHCHECK. <b>Remediation:</b> ikuti \"Remediation\" di tiap finding.",
          "trivy config ."),
     ]
     for tipe, ket, cmd in jenis:
@@ -921,9 +921,9 @@ def _legend(width):
     st_rows = [[Paragraph("STATUS REPO", S_HCELL), ""]]
     S_ST = ParagraphStyle("st_leg", parent=S_CELL, fontSize=7.5, leading=9.5)
     status_leg = [
-        (STATUS["fix"][0], STATUS_HEX["fix"], "There is a Critical/High/Medium finding, or a secret."),
-        (STATUS["safe"][0], STATUS_HEX["safe"], "No Medium+ finding and no secret found."),
-        (STATUS["failed"][0], STATUS_HEX["failed"], "A scan could not complete; coverage is incomplete, not proven safe."),
+        (STATUS["fix"][0], STATUS_HEX["fix"], "Ada finding Critical/High/Medium, atau secret."),
+        (STATUS["safe"][0], STATUS_HEX["safe"], "Tidak ada finding Medium+ maupun secret."),
+        (STATUS["failed"][0], STATUS_HEX["failed"], "Scan gagal; coverage tidak lengkap, belum tentu aman."),
     ]
     for label, color, arti in status_leg:
         st_rows.append([_pill(label, color, 92), Paragraph(arti, S_ST)])
@@ -1125,11 +1125,20 @@ def build_summary_pdf(out_path: Path, run_name: str, target: str, branch: str,
         status_line += (f' &nbsp;&middot;&nbsp; <font color="{STATUS_HEX["failed"]}">Gagal: '
                         f'{esc(", ".join(r.upper() for r in failed_reasons))}</font>')
 
+    # Gitleaks findings are secrets, not C/H/M/L severities, so they're correctly excluded
+    # from the severity cards below -- call that out explicitly (same as the reference's
+    # govulncheck/gitleaks callout lines) so readers don't think they're missing.
+    secret_total = sum(c.get("secret", 0) for t, _, c in tool_rows if t == "GITLEAKS")
+    gitleaks_line = (Paragraph(f'gitleaks: <font color="{WARNA_SECRET}"><b>{secret_total}</b> secret '
+                               f'ter-commit</font> (tidak termasuk di kartu severity di bawah)', S_SUB)
+                     if secret_total else None)
+
     story = [
         Paragraph("Security Scan Summary", S_TITLE),
         Paragraph(f"Target: <b>{esc(target)}</b> &nbsp;&middot;&nbsp; branch: <b>{esc(branch)}</b>", S_SUB),
         Paragraph(f"Scan run: {esc(run_name)}", S_SUB),
         Paragraph(status_line, S_SUB),
+        *([gitleaks_line] if gitleaks_line else []),
         Spacer(1, 16), _stat_cards(total, width), Spacer(1, 10),
         Paragraph("KETERANGAN", S_CAT), *_legend(width),
         PageBreak(),
