@@ -326,11 +326,6 @@ def _single_badge(s):
     return t
 
 
-def _type_label(tipe):
-    label, color = TYPE_INFO.get(tipe, (tipe, "#52606D"))
-    return _pill(label, color, 64)
-
-
 def _doc_header(story, title, target, project, issues):
     story.append(Paragraph(esc(title), S_TITLE))
     story.append(Paragraph(f"Target: {esc(target)}", S_SUB))
@@ -882,7 +877,7 @@ def _stat_cards(total, width):
 def _legend(width):
     """Scan type, status, and severity explanation ("KETERANGAN" / scope & remediation
     table, plus the SEVERITY / STATUS REPO legend boxes) for the 4 tools used here."""
-    rows = [[Paragraph("SCAN TYPE", S_HCELL), Paragraph("SCOPE &amp; REMEDIATION", S_HCELL),
+    rows = [[Paragraph("JENIS SCAN", S_HCELL), Paragraph("SCOPE &amp; REMEDIATION", S_HCELL),
              Paragraph("COMMAND", S_HCELL)]]
     jenis = [
         ("SCA", "Software Composition Analysis: the dependency tree from the manifest/lockfile (package.json, "
@@ -909,7 +904,7 @@ def _legend(width):
          "trivy config ."),
     ]
     for tipe, ket, cmd in jenis:
-        rows.append([_type_label(tipe), Paragraph(ket, S_CELL), Paragraph(cmd, S_CMD)])
+        rows.append([_type_label_full(tipe), Paragraph(ket, S_CELL), Paragraph(cmd, S_CMD)])
     t1 = Table(rows, colWidths=[80, width - 80 - 130, 130], hAlign="LEFT")
     t1.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), CHIP_BG),
@@ -999,10 +994,10 @@ def _istilah(width):
     def label(t):
         if not t:
             return ""
-        return Paragraph("<b>ALL SCANS</b>", S_UMUM) if t == "UMUM" else _type_label(t)
+        return Paragraph("<b>ALL SCANS</b>", S_UMUM) if t == "UMUM" else _type_label_full(t)
 
     rows = [[label(t), Paragraph(f"<b>{i}</b>", S_CELL), Paragraph(a, S_CELL)] for t, i, a in data]
-    return _tabel(["Scan type", "Term", "Meaning"], rows, [90, 125, width - 90 - 125])
+    return _tabel(["JENIS SCAN", "Term", "Meaning"], rows, [90, 125, width - 90 - 125])
 
 
 def _badges(counts):
