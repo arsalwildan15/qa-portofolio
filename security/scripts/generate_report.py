@@ -1135,8 +1135,8 @@ def build_summary_pdf(out_path: Path, run_name: str, target: str, branch: str,
 
     story = [
         Paragraph("Security Scan Summary", S_TITLE),
-        Paragraph(f"Target: <b>{esc(target)}</b> &nbsp;&middot;&nbsp; branch: <b>{esc(branch)}</b>", S_SUB),
-        Paragraph(f"Scan run: {esc(run_name)}", S_SUB),
+        Paragraph(f"Scan: <b>{esc(run_name)}</b> &nbsp;&middot;&nbsp; Target: <b>{esc(target)}</b> "
+                  f"&nbsp;&middot;&nbsp; branch: <b>{esc(branch)}</b>", S_SUB),
         Paragraph(status_line, S_SUB),
         *([gitleaks_line] if gitleaks_line else []),
         Spacer(1, 16), _stat_cards(total, width), Spacer(1, 10),
