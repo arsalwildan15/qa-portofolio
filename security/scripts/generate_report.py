@@ -82,9 +82,9 @@ TYPE_INFO = {
 }
 
 STATUS = {
-    "fix": ("NEEDS ATTENTION", colors.HexColor("#DC2626")),
-    "safe": ("SAFE", colors.HexColor("#15803D")),
-    "failed": ("FAILED", colors.HexColor("#64748B")),
+    "fix": ("PERLU DIPERBAIKI", colors.HexColor("#DC2626")),
+    "safe": ("AMAN", colors.HexColor("#15803D")),
+    "failed": ("GAGAL SCAN", colors.HexColor("#64748B")),
 }
 # Hex-string versions for use inside Paragraph markup.
 STATUS_HEX = {
@@ -298,6 +298,20 @@ def _pill(text, color, width):
     t = Table([[Paragraph(text, S_PILL)]], colWidths=[width])
     t.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(color) if isinstance(color, str) else color),
+        ("LEFTPADDING", (0, 0), (-1, -1), 3), ("RIGHTPADDING", (0, 0), (-1, -1), 3),
+        ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+    ]))
+    return t
+
+
+def _pill2(atas, warna_atas, bawah, warna_bawah, width):
+    """Two-tone pill: top row = main status, bottom row = secondary note (e.g. a repo with
+    findings where some other scan also failed), ported from the reference's _pill2()."""
+    S_BAWAH = ParagraphStyle("pill2b", parent=S_PILL, fontSize=6, leading=7.5)
+    t = Table([[Paragraph(atas, S_PILL)], [Paragraph(esc(bawah), S_BAWAH)]], colWidths=[width])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(warna_atas) if isinstance(warna_atas, str) else warna_atas),
+        ("BACKGROUND", (0, 1), (-1, 1), colors.HexColor(warna_bawah) if isinstance(warna_bawah, str) else warna_bawah),
         ("LEFTPADDING", (0, 0), (-1, -1), 3), ("RIGHTPADDING", (0, 0), (-1, -1), 3),
         ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
     ]))
@@ -912,9 +926,9 @@ def _legend(width):
     st_rows = [[Paragraph("STATUS REPO", S_HCELL), ""]]
     S_ST = ParagraphStyle("st_leg", parent=S_CELL, fontSize=7.5, leading=9.5)
     status_leg = [
-        ("NEEDS ATTENTION", STATUS_HEX["fix"], "There is a Critical/High/Medium finding, or a secret."),
-        ("SAFE", STATUS_HEX["safe"], "No Medium+ finding and no secret found."),
-        ("FAILED", STATUS_HEX["failed"], "A scan could not complete; coverage is incomplete, not proven safe."),
+        (STATUS["fix"][0], STATUS_HEX["fix"], "There is a Critical/High/Medium finding, or a secret."),
+        (STATUS["safe"][0], STATUS_HEX["safe"], "No Medium+ finding and no secret found."),
+        (STATUS["failed"][0], STATUS_HEX["failed"], "A scan could not complete; coverage is incomplete, not proven safe."),
     ]
     for label, color, arti in status_leg:
         st_rows.append([_pill(label, color, 92), Paragraph(arti, S_ST)])
@@ -1030,7 +1044,26 @@ def _type_label_full(tipe):
                         ("BOTTOMPADDING", (0, 0), (-1, -1), 0)], hAlign="LEFT")
 
 
-def _target_card(target_label, branch, status_key, total, tool_rows, width):
+def _status_text(status_key, failed_reasons):
+    """Plain status label text, matching the reference's wording: "PERLU DIPERBAIKI",
+    "AMAN", or "GAGAL: <tool, tool>" when the status itself is "failed"."""
+    if status_key == "failed" and failed_reasons:
+        return "GAGAL: " + ", ".join(r.upper() for r in failed_reasons)
+    return STATUS[status_key][0]
+
+
+def _status_badge(status_key, failed_reasons, width):
+    """Status pill for the per-repo card: two-tone (main status on top, "Gagal: ..." below)
+    when there are findings AND a separate scan failed, a single pill otherwise -- ported
+    from the reference's _status_badge()/_status_pill()."""
+    label = _status_text(status_key, failed_reasons)
+    if status_key == "fix" and failed_reasons:
+        return _pill2(label, STATUS_HEX["fix"], "Gagal: " + ", ".join(r.upper() for r in failed_reasons),
+                      STATUS_HEX["failed"], width)
+    return _pill(label, STATUS_HEX[status_key], width)
+
+
+def _target_card(target_label, branch, status_key, failed_reasons, total, tool_rows, width):
     """Per-repo/branch status card (ported from the reference's _target_block()): a header
     bar with the repo name, branch, status pill, and total severity badges, followed by one
     row per tool that ran (SCA/SAST/GITLEAKS/TRIVY), each with its own severity/secret count.
@@ -1038,7 +1071,7 @@ def _target_card(target_label, branch, status_key, total, tool_rows, width):
     tool_rows: list of (tipe, project_name, counts) where counts is either a severity dict
     (SCA/SAST/TRIVY) or {"secret": N} (GITLEAKS).
     """
-    status_label, status_hex = STATUS[status_key][0], STATUS_HEX[status_key]
+    status_hex = STATUS_HEX[status_key]
     judul = esc(target_label)
     if branch:
         judul += f' <font color="#52606D" size="8.5" face="Helvetica">&nbsp;branch: {esc(branch)}</font>'
@@ -1046,7 +1079,7 @@ def _target_card(target_label, branch, status_key, total, tool_rows, width):
     badge_col = BADGES_W + 2 * pad
     mid_w = width - type_w - badge_col
     judul_w = type_w + mid_w - 2 * pad
-    header = Table([[Paragraph(judul, S_TGT), _pill(status_label, status_hex, pill_w)]],
+    header = Table([[Paragraph(judul, S_TGT), _status_badge(status_key, failed_reasons, pill_w)]],
                    colWidths=[judul_w - pill_w, pill_w],
                    style=[("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
                           ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
@@ -1086,11 +1119,11 @@ def build_summary_pdf(out_path: Path, run_name: str, target: str, branch: str,
     doc = SimpleDocTemplate(str(out_path), pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
                             topMargin=15 * mm, bottomMargin=15 * mm, title="Security Scan Summary")
 
-    status_label, status_color = STATUS[status_key]
     status_hex = STATUS_HEX[status_key]
-    status_line = f'Status: <font color="{status_hex}"><b>{status_label}</b></font>'
-    if failed_reasons:
-        status_line += f' &nbsp;&middot;&nbsp; <font color="{STATUS_HEX["failed"]}">Failed: {esc(", ".join(failed_reasons))}</font>'
+    status_line = f'Status: <font color="{status_hex}"><b>{esc(_status_text(status_key, failed_reasons))}</b></font>'
+    if status_key == "fix" and failed_reasons:
+        status_line += (f' &nbsp;&middot;&nbsp; <font color="{STATUS_HEX["failed"]}">Gagal: '
+                        f'{esc(", ".join(r.upper() for r in failed_reasons))}</font>')
 
     story = [
         Paragraph("Security Scan Summary", S_TITLE),
@@ -1104,7 +1137,7 @@ def build_summary_pdf(out_path: Path, run_name: str, target: str, branch: str,
         Paragraph("Glossary of terms and fields that appear in each tool's detail PDF.", S_SMALL),
         Spacer(1, 4), _istilah(width),
         PageBreak(),
-        _target_card(target, branch, status_key, total, tool_rows, width),
+        _target_card(target, branch, status_key, failed_reasons, total, tool_rows, width),
     ]
     doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
 
