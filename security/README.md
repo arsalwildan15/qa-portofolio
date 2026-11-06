@@ -101,6 +101,25 @@ comparing before/after a fix. A detail PDF is only generated when a tool
 actually found something; a clean result is still recorded in the summary
 PDF/txt, just without its own detail PDF.
 
+## Latest scan results (run `20261106 (3)`)
+
+| Scan | Result |
+|---|---|
+| SCA (`snyk test`) | 5 Critical, 36 High, 64 Medium, 4 Low |
+| SAST (`snyk code test`) | 1 High, 11 Medium, 175 Low |
+| Gitleaks | 358 secret-pattern hits -- on inspection, effectively all are test/fixture data (Symfony/OAuth test fixtures) and one well-known vendored-library false positive (`phpseclib`'s own docblock example code), not live credentials |
+| Trivy config | 1 High, 1 Low |
+
+Full evidence (JSON + PDF, matching this project's internal evidence-report style) is under `security/evidence/`.
+
+## Planned next addition: OWASP ZAP (on hold)
+
+DAST (dynamic scanning against a running app) is planned as the next addition, **currently on hold** pending execution time. Decided approach, so this doesn't need re-deciding later:
+
+- **Target:** a **self-hosted OrangeHRM instance**, built via Docker from the same cloned source at `C:\Users\IT PDN\orangehrm` (it already has a `Dockerfile`, confirmed by the Trivy scan above) and run on `localhost` -- **not** the public demo (`opensource-demo.orangehrmlive.com`).
+- **Why not the public demo:** ZAP's active scan mode sends real attack payloads (SQLi/XSS/etc.) against the target. Doing that against a shared public demo risks violating its ToS or disrupting other users. A baseline (passive-only) scan against the public demo would be safe but far more limited than what ZAP is normally used for.
+- **Why self-host instead:** full active scan, zero risk to any third party, and it keeps the same OrangeHRM narrative running through the whole portfolio (E2E/functional testing on the public demo -> source-level scanning on the official repo -> DAST on a self-hosted instance of that same application).
+
 ## Ethics note
 
 OrangeHRM is a third-party open-source project, not something we control or

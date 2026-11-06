@@ -93,6 +93,13 @@ qa-portofolio/
 │   ├── PIM-Findings-Summary.txt  # Digest of exploration findings across the whole PIM suite
 │   ├── TC-Regression-Allure-Guide.txt # How to run a full regression and view the Allure HTML report
 │   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
+├── security/              # Source-code-level security scanning of OrangeHRM's own open-source repo
+│   ├── scripts/
+│   │   ├── scan_orangehrm.py       # SCA/SAST (Snyk), Gitleaks, Trivy -> JSON evidence
+│   │   ├── generate_report.py      # JSON -> PDF evidence
+│   │   └── requirements.txt
+│   ├── evidence/                   # JSON + PDF evidence, one numbered folder per run
+│   └── README.md                   # Setup, scope, latest results, ethics note
 ├── .github/workflows/     # CI pipeline definition
 ├── playwright.config.ts
 ├── tsconfig.json
@@ -234,9 +241,15 @@ Set these repository secrets if targeting a non-default environment:
 
 > **Note on the Leave suite:** the public demo account has no assigned leave entitlement, so a successful application can't be exercised. Instead the test verifies the deterministic behavior that's actually there: an insufficient-balance message once a date range is selected.
 
+## Security Scanning (source code, separate from the E2E suite above)
+
+Besides the functional/DAST-style security TCs already inside `tests/recruitment/security/` (IDOR, response headers, rate limiting, race conditions -- tested against the *running* demo app), `security/` holds a **source-code-level** scan of OrangeHRM's own open-source repository (`github.com/orangehrm/orangehrm`, GPL-3.0): SCA and SAST via Snyk, secret scanning via Gitleaks, and Dockerfile misconfiguration via Trivy.
+
+**Latest results:** SCA 5 Critical/36 High/64 Medium/4 Low, SAST 1 High/11 Medium/175 Low, Gitleaks 358 secret-pattern hits (inspected -- effectively all test fixtures / a known vendored-library false positive, not live credentials), Trivy 1 High/1 Low. Full JSON + PDF evidence and setup instructions: [security/README.md](security/README.md).
+
 ## Roadmap
 
-- Security testing (Snyk dependency/code scan, OWASP ZAP baseline scan): planned once credentials/infra are ready.
+- **OWASP ZAP (on hold):** planned DAST addition, target already decided -- a self-hosted OrangeHRM instance via Docker (built from the already-cloned source, which has its own Dockerfile), not the public demo, to allow a full active scan without any third-party risk. See [security/README.md](security/README.md#planned-next-addition-owasp-zap-on-hold) for the full reasoning.
 
 ## License
 
