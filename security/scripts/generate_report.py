@@ -1052,6 +1052,26 @@ def _status_text(status_key, failed_reasons):
     return STATUS[status_key][0]
 
 
+STATUS_PHRASE = {
+    "fix": "perlu diperbaiki",
+    "safe": "aman",
+    "failed": "gagal scan (tanpa temuan lain)",
+}
+
+
+def _status_repo_line(status_key, failed_reasons):
+    """Build the "Status repo: ..." header phrase, same bold-colored-count + colored-category
+    style as the reference's "Status repo: 51 perlu diperbaiki · 5 aman · ..." line -- for a
+    single repo this is just that one repo's own category (never padded with the other two
+    categories at "0"), plus a separate "N repo punya scan yang gagal" phrase when this repo
+    has findings AND some other scan failed (mirrors the reference's two independent counts)."""
+    color = STATUS_HEX[status_key]
+    bagian = [f'<font color="{color}"><b>1</b> {STATUS_PHRASE[status_key]}</font>']
+    if status_key == "fix" and failed_reasons:
+        bagian.append(f'<font color="{STATUS_HEX["failed"]}"><b>1</b> repo punya scan yang gagal</font>')
+    return "Status repo: " + " &nbsp;&middot;&nbsp; ".join(bagian)
+
+
 def _status_badge(status_key, failed_reasons, width):
     """Status pill for the per-repo card: two-tone (main status on top, "Gagal: ..." below)
     when there are findings AND a separate scan failed, a single pill otherwise -- ported
@@ -1119,11 +1139,7 @@ def build_summary_pdf(out_path: Path, run_name: str, target: str, branch: str,
     doc = SimpleDocTemplate(str(out_path), pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
                             topMargin=15 * mm, bottomMargin=15 * mm, title="Security Scan Summary")
 
-    status_hex = STATUS_HEX[status_key]
-    status_line = f'Status: <font color="{status_hex}"><b>{esc(_status_text(status_key, failed_reasons))}</b></font>'
-    if status_key == "fix" and failed_reasons:
-        status_line += (f' &nbsp;&middot;&nbsp; <font color="{STATUS_HEX["failed"]}">Gagal: '
-                        f'{esc(", ".join(r.upper() for r in failed_reasons))}</font>')
+    status_line = _status_repo_line(status_key, failed_reasons)
 
     # Gitleaks findings are secrets, not C/H/M/L severities, so they're correctly excluded
     # from the severity cards below -- call that out explicitly (same as the reference's
