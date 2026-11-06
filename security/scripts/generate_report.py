@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 generate_report.py - Step 2: turn the JSON evidence written by
-scan_orangehrm.py into PDF evidence (reportlab), one summary PDF plus
+scan_orangehrm.py into PDF evidence (reportlab): one summary PDF plus
 one detail PDF per tool that had findings.
 
-Simplified, single-repo version of the reference PDF generator: no
-category grouping, no multi-repo comparison logic.
+Simplified, single-repo version of the reference Snyk evidence PDF
+generator (snyk_generate_pdf.py): same visual structure (severity count
+cards, "KETERANGAN" scope & remediation table, SEVERITY / STATUS REPO
+legend boxes, "ISTILAH PER TOOL" glossary, per-finding detail cards,
+and a properly column-sized Gitleaks summary table) but without the
+multi-repo "DAFTAR ISI" table of contents or cross-run comparison logic.
 
 Usage:
     python generate_report.py
@@ -16,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 from reportlab.lib import colors
@@ -24,6 +30,9 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
+    HRFlowable,
+    KeepTogether,
+    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -40,18 +49,284 @@ SECURITY_DIR = SCRIPT_DIR.parent
 FOLDER_SCAN = SECURITY_DIR / "evidence" / "json"     # default: most recent run under here
 FOLDER_OUTPUT = SECURITY_DIR / "evidence" / "pdf"     # PDF output root
 
+# ============================================================
+# STYLING (ported from the reference snyk_generate_pdf.py so the output
+# looks like the real evidence PDFs instead of a bare table)
+# ============================================================
+SEV_ORDER = ["critical", "high", "medium", "low"]
+SEV_ABBR = {"critical": "C", "high": "H", "medium": "M", "low": "L"}
+SEV_COLOR = {
+    "critical": colors.HexColor("#7F1D1D"),
+    "high": colors.HexColor("#DC2626"),
+    "medium": colors.HexColor("#F59E0B"),
+    "low": colors.HexColor("#6B7280"),
+}
+# Snyk-style badge palette: light "number" box + dark "letter" box.
+SNYK_DARK = {"critical": "#AB1A1A", "high": "#CE5019", "medium": "#946100", "low": "#5E6372"}
+SNYK_LIGHT = {"critical": "#FCE4E4", "high": "#FDE8DD", "medium": "#FCF0D7", "low": "#E9EAF0"}
+ZERO_NUM_BG, ZERO_NUM_FG, ZERO_LET_BG = "#EEEEF2", "#8A8A9A", "#6E6E80"
+
+INK = colors.HexColor("#1F2933")
+INK_SOFT = colors.HexColor("#52606D")
+LINE = colors.HexColor("#E4E7EB")
+CHIP_BG = colors.HexColor("#EEF1F4")
+CARD_LINE = colors.HexColor("#E4E7EB")
+JARAK_KARTU = 16  # vertical gap between finding cards (pt)
+
+# Scan type: (pill label, color)
+TYPE_INFO = {
+    "SCA": ("SCA", "#2563EB"),
+    "SAST": ("SAST", "#7C3AED"),
+    "GITLEAKS": ("GITLEAKS", "#B45309"),
+    "TRIVY": ("TRIVY", "#4D7C0F"),
+}
+
 STATUS = {
     "fix": ("NEEDS ATTENTION", colors.HexColor("#DC2626")),
     "safe": ("SAFE", colors.HexColor("#15803D")),
     "failed": ("FAILED", colors.HexColor("#64748B")),
 }
+# Hex-string versions for use inside Paragraph markup.
+STATUS_HEX = {
+    "fix": "#DC2626",
+    "safe": "#15803D",
+    "failed": "#64748B",
+}
 
 styles = getSampleStyleSheet()
-H1 = ParagraphStyle("H1", parent=styles["Heading1"], fontSize=18, spaceAfter=10)
-H2 = ParagraphStyle("H2", parent=styles["Heading2"], fontSize=13, spaceAfter=6)
-BODY = ParagraphStyle("Body", parent=styles["Normal"], fontSize=9.5, leading=13, alignment=TA_LEFT)
-MONO = ParagraphStyle("Mono", parent=styles["Normal"], fontName="Courier", fontSize=8, leading=11)
-SMALL = ParagraphStyle("Small", parent=styles["Normal"], fontSize=8, textColor=colors.HexColor("#555555"))
+S_TITLE = ParagraphStyle("t", parent=styles["Title"], fontSize=17, textColor=INK,
+                         spaceAfter=2, fontName="Helvetica-Bold")
+S_SUB = ParagraphStyle("s", parent=styles["Normal"], fontSize=9.5, textColor=INK_SOFT, spaceAfter=1)
+S_CAT = ParagraphStyle("cat", parent=styles["Normal"], fontSize=12, textColor=INK,
+                       fontName="Helvetica-Bold", spaceBefore=12, spaceAfter=5)
+S_SECHDR = ParagraphStyle("sh", parent=styles["Normal"], fontSize=11, textColor=INK,
+                          fontName="Helvetica-Bold", spaceBefore=8, spaceAfter=4)
+S_ISSUE = ParagraphStyle("iss", parent=styles["Normal"], fontSize=12, textColor=INK,
+                         fontName="Helvetica-Bold", spaceAfter=1, leading=15)
+S_LABEL = ParagraphStyle("lbl", parent=styles["Normal"], fontSize=7.5, textColor=INK_SOFT,
+                         fontName="Helvetica-Bold", spaceAfter=1)
+S_BODY = ParagraphStyle("bd", parent=styles["Normal"], fontSize=9, textColor=INK, leading=13)
+S_MONO = ParagraphStyle("mo", parent=styles["Normal"], fontSize=8, textColor=INK,
+                        fontName="Courier", leading=12)
+S_SMALL = ParagraphStyle("sm", parent=styles["Normal"], fontSize=8.5, textColor=INK_SOFT, leading=12.5)
+S_CHIP = ParagraphStyle("ch", parent=styles["Normal"], fontSize=7.5, textColor=INK, leading=9)
+S_BADGE = ParagraphStyle("bg", parent=styles["Normal"], fontSize=8.5, textColor=colors.white,
+                         fontName="Helvetica-Bold", alignment=TA_LEFT)
+S_CELL = ParagraphStyle("cell", parent=styles["Normal"], fontSize=8.5, textColor=INK, leading=11)
+S_HCELL = ParagraphStyle("hcell", parent=S_CELL, textColor=INK_SOFT, fontName="Helvetica-Bold", fontSize=7.5)
+S_NUM = ParagraphStyle("num", parent=S_CELL, alignment=1, fontName="Helvetica-Bold")
+S_PILL = ParagraphStyle("pill", parent=S_CELL, fontSize=7, leading=8.5, alignment=1,
+                        fontName="Helvetica-Bold", textColor=colors.white)
+S_SEL = ParagraphStyle("sel", parent=S_SMALL, leading=10.5, textColor=INK)
+S_SELM = ParagraphStyle("selm", parent=S_MONO, fontSize=7, leading=9)
+S_CMD = ParagraphStyle("cmd", parent=S_CELL, fontName="Courier", fontSize=8, textColor=INK)
+
+
+def esc(t) -> str:
+    if t is None:
+        return ""
+    return str(t).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def md_to_text(md: str, limit: int | None = None) -> str:
+    """Strip markdown-ish syntax from Snyk description/help text into HTML-ish Paragraph markup."""
+    if not md:
+        return ""
+    t = md.replace("\r\n", "\n").replace("\r", "\n")
+    t = re.sub(r'\[([^\]]+)\]\((https?://[^\)]+)\)', r'\1', t)
+    t = re.sub(r'#{1,6}\s*', '', t)
+    t = t.replace("**", "").replace("`", "").replace("_", "")
+    t = re.sub(r'^\s*Overview\s*\n+', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'\n{3,}', '\n\n', t).strip()
+    if limit and len(t) > limit:
+        t = t[:limit].rstrip() + " ..."
+    return esc(t).replace("\n", "<br/>")
+
+
+# ------------------------------------------------------------
+# Small reusable flowable builders (ported from the reference script)
+# ------------------------------------------------------------
+
+def sev_badge(sev: str) -> Table:
+    c = SEV_COLOR.get(sev, colors.grey)
+    txt_color = colors.white if sev in ("critical", "high") else INK
+    style = ParagraphStyle("bd_" + sev, parent=S_BADGE, textColor=txt_color)
+    tbl = Table([[Paragraph(esc(sev.upper()), style)]], colWidths=[54])
+    tbl.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), c),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ]))
+    return tbl
+
+
+def chip(text: str) -> Table:
+    p = Paragraph(esc(text), S_CHIP)
+    t = Table([[p]])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), CHIP_BG),
+        ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 2.5), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ]))
+    return t
+
+
+def chip_row(items, per_row=6):
+    items = [i for i in items if i]
+    if not items:
+        return None
+    cells = [chip(i) for i in items]
+    rows = [cells[i:i + per_row] for i in range(0, len(cells), per_row)]
+    for r in rows:
+        while len(r) < per_row:
+            r.append("")
+    t = Table(rows, hAlign="LEFT")
+    t.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 1.5), ("BOTTOMPADDING", (0, 0), (-1, -1), 1.5),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ]))
+    return t
+
+
+def kv(label: str, value_flowable) -> Table:
+    if isinstance(value_flowable, str):
+        value_flowable = Paragraph(esc(value_flowable), S_BODY)
+    t = Table([[Paragraph(esc(label), S_LABEL), value_flowable]], colWidths=[95, None], hAlign="LEFT")
+    t.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 1), ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    return t
+
+
+def issue_card(inner_flowables, sev: str) -> Table:
+    """Border card with a colored severity strip on the left. Each flowable is its own
+    table row (not one big cell) so the card can split across pages for long content."""
+    rows = [[f] for f in inner_flowables]
+    card = Table(rows, colWidths=[None], splitByRow=1)
+    card.setStyle(TableStyle([
+        ("BOX", (0, 0), (-1, -1), 0.75, CARD_LINE),
+        ("LINEBEFORE", (0, 0), (0, -1), 3, SEV_COLOR.get(sev, colors.grey)),
+        ("BACKGROUND", (0, 0), (-1, -1), colors.white),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10), ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+        ("TOPPADDING", (0, 0), (-1, -1), 1), ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    return card
+
+
+def para_rows(text_html, style):
+    """Split long text into several Paragraphs so it can break across pages safely."""
+    if not text_html:
+        return []
+    hasil = []
+    for b in text_html.split("<br/><br/>"):
+        if not b.strip():
+            continue
+        baris = b.split("<br/>")
+        for i in range(0, len(baris), 20):
+            hasil.append(Paragraph("<br/>".join(baris[i:i + 20]), style))
+    return hasil
+
+
+def _kartu_utuh(items):
+    """Keep short cards together (move to next page as a unit); long cards are left to
+    split naturally so they don't leave a near-empty page behind them."""
+    w, h = A4[0] - 30 * mm, A4[1] - 30 * mm - 12
+    tinggi = sum(f.wrap(w, h)[1] for f in items)
+    return [KeepTogether(items)] if tinggi <= h * 0.5 else list(items)
+
+
+def _tabel(header, rows, widths, warna_baris=None):
+    """Bordered summary table with a grey header row. `widths` MUST sum to the usable page
+    width; any column holding long free text uses Paragraph cells so it wraps instead of
+    overflowing into the next column."""
+    data = [[Paragraph(esc(h), S_LABEL) for h in header]] + rows
+    t = Table(data, colWidths=widths, hAlign="LEFT", repeatRows=1)
+    st = [
+        ("BACKGROUND", (0, 0), (-1, 0), CHIP_BG),
+        ("BOX", (0, 0), (-1, -1), 0.75, CARD_LINE),
+        ("LINEBELOW", (0, 0), (-1, -2), 0.25, LINE),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]
+    t.setStyle(TableStyle(st + (warna_baris or [])))
+    return t
+
+
+def _info_scan(pasangan):
+    cells = [[Paragraph(esc(k), S_LABEL), Paragraph(esc(v), S_BODY)] for k, v in pasangan if v not in ("", None)]
+    rows = []
+    for i in range(0, len(cells), 2):
+        r = cells[i] + (cells[i + 1] if i + 1 < len(cells) else ["", ""])
+        rows.append(r)
+    t = Table(rows, colWidths=[75, 170, 75, None], hAlign="LEFT")
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), CHIP_BG),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ]))
+    return t
+
+
+def _badge(teks, warna, lebar=70):
+    t = Table([[Paragraph(esc(teks), S_BADGE)]], colWidths=[lebar])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), warna),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
+    return t
+
+
+def _pill(text, color, width):
+    t = Table([[Paragraph(text, S_PILL)]], colWidths=[width])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(color) if isinstance(color, str) else color),
+        ("LEFTPADDING", (0, 0), (-1, -1), 3), ("RIGHTPADDING", (0, 0), (-1, -1), 3),
+        ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+    ]))
+    return t
+
+
+def _single_badge(s):
+    t = Table([[Paragraph(SEV_ABBR[s], S_PILL)]], colWidths=[16])
+    t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(SNYK_DARK[s])),
+                           ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                           ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5)]))
+    return t
+
+
+def _type_label(tipe):
+    label, color = TYPE_INFO.get(tipe, (tipe, "#52606D"))
+    return _pill(label, color, 64)
+
+
+def _doc_header(story, title, target, project, issues):
+    story.append(Paragraph(esc(title), S_TITLE))
+    story.append(Paragraph(f"Target: {esc(target)}", S_SUB))
+    story.append(Paragraph(f"Project: {esc(project)}", S_SUB))
+    counts = {s: 0 for s in SEV_ORDER}
+    for i in issues:
+        counts[i.get("severity", "low")] = counts.get(i.get("severity", "low"), 0) + 1
+    summ = " | ".join(f"{s.capitalize()}: {counts.get(s, 0)}" for s in SEV_ORDER)
+    story.append(Paragraph(f"Total Issues: {len(issues)} &nbsp;&nbsp; ({esc(summ)})", S_SUB))
+    story.append(HRFlowable(width="100%", color=LINE, spaceBefore=6, spaceAfter=4))
+
+
+def _footer(canv, doc):
+    canv.saveState()
+    canv.setFont("Helvetica", 7.5)
+    canv.setFillColor(INK_SOFT)
+    canv.drawString(15 * mm, 9 * mm, "Security Scan Summary")
+    canv.drawRightString(A4[0] - 15 * mm, 9 * mm, f"Page {canv.getPageNumber()}")
+    canv.restoreState()
 
 
 # ============================================================
@@ -68,297 +343,670 @@ def find_latest_scan_folder(root: Path) -> Path | None:
 
 
 # ============================================================
-# Severity helpers
+# PARSERS (same JSON shapes as Snyk/gitleaks/trivy CLI output)
 # ============================================================
 
-def count_severity_from_snyk_test(json_path: Path) -> dict:
-    counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
-    if not json_path.exists() or json_path.stat().st_size == 0:
-        return counts
+def load_json(path: Path):
+    if not path.exists() or path.stat().st_size == 0:
+        return None
     try:
-        data = json.loads(json_path.read_text(encoding="utf-8", errors="replace"))
-        projects = data if isinstance(data, list) else [data]
-        seen = set()
-        for p in projects:
-            for v in (p or {}).get("vulnerabilities", []) or []:
-                vid = v.get("id") or f"{v.get('title')}|{v.get('packageName')}|{v.get('version')}"
-                if vid in seen:
-                    continue
-                seen.add(vid)
-                sev = v.get("severity")
-                if sev in counts:
-                    counts[sev] += 1
+        return json.loads(path.read_text(encoding="utf-8", errors="replace"))
     except Exception:
-        pass
-    return counts
+        return None
 
 
 def extract_sca_findings(json_path: Path) -> list[dict]:
-    findings = []
-    if not json_path.exists() or json_path.stat().st_size == 0:
-        return findings
-    try:
-        data = json.loads(json_path.read_text(encoding="utf-8", errors="replace"))
-        projects = data if isinstance(data, list) else [data]
-        seen = set()
-        for p in projects:
-            for v in (p or {}).get("vulnerabilities", []) or []:
-                vid = v.get("id") or f"{v.get('title')}|{v.get('packageName')}|{v.get('version')}"
-                if vid in seen:
-                    continue
-                seen.add(vid)
-                findings.append({
-                    "id": v.get("id", ""),
-                    "title": v.get("title", ""),
-                    "severity": v.get("severity", ""),
-                    "package": v.get("packageName", ""),
-                    "version": v.get("version", ""),
-                    "cve": ", ".join(v.get("identifiers", {}).get("CVE", [])) if v.get("identifiers") else "",
-                })
-    except Exception:
-        pass
-    return findings
-
-
-def count_severity_from_snyk_code(json_path: Path) -> dict:
-    counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
-    if not json_path.exists() or json_path.stat().st_size == 0:
-        return counts
-    try:
-        data = json.loads(json_path.read_text(encoding="utf-8", errors="replace"))
-        runs = data.get("runs")
-        if runs:
-            for issue in runs[0].get("results", []) or []:
-                level = issue.get("level")
-                if level == "error":
-                    counts["high"] += 1
-                elif level == "warning":
-                    counts["medium"] += 1
-                else:
-                    counts["low"] += 1
-    except Exception:
-        pass
-    return counts
-
-
-def extract_sast_findings(json_path: Path) -> list[dict]:
-    findings = []
-    if not json_path.exists() or json_path.stat().st_size == 0:
-        return findings
-    try:
-        data = json.loads(json_path.read_text(encoding="utf-8", errors="replace"))
-        runs = data.get("runs")
-        if not runs:
-            return findings
-        rules = {r.get("id"): r for r in runs[0].get("tool", {}).get("driver", {}).get("rules", []) or []}
-        for issue in runs[0].get("results", []) or []:
-            level = issue.get("level")
-            severity = {"error": "high", "warning": "medium", "note": "low"}.get(level, "low")
-            loc = (issue.get("locations") or [{}])[0].get("physicalLocation", {})
-            path = loc.get("artifactLocation", {}).get("uri", "")
-            line = loc.get("region", {}).get("startLine", "")
-            rule = rules.get(issue.get("ruleId"), {})
-            findings.append({
-                "ruleId": issue.get("ruleId", ""),
-                "severity": severity,
-                "message": (issue.get("message", {}) or {}).get("text", ""),
-                "file": path,
-                "line": line,
-                "name": rule.get("name", issue.get("ruleId", "")),
-            })
-    except Exception:
-        pass
-    return findings
-
-
-def extract_gitleaks_findings(json_path: Path) -> list[dict]:
-    findings = []
-    if not json_path.exists():
-        return findings
-    try:
-        raw = json_path.read_text(encoding="utf-8", errors="replace")
-        if not raw.strip():
-            return findings
-        data = json.loads(raw)
-        seen = set()
-        for x in data or []:
-            key = (x.get("File"), x.get("StartLine"), x.get("RuleID"))
+    data = load_json(json_path)
+    if data is None:
+        return []
+    findings, seen = [], set()
+    projects = data if isinstance(data, list) else [data]
+    for p in projects:
+        for v in (p or {}).get("vulnerabilities", []) or []:
+            # Dedup by Snyk vulnerability id alone (matches scan_orangehrm.py's own severity
+            # count / RINGKASAN.txt), so the detail PDF totals agree with the recap .txt.
+            key = v.get("id") or f"{v.get('title')}|{v.get('packageName')}|{v.get('version')}"
             if key in seen:
                 continue
             seen.add(key)
+            ident = v.get("identifiers", {}) or {}
             findings.append({
-                "file": x.get("File", ""),
-                "line": x.get("StartLine", ""),
-                "rule": x.get("RuleID", ""),
-                "commit": (x.get("Commit") or "")[:10],
-                "secret": x.get("Secret", "REDACTED"),  # already --redact'ed by gitleaks itself
+                "title": v.get("title", ""),
+                "severity": (v.get("severity") or "low").lower(),
+                "cvss": v.get("cvssScore"),
+                "cve": ", ".join(ident.get("CVE", []) or []),
+                "cwe": ", ".join(ident.get("CWE", []) or []),
+                "snyk_id": v.get("id"),
+                "package": f"{v.get('packageName', '')} {v.get('version', '')}".strip(),
+                "fixedIn": ", ".join(v.get("fixedIn", []) or []) or "No fix available",
+                "from": v.get("from", []) or [],
+                "description": v.get("description", ""),
+                "exploit": v.get("exploit"),
+                "cvssSources": v.get("cvssSources", []) or [],
+                "references": v.get("references", []) or [],
             })
-    except Exception:
-        pass
     return findings
 
 
-def extract_trivy_findings(json_path: Path) -> list[dict]:
+def count_severity(findings: list[dict]) -> dict:
+    counts = {s: 0 for s in SEV_ORDER}
+    for f in findings:
+        sev = f.get("severity", "low")
+        if sev in counts:
+            counts[sev] += 1
+    return counts
+
+
+LEVEL_TO_SEV = {"error": "high", "warning": "medium", "note": "low"}
+
+
+def extract_sast_findings(json_path: Path) -> list[dict]:
+    data = load_json(json_path)
+    if data is None:
+        return []
+    runs = data.get("runs") or []
+    if not runs:
+        return []
+    run = runs[0]
+    rules = {r.get("id"): r for r in run.get("tool", {}).get("driver", {}).get("rules", []) or []}
     findings = []
-    if not json_path.exists():
-        return findings
-    try:
-        data = json.loads(json_path.read_text(encoding="utf-8", errors="replace"))
-        for r in data.get("Results", []) or []:
-            if r.get("Class") != "config":
-                continue
-            target = r.get("Target", "")
-            for m in r.get("Misconfigurations", []) or []:
-                if m.get("Status") != "FAIL":
-                    continue
-                findings.append({
-                    "target": target,
-                    "id": m.get("ID", ""),
-                    "title": m.get("Title", ""),
-                    "severity": (m.get("Severity") or "").lower(),
-                    "message": m.get("Message", ""),
-                })
-    except Exception:
-        pass
+    for res in run.get("results", []) or []:
+        rule = rules.get(res.get("ruleId"), {})
+        props = res.get("properties", {}) or {}
+        sev = (props.get("severity") or LEVEL_TO_SEV.get(res.get("level", "note"), "low")).lower()
+        loc = ""
+        try:
+            pl = res["locations"][0]["physicalLocation"]
+            loc = f'{pl["artifactLocation"]["uri"]}:{pl.get("region", {}).get("startLine", "")}'
+        except Exception:
+            pass
+        h = rule.get("help", {}) or {}
+        findings.append({
+            "title": (rule.get("shortDescription", {}) or {}).get("text") or res.get("ruleId", ""),
+            "severity": sev,
+            "message": (res.get("message", {}) or {}).get("text", ""),
+            "location": loc,
+            "rule_id": res.get("ruleId", ""),
+            "help": h.get("text") or h.get("markdown") or "",
+        })
     return findings
 
 
-def severity_badge_text(sev: dict) -> str:
-    parts = []
-    if sev.get("critical"): parts.append(f"{sev['critical']}C")
-    if sev.get("high"): parts.append(f"{sev['high']}H")
-    if sev.get("medium"): parts.append(f"{sev['medium']}M")
-    if sev.get("low"): parts.append(f"{sev['low']}L")
-    return " ".join(parts) if parts else "0"
-
-
-SEV_COLOR = {
-    "critical": colors.HexColor("#7F1D1D"),
-    "high": colors.HexColor("#DC2626"),
-    "medium": colors.HexColor("#D97706"),
-    "low": colors.HexColor("#65A30D"),
+GITLEAKS_RULES = {
+    "generic-api-key": ("Generic secret: identifier contains key/token/secret/password with a high-entropy value.",
+                        "Verify it is not a dummy value. If valid: rotate at the issuer, then load from an "
+                        "environment variable / secret manager."),
+    "jwt": ("JSON Web Token. A token that has not expired can be used directly as a bearer credential for the "
+            "associated user/service (session hijacking).",
+            "Revoke / invalidate the token (rotate the signing key if needed). Remove the file from the repo if "
+            "it came from a DB dump or log."),
+    "private-key": ("Private key (RSA/EC/SSH/PGP). Whoever holds the key can impersonate, decrypt, or sign on "
+                    "behalf of its owner.",
+                    "Generate a new key pair, revoke the old public key on the server/service, store the new key "
+                    "in a secret manager / KMS."),
+    "aws-access-token": ("AWS access key.", "Deactivate the key in AWS IAM, issue a new key, audit CloudTrail for "
+                                            "suspicious activity."),
+    "gcp-api-key": ("Google Cloud API key.", "Delete/regenerate the key in Google Cloud Console and apply API key "
+                                             "restrictions (API, IP, referrer)."),
+    "github-pat": ("GitHub personal access token.", "Revoke the token in GitHub Settings > Developer settings."),
+    "gitlab-pat": ("GitLab personal access token.", "Revoke the token in GitLab > User Settings > Access Tokens."),
+    "slack-webhook-url": ("Slack webhook URL.", "Regenerate the webhook URL in the Slack app configuration."),
+    "stripe-access-token": ("Stripe API key.", "Roll the API key in the Stripe Dashboard."),
 }
 
 
+def extract_gitleaks_groups(json_path: Path) -> tuple[list[dict], int, dict]:
+    """Group gitleaks findings per (file, rule), mirroring the reference parse_gitleaks()."""
+    data = load_json(json_path)
+    if not isinstance(data, list):
+        return [], 0, {"temuan_mentah": 0, "commit": 0, "file_total": 0}
+    grup, unik, commits = {}, set(), set()
+    for x in data:
+        if not isinstance(x, dict):
+            continue
+        f, rule, baris = x.get("File", ""), x.get("RuleID", ""), x.get("StartLine")
+        unik.add((f, baris, rule))
+        commits.add(x.get("Commit", ""))
+        penjelasan, saran = GITLEAKS_RULES.get(rule, ("", ""))
+        g = grup.setdefault((f, rule), {
+            "file": f, "rule": rule, "desc": x.get("Description", ""), "baris": {},
+            "contoh": x.get("Match", "REDACTED"), "entropy": 0.0,
+            "penjelasan": penjelasan, "saran": saran,
+        })
+        g["entropy"] = max(g["entropy"], x.get("Entropy") or 0)
+        g["baris"].setdefault(baris, []).append({
+            "commit": x.get("Commit", ""), "author": x.get("Author", ""),
+            "waktu": (x.get("Date") or "").replace("T", " ").replace("Z", "")[:16],
+            "kolom": f'{x.get("StartColumn", "")}-{x.get("EndColumn", "")}',
+            "message": (x.get("Message") or "").splitlines()[0] if x.get("Message") else "",
+        })
+    hasil = sorted(grup.values(), key=lambda g: (-len(g["baris"]), g["file"]))
+    info = {"temuan_mentah": len(data), "commit": len(commits - {""}), "file_total": len({g["file"] for g in hasil})}
+    return hasil, len(unik), info
+
+
+TRIVY_CONTOH = {
+    "DS-0001": "# Pin a version, not :latest\nFROM alpine:3.20",
+    "DS-0002": "# Alpine:\nRUN addgroup -S app && adduser -S app -G app\nUSER app",
+    "DS-0026": "HEALTHCHECK --interval=30s --timeout=5s --retries=3 \\\n"
+               "  CMD curl -f http://localhost:<port>/health || exit 1",
+}
+
+
+def extract_trivy_findings(json_path: Path) -> tuple[list[dict], dict]:
+    data = load_json(json_path)
+    if not isinstance(data, dict) or "SchemaVersion" not in data:
+        return [], {"target": [], "versi": "", "lolos": {}}
+    out, target, lolos = [], [], {}
+    for r in data.get("Results") or []:
+        if r.get("Class") != "config":
+            continue
+        t = r.get("Target", "")
+        ms = r.get("MisconfSummary") or {}
+        target.append((t, ms.get("Successes", 0), ms.get("Failures", 0)))
+        for m in r.get("Misconfigurations") or []:
+            if m.get("Status") == "PASS":
+                lolos.setdefault(t, []).append((m.get("ID", ""), m.get("Title", ""), (m.get("Severity") or "").lower()))
+                continue
+            if m.get("Status") != "FAIL":
+                continue
+            cm = m.get("CauseMetadata") or {}
+            awal = cm.get("StartLine")
+            akhir = cm.get("EndLine") or awal
+            baris = (f"{awal}" + (f"-{akhir}" if akhir and akhir != awal else "")) if awal else ""
+            awal_line, konten = None, ""
+            kode = (cm.get("Code") or {}).get("Lines") or []
+            if kode:
+                awal_line = kode[0].get("Number")
+                konten = kode[0].get("Content", "")
+            out.append({
+                "title": m.get("Title", ""),
+                "severity": (m.get("Severity") or "low").lower(),
+                "id": m.get("ID", ""),
+                "location": t + (f":{baris}" if baris else " (file-level: applies to the whole file)"),
+                "message": m.get("Message", ""),
+                "description": m.get("Description", ""),
+                "resolution": m.get("Resolution", ""),
+                "contoh": TRIVY_CONTOH.get(m.get("ID", ""), ""),
+                "refs": [u for u in (m.get("References") or [])],
+                "snippet": f"{awal_line}: {konten}" if awal_line else "",
+            })
+    return out, {"target": target, "versi": (data.get("Trivy") or {}).get("Version", ""), "lolos": lolos}
+
+
 # ============================================================
-# PDF builders
+# DETAIL PDF builders (per-finding card style, matching the reference)
 # ============================================================
 
-def build_findings_table(rows: list[list[str]], header: list[str], col_widths=None) -> Table:
-    data = [header] + rows
-    t = Table(data, colWidths=col_widths, repeatRows=1)
+def build_sca_pdf(findings, target, project, out_path):
+    doc = SimpleDocTemplate(str(out_path), pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
+                            topMargin=15 * mm, bottomMargin=15 * mm)
+    story = []
+    _doc_header(story, "Snyk Test - Dependency Vulnerability Scan (SCA)", target, project, findings)
+
+    by_sev = {s: [] for s in SEV_ORDER}
+    for f in findings:
+        by_sev.setdefault(f["severity"], []).append(f)
+
+    for sev in SEV_ORDER:
+        group = by_sev.get(sev, [])
+        if not group:
+            continue
+        story.append(Spacer(1, 4))
+        header = Paragraph(f"{sev.upper()} ({len(group)})", S_SECHDR)
+        for idx, it in enumerate(group):
+            inner = [sev_badge(sev), Spacer(1, 4),
+                     Paragraph(esc(it["title"]), S_ISSUE),
+                     Paragraph(f"Package: <b>{esc(it['package'])}</b>", S_BODY),
+                     Spacer(1, 3)]
+            chips = []
+            if it.get("cvss") is not None:
+                chips.append(f"CVSS {esc(it['cvss'])}")
+            if it.get("cve"):
+                chips.append(esc(it["cve"]))
+            if it.get("cwe"):
+                chips.append(esc(it["cwe"]))
+            if it.get("snyk_id"):
+                chips.append(esc(it["snyk_id"]))
+            if it.get("exploit"):
+                chips.append("Exploit: " + esc(it["exploit"]))
+            cr = chip_row(chips)
+            if cr:
+                inner += [cr, Spacer(1, 4)]
+            inner.append(kv("Fixed in", it["fixedIn"]))
+            if it.get("from"):
+                inner.append(kv("Introduced through",
+                                Paragraph(" &rarr; ".join(esc(x) for x in it["from"][:8]), S_MONO)))
+            if it.get("cvssSources"):
+                inner += [Spacer(1, 4), Paragraph("Security information", S_LABEL),
+                          cvss_breakdown_flow(it["cvssSources"])]
+            desc = md_to_text(it.get("description", ""))
+            if desc:
+                inner += [Spacer(1, 4), Paragraph("Overview", S_LABEL)]
+                inner.extend(para_rows(desc, S_SMALL))
+            refs = _refs([(r.get("title", "Reference"), r.get("url", "")) for r in it.get("references", [])
+                          if r.get("url")])
+            if refs:
+                inner += [Spacer(1, 4), Paragraph("References", S_LABEL), refs]
+            card = issue_card(inner, sev)
+            story += _kartu_utuh([header, card] if idx == 0 else [card])
+            story.append(Spacer(1, JARAK_KARTU))
+    doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
+
+
+def build_sast_pdf(findings, target, project, out_path):
+    doc = SimpleDocTemplate(str(out_path), pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
+                            topMargin=15 * mm, bottomMargin=15 * mm)
+    story = []
+    _doc_header(story, "Snyk Code (SAST)", target, project, findings)
+
+    by_sev = {s: [] for s in SEV_ORDER}
+    for f in findings:
+        by_sev.setdefault(f["severity"], []).append(f)
+
+    for sev in SEV_ORDER:
+        group = by_sev.get(sev, [])
+        if not group:
+            continue
+        story.append(Spacer(1, 4))
+        header = Paragraph(f"{sev.upper()} ({len(group)})", S_SECHDR)
+        for idx, it in enumerate(group):
+            inner = [sev_badge(sev), Spacer(1, 4), Paragraph(esc(it["title"]), S_ISSUE)]
+            if it.get("location"):
+                inner.append(kv("Location", Paragraph(esc(it["location"]), S_MONO)))
+            if it.get("rule_id"):
+                inner.append(kv("Rule", it["rule_id"]))
+            if it.get("message"):
+                inner += [Spacer(1, 3), Paragraph(esc(it["message"]), S_BODY)]
+            if it.get("help"):
+                inner += [Spacer(1, 4), Paragraph("Details", S_LABEL)]
+                inner.extend(para_rows(md_to_text(it["help"]), S_SMALL))
+            card = issue_card(inner, sev)
+            story += _kartu_utuh([header, card] if idx == 0 else [card])
+            story.append(Spacer(1, JARAK_KARTU))
+    doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
+
+
+def cvss_breakdown_flow(sources):
+    """Compact "Security information" table from cvssSources: one row per CVSS version/source."""
+    rows = [[Paragraph("Version", S_LABEL), Paragraph("Score", S_LABEL),
+             Paragraph("Severity", S_LABEL), Paragraph("Vector", S_LABEL)]]
+    for s in sources[:4]:
+        ver = f"CVSS {esc(s.get('cvssVersion', ''))}"
+        rows.append([
+            Paragraph(ver, S_SMALL),
+            Paragraph(esc(s.get("baseScore", "")), S_SMALL),
+            Paragraph(esc((s.get("severity") or "").capitalize()), S_SMALL),
+            Paragraph(esc(s.get("vector", "")), S_MONO),
+        ])
+    t = Table(rows, colWidths=[55, 32, 52, None], hAlign="LEFT")
     t.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1F2937")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTSIZE", (0, 0), (-1, -1), 7.5),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#CCCCCC")),
+        ("LINEBELOW", (0, 0), (-1, 0), 0.5, LINE),
+        ("LEFTPADDING", (0, 0), (-1, -1), 2), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F5F5F5")]),
     ]))
     return t
 
 
-def build_tool_pdf(out_path: Path, title: str, subtitle: str, header: list[str], rows: list[list[str]], col_widths=None, note: str | None = None):
-    doc = SimpleDocTemplate(str(out_path), pagesize=A4,
-                             leftMargin=15 * mm, rightMargin=15 * mm,
-                             topMargin=15 * mm, bottomMargin=15 * mm)
-    elements = [Paragraph(title, H1), Paragraph(subtitle, SMALL), Spacer(1, 8)]
-    if note:
-        elements.append(Paragraph(note, BODY))
-        elements.append(Spacer(1, 6))
-    elements.append(build_findings_table(rows, header, col_widths))
-    doc.build(elements)
+def _refs(refs):
+    """refs: list of (title, url) tuples -> clickable "References" Paragraph, or None."""
+    if not refs:
+        return None
+    return Paragraph("<br/>".join(f'&bull; <link href="{esc(u)}" color="#1D4ED8">{esc(t)}</link>'
+                                  for t, u in refs), S_SMALL)
 
 
-def build_summary_pdf(out_path: Path, run_name: str, branch: str,
-                       sev_sca, sev_sast, secret_count, sev_trivy, has_dockerfile,
-                       status: dict, generated_pdfs: dict):
-    doc = SimpleDocTemplate(str(out_path), pagesize=A4,
-                             leftMargin=15 * mm, rightMargin=15 * mm,
-                             topMargin=15 * mm, bottomMargin=15 * mm)
-    elements = []
-    elements.append(Paragraph("Security Scan Summary", H1))
-    elements.append(Paragraph(f"OrangeHRM (orangehrm/orangehrm) &mdash; branch: {branch}", BODY))
-    elements.append(Paragraph(f"Scan run: {run_name}", SMALL))
-    elements.append(Spacer(1, 10))
-
-    # overall status badge
-    has_findings = bool(
-        (sev_sca and (sev_sca.get("critical") or sev_sca.get("high") or sev_sca.get("medium"))) or
-        (sev_sast and (sev_sast.get("critical") or sev_sast.get("high") or sev_sast.get("medium"))) or
-        secret_count or
-        (sev_trivy and (sev_trivy.get("critical") or sev_trivy.get("high") or sev_trivy.get("medium")))
-    )
-    any_failed = any([status.get("scaReason"), status.get("sastReason"), status.get("gitleaksReason"),
-                       status.get("trivyReason")])
-    if has_findings:
-        badge_text, badge_color = STATUS["fix"]
-    elif any_failed:
-        badge_text, badge_color = STATUS["failed"]
-    else:
-        badge_text, badge_color = STATUS["safe"]
-    if has_findings and any_failed:
-        badge_text += " (some scans failed)"
-
-    badge_table = Table([[badge_text]], colWidths=[90 * mm])
-    badge_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), badge_color),
-        ("TEXTCOLOR", (0, 0), (-1, -1), colors.white),
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 11),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+def _blok_kode(teks, style):
+    t = Table([[p] for p in para_rows(esc(teks).replace(" ", "&nbsp;").replace("\n", "<br/>"), style)],
+              hAlign="LEFT")
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F3F4F6")),
+        ("BOX", (0, 0), (-1, -1), 0.5, LINE),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 1.5), ("BOTTOMPADDING", (0, 0), (-1, -1), 1.5),
     ]))
-    elements.append(badge_table)
-    elements.append(Spacer(1, 14))
+    return t
 
-    def row_for(name, sev_or_count, applicable, reason, pdf_key):
-        if reason:
-            result_text = "FAILED"
-        elif not applicable:
-            result_text = "-"
-        elif isinstance(sev_or_count, dict):
-            result_text = severity_badge_text(sev_or_count)
-        elif sev_or_count is None:
-            result_text = "0"
-        else:
-            result_text = f"{sev_or_count} secret(s)" if sev_or_count else "0"
-        pdf_note = generated_pdfs.get(pdf_key, "-")
-        return [name, result_text, reason or "-", pdf_note]
 
-    rows = [
-        row_for("SCA (snyk test)", sev_sca, True, status.get("scaReason"), "sca"),
-        row_for("SAST (snyk code test)", sev_sast, True, status.get("sastReason"), "sast"),
-        row_for("Secrets (gitleaks)", secret_count, True, status.get("gitleaksReason"), "gitleaks"),
-        row_for("Trivy config (Dockerfile)", sev_trivy, has_dockerfile, status.get("trivyReason"), "trivy"),
+def _kotak_saran(butir):
+    t = Table([[Paragraph("REMEDIATION", S_LABEL)]] +
+              [[Paragraph(f"&bull; {b}", S_SMALL)] for b in butir], hAlign="LEFT")
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#FFF7ED")),
+        ("LINEBEFORE", (0, 0), (0, -1), 3, colors.HexColor("#C2410C")),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+    ]))
+    return t
+
+
+def build_gitleaks_pdf(grup, jumlah, info, target, project, out_path):
+    doc = SimpleDocTemplate(str(out_path), pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
+                            topMargin=15 * mm, bottomMargin=15 * mm)
+    width = A4[0] - 30 * mm
+    story = [Paragraph("Gitleaks (Secret Scan)", S_TITLE),
+             Paragraph(f"Target: {esc(target)}", S_SUB),
+             Paragraph(f"Project: {esc(project)}", S_SUB),
+             Paragraph(f'Secrets found: <font color="#DC2626"><b>{jumlah}</b></font> (deduplicated per file, '
+                       f'line, and rule) &nbsp;&middot;&nbsp; across {info["file_total"]} file(s)', S_SUB),
+             Spacer(1, 6),
+             _info_scan([("Raw findings", info["temuan_mentah"]), ("Affected commits", info["commit"]),
+                         ("Scope", "full git history"), ("Secret value", "redacted")]),
+             HRFlowable(width="100%", color=LINE, spaceBefore=8, spaceAfter=4),
+             Paragraph("Gitleaks scans <b>the entire git history</b> (all commits), not just HEAD. A secret that "
+                       "was committed and later deleted is still stored in the git objects and can be retrieved by "
+                       "anyone with read access to the repo. Secret values in this report are redacted.", S_SMALL),
+             Spacer(1, 4),
+             _kotak_saran([
+                 "<b>Treat as compromised:</b> rotate / revoke the password, token, or key first. Removing it "
+                 "from the repo alone is not enough.",
+                 "<b>Remove from code:</b> load the secret from an environment variable or secret manager.",
+                 "<b>Prevent recurrence:</b> add .env, DB dumps (*.sql), and credential files to .gitignore; "
+                 "commit only a template (e.g. .env.example) with dummy values. Consider a pre-commit gitleaks hook.",
+                 "<b>Purge history</b> (git filter-repo / BFG) if needed, coordinated with the team since it "
+                 "rewrites git history (force push).",
+             ])]
+
+    # Column widths chosen so long file paths get the remaining width and wrap inside
+    # their own column instead of overflowing into Rule/Count/Status.
+    if grup:
+        rows, warna = [], []
+        for i, g in enumerate(grup, start=1):
+            rows.append([Paragraph(esc(g["file"]), S_SELM), Paragraph(esc(g["rule"]), S_SEL),
+                         Paragraph(f'<b>{len(g["baris"])}</b>', S_SEL),
+                         Paragraph('<font color="#B91C1C"><b>FOUND</b></font>', S_SEL)])
+            warna.append(("BACKGROUND", (0, i), (-1, i), colors.HexColor("#FEF2F2")))
+        story += [Spacer(1, 6), Paragraph("SUMMARY PER FILE", S_SECHDR),
+                  _tabel(["File", "Rule", "Count", "Status"], rows,
+                         [width - 110 - 45 - 80, 110, 45, 80], warna)]
+
+    header = Paragraph(f"FINDING DETAILS ({len(grup)} file &times; rule)", S_SECHDR)
+    story.append(Spacer(1, 4))
+    for idx, g in enumerate(grup):
+        inner = [_badge("SECRET", SEV_COLOR["high"]), Spacer(1, 4),
+                 Paragraph(esc(g["file"]), S_ISSUE), Paragraph(esc(g["desc"]), S_BODY), Spacer(1, 3)]
+        cr = chip_row([g["rule"], f'{len(g["baris"])} line(s)', f'Entropy {g["entropy"]:.2f}' if g["entropy"] else ""])
+        if cr:
+            inner += [cr, Spacer(1, 4)]
+        inner.append(kv("Match (redacted)", Paragraph(esc(g["contoh"]), S_MONO)))
+        if g["penjelasan"]:
+            inner += [Spacer(1, 3), Paragraph("Description", S_LABEL), Paragraph(esc(g["penjelasan"]), S_SMALL)]
+        if g["saran"]:
+            inner += [Spacer(1, 3), Paragraph("Remediation", S_LABEL), Paragraph(esc(g["saran"]), S_SMALL)]
+        MAKS = 15
+        semua = sorted(g["baris"].items(), key=lambda x: x[0] or 0)
+        rows = []
+        for baris, cs in semua[:MAKS]:
+            c = sorted(cs, key=lambda c: c["waktu"])[0]
+            rows.append([Paragraph(f'{baris}:{c["kolom"]}', S_SELM), Paragraph(esc(c["commit"][:10]), S_SELM),
+                         Paragraph(esc(c["author"]), S_SEL), Paragraph(esc(c["waktu"]), S_SEL),
+                         Paragraph(esc(c["message"] if len(c["message"]) <= 60
+                                       else c["message"][:57].rstrip(" -") + "..."), S_SEL)])
+        # Column widths sum to the usable page width; "Commit message" column gets the
+        # remainder so long messages wrap in their own cell instead of overlapping.
+        inner += [Spacer(1, 4), Paragraph("Location &amp; first introducing commit", S_LABEL),
+                  _tabel(["Line:column", "Commit", "Author", "Date (UTC)", "Commit message"], rows,
+                         [58, 56, 64, 70, width - 58 - 56 - 64 - 70 - 26])]
+        if len(semua) > MAKS:
+            sisa = ", ".join(str(b) for b, _ in semua[MAKS:])
+            inner += [Spacer(1, 3), Paragraph(f"<b>{len(semua) - MAKS} other line(s)</b> in the same file: "
+                                              f'<font face="Courier">{esc(sisa)}</font>', S_SMALL)]
+        pertama = min((c for cs in g["baris"].values() for c in cs), key=lambda c: c["waktu"])
+        inner += [Spacer(1, 4), Paragraph("Investigate in repo", S_LABEL),
+                  _blok_kode(f'git log --oneline -- "{g["file"]}"\n'
+                             f'git show {pertama["commit"][:10]} -- "{g["file"]}"', S_MONO)]
+        card = issue_card(inner, "high")
+        story += _kartu_utuh([header, card] if idx == 0 else [card])
+        story.append(Spacer(1, JARAK_KARTU))
+    doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
+
+
+def build_trivy_pdf(findings, info, target, project, out_path):
+    doc = SimpleDocTemplate(str(out_path), pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
+                            topMargin=15 * mm, bottomMargin=15 * mm)
+    width = A4[0] - 30 * mm
+    story = []
+    _doc_header(story, "Trivy (Misconfiguration Scan)", target, project, findings)
+    total_lolos = sum(s for _, s, _ in info["target"])
+    story.append(_info_scan([("Files scanned", len(info["target"])), ("Trivy version", info.get("versi")),
+                             ("Checks passed", total_lolos), ("Checks failed", len(findings))]))
+    if info["target"]:
+        rows = [[Paragraph(esc(t), S_SELM), Paragraph(str(s), S_SEL),
+                 Paragraph(f'<b>{f}</b>' if f else "0", S_SEL)] for t, s, f in info["target"]]
+        story += [Spacer(1, 6), Paragraph("SCANNED FILES", S_SECHDR),
+                  Paragraph("Trivy evaluates each Dockerfile against security best-practice checks "
+                            "(policy-as-code). <b>Pass</b> = check satisfied, <b>Fail</b> = misconfiguration that "
+                            "needs remediation.", S_SMALL), Spacer(1, 3),
+                  _tabel(["File", "Pass", "Fail"], rows, [width - 60 - 60, 60, 60])]
+
+    by_sev = {s: [] for s in SEV_ORDER}
+    for f in findings:
+        by_sev.setdefault(f["severity"], []).append(f)
+    for sev in SEV_ORDER:
+        group = by_sev.get(sev, [])
+        if not group:
+            continue
+        story.append(Spacer(1, 4))
+        header = Paragraph(f"{sev.upper()} ({len(group)})", S_SECHDR)
+        for idx, it in enumerate(group):
+            inner = [sev_badge(sev), Spacer(1, 4), Paragraph(esc(it["title"]), S_ISSUE)]
+            if it.get("id"):
+                inner.append(chip(it["id"]))
+            inner.append(kv("Location", Paragraph(esc(it["location"]), S_MONO)))
+            if it.get("snippet"):
+                inner += [Spacer(1, 3), Paragraph("Code snippet", S_LABEL),
+                          Paragraph(esc(it["snippet"]), S_MONO)]
+            if it.get("message"):
+                inner += [Spacer(1, 3), Paragraph("Finding", S_LABEL), Paragraph(esc(it["message"]), S_BODY)]
+            desc = md_to_text(it.get("description", ""))
+            if desc:
+                inner += [Spacer(1, 4), Paragraph("Description", S_LABEL)]
+                inner.extend(para_rows(desc, S_SMALL))
+            if it.get("resolution"):
+                inner += [Spacer(1, 3), Paragraph("Remediation", S_LABEL), Paragraph(esc(it["resolution"]), S_SMALL)]
+            if it.get("contoh"):
+                inner += [Spacer(1, 3), Paragraph("Remediation example", S_LABEL), _blok_kode(it["contoh"], S_MONO)]
+            refs = _refs([("Reference", u) for u in it.get("refs", [])])
+            if refs:
+                inner += [Spacer(1, 3), Paragraph("References", S_LABEL), refs]
+            card = issue_card(inner, sev)
+            story += _kartu_utuh([header, card] if idx == 0 else [card])
+            story.append(Spacer(1, JARAK_KARTU))
+
+    if info.get("lolos"):
+        for t, checks in info["lolos"].items():
+            if not checks:
+                continue
+            rows = [[Paragraph(esc(cid), S_SELM), Paragraph(esc(title), S_SEL),
+                     Paragraph(esc(sv.capitalize()), S_SEL)] for cid, title, sv in checks]
+            story += [Spacer(1, 10), Paragraph(f"PASSED CHECKS &mdash; {esc(t)} ({len(checks)})", S_SECHDR),
+                      _tabel(["ID", "Check", "Severity"], rows, [45, width - 45 - 60, 60])]
+    doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
+
+
+# ============================================================
+# SUMMARY PDF: severity cards + KETERANGAN legend + ISTILAH PER TOOL glossary
+# ============================================================
+
+def _stat_cards(total, width):
+    cells, style = [], [
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 8), ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
     ]
-    header = ["Scan type", "Result (C/H/M/L)", "Failure reason", "Detail PDF"]
-    elements.append(build_findings_table(rows, header, col_widths=[55 * mm, 35 * mm, 60 * mm, 30 * mm]))
-    elements.append(Spacer(1, 14))
+    gap = 8
+    w = (width - 3 * gap) / 4
+    widths = []
+    for i, s in enumerate(SEV_ORDER):
+        n = total[s]
+        fg = SNYK_DARK[s] if n else ZERO_NUM_FG
+        c = len(cells)
+        cells.append(Paragraph(
+            f'<font size="22" color="{fg}"><b>{n}</b></font><br/>'
+            f'<font size="8.5" color="{fg}"><b>{s.upper()}</b></font>',
+            ParagraphStyle("st" + s, parent=S_CELL, alignment=1, leading=24)))
+        widths.append(w)
+        style += [("BACKGROUND", (c, 0), (c, 0), colors.HexColor(SNYK_LIGHT[s] if n else ZERO_NUM_BG)),
+                  ("LINEABOVE", (c, 0), (c, 0), 3, colors.HexColor(SNYK_DARK[s] if n else ZERO_LET_BG))]
+        if i < 3:
+            cells.append("")
+            widths.append(gap)
+    t = Table([cells], colWidths=widths, hAlign="LEFT")
+    t.setStyle(TableStyle(style))
+    return t
 
-    elements.append(Paragraph("How to read this", H2))
-    elements.append(Paragraph(
-        "NEEDS ATTENTION = findings at Medium severity or above (or secrets) exist in at least one scan. "
-        "SAFE = all applicable scans completed with no Medium+ findings and no secrets. "
-        "FAILED = a scan could not complete; this does NOT mean the code is safe, it means that aspect "
-        "was not actually checked. '-' means the scan was not applicable (e.g. no Dockerfile for Trivy).",
-        BODY,
-    ))
-    elements.append(Spacer(1, 6))
-    elements.append(Paragraph(
-        "Dependency CVEs shown here (SCA) are already public in the NVD/CVE databases; Snyk only "
-        "surfaces information that is already public. No exploit-level detail is included for any "
-        "unpatched critical finding.",
-        SMALL,
-    ))
 
-    if status.get("gitWarning"):
-        elements.append(Spacer(1, 10))
-        elements.append(Paragraph(f"Note: {status['gitWarning']}", SMALL))
+def _legend(width):
+    """Scan type, status, and severity explanation ("KETERANGAN" / scope & remediation
+    table, plus the SEVERITY / STATUS REPO legend boxes) for the 4 tools used here."""
+    rows = [[Paragraph("SCAN TYPE", S_HCELL), Paragraph("SCOPE &amp; REMEDIATION", S_HCELL),
+             Paragraph("COMMAND", S_HCELL)]]
+    jenis = [
+        ("SCA", "Software Composition Analysis: the dependency tree from the manifest/lockfile (package.json, "
+                "pom.xml, etc.) is matched against a vulnerability database (CVE). <b>Remediation:</b> upgrade to "
+                "the version in \"Fixed in\" after checking the upgrade path on snyk.io. For a <b>transitive "
+                "dependency</b> (see \"Introduced through\"), upgrade the direct dependency that pulls it in. "
+                "Pick the nearest safe version, check for breaking changes, then regression test. If there is no "
+                "fix / it is not exploitable, mitigate or ignore with a documented justification.",
+         "snyk test --all-projects"),
+        ("SAST", "Static Application Security Testing: the source code is analyzed with data-flow / taint "
+                 "analysis for vulnerability patterns (SQL injection, XSS, path traversal, hardcoded secrets). "
+                 "<b>Remediation:</b> validate the source &rarr; sink data flow at the reported location (it can "
+                 "be a false positive), then fix it, e.g. parameterized queries, input validation, output "
+                 "encoding. If it is a false positive, ignore with a documented justification.",
+         "snyk code test"),
+        ("GITLEAKS", "Secret scanning (regex + entropy) for passwords, tokens, API keys, and private keys across "
+                     "<b>the entire git history</b>, including commits that have since been removed from HEAD. "
+                     "Secret values are redacted. <b>Remediation:</b> treat as compromised: rotate/revoke first, "
+                     "then move the secret into an environment variable / secret manager.",
+         "gitleaks git --redact"),
+        ("TRIVY", "<i>Repos with a Dockerfile.</i> IaC misconfiguration scanning: the Dockerfile is evaluated "
+                  "against security best-practice checks, e.g. container running as root, unpinned base image "
+                  "(:latest), no HEALTHCHECK. <b>Remediation:</b> follow the \"Resolution\" on each finding.",
+         "trivy config ."),
+    ]
+    for tipe, ket, cmd in jenis:
+        rows.append([_type_label(tipe), Paragraph(ket, S_CELL), Paragraph(cmd, S_CMD)])
+    t1 = Table(rows, colWidths=[80, width - 80 - 130, 130], hAlign="LEFT")
+    t1.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), CHIP_BG),
+        ("BOX", (0, 0), (-1, -1), 0.75, CARD_LINE),
+        ("LINEBELOW", (0, 0), (-1, -2), 0.5, LINE),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
 
-    doc.build(elements)
+    sev_rows = [[Paragraph("SEVERITY", S_HCELL), ""]]
+    for s in SEV_ORDER:
+        sev_rows.append([_single_badge(s), Paragraph(f"<b>{s.capitalize()}</b>", S_CELL)])
+    st_rows = [[Paragraph("STATUS REPO", S_HCELL), ""]]
+    S_ST = ParagraphStyle("st_leg", parent=S_CELL, fontSize=7.5, leading=9.5)
+    status_leg = [
+        ("NEEDS ATTENTION", STATUS_HEX["fix"], "There is a Critical/High/Medium finding, or a secret."),
+        ("SAFE", STATUS_HEX["safe"], "No Medium+ finding and no secret found."),
+        ("FAILED", STATUS_HEX["failed"], "A scan could not complete; coverage is incomplete, not proven safe."),
+    ]
+    for label, color, arti in status_leg:
+        st_rows.append([_pill(label, color, 92), Paragraph(arti, S_ST)])
+    half = (width - 10) / 2
+    ts = Table(sev_rows, colWidths=[44, half - 44], hAlign="LEFT")
+    tt = Table(st_rows, colWidths=[100, half - 100], hAlign="LEFT")
+    for t in (ts, tt):
+        t.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), CHIP_BG), ("SPAN", (0, 0), (-1, 0)),
+            ("BOX", (0, 0), (-1, -1), 0.75, CARD_LINE),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 7), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+            ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ]))
+    t2 = Table([[ts, "", tt]], colWidths=[half, 10, half], hAlign="LEFT")
+    t2.setStyle(TableStyle([("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                            ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                            ("VALIGN", (0, 0), (-1, -1), "TOP")]))
+    return [t1, Spacer(1, 6), t2]
+
+
+def _istilah(width):
+    """Glossary of terms/fields used in the detail PDFs, for SCA/SAST/GITLEAKS/TRIVY only."""
+    data = [
+        ("UMUM", "Severity (C / H / M / L)",
+         "Critical / High / Medium / Low, usually derived from the CVSS score or rule severity. Low findings "
+         "are still listed in the detail PDF."),
+        ("", "CVE / CWE",
+         "<b>CVE</b> = public identifier for one specific vulnerability in a given software version. "
+         "<b>CWE</b> = weakness category (e.g. CWE-89 SQL Injection, CWE-22 Path Traversal, CWE-798 "
+         "Hard-coded Credentials)."),
+        ("", "False positive",
+         "A finding that is not actually exploitable in the application's context. Must be validated manually "
+         "before being ignored, and the ignore must include a justification."),
+        ("SCA", "Introduced through",
+         "The dependency path from the project to the vulnerable package. More than one level = <b>transitive "
+         "dependency</b>; remediate by upgrading the <b>direct dependency</b> that pulls it in."),
+        ("", "Fixed in",
+         "Minimum package version that already contains the patch. Empty = no fix available (mitigate or "
+         "switch library)."),
+        ("", "CVSS score",
+         "Base score 0.0&ndash;10.0 from the CVSS v3.x/v4 standard."),
+        ("", "Exploit maturity",
+         "Public exploit availability: No Known Exploit, Proof of Concept, Functional, Mature. The more mature, "
+         "the higher the likelihood of exploitation."),
+        ("SAST", "Location / data flow",
+         "The vulnerable file:line and the taint flow <b>source &rarr; sink</b> (untrusted input reaching a "
+         "dangerous operation without sanitization)."),
+        ("", "Rule",
+         "Snyk Code rule ID that triggered, e.g. javascript/Sqli, go/PT (Path Traversal)."),
+        ("GITLEAKS", "Rule / Entropy",
+         "<b>Rule</b> = the detector that matched (e.g. generic-api-key, private-key, jwt). <b>Entropy</b> = "
+         "Shannon entropy of the matched value; the higher it is, the more likely it is a real secret (not a "
+         "placeholder)."),
+        ("", "First introducing commit",
+         "Commit, author, and timestamp when the secret first entered the history, for investigation and to "
+         "determine the exposure window."),
+        ("TRIVY", "Pass / Fail",
+         "Number of Dockerfile policy checks satisfied (PASS) and violated (FAIL)."),
+        ("", "Check ID (DS-xxxx)",
+         "Trivy policy ID for Dockerfiles, e.g. DS-0001 unpinned :latest, DS-0002 run as root, DS-0026 no "
+         "HEALTHCHECK."),
+        ("", "File-level finding",
+         "A finding with no line number because the violation is a missing instruction (e.g. USER, HEALTHCHECK)."),
+    ]
+    S_UMUM = ParagraphStyle("umum", parent=S_CELL, fontSize=7.5, textColor=INK_SOFT)
+
+    def label(t):
+        if not t:
+            return ""
+        return Paragraph("<b>ALL SCANS</b>", S_UMUM) if t == "UMUM" else _type_label(t)
+
+    rows = [[label(t), Paragraph(f"<b>{i}</b>", S_CELL), Paragraph(a, S_CELL)] for t, i, a in data]
+    return _tabel(["Scan type", "Term", "Meaning"], rows, [90, 125, width - 90 - 125])
+
+
+def build_summary_pdf(out_path: Path, run_name: str, target: str, branch: str,
+                       total: dict, status_key: str, failed_reasons: list[str]):
+    width = A4[0] - 30 * mm
+    doc = SimpleDocTemplate(str(out_path), pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
+                            topMargin=15 * mm, bottomMargin=15 * mm, title="Security Scan Summary")
+
+    status_label, status_color = STATUS[status_key]
+    status_hex = STATUS_HEX[status_key]
+    status_line = f'Status: <font color="{status_hex}"><b>{status_label}</b></font>'
+    if failed_reasons:
+        status_line += f' &nbsp;&middot;&nbsp; <font color="{STATUS_HEX["failed"]}">Failed: {esc(", ".join(failed_reasons))}</font>'
+
+    story = [
+        Paragraph("Security Scan Summary", S_TITLE),
+        Paragraph(f"Target: <b>{esc(target)}</b> &nbsp;&middot;&nbsp; branch: <b>{esc(branch)}</b>", S_SUB),
+        Paragraph(f"Scan run: {esc(run_name)}", S_SUB),
+        Paragraph(status_line, S_SUB),
+        Spacer(1, 16), _stat_cards(total, width), Spacer(1, 10),
+        Paragraph("KETERANGAN", S_CAT), *_legend(width),
+        PageBreak(),
+        Paragraph("ISTILAH PER TOOL", S_CAT),
+        Paragraph("Glossary of terms and fields that appear in each tool's detail PDF.", S_SMALL),
+        Spacer(1, 4), _istilah(width),
+    ]
+    doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
 
 
 # ============================================================
@@ -385,6 +1033,8 @@ def main() -> int:
         return 1
     repo_dir = repo_dirs[0]
     branch = repo_dir.name.split("(", 1)[1].rstrip(")") if "(" in repo_dir.name else "unknown"
+    target = "orangehrm/orangehrm"
+    project = "orangehrm"
 
     status_path = repo_dir / "snyk_status.json"
     status = {}
@@ -398,94 +1048,73 @@ def main() -> int:
     pdf_repo_dir = pdf_run_dir / "orangehrm" / branch
     pdf_repo_dir.mkdir(parents=True, exist_ok=True)
 
-    generated_pdfs = {}
+    total = {s: 0 for s in SEV_ORDER}
+    failed_reasons = []
+    has_findings = False
 
     # --- SCA ---
     sca_json = repo_dir / "snyk_sca_result.json"
-    sev_sca = count_severity_from_snyk_test(sca_json)
     sca_findings = extract_sca_findings(sca_json)
+    sev_sca = count_severity(sca_findings)
+    for s in SEV_ORDER:
+        total[s] += sev_sca[s]
+    if sev_sca["critical"] or sev_sca["high"] or sev_sca["medium"]:
+        has_findings = True
+    if status.get("scaReason"):
+        failed_reasons.append("SCA")
     if sca_findings:
-        rows = [[f["severity"].upper(), f["title"][:60], f["package"], f["version"], f["cve"][:40]] for f in sca_findings]
         out = pdf_repo_dir / "orangehrm_SCA.pdf"
-        build_tool_pdf(
-            out, "Snyk Test - Dependency Vulnerability Scan (SCA)",
-            f"orangehrm/orangehrm ({branch}) &mdash; {len(sca_findings)} finding(s)",
-            ["Severity", "Title", "Package", "Version", "CVE"], rows,
-            col_widths=[22 * mm, 60 * mm, 38 * mm, 25 * mm, 35 * mm],
-        )
-        generated_pdfs["sca"] = out.name
+        build_sca_pdf(sca_findings, f"{target} ({branch})", project, out)
         print(f"  Wrote {out}")
     else:
         print("  SCA: no findings, no detail PDF generated.")
 
     # --- SAST ---
     sast_json = repo_dir / "snyk_sast_result.json"
-    sev_sast = count_severity_from_snyk_code(sast_json)
     sast_findings = extract_sast_findings(sast_json)
+    sev_sast = count_severity(sast_findings)
+    for s in SEV_ORDER:
+        total[s] += sev_sast[s]
+    if sev_sast["critical"] or sev_sast["high"] or sev_sast["medium"]:
+        has_findings = True
+    if status.get("sastReason"):
+        failed_reasons.append("SAST")
     if sast_findings:
-        rows = [[f["severity"].upper(), f["name"][:40], f["file"][:45], str(f["line"]), f["message"][:60]] for f in sast_findings]
         out = pdf_repo_dir / "orangehrm_SAST.pdf"
-        build_tool_pdf(
-            out, "Snyk Code - Static Code Analysis (SAST)",
-            f"orangehrm/orangehrm ({branch}) &mdash; {len(sast_findings)} finding(s)",
-            ["Severity", "Rule", "File", "Line", "Message"], rows,
-            col_widths=[18 * mm, 35 * mm, 50 * mm, 12 * mm, 65 * mm],
-        )
-        generated_pdfs["sast"] = out.name
+        build_sast_pdf(sast_findings, f"{target} ({branch})", project, out)
         print(f"  Wrote {out}")
     else:
         print("  SAST: no findings, no detail PDF generated.")
 
     # --- Gitleaks ---
     gitleaks_json = repo_dir / "gitleaks_result.json"
-    gitleaks_findings = extract_gitleaks_findings(gitleaks_json)
-    secret_count = len(gitleaks_findings) if gitleaks_json.exists() else None
-    if gitleaks_findings:
-        rows = [[f["file"][:50], str(f["line"]), f["rule"], f["commit"], "REDACTED"] for f in gitleaks_findings]
+    gitleaks_groups, secret_count, gitleaks_info = extract_gitleaks_groups(gitleaks_json)
+    if secret_count:
+        has_findings = True
+    if status.get("gitleaksReason"):
+        failed_reasons.append("Gitleaks")
+    if gitleaks_groups:
         out = pdf_repo_dir / "orangehrm_gitleaks.pdf"
-        build_tool_pdf(
-            out, "Gitleaks - Secret Scan (full git history)",
-            f"orangehrm/orangehrm ({branch}) &mdash; {len(gitleaks_findings)} secret(s) found",
-            ["File", "Line", "Rule", "Commit", "Value"], rows,
-            col_widths=[55 * mm, 12 * mm, 30 * mm, 20 * mm, 30 * mm],
-            note="Secret values are always redacted (gitleaks --redact). Any secret found, even if only "
-                 "in git history, must be rotated - deleting it from the current code is not enough.",
-        )
-        generated_pdfs["gitleaks"] = out.name
+        build_gitleaks_pdf(gitleaks_groups, secret_count, gitleaks_info, f"{target} ({branch})", project, out)
         print(f"  Wrote {out}")
     else:
         print("  Gitleaks: no findings, no detail PDF generated.")
 
     # --- Trivy (only if Dockerfile applicable) ---
     has_dockerfile = status.get("trivyApplicable", False)
-    sev_trivy = None
     if has_dockerfile:
         trivy_json = repo_dir / "trivy_result.json"
-        trivy_findings = extract_trivy_findings(trivy_json)
-        if trivy_json.exists():
-            try:
-                data = json.loads(trivy_json.read_text(encoding="utf-8", errors="replace"))
-                sev_trivy = {"critical": 0, "high": 0, "medium": 0, "low": 0}
-                for r in data.get("Results", []) or []:
-                    if r.get("Class") != "config":
-                        continue
-                    for m in r.get("Misconfigurations", []) or []:
-                        if m.get("Status") == "FAIL":
-                            sev = (m.get("Severity") or "").lower()
-                            if sev in sev_trivy:
-                                sev_trivy[sev] += 1
-            except Exception:
-                sev_trivy = None
+        trivy_findings, trivy_info = extract_trivy_findings(trivy_json)
+        sev_trivy = count_severity(trivy_findings)
+        for s in SEV_ORDER:
+            total[s] += sev_trivy[s]
+        if sev_trivy["critical"] or sev_trivy["high"] or sev_trivy["medium"]:
+            has_findings = True
+        if status.get("trivyReason"):
+            failed_reasons.append("Trivy")
         if trivy_findings:
-            rows = [[f["severity"].upper(), f["id"], f["title"][:45], f["target"][:30], f["message"][:50]] for f in trivy_findings]
             out = pdf_repo_dir / "orangehrm_trivy.pdf"
-            build_tool_pdf(
-                out, "Trivy - Dockerfile Misconfiguration Scan",
-                f"orangehrm/orangehrm ({branch}) &mdash; {len(trivy_findings)} finding(s)",
-                ["Severity", "ID", "Title", "File", "Message"], rows,
-                col_widths=[18 * mm, 25 * mm, 40 * mm, 30 * mm, 47 * mm],
-            )
-            generated_pdfs["trivy"] = out.name
+            build_trivy_pdf(trivy_findings, trivy_info, f"{target} ({branch})", project, out)
             print(f"  Wrote {out}")
         else:
             print("  Trivy: no findings, no detail PDF generated.")
@@ -493,9 +1122,15 @@ def main() -> int:
         print("  Trivy: not applicable (no Dockerfile in repo).")
 
     # --- Summary PDF ---
+    if has_findings:
+        status_key = "fix"
+    elif failed_reasons:
+        status_key = "failed"
+    else:
+        status_key = "safe"
+
     summary_pdf = pdf_run_dir / f"RINGKASAN_{run_name}.pdf"
-    build_summary_pdf(summary_pdf, run_name, branch, sev_sca, sev_sast, secret_count, sev_trivy,
-                       has_dockerfile, status, generated_pdfs)
+    build_summary_pdf(summary_pdf, run_name, target, branch, total, status_key, failed_reasons)
     print(f"\nWrote summary: {summary_pdf}")
     return 0
 
