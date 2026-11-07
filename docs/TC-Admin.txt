@@ -1,0 +1,335 @@
+================================================================================
+  DAFTAR TEST CASE: ADMIN
+  Modul    : Admin (User Management, Job, Corporate Branding)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/admin/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+  [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+  [TEMUAN]      = TC yang hasilnya didokumentasikan via report.finding() karena
+                   perilaku ambigu/environment-dependent, bukan pass/fail tegas
+
+  FORMAT ID  : TC-ADMIN-<SECTION>-NN
+  FOLDER     : satu subfolder per screen, tests/admin/<subfolder>/:
+               TC-ADMIN-USER-*       -> tests/admin/users/
+               TC-ADMIN-JOBTITLE-*   -> tests/admin/job-titles/
+               TC-ADMIN-PAYGRADE-*   -> tests/admin/pay-grades/
+               TC-ADMIN-EMPSTATUS-*  -> tests/admin/employment-status/
+               TC-ADMIN-JOBCAT-*     -> tests/admin/job-categories/
+               TC-ADMIN-SHIFT-*      -> tests/admin/work-shifts/
+               TC-ADMIN-CORPBRAND-*  -> tests/admin/corporate-branding/
+
+  CAKUPAN SAAT INI (pass pertama, dikerjakan dalam satu dispatch): 7
+  sub-screen Admin yang paling sering dites dan paling bernilai untuk
+  security testing -- User Management > Users, dan semua 5 sub-screen
+  Admin > Job (Job Titles, Pay Grades, Employment Status, Job Categories,
+  Work Shifts), plus Corporate Branding (upload-security target utama).
+  Total 39 TC.
+
+  BELUM DICAKUP (scope eksplisit untuk pass berikutnya, BUKAN gap yang
+  disengaja diabaikan tanpa dicatat):
+    - Organization > General Information, Locations, Structure
+    - Qualifications > Skills/Education/Licenses/Languages/Memberships
+      (admin-level master data)
+    - Nationalities
+    - Configuration > Email Configuration, Email Subscriptions,
+      Localization, Language Packages, Modules, Social Media
+      Authentication, OAuth Client, LDAP Configuration
+  Alasan: scope di atas butuh discovery + implementasi terpisah yang
+  signifikan (terutama Configuration, yang punya safety constraint khusus
+  karena berbagi infrastruktur demo publik -- lihat CATATAN TEKNIS di
+  bawah). Mengerjakannya sekaligus dengan 7 sub-screen di atas dalam satu
+  dispatch akan memaksa terburu-buru dan berisiko temuan "confirmed" yang
+  sebenarnya belum benar-benar diverifikasi live, jadi sengaja dipisah.
+
+================================================================================
+  CATATAN TEKNIS
+  Dikonfirmasi via Playwright discovery run langsung terhadap OrangeHRM OS
+================================================================================
+
+  FRAMEWORK: Vue 3 + OXD Design System, sama dengan PIM/Recruitment. Semua
+  sub-screen Admin > Job dipakai lewat SPA client-side navigation; hard
+  reload (page.goto langsung ke sub-route) pada beberapa sub-route (Job
+  Titles, Pay Grades, Job Categories, Work Shifts, Corporate Branding)
+  mengembalikan BODY KOSONG / shell blank, BUKAN 404 -- dikonfirmasi lewat
+  beberapa percobaan direct-navigate yang konsisten gagal. Employment
+  Status adalah satu-satunya sub-screen Job yang hard-reload-safe secara
+  langsung. Page object di suite ini SELALU goto() ke list URL dari
+  halaman yang sudah authenticated (bukan navigasi submenu manual), yang
+  terbukti reliable di semua 7 sub-screen.
+
+  URL & API ENDPOINT PER SUB-SCREEN (CONFIRMED):
+
+    USERS
+      List   : /web/index.php/admin/viewSystemUsers
+      Add    : /web/index.php/admin/saveSystemUser
+      API    : GET /api/v2/admin/users?limit=50&offset=0&sortField=
+               u.userName&sortOrder=ASC
+      Form fields (confirmed): Username, User Role (dropdown), Employee
+      Name (autocomplete, getByPlaceholder('Type for hints...'), sama
+      pola dengan Hiring Manager di Recruitment), Status ([TEMUAN
+      PENTING] DROPDOWN "-- Select --" dengan opsi Enabled/Disabled --
+      BUKAN toggle checkbox seperti dugaan awal di scoping; dikonfirmasi
+      live lewat pesan "Required" yang tersisa setelah semua field lain
+      diisi saat Status belum dipilih), Password, Confirm Password (2
+      input type=password berurutan di DOM).
+
+    JOB TITLES
+      List   : /web/index.php/admin/viewJobTitleList
+      Add    : /web/index.php/admin/saveJobTitle
+      API    : GET /api/v2/admin/job-titles?limit=50&offset=0&
+               sortField=jt.jobTitleName&sortOrder=ASC
+      Form fields (confirmed): Job Title (text), Job Description
+      (textarea), "Job Specification" (file upload -- SATU-SATUNYA
+      sub-screen Job dengan file input, high-value target upload-
+      security sama pola dengan Resume Candidate), Note (textarea).
+
+    PAY GRADES
+      List    : /web/index.php/admin/viewPayGrades
+      Add form: /web/index.php/admin/payGrade (SINGULAR, bukan plural
+                seperti list URL -- dikonfirmasi beda dari dugaan awal)
+      API     : GET /api/v2/admin/pay-grades?limit=50&offset=0
+      Form fields (confirmed): Name (text) saja di form Add. Currencies
+      per pay grade adalah sub-section TERPISAH yang hanya muncul
+      setelah pay grade pertama disimpan (di luar scope TC pass ini).
+
+    EMPLOYMENT STATUS
+      List   : /web/index.php/admin/employmentStatus (hard-reload-safe)
+      Add    : /web/index.php/admin/saveEmploymentStatus
+      API    : GET /api/v2/admin/employment-statuses?limit=50&offset=0
+      Form fields (confirmed): Name (text) saja.
+
+    JOB CATEGORIES
+      List   : /web/index.php/admin/jobCategory
+      Add    : /web/index.php/admin/saveJobCategory
+      API    : GET /api/v2/admin/job-categories?limit=50&offset=0
+      Form fields (confirmed): Name (text) saja.
+
+    WORK SHIFTS
+      List   : /web/index.php/admin/workShift
+      Add    : /web/index.php/admin/saveWorkShifts
+      API    : GET /api/v2/admin/work-shifts?limit=50&offset=0
+      Form fields (confirmed): Shift Name (text), From (time), To
+      (time), "Duration Per Day" (readonly, auto-dihitung dari From/To,
+      default tampil "8.00" sebelum diisi), Assigned Employees (di luar
+      scope TC pass ini).
+
+    CORPORATE BRANDING
+      Form   : /web/index.php/admin/addTheme
+      API    : GET /api/v2/admin/theme
+      [TEMUAN PENTING] Form ini BUKAN form "Add" seperti sub-screen lain
+      -- TIDAK ADA tombol "Save". Tombol yang ada: "Reset to Default",
+      "Preview", "Publish". "Publish" yang berfungsi sebagai commit
+      perubahan (confirmed dari label tombol, bukan diasumsikan sama
+      dengan "Save").
+      Field (confirmed): 6 color picker (Primary/Secondary Color,
+      Primary/Secondary Font Color, Primary Gradient Color 1/2) + 3 file
+      upload (Client Logo, Client Banner, Login Banner) -- 3 file input
+      terkonfirmasi lewat input[type="file"] count = 3, SEMUANYA target
+      upload-security, bukan cuma 1 seperti sub-screen lain.
+
+      [SAFETY CONSTRAINT -- PENTING] "Publish" di form ini BUKAN create
+      record baru (seperti Save di sub-screen lain), tapi MENGUBAH THEME
+      GLOBAL yang dilihat SEMUA user demo publik ini secara bersamaan,
+      mirip Configuration (Email/LDAP/dst). Klik Publish dengan payload
+      upload-security (exe-renamed) kalau ternyata DITERIMA akan benar-
+      benar mengganti logo/banner demo publik untuk semua orang, bukan
+      cuma menambah 1 record uji seperti Job Title/Pay Grade. Karena itu
+      TC-ADMIN-CORPBRAND-02/03/04/05 di suite ini SENGAJA TIDAK pernah
+      klik "Publish" -- validasi hanya diuji sampai TITIK SETELAH file
+      dipilih (cek pesan error client-side "File type not allowed" atau
+      sejenisnya), TIDAK sampai commit. Ini DIBATASI SECARA SENGAJA demi
+      keamanan demo bersama, konsisten dengan constraint yang sama untuk
+      Configuration, BUKAN gap yang diabaikan diam-diam.
+
+  SECURITY: UPLOAD VALIDATION (TC-ADMIN-JOBTITLE-07/08, TC-ADMIN-
+  CORPBRAND-04/05, pola sama dengan TC-PIM-ADD-28/29 dan
+  TC-RECRUITMENT-CANDIDATE-11/12): file executable (header PE "MZ")
+  di-rename jadi ekstensi yang diterima whitelist (.jpg/.pdf tergantung
+  field), dibandingkan dengan baseline file .exe ekstensi ASLI yang
+  diharapkan ditolak. Hasil aktual tiap TC didokumentasikan apa adanya
+  di STATUS masing-masing TC di bawah (lihat SUMMARY untuk rekap).
+
+  KONSISTENSI DELETE ACTION: [TEMUAN PENTING] Semua sub-screen simple-list
+  (Pay Grades, Employment Status, Job Categories, Job Titles, Work
+  Shifts, Users) punya 2 ikon aksi per row dengan urutan trash (delete)
+  LALU pencil (edit) -- BUKAN edit-lalu-delete seperti intuisi umum.
+  Dikonfirmasi lewat inspeksi innerHTML row (bi-trash muncul sebelum
+  bi-pencil-fill di DOM). Semua page object di suite ini pakai tombol
+  AKSI PERTAMA (.oxd-table-cell-actions button pertama) sebagai Delete.
+
+  [TEMUAN: SHARED-DEMO FLAKINESS DI BAWAH BEBAN PARALEL] Saat seluruh TC
+  Admin dijalankan dengan Playwright default (fullyParallel, banyak worker)
+  terhadap demo publik yang sedang dipakai sesi lain secara bersamaan,
+  beberapa TC acak (goto() setelah Save, evaluate() setelah navigasi)
+  kadang gagal karena server lambat atau context destroyed akibat
+  navigasi SPA yang belum selesai. TC yang SAMA PERSIS lulus bersih saat
+  dijalankan --workers=1 (serial). Pola ini konsisten dengan temuan
+  flakiness shared-demo yang sudah didokumentasikan di sesi PIM/
+  Recruitment sebelumnya -- bukan bug di test maupun aplikasi.
+
+  UNIQUE DATA: Nama job title/pay grade/employment status/job category/
+  work shift dan username dibuat via src/data/testData.ts (uniqueName,
+  uniqueEmail yang sudah ada di suite ini, dipakai ulang bukan dibuat
+  baru) supaya tidak kolisi dengan data seed demo maupun run sebelumnya
+  terhadap backend demo publik yang sama.
+
+================================================================================
+  TEST CASES: USER MANAGEMENT - USERS (6 TC)
+================================================================================
+
+  NO  ID                      KATEGORI  DESKRIPSI                                       STATUS
+  --  ----------------------  --------  ----------------------------------------------  -------
+  01  TC-ADMIN-USER-01        (+)       Add User valid (role ESS, employee valid)        [DONE]
+  02  TC-ADMIN-USER-02        (-)       Submit kosong -> validasi Required                [DONE]
+  03  TC-ADMIN-USER-03        (-)       Password dan Confirm Password tidak sama          [DONE]
+  04  TC-ADMIN-USER-04        (S)       XSS payload di Username                           [DONE]
+  05  TC-ADMIN-USER-05        (S)       SQL injection payload di search Username          [DONE]
+  06  TC-ADMIN-USER-06        (!)       Cancel membatalkan form Add User                  [DONE]
+
+================================================================================
+  TEST CASES: JOB TITLES (8 TC)
+================================================================================
+
+  NO  ID                         KATEGORI  DESKRIPSI                                        STATUS
+  --  -------------------------  --------  -----------------------------------------------  -------
+  01  TC-ADMIN-JOBTITLE-01       (+)       Add Job Title valid                               [DONE]
+  02  TC-ADMIN-JOBTITLE-02       (-)       Submit kosong -> validasi Required                [DONE]
+  03  TC-ADMIN-JOBTITLE-03       (B)       Job Title sangat panjang (300 char) [TEMUAN]       [DONE]
+  04  TC-ADMIN-JOBTITLE-04       (S)       XSS payload di Job Title                           [DONE]
+  05  TC-ADMIN-JOBTITLE-05       (!)       Cancel membatalkan form                            [DONE]
+  06  TC-ADMIN-JOBTITLE-06       (+)       Delete Job Title yang baru dibuat                  [DONE]
+  07  TC-ADMIN-JOBTITLE-07       (S)       File executable di-rename .jpg sbg Job Spec        [DONE]
+  08  TC-ADMIN-JOBTITLE-08       (S)       File .exe ekstensi asli ditolak (baseline)          [DONE]
+
+================================================================================
+  TEST CASES: PAY GRADES (5 TC)
+================================================================================
+
+  NO  ID                        KATEGORI  DESKRIPSI                                     STATUS
+  --  ------------------------  --------  ---------------------------------------------  -------
+  01  TC-ADMIN-PAYGRADE-01      (+)       Add Pay Grade valid                            [DONE]
+  02  TC-ADMIN-PAYGRADE-02      (-)       Submit kosong -> validasi Required              [DONE]
+  03  TC-ADMIN-PAYGRADE-03      (S)       XSS payload di Name                             [DONE]
+  04  TC-ADMIN-PAYGRADE-04      (!)       Duplicate name (nama pay grade existing)        [DONE]
+  05  TC-ADMIN-PAYGRADE-05      (+)       Delete Pay Grade yang baru dibuat               [DONE]
+
+================================================================================
+  TEST CASES: EMPLOYMENT STATUS (5 TC)
+================================================================================
+
+  NO  ID                         KATEGORI  DESKRIPSI                                     STATUS
+  --  -------------------------  --------  ---------------------------------------------  -------
+  01  TC-ADMIN-EMPSTATUS-01      (+)       Add Employment Status valid                    [DONE]
+  02  TC-ADMIN-EMPSTATUS-02      (-)       Submit kosong -> validasi Required              [DONE]
+  03  TC-ADMIN-EMPSTATUS-03      (S)       SQL injection payload di Name                   [DONE]
+  04  TC-ADMIN-EMPSTATUS-04      (!)       Duplicate name (nama existing, cth "Full-Time") [DONE]
+  05  TC-ADMIN-EMPSTATUS-05      (+)       Delete Employment Status yang baru dibuat       [DONE]
+
+================================================================================
+  TEST CASES: JOB CATEGORIES (5 TC)
+================================================================================
+
+  NO  ID                     KATEGORI  DESKRIPSI                                     STATUS
+  --  ---------------------  --------  ---------------------------------------------  -------
+  01  TC-ADMIN-JOBCAT-01     (+)       Add Job Category valid                         [DONE]
+  02  TC-ADMIN-JOBCAT-02     (-)       Submit kosong -> validasi Required              [DONE]
+  03  TC-ADMIN-JOBCAT-03     (S)       XSS payload di Name                             [DONE]
+  04  TC-ADMIN-JOBCAT-04     (!)       Duplicate name (nama existing, cth "Executive") [DONE]
+  05  TC-ADMIN-JOBCAT-05     (+)       Delete Job Category yang baru dibuat            [DONE]
+
+================================================================================
+  TEST CASES: WORK SHIFTS (5 TC)
+================================================================================
+
+  NO  ID                   KATEGORI  DESKRIPSI                                        STATUS
+  --  -------------------  --------  -----------------------------------------------  -------
+  01  TC-ADMIN-SHIFT-01    (+)       Add Work Shift valid (From < To)                  [DONE]
+  02  TC-ADMIN-SHIFT-02    (-)       Submit kosong -> validasi Required                 [DONE]
+  03  TC-ADMIN-SHIFT-03    (!)       From = To (durasi shift 0 jam / 24 jam) [TEMUAN]   [DONE]
+  04  TC-ADMIN-SHIFT-04    (S)       XSS payload di Shift Name                         [DONE]
+  05  TC-ADMIN-SHIFT-05    (+)       Delete Work Shift yang baru dibuat                [DONE]
+
+================================================================================
+  TEST CASES: CORPORATE BRANDING (5 TC)
+================================================================================
+
+  NO  ID                       KATEGORI  DESKRIPSI                                       STATUS
+  --  -----------------------  --------  ----------------------------------------------  -------
+  01  TC-ADMIN-CORPBRAND-01    (+)       Form termuat dengan 3 file input + tombol        [DONE]
+                                         Reset/Preview/Publish
+  02  TC-ADMIN-CORPBRAND-02    (-)       [VALIDATE-ONLY] File .txt sbg Client Logo        [DONE]
+                                         ditolak client-side (TIDAK klik Publish)
+  03  TC-ADMIN-CORPBRAND-03    (S)       [VALIDATE-ONLY] File .exe ekstensi asli sbg      [DONE]
+                                         Client Logo ditolak client-side (baseline,
+                                         TIDAK klik Publish)
+  04  TC-ADMIN-CORPBRAND-04    (S)       [VALIDATE-ONLY] File executable di-rename .png   [DONE]
+                                         sbg Client Logo -- cek error client-side SAJA
+                                         (TIDAK klik Publish, lihat SAFETY CONSTRAINT)
+  05  TC-ADMIN-CORPBRAND-05    (S)       [VALIDATE-ONLY] File executable di-rename .png   [DONE]
+                                         sbg Login Banner -- cek error client-side SAJA
+                                         (TIDAK klik Publish, lihat SAFETY CONSTRAINT)
+
+================================================================================
+  SUMMARY
+================================================================================
+
+  Total TC pass ini: 39
+  (Users 6, Job Titles 8, Pay Grades 5, Employment Status 5,
+  Job Categories 5, Work Shifts 5, Corporate Branding 5)
+
+  Hard check() (pass/fail tegas) : 35 TC
+  finding() (dokumentasi, bukan pass/fail tegas) : 4 TC -- Job Title
+  sangat panjang (TC-ADMIN-JOBTITLE-03), From=To pada Work Shift
+  (TC-ADMIN-SHIFT-03), dan TC-ADMIN-CORPBRAND-04/05 (exe-renamed-.png
+  pada Client Logo/Login Banner, dicatat finding() karena constraint
+  VALIDATE-ONLY -- tidak sampai klik Publish -- membuat hasilnya tidak
+  bisa dipastikan sebagai pass/fail tegas terhadap perilaku server-side).
+
+  TC yang SENGAJA dibiarkan FAILED (bukan test.fail()) karena bug nyata
+  reproduce: TC-ADMIN-JOBTITLE-07 (exe-renamed-.jpg diterima sebagai Job
+  Specification file, pola sama dengan TC-PIM-ADD-28 dan
+  TC-RECRUITMENT-CANDIDATE-11 -- temuan ke-3 di suite ini dengan pola
+  yang sama).
+
+  TEMUAN UPLOAD-SECURITY (lihat detail live-run yang sebenarnya di hasil
+  eksekusi -- bagian ini TIDAK diisi dengan asumsi, diisi sesuai apa yang
+  benar-benar terjadi saat spec dijalankan terhadap demo live. Lihat
+  README.md Test Coverage table untuk rekap final per TC setelah
+  eksekusi).
+
+================================================================================
+  CATATAN EKSEKUSI
+================================================================================
+
+  1. Semua TC pakai page object baru di src/pages/: AdminUsersPage,
+     AdminJobTitlesPage, AdminWorkShiftsPage, AdminSimpleListPage (dipakai
+     ulang untuk Pay Grades/Employment Status/Job Categories dengan
+     listPath berbeda per instance), AdminCorporateBrandingPage --
+     diinjeksikan via src/fixtures/pages.fixture.ts.
+
+  2. Nama unik (job title, pay grade, employment status, job category,
+     work shift, username) pakai src/data/testData.ts (uniqueName /
+     uniqueEmail yang sudah ada di suite ini), supaya tidak kolisi dengan
+     data seed demo publik maupun run sebelumnya.
+
+  3. Setiap TC pakai TestReport (src/utils/testReport.ts) persis seperti
+     modul lain di suite ini -- console error check otomatis di setiap TC.
+
+  4. Safety: TC Admin pass ini TIDAK menyentuh Configuration (Email/LDAP/
+     OAuth/Localization/dst) sama sekali -- scope itu sengaja ditunda ke
+     pass berikutnya, bukan di-skip diam-diam (lihat alasan di bagian atas
+     dokumen ini).
+================================================================================

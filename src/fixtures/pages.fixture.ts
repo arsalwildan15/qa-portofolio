@@ -25,6 +25,11 @@ import {
   PimReportsPage,
   VacanciesPage,
   CandidatesPage,
+  AdminUsersPage,
+  AdminJobTitlesPage,
+  AdminWorkShiftsPage,
+  AdminSimpleListPage,
+  AdminCorporateBrandingPage,
 } from '../pages';
 
 interface Pages {
@@ -52,6 +57,13 @@ interface Pages {
   pimReportsPage: PimReportsPage;
   vacanciesPage: VacanciesPage;
   candidatesPage: CandidatesPage;
+  adminUsersPage: AdminUsersPage;
+  adminJobTitlesPage: AdminJobTitlesPage;
+  adminWorkShiftsPage: AdminWorkShiftsPage;
+  adminPayGradesPage: AdminSimpleListPage;
+  adminEmploymentStatusPage: AdminSimpleListPage;
+  adminJobCategoriesPage: AdminSimpleListPage;
+  adminCorporateBrandingPage: AdminCorporateBrandingPage;
 }
 
 export const test = base.extend<Pages>({
@@ -126,6 +138,27 @@ export const test = base.extend<Pages>({
   },
   candidatesPage: async ({ page }, use) => {
     await use(new CandidatesPage(page));
+  },
+  adminUsersPage: async ({ page }, use) => {
+    await use(new AdminUsersPage(page));
+  },
+  adminJobTitlesPage: async ({ page }, use) => {
+    await use(new AdminJobTitlesPage(page));
+  },
+  adminWorkShiftsPage: async ({ page }, use) => {
+    await use(new AdminWorkShiftsPage(page));
+  },
+  adminPayGradesPage: async ({ page }, use) => {
+    await use(new AdminSimpleListPage(page, '/web/index.php/admin/viewPayGrades'));
+  },
+  adminEmploymentStatusPage: async ({ page }, use) => {
+    await use(new AdminSimpleListPage(page, '/web/index.php/admin/employmentStatus'));
+  },
+  adminJobCategoriesPage: async ({ page }, use) => {
+    await use(new AdminSimpleListPage(page, '/web/index.php/admin/jobCategory'));
+  },
+  adminCorporateBrandingPage: async ({ page }, use) => {
+    await use(new AdminCorporateBrandingPage(page));
   },
 });
 

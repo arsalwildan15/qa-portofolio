@@ -23,3 +23,8 @@ export { TerminationReasonsPage } from './TerminationReasonsPage';
 export { PimReportsPage } from './PimReportsPage';
 export { VacanciesPage } from './VacanciesPage';
 export { CandidatesPage } from './CandidatesPage';
+export { AdminUsersPage } from './AdminUsersPage';
+export { AdminJobTitlesPage } from './AdminJobTitlesPage';
+export { AdminWorkShiftsPage } from './AdminWorkShiftsPage';
+export { AdminSimpleListPage } from './AdminSimpleListPage';
+export { AdminCorporateBrandingPage } from './AdminCorporateBrandingPage';
