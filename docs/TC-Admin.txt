@@ -1,7 +1,7 @@
 ================================================================================
   DAFTAR TEST CASE: ADMIN
   Modul    : Admin (User Management, Job, Corporate Branding,
-             Qualifications, Nationalities)
+             Qualifications, Nationalities, Organization)
   Target   : https://opensource-demo.orangehrmlive.com/web/index.php/admin/*
   Engineer : Arsal Wildan Naviaddin, QA Engineer
   Project  : qa-portofolio
@@ -37,25 +37,42 @@ LEGEND SIMBOL SKENARIO
                TC-ADMIN-LANG-*        -> tests/admin/languages/
                TC-ADMIN-MEMBERSHIP-*  -> tests/admin/memberships/
                TC-ADMIN-NATIONALITY-* -> tests/admin/nationalities/
+               TC-ADMIN-ORGGI-*       -> tests/admin/general-information/
 
-  CAKUPAN SAAT INI: 13 sub-screen Admin. Pass pertama (39 TC): User
-  Management > Users, semua 5 sub-screen Admin > Job (Job Titles, Pay
-  Grades, Employment Status, Job Categories, Work Shifts), plus Corporate
-  Branding. Pass kedua (34 TC, dispatch ini): semua 5 sub-screen Admin >
+  CAKUPAN SAAT INI: 13 sub-screen Admin, plus Organization > General
+  Information (pass ketiga, dispatch ini) sedang berjalan. Pass pertama
+  (39 TC): User Management > Users, semua 5 sub-screen Admin > Job (Job
+  Titles, Pay Grades, Employment Status, Job Categories, Work Shifts),
+  plus Corporate Branding. Pass kedua (34 TC): semua 5 sub-screen Admin >
   Qualifications (Skills, Education, Licenses, Languages, Memberships)
-  dan Admin > Nationalities. Total 73 TC.
+  dan Admin > Nationalities. Pass ketiga / dispatch ini (Organization):
+  General Information selesai (6 TC); Locations dan Structure masih
+  berjalan dalam dispatch yang sama (commit terpisah per sub-screen).
+  Total TC saat ini: 79 (73 + 6 General Information).
 
   BELUM DICAKUP (scope eksplisit untuk pass berikutnya, BUKAN gap yang
   disengaja diabaikan tanpa dicatat):
-    - Organization > General Information, Locations, Structure
+    - Organization > Locations, Structure (sedang dikerjakan di dispatch
+      yang sama dengan General Information, commit terpisah menyusul)
     - Configuration > Email Configuration, Email Subscriptions,
       Localization, Language Packages, Modules, Social Media
       Authentication, OAuth Client, LDAP Configuration
   Alasan: scope di atas butuh discovery + implementasi terpisah yang
   signifikan (terutama Configuration, yang punya safety constraint khusus
   karena berbagi infrastruktur demo publik -- lihat CATATAN TEKNIS di
-  bawah). Organization sedang dikerjakan di dispatch paralel yang
-  terpisah dari dispatch Qualifications + Nationalities ini.
+  bawah).
+
+  CATATAN CAKUPAN ORGANIZATION > GENERAL INFORMATION (live discovery,
+  dispatch ini): screen ini TIDAK berbentuk form Add/Edit seperti semua
+  sub-screen Admin lain -- ini SATU record organisasi tunggal yang selalu
+  ada, ditampilkan read-only secara default, dengan switch "Edit" untuk
+  mengaktifkan field. [TEMUAN PENTING] TIDAK ADA field upload logo di
+  screen ini sama sekali (`input[type="file"]` count = 0, dikonfirmasi
+  live baik di mode view maupun edit) -- asumsi awal di scoping bahwa
+  ada field logo di sini TIDAK TERBUKTI; upload logo/banner tetap hanya
+  ada di Corporate Branding (sudah dicakup pass pertama). Karena itu
+  TIDAK ADA TC file-upload-security trio untuk screen ini -- coverage
+  security dialihkan ke XSS + SQLi di field teks sebagai gantinya.
 
   CATATAN CAKUPAN QUALIFICATIONS + NATIONALITIES (live discovery,
   dispatch ini): kelima sub-screen Qualifications TIDAK 100% identik
@@ -244,6 +261,53 @@ LEGEND SIMBOL SKENARIO
       CAKUPAN QUALIFICATIONS + NATIONALITIES di atas untuk dampaknya ke
       desain TC-ADMIN-NATIONALITY-01/06 (verifikasi via API, bukan scan
       baris UI).
+
+    GENERAL INFORMATION (Admin > Organization > General Information)
+      URL    : /web/index.php/admin/viewOrganizationGeneralInformation
+      API    : PUT /api/v2/admin/organization (SATU-SATUNYA endpoint --
+               selalu PUT, bukan POST, karena ini update ke 1 record yang
+               selalu ada, bukan "Add" record baru seperti sub-screen
+               lain).
+      [TEMUAN PENTING] Screen ini TAMPIL READ-ONLY secara default --
+      semua text field dirender sebagai textbox `disabled`. Switch "Edit"
+      (oxd-switch, BUKAN checkbox seperti pola Status di Users) di
+      sebelah heading harus diaktifkan dulu untuk mengisi field dan
+      memunculkan tombol "Save". [TEMUAN PENTING] TIDAK ADA tombol
+      "Cancel" di screen ini sama sekali -- satu-satunya sub-screen Admin
+      tanpa Cancel (dikonfirmasi live, lihat TC-ADMIN-ORGGI-06).
+      Field (confirmed): Organization Name (text, SATU-SATUNYA field
+      required -- dikonfirmasi lewat pesan "Required" tunggal saat
+      dikosongkan; batas panjang 100 karakter dikonfirmasi lewat pesan
+      client-side "Should not exceed 100 characters"), Number of
+      Employees (computed read-only, TIDAK PERNAH jadi input walau mode
+      Edit aktif), Registration Number, Tax ID, Phone, Fax, Email,
+      Address Street 1, Address Street 2, City, State/Province,
+      Zip/Postal Code, Country (SELECT DROPDOWN asli di mode Edit --
+      bukan text field, dikonfirmasi lewat `.oxd-select-text`), Notes.
+      [TEMUAN PENTING] TIDAK ADA field upload logo/file apa pun di
+      screen ini (`input[type="file"]` count = 0, dikonfirmasi live) --
+      lihat CATATAN CAKUPAN ORGANIZATION > GENERAL INFORMATION di atas.
+      [TEMUAN TEKNIS] Toggle "Edit" ke off TANPA klik Save TIDAK langsung
+      mengembalikan tampilan field ke nilai asli -- field yang sudah
+      disabled lagi tetap menampilkan teks yang baru diketik sampai
+      halaman direload. Data TIDAK pernah terkirim ke server (tidak ada
+      PUT), dikonfirmasi lewat reload penuh + lewat direct `page.request.
+      get` ke API -- jadi ini quirk tampilan (stale displayed value),
+      BUKAN kehilangan data nyata. Dicatat via finding() di
+      TC-ADMIN-ORGGI-06, bukan dianggap bug fungsional.
+      [TEMUAN PROSES -- PENTING UNTUK TEST INI SENDIRI] Membaca value
+      field segera setelah `page.goto()` + waktu tunggu pendek BERISIKO
+      race condition dengan hydration Vue -- bisa salah baca value
+      "" (belum sempat di-fetch) padahal data asli di server sudah benar
+      (dikonfirmasi lewat `page.request.get` langsung ke API yang
+      membuktikan value server selalu benar). AdminGeneralInformationPage
+      .goto() karena itu menunggu response GET /api/v2/admin/organization
+      secara eksplisit sebelum dianggap selesai, BUKAN sekadar
+      waitForTimeout tetap.
+      [SAFETY] Record ini GLOBAL, dilihat semua user demo publik (nama
+      organisasi tampil di header/branding). Semua TC yang menyimpan
+      perubahan di screen ini WAJIB mengembalikan nilai asli di akhir
+      test (lihat AdminGeneralInformationPage.snapshot()/restore()).
 
   SECURITY: UPLOAD VALIDATION (TC-ADMIN-JOBTITLE-07/08, TC-ADMIN-
   CORPBRAND-04/05, pola sama dengan TC-PIM-ADD-28/29 dan
@@ -463,29 +527,54 @@ LEGEND SIMBOL SKENARIO
                                             lihat TEMUAN ~196 record)
 
 ================================================================================
+  TEST CASES: ORGANIZATION - GENERAL INFORMATION (6 TC)
+================================================================================
+
+  NO  ID                  KATEGORI  DESKRIPSI                                        STATUS
+  --  ------------------  --------  -----------------------------------------------  -------
+  01  TC-ADMIN-ORGGI-01   (+)       Toggle Edit, ubah Notes, Save -> tersimpan,       [DONE]
+                                     restore ke nilai asli
+  02  TC-ADMIN-ORGGI-02   (-)       Kosongkan Organization Name (required) ->        [DONE]
+                                     validasi Required, tidak ada PUT terkirim
+  03  TC-ADMIN-ORGGI-03   (B)       Organization Name 300 char [TEMUAN: ditolak      [DONE]
+                                     client-side, limit 100 char]
+  04  TC-ADMIN-ORGGI-04   (S)       XSS payload di Organization Name                 [DONE]
+  05  TC-ADMIN-ORGGI-05   (S)       SQL injection payload di Tax ID                  [DONE]
+  06  TC-ADMIN-ORGGI-06   (!)       Toggle Edit off TANPA Save -- tidak ada tombol    [DONE]
+                                     Cancel, data tidak tersimpan di server
+                                     [TEMUAN: quirk tampilan field]
+
+================================================================================
   SUMMARY
 ================================================================================
 
-  Total TC: 73 (39 pass pertama + 34 pass kedua/dispatch ini)
+  Total TC: 79 (39 pass pertama + 34 pass kedua + 6 pass ketiga/
+  Organization > General Information, dispatch ini -- Locations dan
+  Structure menyusul di commit terpisah)
 
   Pass pertama (39): Users 6, Job Titles 8, Pay Grades 5, Employment
   Status 5, Job Categories 5, Work Shifts 5, Corporate Branding 5.
 
-  Pass kedua / dispatch ini (34): Skills 8, Education 5, Licenses 5,
-  Languages 5, Memberships 5, Nationalities 6.
+  Pass kedua (34): Skills 8, Education 5, Licenses 5, Languages 5,
+  Memberships 5, Nationalities 6.
 
-  Hard check() (pass/fail tegas) : 69 TC
-  finding() (dokumentasi, bukan pass/fail tegas) : 7 TC -- Job Title
+  Pass ketiga / dispatch ini (6 sejauh ini): General Information 6.
+
+  Hard check() (pass/fail tegas) : 74 TC
+  finding() (dokumentasi, bukan pass/fail tegas) : 9 TC -- Job Title
   sangat panjang (TC-ADMIN-JOBTITLE-03), From=To pada Work Shift
   (TC-ADMIN-SHIFT-03), TC-ADMIN-CORPBRAND-04/05 (exe-renamed-.png pada
   Client Logo/Login Banner, dicatat finding() karena constraint
   VALIDATE-ONLY -- tidak sampai klik Publish -- membuat hasilnya tidak
   bisa dipastikan sebagai pass/fail tegas terhadap perilaku server-side),
   Skill Name sangat panjang (TC-ADMIN-SKILL-03), Language Name sangat
-  panjang (TC-ADMIN-LANG-03), dan TC-ADMIN-SKILL-08 (cross-record GET/PUT
+  panjang (TC-ADMIN-LANG-03), TC-ADMIN-SKILL-08 (cross-record GET/PUT
   via id dicatat finding() karena N/A - arsitektur single-role, bukan
   kerentanan IDOR yang valid dalam konteks demo single-admin ini -- pola
-  sama dengan TC-RECRUITMENT-SECURITY-01).
+  sama dengan TC-RECRUITMENT-SECURITY-01), Organization Name 300 char
+  (TC-ADMIN-ORGGI-03, ditolak client-side dengan limit 100 char
+  dikonfirmasi), dan quirk tampilan toggle-Edit-off-tanpa-Save
+  (TC-ADMIN-ORGGI-06, stale displayed value, bukan kehilangan data).
 
   TC yang SENGAJA dibiarkan FAILED (bukan test.fail()) karena bug nyata
   reproduce: TC-ADMIN-JOBTITLE-07 (exe-renamed-.jpg diterima sebagai Job
@@ -493,7 +582,10 @@ LEGEND SIMBOL SKENARIO
   TC-RECRUITMENT-CANDIDATE-11 -- temuan ke-3 di suite ini dengan pola
   yang sama). Pass kedua (Qualifications + Nationalities) TIDAK
   menemukan bug upload-security baru -- tidak ada field file upload di
-  6 sub-screen ini.
+  6 sub-screen ini. General Information (pass ketiga) juga TIDAK punya
+  field upload sama sekali (lihat CATATAN TEKNIS) sehingga tidak ada
+  TC upload-security trio di sini -- bukan gap yang diabaikan, melainkan
+  hasil live discovery yang mengoreksi asumsi awal.
 
   TEMUAN UPLOAD-SECURITY (lihat detail live-run yang sebenarnya di hasil
   eksekusi -- bagian ini TIDAK diisi dengan asumsi, diisi sesuai apa yang
@@ -535,4 +627,12 @@ LEGEND SIMBOL SKENARIO
      TC-ADMIN-NATIONALITY-01 dan -06 karena itu memverifikasi add/delete
      via API (GET/DELETE by id) bukan scan baris tabel UI -- lihat
      CATATAN CAKUPAN QUALIFICATIONS + NATIONALITIES di atas.
+
+  6. General Information (pass ketiga) pakai page object baru
+     AdminGeneralInformationPage, diinjeksikan via
+     src/fixtures/pages.fixture.ts seperti page object lain. Berbeda dari
+     semua page object Admin lain di suite ini, kelas ini punya
+     snapshot()/restore() karena screen-nya adalah 1 record GLOBAL milik
+     demo publik (bukan record baru yang bisa dihapus bebas) -- setiap TC
+     yang menyimpan perubahan WAJIB memanggil restore() di akhir test.
 ================================================================================

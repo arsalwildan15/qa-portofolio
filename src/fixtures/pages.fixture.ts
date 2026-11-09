@@ -30,6 +30,7 @@ import {
   AdminWorkShiftsPage,
   AdminSimpleListPage,
   AdminCorporateBrandingPage,
+  AdminGeneralInformationPage,
 } from '../pages';
 
 interface Pages {
@@ -70,6 +71,7 @@ interface Pages {
   adminLanguagesPage: AdminSimpleListPage;
   adminMembershipsListPage: AdminSimpleListPage;
   adminNationalitiesPage: AdminSimpleListPage;
+  adminGeneralInformationPage: AdminGeneralInformationPage;
 }
 
 export const test = base.extend<Pages>({
@@ -183,6 +185,9 @@ export const test = base.extend<Pages>({
   },
   adminNationalitiesPage: async ({ page }, use) => {
     await use(new AdminSimpleListPage(page, '/web/index.php/admin/nationality'));
+  },
+  adminGeneralInformationPage: async ({ page }, use) => {
+    await use(new AdminGeneralInformationPage(page));
   },
 });
 

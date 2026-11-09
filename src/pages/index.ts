@@ -28,3 +28,4 @@ export { AdminJobTitlesPage } from './AdminJobTitlesPage';
 export { AdminWorkShiftsPage } from './AdminWorkShiftsPage';
 export { AdminSimpleListPage } from './AdminSimpleListPage';
 export { AdminCorporateBrandingPage } from './AdminCorporateBrandingPage';
+export { AdminGeneralInformationPage } from './AdminGeneralInformationPage';
