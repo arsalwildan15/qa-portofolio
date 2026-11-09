@@ -64,6 +64,12 @@ interface Pages {
   adminEmploymentStatusPage: AdminSimpleListPage;
   adminJobCategoriesPage: AdminSimpleListPage;
   adminCorporateBrandingPage: AdminCorporateBrandingPage;
+  adminSkillsPage: AdminSimpleListPage;
+  adminEducationPage: AdminSimpleListPage;
+  adminLicensesPage: AdminSimpleListPage;
+  adminLanguagesPage: AdminSimpleListPage;
+  adminMembershipsListPage: AdminSimpleListPage;
+  adminNationalitiesPage: AdminSimpleListPage;
 }
 
 export const test = base.extend<Pages>({
@@ -159,6 +165,24 @@ export const test = base.extend<Pages>({
   },
   adminCorporateBrandingPage: async ({ page }, use) => {
     await use(new AdminCorporateBrandingPage(page));
+  },
+  adminSkillsPage: async ({ page }, use) => {
+    await use(new AdminSimpleListPage(page, '/web/index.php/admin/viewSkills'));
+  },
+  adminEducationPage: async ({ page }, use) => {
+    await use(new AdminSimpleListPage(page, '/web/index.php/admin/viewEducation', 'Level'));
+  },
+  adminLicensesPage: async ({ page }, use) => {
+    await use(new AdminSimpleListPage(page, '/web/index.php/admin/viewLicenses'));
+  },
+  adminLanguagesPage: async ({ page }, use) => {
+    await use(new AdminSimpleListPage(page, '/web/index.php/admin/viewLanguages'));
+  },
+  adminMembershipsListPage: async ({ page }, use) => {
+    await use(new AdminSimpleListPage(page, '/web/index.php/admin/membership'));
+  },
+  adminNationalitiesPage: async ({ page }, use) => {
+    await use(new AdminSimpleListPage(page, '/web/index.php/admin/nationality'));
   },
 });
 
