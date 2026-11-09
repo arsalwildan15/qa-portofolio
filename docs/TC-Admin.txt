@@ -38,22 +38,24 @@ LEGEND SIMBOL SKENARIO
                TC-ADMIN-MEMBERSHIP-*  -> tests/admin/memberships/
                TC-ADMIN-NATIONALITY-* -> tests/admin/nationalities/
                TC-ADMIN-ORGGI-*       -> tests/admin/general-information/
+               TC-ADMIN-LOCATION-*    -> tests/admin/locations/
 
   CAKUPAN SAAT INI: 13 sub-screen Admin, plus Organization > General
-  Information (pass ketiga, dispatch ini) sedang berjalan. Pass pertama
-  (39 TC): User Management > Users, semua 5 sub-screen Admin > Job (Job
-  Titles, Pay Grades, Employment Status, Job Categories, Work Shifts),
-  plus Corporate Branding. Pass kedua (34 TC): semua 5 sub-screen Admin >
-  Qualifications (Skills, Education, Licenses, Languages, Memberships)
-  dan Admin > Nationalities. Pass ketiga / dispatch ini (Organization):
-  General Information selesai (6 TC); Locations dan Structure masih
-  berjalan dalam dispatch yang sama (commit terpisah per sub-screen).
-  Total TC saat ini: 79 (73 + 6 General Information).
+  Information dan Organization > Locations (pass ketiga, dispatch ini).
+  Pass pertama (39 TC): User Management > Users, semua 5 sub-screen Admin
+  > Job (Job Titles, Pay Grades, Employment Status, Job Categories, Work
+  Shifts), plus Corporate Branding. Pass kedua (34 TC): semua 5
+  sub-screen Admin > Qualifications (Skills, Education, Licenses,
+  Languages, Memberships) dan Admin > Nationalities. Pass ketiga /
+  dispatch ini (Organization): General Information (6 TC) dan Locations
+  (9 TC) selesai; Structure masih berjalan dalam dispatch yang sama
+  (commit terpisah menyusul). Total TC saat ini: 88 (73 + 6 General
+  Information + 9 Locations).
 
   BELUM DICAKUP (scope eksplisit untuk pass berikutnya, BUKAN gap yang
   disengaja diabaikan tanpa dicatat):
-    - Organization > Locations, Structure (sedang dikerjakan di dispatch
-      yang sama dengan General Information, commit terpisah menyusul)
+    - Organization > Structure (sedang dikerjakan di dispatch yang sama
+      dengan General Information + Locations, commit terpisah menyusul)
     - Configuration > Email Configuration, Email Subscriptions,
       Localization, Language Packages, Modules, Social Media
       Authentication, OAuth Client, LDAP Configuration
@@ -73,6 +75,20 @@ LEGEND SIMBOL SKENARIO
   ada di Corporate Branding (sudah dicakup pass pertama). Karena itu
   TIDAK ADA TC file-upload-security trio untuk screen ini -- coverage
   security dialihkan ke XSS + SQLi di field teks sebagai gantinya.
+
+  CATATAN CAKUPAN ORGANIZATION > LOCATIONS (live discovery, dispatch
+  ini): berbeda dari screen simple-list Admin lain, Locations punya 9
+  field (Name, City, State/Province, Zip/Postal Code, Country, Phone,
+  Fax, Address, Notes) dengan 2 field required (Name DAN City --
+  dikonfirmasi lewat 2 pesan "Required" saat submit kosong, bukan cuma
+  Name). [TEMUAN PENTING] Name punya validasi UNIQUENESS SERVER-BACKED
+  nyata -- GET /api/v2/core/validation/unique dipanggil saat field
+  di-blur, dan Name duplikat benar-benar DITOLAK (pesan "Already exists"
+  + submit kedua tidak terkirim, dikonfirmasi live lewat
+  TC-ADMIN-LOCATION-07) -- BEDA dari Pay Grade yang duplikatnya cuma
+  didokumentasikan apa adanya tanpa ekspektasi pasti. Form edit
+  menaruh id record langsung di URL (/admin/saveLocation/{id}), target
+  IDOR natural (lihat TC-ADMIN-LOCATION-09).
 
   CATATAN CAKUPAN QUALIFICATIONS + NATIONALITIES (live discovery,
   dispatch ini): kelima sub-screen Qualifications TIDAK 100% identik
@@ -308,6 +324,30 @@ LEGEND SIMBOL SKENARIO
       organisasi tampil di header/branding). Semua TC yang menyimpan
       perubahan di screen ini WAJIB mengembalikan nilai asli di akhir
       test (lihat AdminGeneralInformationPage.snapshot()/restore()).
+
+    LOCATIONS (Admin > Organization > Locations)
+      List   : /web/index.php/admin/viewLocations
+      Add    : /web/index.php/admin/saveLocation
+      Edit   : /web/index.php/admin/saveLocation/{id} (id langsung di
+               URL -- target IDOR natural, lihat TC-ADMIN-LOCATION-09)
+      API    : GET /api/v2/admin/locations?limit=50&offset=0&
+               sortField=location.name&sortOrder=ASC (list), POST
+               /api/v2/admin/locations (add), PUT /api/v2/admin/
+               locations/{id} (edit), DELETE /api/v2/admin/locations
+               (bulk, body {ids: [...]}) -- semua dikonfirmasi live.
+               Bogus id -> PUT/DELETE 404 bersih ("Record(s) Not
+               Found"), bukan 500/stack-trace leak (dikonfirmasi live).
+      Form fields (confirmed): Name (required), City (required -- SATU-
+      SATUNYA 2 field required di form ini, dikonfirmasi lewat 2 pesan
+      "Required" saat submit kosong), State/Province, Zip/Postal Code,
+      Country (select dropdown), Phone, Fax, Address (textarea), Notes
+      (textarea). Punya tombol "Cancel" (beda dari General Information).
+      [TEMUAN PENTING] Name punya validasi uniqueness SERVER-BACKED nyata
+      -- GET /api/v2/core/validation/unique?value=...&entityName=
+      Location&attributeName=name dipanggil saat field di-blur; Name
+      duplikat benar-benar DITOLAK (pesan "Already exists"), dikonfirmasi
+      live lewat TC-ADMIN-LOCATION-07 -- BEDA dari Pay Grade yang
+      duplikatnya cuma didokumentasikan apa adanya.
 
   SECURITY: UPLOAD VALIDATION (TC-ADMIN-JOBTITLE-07/08, TC-ADMIN-
   CORPBRAND-04/05, pola sama dengan TC-PIM-ADD-28/29 dan
@@ -545,12 +585,31 @@ LEGEND SIMBOL SKENARIO
                                      [TEMUAN: quirk tampilan field]
 
 ================================================================================
+  TEST CASES: ORGANIZATION - LOCATIONS (9 TC)
+================================================================================
+
+  NO  ID                     KATEGORI  DESKRIPSI                                       STATUS
+  --  ---------------------  --------  ----------------------------------------------  -------
+  01  TC-ADMIN-LOCATION-01   (+)       Add Location valid (Name, City, Country)         [DONE]
+  02  TC-ADMIN-LOCATION-02   (-)       Submit kosong -> Required di Name DAN City       [DONE]
+  03  TC-ADMIN-LOCATION-03   (B)       Name sangat panjang (300 char) [TEMUAN: ditolak   [DONE]
+                                       client-side, limit 100 char]
+  04  TC-ADMIN-LOCATION-04   (S)       XSS payload di Name                              [DONE]
+  05  TC-ADMIN-LOCATION-05   (S)       SQL injection payload di Name                     [DONE]
+  06  TC-ADMIN-LOCATION-06   (!)       Cancel membatalkan form Add Location              [DONE]
+  07  TC-ADMIN-LOCATION-07   (!)       Duplicate Name -> DITOLAK ("Already exists",      [DONE]
+                                       validasi uniqueness server-backed nyata)
+  08  TC-ADMIN-LOCATION-08   (+)       Delete Location yang baru dibuat                  [DONE]
+  09  TC-ADMIN-LOCATION-09   (S)       IDOR: cross-record access + bogus-id handling     [DONE]
+                                       pada PUT/DELETE by id
+
+================================================================================
   SUMMARY
 ================================================================================
 
-  Total TC: 79 (39 pass pertama + 34 pass kedua + 6 pass ketiga/
-  Organization > General Information, dispatch ini -- Locations dan
-  Structure menyusul di commit terpisah)
+  Total TC: 88 (39 pass pertama + 34 pass kedua + 15 pass ketiga/
+  Organization sejauh ini -- General Information 6 + Locations 9,
+  dispatch ini -- Structure menyusul di commit terpisah)
 
   Pass pertama (39): Users 6, Job Titles 8, Pay Grades 5, Employment
   Status 5, Job Categories 5, Work Shifts 5, Corporate Branding 5.
@@ -558,10 +617,11 @@ LEGEND SIMBOL SKENARIO
   Pass kedua (34): Skills 8, Education 5, Licenses 5, Languages 5,
   Memberships 5, Nationalities 6.
 
-  Pass ketiga / dispatch ini (6 sejauh ini): General Information 6.
+  Pass ketiga / dispatch ini (15 sejauh ini): General Information 6,
+  Locations 9.
 
-  Hard check() (pass/fail tegas) : 74 TC
-  finding() (dokumentasi, bukan pass/fail tegas) : 9 TC -- Job Title
+  Hard check() (pass/fail tegas) : 83 TC
+  finding() (dokumentasi, bukan pass/fail tegas) : 10 TC -- Job Title
   sangat panjang (TC-ADMIN-JOBTITLE-03), From=To pada Work Shift
   (TC-ADMIN-SHIFT-03), TC-ADMIN-CORPBRAND-04/05 (exe-renamed-.png pada
   Client Logo/Login Banner, dicatat finding() karena constraint
@@ -573,8 +633,11 @@ LEGEND SIMBOL SKENARIO
   kerentanan IDOR yang valid dalam konteks demo single-admin ini -- pola
   sama dengan TC-RECRUITMENT-SECURITY-01), Organization Name 300 char
   (TC-ADMIN-ORGGI-03, ditolak client-side dengan limit 100 char
-  dikonfirmasi), dan quirk tampilan toggle-Edit-off-tanpa-Save
-  (TC-ADMIN-ORGGI-06, stale displayed value, bukan kehilangan data).
+  dikonfirmasi), quirk tampilan toggle-Edit-off-tanpa-Save
+  (TC-ADMIN-ORGGI-06, stale displayed value, bukan kehilangan data), dan
+  TC-ADMIN-LOCATION-09 (cross-record GET/PUT via id, finding() karena N/A
+  - single-role, pola sama dengan TC-ADMIN-SKILL-08). Location Name 300
+  char (TC-ADMIN-LOCATION-03) juga finding(), sama pola dengan Job Title.
 
   TC yang SENGAJA dibiarkan FAILED (bukan test.fail()) karena bug nyata
   reproduce: TC-ADMIN-JOBTITLE-07 (exe-renamed-.jpg diterima sebagai Job
@@ -582,10 +645,11 @@ LEGEND SIMBOL SKENARIO
   TC-RECRUITMENT-CANDIDATE-11 -- temuan ke-3 di suite ini dengan pola
   yang sama). Pass kedua (Qualifications + Nationalities) TIDAK
   menemukan bug upload-security baru -- tidak ada field file upload di
-  6 sub-screen ini. General Information (pass ketiga) juga TIDAK punya
-  field upload sama sekali (lihat CATATAN TEKNIS) sehingga tidak ada
-  TC upload-security trio di sini -- bukan gap yang diabaikan, melainkan
-  hasil live discovery yang mengoreksi asumsi awal.
+  6 sub-screen ini. General Information dan Locations (pass ketiga) juga
+  TIDAK punya field upload sama sekali (lihat CATATAN TEKNIS) sehingga
+  tidak ada TC upload-security trio di kedua screen ini -- bukan gap
+  yang diabaikan, melainkan hasil live discovery yang mengoreksi asumsi
+  awal.
 
   TEMUAN UPLOAD-SECURITY (lihat detail live-run yang sebenarnya di hasil
   eksekusi -- bagian ini TIDAK diisi dengan asumsi, diisi sesuai apa yang
@@ -635,4 +699,11 @@ LEGEND SIMBOL SKENARIO
      snapshot()/restore() karena screen-nya adalah 1 record GLOBAL milik
      demo publik (bukan record baru yang bisa dihapus bebas) -- setiap TC
      yang menyimpan perubahan WAJIB memanggil restore() di akhir test.
+
+  7. Locations (pass ketiga) pakai page object baru AdminLocationsPage
+     (bukan AdminSimpleListPage -- field-nya terlalu banyak/beragam untuk
+     pola 1-field itu), diinjeksikan via src/fixtures/pages.fixture.ts.
+     Record yang dibuat TC Add/XSS/SQLi dibiarkan ada (sama pola dengan
+     sub-screen lain di suite ini), kecuali TC Delete/Duplicate/IDOR yang
+     membersihkan sendiri record yang dibuatnya.
 ================================================================================
