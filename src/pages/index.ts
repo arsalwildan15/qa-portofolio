@@ -30,3 +30,4 @@ export { AdminSimpleListPage } from './AdminSimpleListPage';
 export { AdminCorporateBrandingPage } from './AdminCorporateBrandingPage';
 export { AdminGeneralInformationPage } from './AdminGeneralInformationPage';
 export { AdminLocationsPage } from './AdminLocationsPage';
+export { AdminStructurePage } from './AdminStructurePage';

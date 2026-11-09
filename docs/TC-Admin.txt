@@ -39,30 +39,61 @@ LEGEND SIMBOL SKENARIO
                TC-ADMIN-NATIONALITY-* -> tests/admin/nationalities/
                TC-ADMIN-ORGGI-*       -> tests/admin/general-information/
                TC-ADMIN-LOCATION-*    -> tests/admin/locations/
+               TC-ADMIN-STRUCTURE-*   -> tests/admin/structure/
 
-  CAKUPAN SAAT INI: 13 sub-screen Admin, plus Organization > General
-  Information dan Organization > Locations (pass ketiga, dispatch ini).
-  Pass pertama (39 TC): User Management > Users, semua 5 sub-screen Admin
-  > Job (Job Titles, Pay Grades, Employment Status, Job Categories, Work
-  Shifts), plus Corporate Branding. Pass kedua (34 TC): semua 5
-  sub-screen Admin > Qualifications (Skills, Education, Licenses,
-  Languages, Memberships) dan Admin > Nationalities. Pass ketiga /
-  dispatch ini (Organization): General Information (6 TC) dan Locations
-  (9 TC) selesai; Structure masih berjalan dalam dispatch yang sama
-  (commit terpisah menyusul). Total TC saat ini: 88 (73 + 6 General
-  Information + 9 Locations).
+  CAKUPAN SAAT INI: 13 sub-screen Admin, plus semua 3 sub-screen
+  Organization (General Information, Locations, Structure) -- pass
+  ketiga, dispatch ini, SELESAI. Pass pertama (39 TC): User Management >
+  Users, semua 5 sub-screen Admin > Job (Job Titles, Pay Grades,
+  Employment Status, Job Categories, Work Shifts), plus Corporate
+  Branding. Pass kedua (34 TC): semua 5 sub-screen Admin > Qualifications
+  (Skills, Education, Licenses, Languages, Memberships) dan Admin >
+  Nationalities. Pass ketiga (24 TC): Organization > General Information
+  (6), Locations (9), Structure (9). Total TC: 97 (73 + 24).
 
   BELUM DICAKUP (scope eksplisit untuk pass berikutnya, BUKAN gap yang
   disengaja diabaikan tanpa dicatat):
-    - Organization > Structure (sedang dikerjakan di dispatch yang sama
-      dengan General Information + Locations, commit terpisah menyusul)
     - Configuration > Email Configuration, Email Subscriptions,
       Localization, Language Packages, Modules, Social Media
       Authentication, OAuth Client, LDAP Configuration
   Alasan: scope di atas butuh discovery + implementasi terpisah yang
-  signifikan (terutama Configuration, yang punya safety constraint khusus
-  karena berbagi infrastruktur demo publik -- lihat CATATAN TEKNIS di
-  bawah).
+  signifikan -- Configuration punya safety constraint khusus karena
+  berbagi infrastruktur demo publik (lihat CATATAN TEKNIS di bawah).
+  Dengan selesainya Organization di pass ketiga ini, Configuration kini
+  SATU-SATUNYA area Admin yang belum tersentuh.
+
+  CATATAN CAKUPAN ORGANIZATION > STRUCTURE (live discovery, dispatch
+  ini): screen ini BUKAN flat list seperti semua sub-screen Admin
+  lain -- ini TREE HIERARKI ASLI (OXD `oxd-tree-view`, org chart),
+  dikonfirmasi lewat API GET /api/v2/admin/subunits?mode=tree dan DOM
+  (`<ul class="oxd-tree-view">` bersarang). Root node = perusahaan
+  ("OrangeHRM", nama yang sama dengan General Information) -- root hanya
+  punya tombol "Add" (anak langsung), tidak bisa di-edit/delete dari
+  sini. Semua aksi CRUD digerbangi switch "Edit" (sama pola dengan
+  General Information, bukan checkbox). Setiap node non-root punya 3
+  ikon: trash (delete) LALU pencil (edit) LALU plus (add child) --
+  delete-first, konsisten dengan konvensi project. [TEMUAN PENTING] Node
+  yang baru menerima child pertamanya TIDAK auto-expand -- data API
+  sudah benar ter-nested, tapi node tetap collapsed secara visual sampai
+  chevron toggle-nya di-klik, bahkan setelah full page reload (lihat
+  AdminStructurePage.expandNode()).
+
+  [BUG NYATA dikonfirmasi live, TC-ADMIN-STRUCTURE-07 SENGAJA DIBIARKAN
+  FAILED] Menambah unit baru mengirim unitId="" dan description=""
+  (string kosong, field OPSIONAL) ke POST /api/v2/admin/subunits, tapi
+  server menyimpan dan mengembalikannya sebagai `null`. Saat unit itu
+  kemudian di-edit (ganti Name saja, perilaku user yang realistis), form
+  edit mem-prefill dari nilai `null` tersebut, dan PUT /api/v2/admin/
+  subunits/{id} mengirim ulang `unitId: null, description: null` -- yang
+  DITOLAK server dengan HTTP 422 "Invalid Parameter" (invalidParamKeys:
+  ["unitId","description"]), padahal KEDUA field itu opsional (bukan di
+  daftar "* Required"). Akibatnya: SETIAP unit yang baru ditambah TIDAK
+  BISA di-rename lagi tanpa dulu mengisi Unit Id dan Description secara
+  manual -- regresi nyata antara flow Add (longgar menerima "") dan flow
+  Edit (strict menolak null) untuk field opsional yang sama. Temuan ke-2
+  di suite Admin ini (setelah TC-ADMIN-JOBTITLE-07), bug pattern BEDA
+  (bukan upload-security, tapi null-vs-empty-string pada field opsional
+  antara create dan update).
 
   CATATAN CAKUPAN ORGANIZATION > GENERAL INFORMATION (live discovery,
   dispatch ini): screen ini TIDAK berbentuk form Add/Edit seperti semua
@@ -349,6 +380,38 @@ LEGEND SIMBOL SKENARIO
       live lewat TC-ADMIN-LOCATION-07 -- BEDA dari Pay Grade yang
       duplikatnya cuma didokumentasikan apa adanya.
 
+    STRUCTURE (Admin > Organization > Structure)
+      URL    : /web/index.php/admin/viewCompanyStructure
+      API    : GET /api/v2/admin/subunits?mode=tree (tree penuh), POST
+               /api/v2/admin/subunits (add), PUT /api/v2/admin/subunits/
+               {id} (edit), DELETE /api/v2/admin/subunits/{id} (delete,
+               by id langsung di path, BUKAN bulk {ids:[...]} seperti
+               Locations/Skills/Nationalities) -- semua dikonfirmasi
+               live.
+      [TEMUAN PENTING] Bukan form Add/Edit terpisah seperti sub-screen
+      lain -- Add/Edit membuka MODAL DIALOG di halaman yang sama (judul
+      "Add Organization Unit", teks pembantu "This unit will be added
+      under <parent>"). Field: Unit Id, Name (SATU-SATUNYA required,
+      dikonfirmasi lewat 1 pesan "Required" saat submit kosong),
+      Description. Tombol: Cancel, Save, "×" (close icon).
+      [TEMUAN PENTING] Semua aksi CRUD digerbangi switch "Edit" (oxd-
+      switch, sama pola dengan General Information). Root node
+      ("OrangeHRM") hanya dapat tombol "Add" (muncul setelah node-nya
+      diklik/dipilih, sebelumnya `display:none`); setiap node NON-root
+      langsung tampil 3 ikon aksi tanpa perlu seleksi dulu: trash
+      (delete) LALU pencil (edit) LALU plus (add child) -- delete-first,
+      konsisten dengan konvensi project.
+      [TEMUAN TEKNIS] Node yang baru menerima child pertamanya TIDAK
+      auto-expand secara visual walau data API sudah benar ter-nested --
+      perlu klik chevron toggle node tersebut (lihat
+      AdminStructurePage.expandNode(), toggle adalah SIBLING dari card
+      node di dalam `.oxd-tree-node-wrapper` yang sama, bukan descendant
+      dari card).
+      [BUG NYATA -- lihat CATATAN CAKUPAN ORGANIZATION > STRUCTURE di
+      atas untuk detail penuh] Unit baru tidak bisa di-rename tanpa
+      HTTP 422, karena unitId/description kosong disimpan sebagai `null`
+      saat create tapi ditolak sebagai `null` saat update.
+
   SECURITY: UPLOAD VALIDATION (TC-ADMIN-JOBTITLE-07/08, TC-ADMIN-
   CORPBRAND-04/05, pola sama dengan TC-PIM-ADD-28/29 dan
   TC-RECRUITMENT-CANDIDATE-11/12): file executable (header PE "MZ")
@@ -604,12 +667,29 @@ LEGEND SIMBOL SKENARIO
                                        pada PUT/DELETE by id
 
 ================================================================================
+  TEST CASES: ORGANIZATION - STRUCTURE (9 TC)
+================================================================================
+
+  NO  ID                      KATEGORI  DESKRIPSI                                       STATUS
+  --  ----------------------  --------  ----------------------------------------------  -------
+  01  TC-ADMIN-STRUCTURE-01   (+)       Add Organization Unit di bawah root valid        [DONE]
+  02  TC-ADMIN-STRUCTURE-02   (-)       Submit kosong -> Required di Name                [DONE]
+  03  TC-ADMIN-STRUCTURE-03   (B)       Name sangat panjang (300 char) [TEMUAN]          [DONE]
+  04  TC-ADMIN-STRUCTURE-04   (S)       XSS payload di Name                              [DONE]
+  05  TC-ADMIN-STRUCTURE-05   (S)       SQL injection payload di Name                     [DONE]
+  06  TC-ADMIN-STRUCTURE-06   (!)       Cancel membatalkan dialog Add Organization Unit  [DONE]
+  07  TC-ADMIN-STRUCTURE-07   (+)       Rename unit baru -> [BUG] HTTP 422, unitId/      [FAILED]
+                                        description null ditolak saat edit
+  08  TC-ADMIN-STRUCTURE-08   (+)       Delete Organization Unit yang baru dibuat         [DONE]
+  09  TC-ADMIN-STRUCTURE-09   (!)       Add child unit di bawah unit lain (bukan root)    [DONE]
+                                        -> bersarang benar, hierarki bertingkat terbukti
+
+================================================================================
   SUMMARY
 ================================================================================
 
-  Total TC: 88 (39 pass pertama + 34 pass kedua + 15 pass ketiga/
-  Organization sejauh ini -- General Information 6 + Locations 9,
-  dispatch ini -- Structure menyusul di commit terpisah)
+  Total TC: 97 (39 pass pertama + 34 pass kedua + 24 pass ketiga/
+  Organization -- General Information 6 + Locations 9 + Structure 9)
 
   Pass pertama (39): Users 6, Job Titles 8, Pay Grades 5, Employment
   Status 5, Job Categories 5, Work Shifts 5, Corporate Branding 5.
@@ -617,11 +697,10 @@ LEGEND SIMBOL SKENARIO
   Pass kedua (34): Skills 8, Education 5, Licenses 5, Languages 5,
   Memberships 5, Nationalities 6.
 
-  Pass ketiga / dispatch ini (15 sejauh ini): General Information 6,
-  Locations 9.
+  Pass ketiga (24): General Information 6, Locations 9, Structure 9.
 
-  Hard check() (pass/fail tegas) : 83 TC
-  finding() (dokumentasi, bukan pass/fail tegas) : 10 TC -- Job Title
+  Hard check() (pass/fail tegas) : 91 TC
+  finding() (dokumentasi, bukan pass/fail tegas) : 11 TC -- Job Title
   sangat panjang (TC-ADMIN-JOBTITLE-03), From=To pada Work Shift
   (TC-ADMIN-SHIFT-03), TC-ADMIN-CORPBRAND-04/05 (exe-renamed-.png pada
   Client Logo/Login Banner, dicatat finding() karena constraint
@@ -634,22 +713,28 @@ LEGEND SIMBOL SKENARIO
   sama dengan TC-RECRUITMENT-SECURITY-01), Organization Name 300 char
   (TC-ADMIN-ORGGI-03, ditolak client-side dengan limit 100 char
   dikonfirmasi), quirk tampilan toggle-Edit-off-tanpa-Save
-  (TC-ADMIN-ORGGI-06, stale displayed value, bukan kehilangan data), dan
+  (TC-ADMIN-ORGGI-06, stale displayed value, bukan kehilangan data),
   TC-ADMIN-LOCATION-09 (cross-record GET/PUT via id, finding() karena N/A
-  - single-role, pola sama dengan TC-ADMIN-SKILL-08). Location Name 300
-  char (TC-ADMIN-LOCATION-03) juga finding(), sama pola dengan Job Title.
+  - single-role, pola sama dengan TC-ADMIN-SKILL-08), Location Name 300
+  char (TC-ADMIN-LOCATION-03), dan Organization Unit Name 300 char
+  (TC-ADMIN-STRUCTURE-03) -- keduanya finding() sama pola dengan Job
+  Title.
 
   TC yang SENGAJA dibiarkan FAILED (bukan test.fail()) karena bug nyata
   reproduce: TC-ADMIN-JOBTITLE-07 (exe-renamed-.jpg diterima sebagai Job
   Specification file, pola sama dengan TC-PIM-ADD-28 dan
-  TC-RECRUITMENT-CANDIDATE-11 -- temuan ke-3 di suite ini dengan pola
-  yang sama). Pass kedua (Qualifications + Nationalities) TIDAK
-  menemukan bug upload-security baru -- tidak ada field file upload di
-  6 sub-screen ini. General Information dan Locations (pass ketiga) juga
-  TIDAK punya field upload sama sekali (lihat CATATAN TEKNIS) sehingga
-  tidak ada TC upload-security trio di kedua screen ini -- bukan gap
-  yang diabaikan, melainkan hasil live discovery yang mengoreksi asumsi
-  awal.
+  TC-RECRUITMENT-CANDIDATE-11), dan TC-ADMIN-STRUCTURE-07 (unit baru
+  tidak bisa di-rename -- HTTP 422 karena unitId/description tersimpan
+  `null` saat create tapi ditolak sebagai `null` saat update, walau
+  kedua field itu opsional; lihat CATATAN CAKUPAN ORGANIZATION >
+  STRUCTURE untuk detail penuh). 2 bug nyata dengan pola BERBEDA
+  ditemukan di seluruh suite Admin ini. Pass kedua (Qualifications +
+  Nationalities) TIDAK menemukan bug upload-security baru -- tidak ada
+  field file upload di 6 sub-screen ini. General Information dan
+  Locations (pass ketiga) juga TIDAK punya field upload sama sekali
+  (lihat CATATAN TEKNIS) sehingga tidak ada TC upload-security trio di
+  kedua screen ini -- bukan gap yang diabaikan, melainkan hasil live
+  discovery yang mengoreksi asumsi awal.
 
   TEMUAN UPLOAD-SECURITY (lihat detail live-run yang sebenarnya di hasil
   eksekusi -- bagian ini TIDAK diisi dengan asumsi, diisi sesuai apa yang
@@ -706,4 +791,18 @@ LEGEND SIMBOL SKENARIO
      Record yang dibuat TC Add/XSS/SQLi dibiarkan ada (sama pola dengan
      sub-screen lain di suite ini), kecuali TC Delete/Duplicate/IDOR yang
      membersihkan sendiri record yang dibuatnya.
+
+  8. Structure (pass ketiga) pakai page object baru AdminStructurePage,
+     diinjeksikan via src/fixtures/pages.fixture.ts. BEDA dari Locations,
+     setiap TC Structure yang membuat unit (termasuk Add/XSS/SQLi/
+     boundary) MEMBERSIHKAN unit yang dibuatnya di akhir test -- tree
+     org chart ini tampil mencolok bagi semua user demo publik sehingga
+     lebih sensitif terhadap data uji yang menumpuk dibanding row di
+     list biasa.
+
+  9. TC-ADMIN-STRUCTURE-07 SENGAJA dibiarkan FAILED (bukan test.fail())
+     karena bug nyata reproduce (lihat SUMMARY dan CATATAN CAKUPAN
+     ORGANIZATION > STRUCTURE untuk detail). Cleanup-nya tetap jalan
+     meski assertion gagal (expect.soft tidak menghentikan test), jadi
+     unit uji tidak tertinggal di tree walau TC-nya FAILED.
 ================================================================================
