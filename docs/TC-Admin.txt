@@ -1,6 +1,7 @@
 ================================================================================
   DAFTAR TEST CASE: ADMIN
-  Modul    : Admin (User Management, Job, Corporate Branding)
+  Modul    : Admin (User Management, Job, Corporate Branding,
+             Qualifications, Nationalities)
   Target   : https://opensource-demo.orangehrmlive.com/web/index.php/admin/*
   Engineer : Arsal Wildan Naviaddin, QA Engineer
   Project  : qa-portofolio
@@ -23,36 +24,72 @@ LEGEND SIMBOL SKENARIO
 
   FORMAT ID  : TC-ADMIN-<SECTION>-NN
   FOLDER     : satu subfolder per screen, tests/admin/<subfolder>/:
-               TC-ADMIN-USER-*       -> tests/admin/users/
-               TC-ADMIN-JOBTITLE-*   -> tests/admin/job-titles/
-               TC-ADMIN-PAYGRADE-*   -> tests/admin/pay-grades/
-               TC-ADMIN-EMPSTATUS-*  -> tests/admin/employment-status/
-               TC-ADMIN-JOBCAT-*     -> tests/admin/job-categories/
-               TC-ADMIN-SHIFT-*      -> tests/admin/work-shifts/
-               TC-ADMIN-CORPBRAND-*  -> tests/admin/corporate-branding/
+               TC-ADMIN-USER-*        -> tests/admin/users/
+               TC-ADMIN-JOBTITLE-*    -> tests/admin/job-titles/
+               TC-ADMIN-PAYGRADE-*    -> tests/admin/pay-grades/
+               TC-ADMIN-EMPSTATUS-*   -> tests/admin/employment-status/
+               TC-ADMIN-JOBCAT-*      -> tests/admin/job-categories/
+               TC-ADMIN-SHIFT-*       -> tests/admin/work-shifts/
+               TC-ADMIN-CORPBRAND-*   -> tests/admin/corporate-branding/
+               TC-ADMIN-SKILL-*       -> tests/admin/skills/
+               TC-ADMIN-EDU-*         -> tests/admin/education/
+               TC-ADMIN-LICENSE-*     -> tests/admin/licenses/
+               TC-ADMIN-LANG-*        -> tests/admin/languages/
+               TC-ADMIN-MEMBERSHIP-*  -> tests/admin/memberships/
+               TC-ADMIN-NATIONALITY-* -> tests/admin/nationalities/
 
-  CAKUPAN SAAT INI (pass pertama, dikerjakan dalam satu dispatch): 7
-  sub-screen Admin yang paling sering dites dan paling bernilai untuk
-  security testing -- User Management > Users, dan semua 5 sub-screen
-  Admin > Job (Job Titles, Pay Grades, Employment Status, Job Categories,
-  Work Shifts), plus Corporate Branding (upload-security target utama).
-  Total 39 TC.
+  CAKUPAN SAAT INI: 13 sub-screen Admin. Pass pertama (39 TC): User
+  Management > Users, semua 5 sub-screen Admin > Job (Job Titles, Pay
+  Grades, Employment Status, Job Categories, Work Shifts), plus Corporate
+  Branding. Pass kedua (34 TC, dispatch ini): semua 5 sub-screen Admin >
+  Qualifications (Skills, Education, Licenses, Languages, Memberships)
+  dan Admin > Nationalities. Total 73 TC.
 
   BELUM DICAKUP (scope eksplisit untuk pass berikutnya, BUKAN gap yang
   disengaja diabaikan tanpa dicatat):
     - Organization > General Information, Locations, Structure
-    - Qualifications > Skills/Education/Licenses/Languages/Memberships
-      (admin-level master data)
-    - Nationalities
     - Configuration > Email Configuration, Email Subscriptions,
       Localization, Language Packages, Modules, Social Media
       Authentication, OAuth Client, LDAP Configuration
   Alasan: scope di atas butuh discovery + implementasi terpisah yang
   signifikan (terutama Configuration, yang punya safety constraint khusus
   karena berbagi infrastruktur demo publik -- lihat CATATAN TEKNIS di
-  bawah). Mengerjakannya sekaligus dengan 7 sub-screen di atas dalam satu
-  dispatch akan memaksa terburu-buru dan berisiko temuan "confirmed" yang
-  sebenarnya belum benar-benar diverifikasi live, jadi sengaja dipisah.
+  bawah). Organization sedang dikerjakan di dispatch paralel yang
+  terpisah dari dispatch Qualifications + Nationalities ini.
+
+  CATATAN CAKUPAN QUALIFICATIONS + NATIONALITIES (live discovery,
+  dispatch ini): kelima sub-screen Qualifications TIDAK 100% identik
+  seperti yang diduga di scoping awal:
+    - Skills PUNYA field kedua "Description" (textarea) -- SATU-SATUNYA
+      sub-screen di grup ini dengan field tambahan, sehingga mendapat set
+      TC paling lengkap (8 TC, termasuk SQLi khusus di Description dan
+      IDOR dedicated).
+    - Education PUNYA label field "Level", BUKAN "Name" seperti 4
+      sub-screen lain -- dikonfirmasi live. AdminSimpleListPage diberi
+      parameter fieldLabel (default "Name") untuk menangani ini.
+    - Licenses, Languages, Memberships, dan Nationalities identik secara
+      struktural di level form/API (1 field Name, 2 tombol aksi per row
+      trash-lalu-pencil, API shape sama: GET/POST list collection, PUT
+      .../{id}, DELETE bulk collection dengan body {ids: [...]}) --
+      dikonfirmasi live lewat discovery run. Untuk 4 screen ini, TC
+      boundary (300 char) dan security payload (XSS vs SQLi) DISEBAR
+      berbeda per screen (bukan diduplikasi 4x identik) supaya tetap ada
+      coverage representatif tanpa TC filler yang mekanismenya
+      benar-benar sama, konsisten dengan pola yang sudah dipakai pass
+      pertama untuk Pay Grades/Employment Status/Job Categories.
+    - [TEMUAN PENTING] Nationalities TIDAK identik dengan Licenses/
+      Languages/Memberships dalam SATU hal: datanya berisi ~196 record
+      REAL (hampir semua negara di dunia, dikonfirmasi live lewat
+      meta.total pada API), bukan cuma beberapa seperti 4 screen lain,
+      dan list-nya TIDAK punya search/filter box maupun kontrol
+      pagination yang kelihatan. Konsekuensinya: assertion "row baru
+      muncul di list" via scan baris UI (pola yang dipakai di semua
+      screen Admin lain di suite ini) TERBUKTI GAGAL live untuk
+      Nationalities, karena row baru tidak selalu masuk 50 baris
+      pertama yang di-render. TC-ADMIN-NATIONALITY-01 (Add) dan -06
+      (Delete) karena itu diverifikasi via API langsung (GET/DELETE by
+      id) bukan scan baris UI -- adaptasi yang disengaja dan didokumentasikan,
+      bukan TC yang "dilemahkan" diam-diam.
 
 ================================================================================
   CATATAN TEKNIS
@@ -154,6 +191,60 @@ LEGEND SIMBOL SKENARIO
       keamanan demo bersama, konsisten dengan constraint yang sama untuk
       Configuration, BUKAN gap yang diabaikan diam-diam.
 
+    SKILLS (Admin > Qualifications > Skills)
+      List   : /web/index.php/admin/viewSkills (hard-reload-safe, fresh
+               goto() terkonfirmasi langsung bekerja)
+      Add    : /web/index.php/admin/saveSkills
+      API    : GET/POST /api/v2/admin/skills?limit=50&offset=0, PUT
+               /api/v2/admin/skills/{id}, DELETE /api/v2/admin/skills
+               (bulk, body {ids: [...]}) -- semua dikonfirmasi live.
+      Form fields (confirmed): Name (text) + Description (textarea) --
+      SATU-SATUNYA sub-screen di grup Qualifications dengan field kedua.
+
+    EDUCATION (Admin > Qualifications > Education)
+      List   : /web/index.php/admin/viewEducation (hard-reload-safe)
+      Add    : /web/index.php/admin/saveEducation
+      API    : GET/POST /api/v2/admin/educations?limit=50&offset=0
+      Form fields (confirmed): [TEMUAN] label field adalah "Level",
+      BUKAN "Name" seperti sub-screen Qualifications lain.
+
+    LICENSES (Admin > Qualifications > Licenses)
+      List   : /web/index.php/admin/viewLicenses (hard-reload-safe)
+      Add    : /web/index.php/admin/saveLicenses
+      API    : GET/POST /api/v2/admin/licenses?limit=50&offset=0
+      Form fields (confirmed): Name (text) saja.
+
+    LANGUAGES (Admin > Qualifications > Languages)
+      List   : /web/index.php/admin/viewLanguages (hard-reload-safe)
+      Add    : /web/index.php/admin/saveLanguages
+      API    : GET/POST /api/v2/admin/languages?limit=50&offset=0
+      Form fields (confirmed): Name (text) saja.
+
+    MEMBERSHIPS (Admin > Qualifications > Memberships)
+      List   : /web/index.php/admin/membership (hard-reload-safe)
+      Add    : /web/index.php/admin/saveMemberships
+      API    : GET/POST /api/v2/admin/memberships?limit=50&offset=0
+      Form fields (confirmed): Name (text) saja. [CATATAN] Ini
+      master-data list Admin-level, BUKAN tab Memberships level-karyawan
+      di PIM (sudah dites terpisah di tests/pim/).
+
+    NATIONALITIES (Admin > Nationalities)
+      List   : /web/index.php/admin/nationality (SINGULAR, bukan
+               "nationalities" seperti dugaan awal -- dikonfirmasi beda
+               dari URL API-nya yang plural) (hard-reload-safe)
+      Add    : /web/index.php/admin/saveNationality
+      API    : GET/POST /api/v2/admin/nationalities?limit=50&offset=0,
+               GET/PUT /api/v2/admin/nationalities/{id}, DELETE
+               /api/v2/admin/nationalities (bulk, body {ids: [...]}) --
+               semua dikonfirmasi live.
+      Form fields (confirmed): Name (text) saja.
+      [TEMUAN PENTING] ~196 record REAL (hampir semua negara di dunia,
+      dikonfirmasi lewat meta.total API), TIDAK ADA search/filter box
+      maupun kontrol pagination yang kelihatan di UI. Lihat CATATAN
+      CAKUPAN QUALIFICATIONS + NATIONALITIES di atas untuk dampaknya ke
+      desain TC-ADMIN-NATIONALITY-01/06 (verifikasi via API, bukan scan
+      baris UI).
+
   SECURITY: UPLOAD VALIDATION (TC-ADMIN-JOBTITLE-07/08, TC-ADMIN-
   CORPBRAND-04/05, pola sama dengan TC-PIM-ADD-28/29 dan
   TC-RECRUITMENT-CANDIDATE-11/12): file executable (header PE "MZ")
@@ -164,11 +255,13 @@ LEGEND SIMBOL SKENARIO
 
   KONSISTENSI DELETE ACTION: [TEMUAN PENTING] Semua sub-screen simple-list
   (Pay Grades, Employment Status, Job Categories, Job Titles, Work
-  Shifts, Users) punya 2 ikon aksi per row dengan urutan trash (delete)
-  LALU pencil (edit) -- BUKAN edit-lalu-delete seperti intuisi umum.
-  Dikonfirmasi lewat inspeksi innerHTML row (bi-trash muncul sebelum
-  bi-pencil-fill di DOM). Semua page object di suite ini pakai tombol
-  AKSI PERTAMA (.oxd-table-cell-actions button pertama) sebagai Delete.
+  Shifts, Users, dan kelima sub-screen Qualifications + Nationalities --
+  dikonfirmasi live lagi lewat discovery run dispatch ini) punya 2 ikon
+  aksi per row dengan urutan trash (delete) LALU pencil (edit) -- BUKAN
+  edit-lalu-delete seperti intuisi umum. Dikonfirmasi lewat inspeksi
+  innerHTML row (bi-trash muncul sebelum bi-pencil-fill di DOM). Semua
+  page object di suite ini pakai tombol AKSI PERTAMA
+  (.oxd-table-cell-actions button pertama) sebagai Delete.
 
   [TEMUAN: SHARED-DEMO FLAKINESS DI BAWAH BEBAN PARALEL] Saat seluruh TC
   Admin dijalankan dengan Playwright default (fullyParallel, banyak worker)
@@ -178,10 +271,17 @@ LEGEND SIMBOL SKENARIO
   navigasi SPA yang belum selesai. TC yang SAMA PERSIS lulus bersih saat
   dijalankan --workers=1 (serial). Pola ini konsisten dengan temuan
   flakiness shared-demo yang sudah didokumentasikan di sesi PIM/
-  Recruitment sebelumnya -- bukan bug di test maupun aplikasi.
+  Recruitment sebelumnya -- bukan bug di test maupun aplikasi. Pola yang
+  sama terkonfirmasi ulang di dispatch Qualifications + Nationalities:
+  5 TC (TC-ADMIN-LANG-05, TC-ADMIN-LICENSE-03, TC-ADMIN-MEMBERSHIP-04/05,
+  TC-ADMIN-SKILL-01) gagal pada 1 run awal yang dijalankan beruntun cepat
+  terhadap demo publik yang sedang ramai, lalu lulus 100% bersih saat
+  di-run ulang individual beberapa menit kemudian -- dikonfirmasi bukan
+  bug di test/aplikasi, konsisten dengan temuan flakiness yang sudah ada.
 
   UNIQUE DATA: Nama job title/pay grade/employment status/job category/
-  work shift dan username dibuat via src/data/testData.ts (uniqueName,
+  work shift/skill/education level/license/language/membership/
+  nationality dan username dibuat via src/data/testData.ts (uniqueName,
   uniqueEmail yang sudah ada di suite ini, dipakai ulang bukan dibuat
   baru) supaya tidak kolisi dengan data seed demo maupun run sebelumnya
   terhadap backend demo publik yang sama.
@@ -283,26 +383,117 @@ LEGEND SIMBOL SKENARIO
                                          (TIDAK klik Publish, lihat SAFETY CONSTRAINT)
 
 ================================================================================
+  TEST CASES: QUALIFICATIONS - SKILLS (8 TC)
+================================================================================
+
+  NO  ID                   KATEGORI  DESKRIPSI                                        STATUS
+  --  -------------------  --------  -----------------------------------------------  -------
+  01  TC-ADMIN-SKILL-01    (+)       Add Skill valid (Name + Description)              [DONE]
+  02  TC-ADMIN-SKILL-02    (-)       Submit kosong -> validasi Required                [DONE]
+  03  TC-ADMIN-SKILL-03    (B)       Name sangat panjang (300 char) [TEMUAN]           [DONE]
+  04  TC-ADMIN-SKILL-04    (S)       XSS payload di Name                               [DONE]
+  05  TC-ADMIN-SKILL-05    (S)       SQL injection payload di Description              [DONE]
+  06  TC-ADMIN-SKILL-06    (!)       Cancel membatalkan form                           [DONE]
+  07  TC-ADMIN-SKILL-07    (+)       Delete Skill yang baru dibuat                     [DONE]
+  08  TC-ADMIN-SKILL-08    (S)       IDOR: cross-record access + bogus-id handling     [DONE]
+                                     pada PUT/DELETE by id
+
+================================================================================
+  TEST CASES: QUALIFICATIONS - EDUCATION (5 TC)
+================================================================================
+
+  NO  ID                 KATEGORI  DESKRIPSI                                        STATUS
+  --  -----------------  --------  -----------------------------------------------  -------
+  01  TC-ADMIN-EDU-01    (+)       Add Education Level valid ("Level", bukan "Name") [DONE]
+  02  TC-ADMIN-EDU-02    (-)       Submit kosong -> validasi Required                [DONE]
+  03  TC-ADMIN-EDU-03    (S)       XSS payload di Level                              [DONE]
+  04  TC-ADMIN-EDU-04    (!)       Duplicate Level name                              [DONE]
+  05  TC-ADMIN-EDU-05    (+)       Delete Education Level yang baru dibuat           [DONE]
+
+================================================================================
+  TEST CASES: QUALIFICATIONS - LICENSES (5 TC)
+================================================================================
+
+  NO  ID                     KATEGORI  DESKRIPSI                                    STATUS
+  --  ---------------------  --------  -------------------------------------------  -------
+  01  TC-ADMIN-LICENSE-01    (+)       Add License valid                             [DONE]
+  02  TC-ADMIN-LICENSE-02    (-)       Submit kosong -> validasi Required            [DONE]
+  03  TC-ADMIN-LICENSE-03    (S)       SQL injection payload di Name                 [DONE]
+  04  TC-ADMIN-LICENSE-04    (!)       Cancel membatalkan form                       [DONE]
+  05  TC-ADMIN-LICENSE-05    (+)       Delete License yang baru dibuat               [DONE]
+
+================================================================================
+  TEST CASES: QUALIFICATIONS - LANGUAGES (5 TC)
+================================================================================
+
+  NO  ID                  KATEGORI  DESKRIPSI                                       STATUS
+  --  ------------------  --------  ----------------------------------------------  -------
+  01  TC-ADMIN-LANG-01    (+)       Add Language valid                               [DONE]
+  02  TC-ADMIN-LANG-02    (-)       Submit kosong -> validasi Required               [DONE]
+  03  TC-ADMIN-LANG-03    (B)       Name sangat panjang (300 char) [TEMUAN]          [DONE]
+  04  TC-ADMIN-LANG-04    (S)       XSS payload di Name                              [DONE]
+  05  TC-ADMIN-LANG-05    (+)       Delete Language yang baru dibuat                 [DONE]
+
+================================================================================
+  TEST CASES: QUALIFICATIONS - MEMBERSHIPS (5 TC)
+================================================================================
+
+  NO  ID                         KATEGORI  DESKRIPSI                                STATUS
+  --  -------------------------  --------  ---------------------------------------  -------
+  01  TC-ADMIN-MEMBERSHIP-01     (+)       Add Membership valid                      [DONE]
+  02  TC-ADMIN-MEMBERSHIP-02     (-)       Submit kosong -> validasi Required        [DONE]
+  03  TC-ADMIN-MEMBERSHIP-03     (!)       Duplicate name                            [DONE]
+  04  TC-ADMIN-MEMBERSHIP-04     (S)       SQL injection payload di Name             [DONE]
+  05  TC-ADMIN-MEMBERSHIP-05     (+)       Delete Membership yang baru dibuat        [DONE]
+
+================================================================================
+  TEST CASES: NATIONALITIES (6 TC)
+================================================================================
+
+  NO  ID                          KATEGORI  DESKRIPSI                                       STATUS
+  --  --------------------------  --------  ----------------------------------------------  -------
+  01  TC-ADMIN-NATIONALITY-01     (+)       Add Nationality valid (verifikasi via API         [DONE]
+                                            GET by id, lihat TEMUAN ~196 record)
+  02  TC-ADMIN-NATIONALITY-02     (-)       Submit kosong -> validasi Required                [DONE]
+  03  TC-ADMIN-NATIONALITY-03     (S)       XSS payload di Name                               [DONE]
+  04  TC-ADMIN-NATIONALITY-04     (S)       IDOR: GET cross-record (read-only) + bogus-id      [DONE]
+                                            PUT/DELETE handling (TIDAK menyentuh seed asli)
+  05  TC-ADMIN-NATIONALITY-05     (!)       Cancel membatalkan form                            [DONE]
+  06  TC-ADMIN-NATIONALITY-06     (+)       Delete Nationality yang baru dibuat (via API,       [DONE]
+                                            lihat TEMUAN ~196 record)
+
+================================================================================
   SUMMARY
 ================================================================================
 
-  Total TC pass ini: 39
-  (Users 6, Job Titles 8, Pay Grades 5, Employment Status 5,
-  Job Categories 5, Work Shifts 5, Corporate Branding 5)
+  Total TC: 73 (39 pass pertama + 34 pass kedua/dispatch ini)
 
-  Hard check() (pass/fail tegas) : 35 TC
-  finding() (dokumentasi, bukan pass/fail tegas) : 4 TC -- Job Title
+  Pass pertama (39): Users 6, Job Titles 8, Pay Grades 5, Employment
+  Status 5, Job Categories 5, Work Shifts 5, Corporate Branding 5.
+
+  Pass kedua / dispatch ini (34): Skills 8, Education 5, Licenses 5,
+  Languages 5, Memberships 5, Nationalities 6.
+
+  Hard check() (pass/fail tegas) : 69 TC
+  finding() (dokumentasi, bukan pass/fail tegas) : 7 TC -- Job Title
   sangat panjang (TC-ADMIN-JOBTITLE-03), From=To pada Work Shift
-  (TC-ADMIN-SHIFT-03), dan TC-ADMIN-CORPBRAND-04/05 (exe-renamed-.png
-  pada Client Logo/Login Banner, dicatat finding() karena constraint
+  (TC-ADMIN-SHIFT-03), TC-ADMIN-CORPBRAND-04/05 (exe-renamed-.png pada
+  Client Logo/Login Banner, dicatat finding() karena constraint
   VALIDATE-ONLY -- tidak sampai klik Publish -- membuat hasilnya tidak
-  bisa dipastikan sebagai pass/fail tegas terhadap perilaku server-side).
+  bisa dipastikan sebagai pass/fail tegas terhadap perilaku server-side),
+  Skill Name sangat panjang (TC-ADMIN-SKILL-03), Language Name sangat
+  panjang (TC-ADMIN-LANG-03), dan TC-ADMIN-SKILL-08 (cross-record GET/PUT
+  via id dicatat finding() karena N/A - arsitektur single-role, bukan
+  kerentanan IDOR yang valid dalam konteks demo single-admin ini -- pola
+  sama dengan TC-RECRUITMENT-SECURITY-01).
 
   TC yang SENGAJA dibiarkan FAILED (bukan test.fail()) karena bug nyata
   reproduce: TC-ADMIN-JOBTITLE-07 (exe-renamed-.jpg diterima sebagai Job
   Specification file, pola sama dengan TC-PIM-ADD-28 dan
   TC-RECRUITMENT-CANDIDATE-11 -- temuan ke-3 di suite ini dengan pola
-  yang sama).
+  yang sama). Pass kedua (Qualifications + Nationalities) TIDAK
+  menemukan bug upload-security baru -- tidak ada field file upload di
+  6 sub-screen ini.
 
   TEMUAN UPLOAD-SECURITY (lihat detail live-run yang sebenarnya di hasil
   eksekusi -- bagian ini TIDAK diisi dengan asumsi, diisi sesuai apa yang
@@ -314,22 +505,34 @@ LEGEND SIMBOL SKENARIO
   CATATAN EKSEKUSI
 ================================================================================
 
-  1. Semua TC pakai page object baru di src/pages/: AdminUsersPage,
+  1. Semua TC pakai page object di src/pages/: AdminUsersPage,
      AdminJobTitlesPage, AdminWorkShiftsPage, AdminSimpleListPage (dipakai
-     ulang untuk Pay Grades/Employment Status/Job Categories dengan
-     listPath berbeda per instance), AdminCorporateBrandingPage --
-     diinjeksikan via src/fixtures/pages.fixture.ts.
+     ulang untuk Pay Grades/Employment Status/Job Categories/Education/
+     Licenses/Languages/Memberships/Nationalities dengan listPath berbeda
+     per instance, plus parameter fieldLabel opsional untuk Education's
+     "Level"; Skills juga dipakai lewat AdminSimpleListPage lewat
+     descriptionTextarea tambahan yang di-expose kelas ini), dan
+     AdminCorporateBrandingPage -- semua diinjeksikan via
+     src/fixtures/pages.fixture.ts.
 
   2. Nama unik (job title, pay grade, employment status, job category,
-     work shift, username) pakai src/data/testData.ts (uniqueName /
+     work shift, skill, education level, license, language, membership,
+     nationality, username) pakai src/data/testData.ts (uniqueName /
      uniqueEmail yang sudah ada di suite ini), supaya tidak kolisi dengan
      data seed demo publik maupun run sebelumnya.
 
   3. Setiap TC pakai TestReport (src/utils/testReport.ts) persis seperti
      modul lain di suite ini -- console error check otomatis di setiap TC.
 
-  4. Safety: TC Admin pass ini TIDAK menyentuh Configuration (Email/LDAP/
-     OAuth/Localization/dst) sama sekali -- scope itu sengaja ditunda ke
-     pass berikutnya, bukan di-skip diam-diam (lihat alasan di bagian atas
-     dokumen ini).
+  4. Safety: TC Admin TIDAK menyentuh Configuration (Email/LDAP/OAuth/
+     Localization/dst) sama sekali, dan Nationalities IDOR (TC-ADMIN-
+     NATIONALITY-04) sengaja TIDAK PERNAH memodifikasi/menghapus record
+     seed asli (hanya GET read-only + PUT/DELETE pada id bogus yang tidak
+     ada) -- lihat SAFETY CONSTRAINT di header spec file-nya.
+
+  5. Nationalities adalah satu-satunya sub-screen di pass ini dengan data
+     seed real berskala besar (~196 record, tanpa search/filter UI).
+     TC-ADMIN-NATIONALITY-01 dan -06 karena itu memverifikasi add/delete
+     via API (GET/DELETE by id) bukan scan baris tabel UI -- lihat
+     CATATAN CAKUPAN QUALIFICATIONS + NATIONALITIES di atas.
 ================================================================================
