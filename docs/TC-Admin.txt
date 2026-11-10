@@ -43,6 +43,7 @@ LEGEND SIMBOL SKENARIO
                TC-ADMIN-EMAILCONFIG-* -> tests/admin/email-configuration/
                TC-ADMIN-EMAILSUB-*    -> tests/admin/email-subscriptions/
                TC-ADMIN-LOCALIZATION-*-> tests/admin/localization/
+               TC-ADMIN-LANGPACK-*    -> tests/admin/language-packages/
 
   CAKUPAN SAAT INI: 16 sub-screen Admin (13 + 3 Organization) SELESAI
   dari pass sebelumnya, PLUS pass keempat/dispatch ini sedang mengerjakan
@@ -220,9 +221,42 @@ LEGEND SIMBOL SKENARIO
     options dan pembuktian bahwa memilih opsi lain TANPA Save tidak
     ter-persist (pola sama dengan TC-ADMIN-ORGGI-06).
 
-    LANGUAGE PACKAGES, MODULES, SOCIAL MEDIA AUTHENTICATION, OAUTH CLIENT,
-    LDAP CONFIGURATION -- lihat progress di SUMMARY; risk classification
-    tiap satu didokumentasikan di sini begitu TC-nya ditulis.
+    LANGUAGE PACKAGES -- LOW RISK, FULLY EXERCISED (dengan restore-after-
+    mutate). Alasan: mengubah locale mana yang SELECTABLE di dropdown
+    Localization, TAPI TIDAK mengubah bahasa aktif siapa pun -- additive/
+    reversibel, sama risk class dengan menambah Job Title. [TEMUAN
+    PENTING] TIDAK bisa menambah locale BARU di demo ini -- SEMUA 9 locale
+    yang OrangeHRM sediakan sudah ter-enable (dropdown Add menampilkan
+    "No Records Found"), jadi TC mutating-nya menguji Delete-lalu-re-Add
+    pada package yang SUDAH ADA ("Tamil (India)"), bukan menambah baru.
+    [TEMUAN PROSES, PENTING -- insiden saat menulis suite ini] Dropdown
+    Name di dialog Add punya ~490 opsi dan TERNYATA TIDAK benar-benar
+    difilter oleh ketikan (jumlah opsi tetap ~490 setelah mengetik,
+    walau terlihat seperti autocomplete) -- beberapa percobaan awal
+    (klik berdasar index/filter substring, navigasi keyboard) GAGAL
+    memilih opsi yang benar secara konsisten, dan satu percobaan debug
+    (force-click pada index hasil scroll di list yang belum di-filter)
+    SEMPAT tidak sengaja mengaktifkan 3 package lain (Afrikaans (South
+    Africa), Aghem (Cameroon), Akan (Ghana)) sebagai side effect. Insiden
+    ini terdeteksi lewat verifikasi API (BUKAN cuma baca UI) setelah
+    batch test dijalankan ulang dan jumlah package tidak sesuai baseline,
+    lalu dibersihkan via Delete UI (dikonfirmasi reliable) sampai live
+    state kembali PERSIS ke 9 package original -- dikonfirmasi ulang
+    lewat GET /api/v2/admin/i18n/languages?activeOnly=true langsung,
+    bukan cuma re-run test. Metode yang akhirnya TERBUKTI reliable:
+    cari exact display name locale lewat API (activeOnly=false), lalu
+    klik via `getByText(fullExactName, {exact: true})` yang di-scope ke
+    `.oxd-select-dropdown` (bukan klik berdasar index atau substring
+    filter) -- lihat AdminLanguagePackagesPage.addLanguagePackageRobust().
+    Setiap TC yang mem-verifikasi hasil Add/Delete di screen ini
+    menggunakan API langsung (GET activeOnly=true) sebagai ground truth,
+    BUKAN cuma scan baris UI, persis pola yang sudah dipakai Nationalities
+    (pass kedua) untuk alasan serupa (UI tidak selalu reliable untuk
+    verifikasi tegas).
+
+    MODULES, SOCIAL MEDIA AUTHENTICATION, OAUTH CLIENT, LDAP CONFIGURATION
+    -- lihat progress di SUMMARY; risk classification tiap satu
+    didokumentasikan di sini begitu TC-nya ditulis.
 
   [TEMUAN PROSES, PENTING UNTUK SELURUH SUITE INI] Page object Admin yang
   goto()-nya membaca field value SEGERA setelah navigasi (tanpa menunggu
@@ -541,6 +575,33 @@ LEGEND SIMBOL SKENARIO
       [TEMUAN PENTING] TIDAK ADA field Timezone sama sekali di screen ini
       (koreksi atas asumsi awal scoping) -- cuma 2 field, keduanya select,
       TIDAK ADA tombol Cancel (quirk sama dengan General Information).
+
+    LANGUAGE PACKAGES (Admin > Configuration > Language Packages)
+      URL    : /web/index.php/admin/languagePackage
+      API    : GET /api/v2/admin/i18n/languages?activeOnly=true&limit=0
+               (list aktif), GET ...?activeOnly=false&limit=0 (list
+               lengkap, dipakai dialog Add untuk menampilkan opsi belum
+               ter-enable), PUT /api/v2/admin/i18n/languages/{id} (toggle
+               aktif/nonaktif -- dikonfirmasi live via network listener,
+               BUKAN POST ke collection seperti diduga awal).
+      List: 9 package pada demo ini. Setiap row: checkbox bulk-select +
+      4 icon aksi (urutan dikonfirmasi live via innerHTML): [0] upload
+      (import file translation), [1] translate (bi-translate), [2]
+      download, [3] trash (Delete) -- BUKAN cuma 2 icon seperti screen
+      simple-list lain.
+      [TEMUAN PENTING] Dialog Add cuma 1 field: Name (select "-- Select
+      --"), + Note informasional + Cancel/Save. Di demo ini dropdown-nya
+      "No Records Found" karena SEMUA locale yang OrangeHRM sediakan
+      sudah ter-enable -- tidak bisa Add locale baru, TC yang menguji
+      mutasi di screen ini pakai Delete-lalu-re-Add pada locale yang
+      SUDAH ADA.
+      [TEMUAN PROSES PENTING] Dropdown Name punya ~490 opsi dan TIDAK
+      benar-benar difilter oleh ketikan (opsi tetap ~490 meski sudah
+      mengetik). Metode seleksi yang TERBUKTI reliable: ambil exact
+      display name locale (termasuk native script) lewat API, lalu klik
+      via `getByText(fullExactName, {exact:true})` yang di-scope ke
+      `.oxd-select-dropdown` -- lihat CATATAN CAKUPAN CONFIGURATION untuk
+      detail insiden & mitigasi penuh.
 
   SECURITY: UPLOAD VALIDATION (TC-ADMIN-JOBTITLE-07/08, TC-ADMIN-
   CORPBRAND-04/05, pola sama dengan TC-PIM-ADD-28/29 dan
@@ -865,12 +926,25 @@ LEGEND SIMBOL SKENARIO
                                           Language Packages (read-only cross-screen check)
 
 ================================================================================
+  TEST CASES: CONFIGURATION - LANGUAGE PACKAGES (4 TC) [FULLY EXERCISED]
+================================================================================
+
+  NO  ID                   KATEGORI  DESKRIPSI                                        STATUS
+  --  -------------------  --------  -----------------------------------------------  -------
+  01  TC-ADMIN-LANGPACK-01 (+)       List 9 package tampil, 4 icon aksi per baris,     [DONE]
+                                     tombol Add
+  02  TC-ADMIN-LANGPACK-02 (+)       Delete "Tamil (India)" lalu re-Add -> round-trip  [DONE]
+                                     bersih, diverifikasi via API (bukan scan UI)
+  03  TC-ADMIN-LANGPACK-03 (-)       Submit kosong -> Required, tidak ada POST          [DONE]
+  04  TC-ADMIN-LANGPACK-04 (!)       Cancel membatalkan, jumlah baris tidak berubah      [DONE]
+
+================================================================================
   SUMMARY
 ================================================================================
 
-  Total TC: 112 sejauh ini (97 dari pass pertama-ketiga + 15 dari pass
-  keempat/Configuration BAGIAN PERTAMA -- Email Configuration 5, Email
-  Subscriptions 5, Localization 5; Language Packages/Modules/Social
+  Total TC: 116 sejauh ini (97 dari pass pertama-ketiga + 19 dari pass
+  keempat/Configuration SEJAUH INI -- Email Configuration 5, Email
+  Subscriptions 5, Localization 5, Language Packages 4; Modules/Social
   Media Authentication/OAuth Client/LDAP Configuration MASIH BERJALAN,
   lihat progress terbaru di CATATAN CAKUPAN CONFIGURATION).
 
@@ -882,10 +956,11 @@ LEGEND SIMBOL SKENARIO
 
   Pass ketiga (24): General Information 6, Locations 9, Structure 9.
 
-  Pass keempat/Configuration, bagian pertama (15): Email Configuration 5
+  Pass keempat/Configuration, sejauh ini (19): Email Configuration 5
   (VALIDATE-ONLY, Save tidak pernah diklik), Email Subscriptions 5
   (FULLY EXERCISED dengan restore-after-mutate), Localization 5
-  (VALIDATE-ONLY, Save tidak pernah diklik).
+  (VALIDATE-ONLY, Save tidak pernah diklik), Language Packages 4
+  (FULLY EXERCISED dengan restore-after-mutate, diverifikasi via API).
 
   Hard check() (pass/fail tegas) : 91 TC
   finding() (dokumentasi, bukan pass/fail tegas) : 11 TC -- Job Title
