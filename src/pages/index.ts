@@ -31,3 +31,7 @@ export { AdminCorporateBrandingPage } from './AdminCorporateBrandingPage';
 export { AdminGeneralInformationPage } from './AdminGeneralInformationPage';
 export { AdminLocationsPage } from './AdminLocationsPage';
 export { AdminStructurePage } from './AdminStructurePage';
+export { AdminEmailConfigurationPage } from './AdminEmailConfigurationPage';
+export { AdminEmailSubscriptionsPage } from './AdminEmailSubscriptionsPage';
+export { AdminLocalizationPage } from './AdminLocalizationPage';
+export { AdminLanguagePackagesPage } from './AdminLanguagePackagesPage';

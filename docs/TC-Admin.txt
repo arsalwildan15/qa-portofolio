@@ -40,27 +40,32 @@ LEGEND SIMBOL SKENARIO
                TC-ADMIN-ORGGI-*       -> tests/admin/general-information/
                TC-ADMIN-LOCATION-*    -> tests/admin/locations/
                TC-ADMIN-STRUCTURE-*   -> tests/admin/structure/
+               TC-ADMIN-EMAILCONFIG-* -> tests/admin/email-configuration/
+               TC-ADMIN-EMAILSUB-*    -> tests/admin/email-subscriptions/
+               TC-ADMIN-LOCALIZATION-*-> tests/admin/localization/
 
-  CAKUPAN SAAT INI: 13 sub-screen Admin, plus semua 3 sub-screen
-  Organization (General Information, Locations, Structure) -- pass
-  ketiga, dispatch ini, SELESAI. Pass pertama (39 TC): User Management >
-  Users, semua 5 sub-screen Admin > Job (Job Titles, Pay Grades,
-  Employment Status, Job Categories, Work Shifts), plus Corporate
-  Branding. Pass kedua (34 TC): semua 5 sub-screen Admin > Qualifications
-  (Skills, Education, Licenses, Languages, Memberships) dan Admin >
-  Nationalities. Pass ketiga (24 TC): Organization > General Information
-  (6), Locations (9), Structure (9). Total TC: 97 (73 + 24).
+  CAKUPAN SAAT INI: 16 sub-screen Admin (13 + 3 Organization) SELESAI
+  dari pass sebelumnya, PLUS pass keempat/dispatch ini sedang mengerjakan
+  Admin > Configuration (8 sub-screen, area terakhir yang belum
+  tersentuh). Pass pertama (39 TC): User Management > Users, semua 5
+  sub-screen Admin > Job (Job Titles, Pay Grades, Employment Status, Job
+  Categories, Work Shifts), plus Corporate Branding. Pass kedua (34 TC):
+  semua 5 sub-screen Admin > Qualifications (Skills, Education, Licenses,
+  Languages, Memberships) dan Admin > Nationalities. Pass ketiga (24 TC):
+  Organization > General Information (6), Locations (9), Structure (9).
+  Pass keempat/SAAT INI (Configuration): Email Configuration (5),
+  Email Subscriptions (5), Localization (5) SELESAI; Language Packages,
+  Modules, Social Media Authentication, OAuth Client, LDAP Configuration
+  MASIH BERJALAN (lihat progress di bawah). Total TC setelah pass
+  pertama-ketiga: 97.
 
-  BELUM DICAKUP (scope eksplisit untuk pass berikutnya, BUKAN gap yang
-  disengaja diabaikan tanpa dicatat):
-    - Configuration > Email Configuration, Email Subscriptions,
-      Localization, Language Packages, Modules, Social Media
+  BELUM DICAKUP (sisa scope pass keempat, BUKAN gap yang disengaja
+  diabaikan tanpa dicatat):
+    - Configuration > Language Packages, Modules, Social Media
       Authentication, OAuth Client, LDAP Configuration
-  Alasan: scope di atas butuh discovery + implementasi terpisah yang
-  signifikan -- Configuration punya safety constraint khusus karena
-  berbagi infrastruktur demo publik (lihat CATATAN TEKNIS di bawah).
-  Dengan selesainya Organization di pass ketiga ini, Configuration kini
-  SATU-SATUNYA area Admin yang belum tersentuh.
+  Alasan: dikerjakan incremental per 2-3 sub-screen per commit (lihat
+  CATATAN CAKUPAN CONFIGURATION di bawah untuk risk classification tiap
+  sub-screen yang sudah selesai).
 
   CATATAN CAKUPAN ORGANIZATION > STRUCTURE (live discovery, dispatch
   ini): screen ini BUKAN flat list seperti semua sub-screen Admin
@@ -154,6 +159,81 @@ LEGEND SIMBOL SKENARIO
       (Delete) karena itu diverifikasi via API langsung (GET/DELETE by
       id) bukan scan baris UI -- adaptasi yang disengaja dan didokumentasikan,
       bukan TC yang "dilemahkan" diam-diam.
+
+  CATATAN CAKUPAN CONFIGURATION (pass keempat, live discovery + risk
+  classification per sub-screen -- SAFETY CONSTRAINT UTAMA dispatch ini):
+  demo publik ini dipakai BANYAK orang asing secara konkuren. Tidak
+  seperti record vacancy/candidate/job-title (nambah 1 baris tak
+  berbahaya), 8 sub-screen Configuration adalah GLOBAL INFRASTRUCTURE
+  SETTINGS -- Save yang buruk di sini bisa merusak demo untuk SEMUA orang,
+  bukan cuma nambah noise. Klasifikasi risiko per sub-screen (dengan
+  reasoning, supaya reviewer manusia bisa lihat judgment call-nya, bukan
+  cuma hasilnya):
+
+    EMAIL CONFIGURATION -- HIGH-RISK, VALIDATE-ONLY (Save TIDAK PERNAH
+    diklik sama sekali di 5 TC-nya). Alasan: screen ini mengatur SMTP
+    config GLOBAL yang dipakai untuk SEMUA email otomatis demo publik ini
+    (reset password, notifikasi, dst). [TEMUAN PROSES PENTING] Saat
+    menulis TC ini, versi AWAL TC-ADMIN-EMAILCONFIG-02/03/05 SEMPAT benar-
+    benar mengklik Save dengan input tidak valid (kosong/XSS/300-char) --
+    ternyata field "Mail Sent As" JUSTRU PUNYA validasi on-blur yang
+    benar (pesan "Required"/"Expected format: admin@example.com"/"Should
+    not exceed 100 characters", sama pola dengan Organization Name), tapi
+    temuan itu BARU ketahuan setelah debug mendalam karena bug test-side
+    terpisah (race hydration Vue di `AdminEmailConfigurationPage.goto()`
+    yang belum menunggu GET resolve, menyebabkan nilai asli salah terbaca
+    sebagai "" -- sudah diperbaiki, sama pola dengan
+    AdminGeneralInformationPage.goto()). KEPUTUSAN FINAL: walau validasi
+    client-side-nya ternyata benar, screen ini TETAP diperlakukan
+    validate-only by POLICY (bukan karena terpaksa) -- konsisten dengan
+    prinsip "lebih baik TC yang lebih tipis daripada TC yang berisiko
+    merusak demo bersama" dari brief dispatch ini. Live juga dikonfirmasi
+    TIDAK ADA tombol "Test Connection" di screen ini (beda dari LDAP) --
+    "Send Test Mail" cuma checkbox yang menambah field "Mail To" dan tetap
+    commit lewat Save yang sama, BUKAN probe terpisah yang aman.
+
+    EMAIL SUBSCRIPTIONS -- LOW-MEDIUM RISK, FULLY EXERCISED (dengan
+    restore-after-mutate). [TEMUAN KOREKSI PENTING] Scoping awal menduga
+    ini "notification toggle per-admin-user" (lowest risk, scoped ke
+    admin ini sendiri) -- TERBUKTI SALAH live: ini adalah daftar GLOBAL
+    siapa yang menerima tiap jenis notifikasi HR (Leave Applications/
+    Approvals/Assignments/Cancellations/Rejections), dikonfirmasi lewat
+    URL /admin/saveSubscriber/{notificationTypeId} dan kolom Name/Email/
+    Actions di sub-page-nya. [TEMUAN KOREKSI KEDUA] Dialog "Add
+    Subscriber" BUKAN employee autocomplete (dugaan awal, pola sama
+    dengan Users' Employee Name) -- ini 2 FIELD TEKS BEBAS (Name + Email),
+    dikonfirmasi lewat DOM inspection (tidak ada placeholder "Type for
+    hints...", tidak ada .oxd-autocomplete-option). Walau scope-nya global
+    (bukan per-admin), risikonya tetap rendah karena additive & reversibel
+    (bisa ditambah lalu dihapus bersih dalam 1 TC) -- karena itu TETAP
+    fully exercised, bukan diturunkan ke validate-only, dengan setiap TC
+    yang menambah subscriber membersihkannya lagi di akhir test.
+
+    LOCALIZATION -- HIGH-RISK, VALIDATE-ONLY (Save TIDAK PERNAH diklik).
+    Alasan: 2 field SELECT-ONLY (Language, Date Format) -- mengubah
+    default Language/Date Format mengubah tampilan untuk SEMUA user demo
+    publik ini. [TEMUAN] TIDAK ADA field Timezone di screen ini sama
+    sekali (koreksi atas asumsi awal scoping "timezone, etc."), dan TIDAK
+    ADA tombol Cancel (quirk sama dengan General Information). Karena
+    cuma 2 dropdown (bukan free-text), tidak ada permukaan injeksi XSS/
+    SQLi untuk dites di sini -- coverage-nya fokus ke verifikasi dropdown
+    options dan pembuktian bahwa memilih opsi lain TANPA Save tidak
+    ter-persist (pola sama dengan TC-ADMIN-ORGGI-06).
+
+    LANGUAGE PACKAGES, MODULES, SOCIAL MEDIA AUTHENTICATION, OAUTH CLIENT,
+    LDAP CONFIGURATION -- lihat progress di SUMMARY; risk classification
+    tiap satu didokumentasikan di sini begitu TC-nya ditulis.
+
+  [TEMUAN PROSES, PENTING UNTUK SELURUH SUITE INI] Page object Admin yang
+  goto()-nya membaca field value SEGERA setelah navigasi (tanpa menunggu
+  GET API resolve) BERISIKO race condition dengan hydration Vue -- bisa
+  salah baca value kosong/placeholder padahal data server sudah benar.
+  Ini BUKAN bug baru yang ditemukan di Configuration saja (sudah
+  didokumentasikan di AdminGeneralInformationPage sejak pass ketiga),
+  tapi dispatch ini mengonfirmasi ulang pola yang SAMA PERSIS di
+  AdminEmailConfigurationPage dan AdminLocalizationPage -- keduanya
+  diperbaiki dengan cara yang sama (`goto()` menunggu response GET
+  eksplisit sebelum return).
 
 ================================================================================
   CATATAN TEKNIS
@@ -411,6 +491,56 @@ LEGEND SIMBOL SKENARIO
       atas untuk detail penuh] Unit baru tidak bisa di-rename tanpa
       HTTP 422, karena unitId/description kosong disimpan sebagai `null`
       saat create tapi ditolak sebagai `null` saat update.
+
+    EMAIL CONFIGURATION (Admin > Configuration > Email Configuration)
+      URL    : /web/index.php/admin/listMailConfiguration
+      API    : PUT /api/v2/admin/email-configuration (SATU-SATUNYA
+               endpoint, selalu PUT -- update ke 1 config global, bukan
+               "Add"). TIDAK PERNAH diklik di suite ini -- lihat CATATAN
+               CAKUPAN CONFIGURATION untuk alasan lengkap.
+      Field (confirmed live): Mail Sent As* (satu-satunya field dengan "*"
+      di label-nya sendiri), Sending Method (3 radio: SECURE SMTP/SMTP/
+      Sendmail, default Sendmail pada demo ini). Field kondisional: mode
+      Sendmail -> "Path to Sendmail" ([TEMUAN] ini READ-ONLY `<p>` text,
+      BUKAN input, satu-satunya field non-editable di form ini); mode
+      SMTP/SECURE SMTP -> SMTP Host, SMTP Port, "Use SMTP Authentication"
+      (radio Yes/No), TLS (checkbox). "Send Test Mail" (checkbox) ADA di
+      semua mode tapi TIDAK PERNAH jadi tombol probe terpisah -- cuma
+      menambah field "Mail To" dan tetap commit lewat Save yang sama
+      (BEDA dari LDAP's "Test Connection" yang benar-benar terpisah dari
+      Save). Tombol: Reset, Save (BUKAN "Test Connection").
+      [TEMUAN, dikonfirmasi live SETELAH memperbaiki bug test-side race
+      hydration] Mail Sent As PUNYA validasi on-blur yang benar: Required
+      saat kosong, "Expected format: admin@example.com" saat bukan email
+      valid, "Should not exceed 100 characters" saat lebih dari 100 char
+      -- sama pola dengan Organization Name di General Information.
+
+    EMAIL SUBSCRIPTIONS (Admin > Configuration > Email Subscriptions)
+      URL    : /web/index.php/admin/viewEmailNotification
+      Sub-page: /web/index.php/admin/saveSubscriber/{notificationTypeId}
+               (dibuka lewat icon "person-plus" di Actions kolom row)
+      5 notification type: Leave Applications/Approvals/Assignments/
+      Cancellations/Rejections, masing-masing baris punya 2 kontrol di
+      Actions: icon person-plus (buka sub-page subscriber) dan 1 switch
+      toggle (TIDAK disentuh TC apa pun di suite ini -- semantik pastinya
+      tidak dikonfirmasi penuh, lihat CATATAN CAKUPAN CONFIGURATION).
+      Sub-page: heading "Subscribers: <Type>", tombol Add, tabel Name/
+      Email/Actions (0 subscriber by default, "No Records Found").
+      [TEMUAN KOREKSI PENTING] Dialog Add BUKAN employee autocomplete --
+      cuma 2 input teks bebas: Name, Email (keduanya required, dikonfirmasi
+      via DOM: 2 label `oxd-input-field-required`, TIDAK ADA placeholder
+      "Type for hints..." atau `.oxd-autocomplete-option` di dialog ini).
+
+    LOCALIZATION (Admin > Configuration > Localization)
+      URL    : /web/index.php/admin/localization
+      API    : PUT /api/v2/admin/localization (SATU-SATUNYA endpoint).
+               TIDAK PERNAH diklik di suite ini -- lihat CATATAN CAKUPAN
+               CONFIGURATION untuk alasan lengkap.
+      Field (confirmed live): Language (select, default "English (United
+      States)" pada demo ini), Date Format (select, default "yyyy-dd-mm").
+      [TEMUAN PENTING] TIDAK ADA field Timezone sama sekali di screen ini
+      (koreksi atas asumsi awal scoping) -- cuma 2 field, keduanya select,
+      TIDAK ADA tombol Cancel (quirk sama dengan General Information).
 
   SECURITY: UPLOAD VALIDATION (TC-ADMIN-JOBTITLE-07/08, TC-ADMIN-
   CORPBRAND-04/05, pola sama dengan TC-PIM-ADD-28/29 dan
@@ -685,11 +815,64 @@ LEGEND SIMBOL SKENARIO
                                         -> bersarang benar, hierarki bertingkat terbukti
 
 ================================================================================
+  TEST CASES: CONFIGURATION - EMAIL CONFIGURATION (5 TC) [VALIDATE-ONLY]
+================================================================================
+
+  NO  ID                        KATEGORI  DESKRIPSI                                     STATUS
+  --  ------------------------  --------  ---------------------------------------------  -------
+  01  TC-ADMIN-EMAILCONFIG-01   (+)       Form termuat (Mail Sent As, Sending Method,     [DONE]
+                                          Reset/Save)
+  02  TC-ADMIN-EMAILCONFIG-02   (-)       Mail Sent As kosong -> Required on-blur,        [DONE]
+                                          TIDAK PERNAH klik Save
+  03  TC-ADMIN-EMAILCONFIG-03   (S)       XSS payload di Mail Sent As -> format ditolak   [DONE]
+                                          on-blur, TIDAK PERNAH klik Save
+  04  TC-ADMIN-EMAILCONFIG-04   (!)       Switch Sending Method (Sendmail<->SMTP)         [DONE]
+                                          menampilkan field kondisional yang benar
+  05  TC-ADMIN-EMAILCONFIG-05   (B)       Mail Sent As 300 char -> "Should not exceed     [DONE]
+                                          100 characters" on-blur, TIDAK PERNAH klik Save
+
+================================================================================
+  TEST CASES: CONFIGURATION - EMAIL SUBSCRIPTIONS (5 TC) [FULLY EXERCISED]
+================================================================================
+
+  NO  ID                     KATEGORI  DESKRIPSI                                       STATUS
+  --  ---------------------  --------  ----------------------------------------------  -------
+  01  TC-ADMIN-EMAILSUB-01   (+)       List 5 notification type tampil                  [DONE]
+  02  TC-ADMIN-EMAILSUB-02   (+)       Add subscriber (Name+Email) ke Leave             [DONE]
+                                      Cancellations -> tersimpan, lalu di-restore
+  03  TC-ADMIN-EMAILSUB-03   (-)       Submit kosong (Leave Rejections) -> Required,     [DONE]
+                                      tidak ada POST
+  04  TC-ADMIN-EMAILSUB-04   (!)       Cancel (Leave Assignments) membatalkan             [DONE]
+                                      penambahan subscriber
+  05  TC-ADMIN-EMAILSUB-05   (S)       XSS/SQLi payload di Name (Leave Approvals) ->      [DONE]
+                                      tersimpan aman sebagai teks, dibersihkan
+
+================================================================================
+  TEST CASES: CONFIGURATION - LOCALIZATION (5 TC) [VALIDATE-ONLY]
+================================================================================
+
+  NO  ID                       KATEGORI  DESKRIPSI                                     STATUS
+  --  -----------------------  --------  ---------------------------------------------  -------
+  01  TC-ADMIN-LOCALIZATION-01 (+)       Form termuat (Language, Date Format, Save,     [DONE]
+                                          TANPA Cancel)
+  02  TC-ADMIN-LOCALIZATION-02 (!)       Dropdown Language berisi > 1 opsi, TIDAK        [DONE]
+                                          pernah Save
+  03  TC-ADMIN-LOCALIZATION-03 (!)       Pilih Language lain TANPA Save -> tidak          [DONE]
+                                          ter-persist (reload membuktikan)
+  04  TC-ADMIN-LOCALIZATION-04 (!)       Pilih Date Format lain TANPA Save -> tidak       [DONE]
+                                          ter-persist (reload membuktikan)
+  05  TC-ADMIN-LOCALIZATION-05 (!)       Opsi dropdown Language konsisten dengan daftar   [DONE]
+                                          Language Packages (read-only cross-screen check)
+
+================================================================================
   SUMMARY
 ================================================================================
 
-  Total TC: 97 (39 pass pertama + 34 pass kedua + 24 pass ketiga/
-  Organization -- General Information 6 + Locations 9 + Structure 9)
+  Total TC: 112 sejauh ini (97 dari pass pertama-ketiga + 15 dari pass
+  keempat/Configuration BAGIAN PERTAMA -- Email Configuration 5, Email
+  Subscriptions 5, Localization 5; Language Packages/Modules/Social
+  Media Authentication/OAuth Client/LDAP Configuration MASIH BERJALAN,
+  lihat progress terbaru di CATATAN CAKUPAN CONFIGURATION).
 
   Pass pertama (39): Users 6, Job Titles 8, Pay Grades 5, Employment
   Status 5, Job Categories 5, Work Shifts 5, Corporate Branding 5.
@@ -698,6 +881,11 @@ LEGEND SIMBOL SKENARIO
   Memberships 5, Nationalities 6.
 
   Pass ketiga (24): General Information 6, Locations 9, Structure 9.
+
+  Pass keempat/Configuration, bagian pertama (15): Email Configuration 5
+  (VALIDATE-ONLY, Save tidak pernah diklik), Email Subscriptions 5
+  (FULLY EXERCISED dengan restore-after-mutate), Localization 5
+  (VALIDATE-ONLY, Save tidak pernah diklik).
 
   Hard check() (pass/fail tegas) : 91 TC
   finding() (dokumentasi, bukan pass/fail tegas) : 11 TC -- Job Title
