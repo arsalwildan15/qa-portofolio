@@ -37,3 +37,5 @@ export { AdminLocalizationPage } from './AdminLocalizationPage';
 export { AdminLanguagePackagesPage } from './AdminLanguagePackagesPage';
 export { AdminModulesPage } from './AdminModulesPage';
 export { AdminSocialMediaAuthPage } from './AdminSocialMediaAuthPage';
+export { AdminOAuthClientPage } from './AdminOAuthClientPage';
+export { AdminLdapConfigurationPage } from './AdminLdapConfigurationPage';

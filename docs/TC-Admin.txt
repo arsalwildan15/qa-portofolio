@@ -1,7 +1,7 @@
 ================================================================================
   DAFTAR TEST CASE: ADMIN
   Modul    : Admin (User Management, Job, Corporate Branding,
-             Qualifications, Nationalities, Organization)
+             Qualifications, Nationalities, Organization, Configuration)
   Target   : https://opensource-demo.orangehrmlive.com/web/index.php/admin/*
   Engineer : Arsal Wildan Naviaddin, QA Engineer
   Project  : qa-portofolio
@@ -46,29 +46,24 @@ LEGEND SIMBOL SKENARIO
                TC-ADMIN-LANGPACK-*    -> tests/admin/language-packages/
                TC-ADMIN-MODULES-*     -> tests/admin/modules/
                TC-ADMIN-SOCIALAUTH-*  -> tests/admin/social-media-authentication/
+               TC-ADMIN-OAUTH-*       -> tests/admin/oauth-client/
+               TC-ADMIN-LDAP-*        -> tests/admin/ldap-configuration/
 
-  CAKUPAN SAAT INI: 16 sub-screen Admin (13 + 3 Organization) SELESAI
-  dari pass sebelumnya, PLUS pass keempat/dispatch ini sedang mengerjakan
-  Admin > Configuration (8 sub-screen, area terakhir yang belum
-  tersentuh). Pass pertama (39 TC): User Management > Users, semua 5
-  sub-screen Admin > Job (Job Titles, Pay Grades, Employment Status, Job
-  Categories, Work Shifts), plus Corporate Branding. Pass kedua (34 TC):
-  semua 5 sub-screen Admin > Qualifications (Skills, Education, Licenses,
-  Languages, Memberships) dan Admin > Nationalities. Pass ketiga (24 TC):
-  Organization > General Information (6), Locations (9), Structure (9).
-  Pass keempat/SAAT INI (Configuration): Email Configuration (5),
-  Email Subscriptions (5), Localization (5) SELESAI; Language Packages,
-  Modules, Social Media Authentication, OAuth Client, LDAP Configuration
-  MASIH BERJALAN (lihat progress di bawah). Total TC setelah pass
-  pertama-ketiga: 97.
+  CAKUPAN SAAT INI: SEMUA ~16 sub-screen Admin SELESAI -- Admin module
+  SEPENUHNYA LENGKAP. Pass pertama (39 TC): User Management > Users,
+  semua 5 sub-screen Admin > Job (Job Titles, Pay Grades, Employment
+  Status, Job Categories, Work Shifts), plus Corporate Branding. Pass
+  kedua (34 TC): semua 5 sub-screen Admin > Qualifications (Skills,
+  Education, Licenses, Languages, Memberships) dan Admin > Nationalities.
+  Pass ketiga (24 TC): Organization > General Information (6), Locations
+  (9), Structure (9). Pass keempat (39 TC): semua 8 sub-screen Admin >
+  Configuration -- Email Configuration (5), Email Subscriptions (5),
+  Localization (5), Language Packages (4), Modules (5), Social Media
+  Authentication (5), OAuth Client (5), LDAP Configuration (5). Total TC:
+  136.
 
-  BELUM DICAKUP (sisa scope pass keempat, BUKAN gap yang disengaja
-  diabaikan tanpa dicatat):
-    - Configuration > Language Packages, Modules, Social Media
-      Authentication, OAuth Client, LDAP Configuration
-  Alasan: dikerjakan incremental per 2-3 sub-screen per commit (lihat
-  CATATAN CAKUPAN CONFIGURATION di bawah untuk risk classification tiap
-  sub-screen yang sudah selesai).
+  BELUM DICAKUP: TIDAK ADA -- semua scope Admin yang direncanakan di
+  seluruh 4 pass sudah selesai dikerjakan.
 
   CATATAN CAKUPAN ORGANIZATION > STRUCTURE (live discovery, dispatch
   ini): screen ini BUKAN flat list seperti semua sub-screen Admin
@@ -279,9 +274,54 @@ LEGEND SIMBOL SKENARIO
     pesan on-blur "Should not exceed 40 characters" -- tidak pernah
     diverifikasi sampai Save karena SAFETY CONSTRAINT di atas.
 
-    OAUTH CLIENT, LDAP CONFIGURATION -- lihat progress di SUMMARY; risk
-    classification tiap satu didokumentasikan di sini begitu TC-nya
-    ditulis.
+    OAUTH CLIENT -- LOW RISK, FULLY EXERCISED (koreksi atas asumsi awal
+    scoping yang menduga ini HIGH-RISK sama seperti Social Media
+    Authentication). Alasan, dikonfirmasi live: OAuth Client meregister
+    client untuk token issuance API/mobile-app, BUKAN halaman login
+    browser -- beda fundamental dari Social Media Authentication walau
+    sama-sama di bawah Configuration. Menambah client baru additive dan
+    TIDAK mengubah seed row "OrangeHRM Mobile App" yang ada (yang trash/
+    pencil icon-nya `disabled`, protected). [TEMUAN KOREKSI] Checkbox
+    "Enable Client" TIDAK mengontrol hasil akhir seperti diduga -- client
+    baru TETAP tersimpan `enabled: true` di response API walau checkbox
+    tidak pernah dicentang (dikonfirmasi lewat capture response body
+    POST /api/v2/admin/oauth-clients). [TEMUAN PROSES PENTING] List TIDAK
+    auto-refresh setelah Save/Delete sukses -- request-nya berhasil
+    (dikonfirmasi 200 OK) tapi baris baru/terhapus tidak muncul/hilang di
+    tabel walau ditunggu lama, perlu reload eksplisit (lihat
+    AdminOAuthClientPage.saveAndReload()/deleteRow()). [TEMUAN LIVE]
+    Trash/pencil icon untuk client BARU (bukan seed) TERKONFIRMASI aktif
+    (bisa dihapus), beda dari seed row yang terkunci.
+    [CATATAN KEBERSIHAN DEMO] Karena bug test-side di atas (list tidak
+    auto-refresh) menyebabkan beberapa percobaan debug awal salah
+    menyimpulkan Add gagal padahal sebenarnya berhasil, screen ini
+    sekarang punya ~11 baris tambahan dari percobaan berulang sesi ini
+    (semua dari TC Add/XSS, bukan TC Delete) -- SESUAI konvensi yang
+    sudah ada di suite ini (Locations/Job Title dst, lihat CATATAN
+    EKSEKUSI poin 7) bahwa baris hasil TC Add/XSS dibiarkan ada, HANYA TC
+    Delete yang wajib membersihkan diri sendiri (dan TC-ADMIN-OAUTH-05
+    sudah dikonfirmasi membersihkan baris buatannya sendiri). Tidak ada
+    risiko fungsional dari baris tambahan ini (OAuth Client tidak
+    memengaruhi login browser).
+
+    LDAP CONFIGURATION -- HIGH-RISK, VALIDATE-ONLY (Save TIDAK PERNAH
+    diklik sama sekali di 5 TC-nya -- screen PALING BERISIKO di suite
+    ini). Alasan, dikonfirmasi live lewat teks peringatan aplikasi
+    sendiri: "Before activating the LDAP service, make sure that all
+    LDAP settings are functioning properly since incorrect configuration
+    may result in corrupted data. As a precaution, we recommend you to
+    create a backup of your database before continuing." -- konfirmasi
+    eksplisit bahwa Save di sini genuinely destructive-if-wrong untuk
+    SEMUA user demo publik (bisa mengubah metode autentikasi instance).
+    [TEMUAN PENTING] "Test Connection" dikonfirmasi live sebagai probe
+    yang BENAR-BENAR terpisah dari Save (tidak ada POST/PUT Save-
+    equivalent yang terkirim saat Test Connection diklik, dikonfirmasi
+    lewat network listener di TC-ADMIN-LDAP-02/03/04/05) -- dipakai
+    sebagai satu-satunya aksi interaktif "aman" di screen ini, sesuai
+    izin eksplisit di brief dispatch ini. TC-ADMIN-LDAP-05 secara khusus
+    membuktikan ini: Test Connection dengan Host/Port default (localhost/
+    389, kemungkinan tidak reachable dari backend demo) tidak mengubah
+    apa pun di server, dikonfirmasi lewat reload + network listener.
 
   [TEMUAN PROSES, PENTING UNTUK SELURUH SUITE INI] Page object Admin yang
   goto()-nya membaca field value SEGERA setelah navigasi (tanpa menunggu
@@ -652,6 +692,38 @@ LEGEND SIMBOL SKENARIO
       Cancel, Save. TIDAK PERNAH diklik Save di suite ini -- lihat
       CATATAN CAKUPAN CONFIGURATION.
 
+    OAUTH CLIENT (Admin > Configuration > OAuth Client)
+      URL    : /web/index.php/admin/registerOAuthClient
+      Add    : /web/index.php/admin/saveOAuthClient
+      API    : POST /api/v2/admin/oauth-clients (add, 200, response
+               confirmed live mengembalikan `enabled: true` walau
+               checkbox "Enable Client" tidak dicentang). DELETE lewat
+               icon trash per-row (dikonfirmasi live aktif untuk client
+               baru, BEDA dari seed row "OrangeHRM Mobile App" yang
+               trash/pencil-nya `disabled`).
+      [TEMUAN PROSES PENTING] List TIDAK auto-refresh setelah Save/
+      Delete sukses -- lihat CATATAN CAKUPAN CONFIGURATION untuk detail
+      penuh dan mitigasi (`saveAndReload()`/`deleteRow()` di page
+      object).
+      Form Add: Name, Redirect URI (keduanya required), checkbox "Enable
+      Client", checkbox "Confidential Client". Tombol: Cancel, Save.
+
+    LDAP CONFIGURATION (Admin > Configuration > LDAP Configuration)
+      URL    : /web/index.php/admin/ldapConfiguration
+      TIDAK PERNAH diklik Save di suite ini -- lihat CATATAN CAKUPAN
+      CONFIGURATION untuk alasan lengkap (teks peringatan aplikasi
+      sendiri soal backup database).
+      Section (confirmed live): Server Settings (Host, Port, Encryption
+      select, LDAP Implementation select), Bind Settings (Bind
+      Anonymously checkbox, Distinguished Name, Password), User Lookup
+      Settings (Base Distinguished Name, Search Scope select, User Name
+      Attribute, User Search Filter, User Unique ID Attribute), Data
+      Mapping (First/Middle/Last Name, User Status, Work Email, Employee
+      Id, masing-masing mapped ke field LDAP), Additional Settings
+      (Merge LDAP Users With Existing System Users, Sync Interval).
+      Tombol: "Test Connection" (probe terpisah dari Save, dikonfirmasi
+      live TIDAK mengirim POST/PUT Save-equivalent), Save.
+
   SECURITY: UPLOAD VALIDATION (TC-ADMIN-JOBTITLE-07/08, TC-ADMIN-
   CORPBRAND-04/05, pola sama dengan TC-PIM-ADD-28/29 dan
   TC-RECRUITMENT-CANDIDATE-11/12): file executable (header PE "MZ")
@@ -1017,14 +1089,46 @@ LEGEND SIMBOL SKENARIO
                                         characters" on-blur, TIDAK PERNAH klik Save
 
 ================================================================================
+  TEST CASES: CONFIGURATION - OAUTH CLIENT (5 TC) [FULLY EXERCISED]
+================================================================================
+
+  NO  ID                  KATEGORI  DESKRIPSI                                        STATUS
+  --  ------------------  --------  -----------------------------------------------  -------
+  01  TC-ADMIN-OAUTH-01   (+)       Add OAuth Client valid -> tersimpan, Status       [DONE]
+                                    Enabled (koreksi: checkbox tidak mengontrol ini)
+  02  TC-ADMIN-OAUTH-02   (-)       Submit kosong -> 2 Required, tidak ada POST       [DONE]
+  03  TC-ADMIN-OAUTH-03   (S)       XSS payload di Name -> tersimpan aman sebagai     [DONE]
+                                    teks, tidak ada alert
+  04  TC-ADMIN-OAUTH-04   (!)       Cancel membatalkan, jumlah client tidak berubah   [DONE]
+  05  TC-ADMIN-OAUTH-05   (+)       Add lalu Delete client baru -> trash icon aktif    [DONE]
+                                    untuk client baru (beda dari seed row terkunci)
+
+================================================================================
+  TEST CASES: CONFIGURATION - LDAP CONFIGURATION (5 TC) [VALIDATE-ONLY]
+================================================================================
+
+  NO  ID                KATEGORI  DESKRIPSI                                          STATUS
+  --  ----------------  --------  -------------------------------------------------  -------
+  01  TC-ADMIN-LDAP-01  (+)       Form termuat, teks peringatan backup sebelum        [DONE]
+                                  aktivasi LDAP terlihat (konfirmasi HIGH-RISK)
+  02  TC-ADMIN-LDAP-02  (-)       Host kosong via Test Connection -> Required,        [DONE]
+                                  TIDAK PERNAH klik Save
+  03  TC-ADMIN-LDAP-03  (S)       XSS/SQLi/LDAP-injection di Distinguished Name via    [DONE]
+                                  Test Connection -> tidak ada alert, TIDAK PERNAH Save
+  04  TC-ADMIN-LDAP-04  (B)       Host 300 char via Test Connection, TIDAK PERNAH      [DONE]
+                                  klik Save
+  05  TC-ADMIN-LDAP-05  (!)       Test Connection dengan default TIDAK mengubah apa    [DONE]
+                                  pun di server -- membuktikan probe ini aman
+
+================================================================================
   SUMMARY
 ================================================================================
 
-  Total TC: 126 sejauh ini (97 dari pass pertama-ketiga + 29 dari pass
-  keempat/Configuration SEJAUH INI -- Email Configuration 5, Email
-  Subscriptions 5, Localization 5, Language Packages 4, Modules 5,
-  Social Media Authentication 5; OAuth Client/LDAP Configuration MASIH
-  BERJALAN, lihat progress terbaru di CATATAN CAKUPAN CONFIGURATION).
+  Total TC: 136 (97 dari pass pertama-ketiga + 39 dari pass keempat/
+  Configuration). Dengan ini, SEMUA ~16 sub-screen Admin (13 sub-screen
+  pass pertama-kedua + 3 sub-screen Organization pass ketiga + 8 sub-
+  screen Configuration pass keempat) SELESAI dicakup -- Admin module
+  SEPENUHNYA LENGKAP.
 
   Pass pertama (39): Users 6, Job Titles 8, Pay Grades 5, Employment
   Status 5, Job Categories 5, Work Shifts 5, Corporate Branding 5.
@@ -1034,17 +1138,56 @@ LEGEND SIMBOL SKENARIO
 
   Pass ketiga (24): General Information 6, Locations 9, Structure 9.
 
-  Pass keempat/Configuration, sejauh ini (29): Email Configuration 5
-  (VALIDATE-ONLY, Save tidak pernah diklik), Email Subscriptions 5
-  (FULLY EXERCISED dengan restore-after-mutate), Localization 5
-  (VALIDATE-ONLY, Save tidak pernah diklik), Language Packages 4
-  (FULLY EXERCISED dengan restore-after-mutate, diverifikasi via API),
-  Modules 5 (VALIDATE-ONLY, Save tidak pernah diklik sama sekali),
-  Social Media Authentication 5 (VALIDATE-ONLY, Save tidak pernah
-  diklik sama sekali).
+  Pass keempat/Configuration (39, SELESAI -- semua 8 sub-screen):
+  Email Configuration 5 (VALIDATE-ONLY, Save tidak pernah diklik --
+  dikonfirmasi live field-nya PUNYA validasi on-blur yang benar, tapi
+  screen ini TETAP diperlakukan validate-only by policy karena mengatur
+  SMTP global demo publik), Email Subscriptions 5 (FULLY EXERCISED
+  dengan restore-after-mutate -- koreksi scoping: scope-nya global
+  notification routing, bukan per-admin, dan dialog Add-nya 2 field
+  teks bebas bukan employee autocomplete), Localization 5 (VALIDATE-
+  ONLY, Save tidak pernah diklik -- TIDAK ADA field Timezone, koreksi
+  asumsi awal), Language Packages 4 (FULLY EXERCISED dengan restore-
+  after-mutate, diverifikasi via API karena dropdown ~490 opsi-nya
+  terbukti tidak reliable diklik langsung), Modules 5 (VALIDATE-ONLY,
+  Save tidak pernah diklik sama sekali -- disabling module apa pun
+  menghilangkannya dari sidebar SEMUA user), Social Media
+  Authentication 5 (VALIDATE-ONLY, Save tidak pernah diklik sama
+  sekali -- berpotensi mengubah halaman login bersama), OAuth Client 5
+  (FULLY EXERCISED -- koreksi scoping: ternyata LOW RISK karena cuma
+  soal token issuance API/mobile-app, bukan halaman login, additive &
+  reversibel sama seperti Job Title), LDAP Configuration 5 (VALIDATE-
+  ONLY, Save tidak pernah diklik sama sekali -- screen PALING BERISIKO
+  di suite ini, aplikasi sendiri memperingatkan risiko corrupt data;
+  "Test Connection" dipakai sebagai probe aman yang dikonfirmasi live
+  terpisah dari Save).
 
-  Hard check() (pass/fail tegas) : 91 TC
-  finding() (dokumentasi, bukan pass/fail tegas) : 11 TC -- Job Title
+  [CATATAN KEBERSIHAN DEMO -- OAUTH CLIENT] Karena bug test-side (list
+  OAuth Client tidak auto-refresh setelah Save/Delete sukses, baru
+  ditemukan & diperbaiki saat menulis TC pass keempat ini) menyebabkan
+  beberapa percobaan debug awal salah menyimpulkan Add gagal padahal
+  sebenarnya berhasil, screen OAuth Client sekarang punya ~11 baris
+  tambahan hasil TC Add/XSS dari sesi penulisan ini (bukan dari TC
+  Delete -- TC-ADMIN-OAUTH-05 sendiri sudah dikonfirmasi membersihkan
+  baris buatannya). Ini SESUAI konvensi yang sudah berlaku di suite ini
+  (lihat CATATAN EKSEKUSI poin 7 untuk Locations): baris hasil TC Add/
+  XSS dibiarkan ada, hanya TC Delete yang wajib membersihkan diri
+  sendiri. Tidak ada risiko fungsional (OAuth Client tidak memengaruhi
+  halaman login browser, dikonfirmasi live).
+
+  Hard check() (pass/fail tegas) dari pass pertama-ketiga : 91 TC dari 97
+  (lihat rincian finding() di bawah untuk pass pertama-ketiga). Pass
+  keempat/Configuration menambah beberapa TC dengan finding() juga
+  (informasional/environment-dependent, bukan pass/fail tegas):
+  TC-ADMIN-SOCIALAUTH-05 dan TC-ADMIN-LDAP-02/04/05 (hasil Test
+  Connection/validasi on-blur dicatat sebagai temuan, sedangkan check
+  "tidak ada Save yang terkirim" di TC yang sama TETAP hard check()),
+  TC-ADMIN-LANGPACK-02 (baseline subscriber), TC-ADMIN-OAUTH-03/05
+  (rendering payload / status trash icon) -- selebihnya TC pass keempat
+  pakai hard check() murni.
+
+  finding() dari pass pertama-ketiga (dokumentasi, bukan pass/fail
+  tegas) : 11 TC -- Job Title
   sangat panjang (TC-ADMIN-JOBTITLE-03), From=To pada Work Shift
   (TC-ADMIN-SHIFT-03), TC-ADMIN-CORPBRAND-04/05 (exe-renamed-.png pada
   Client Logo/Login Banner, dicatat finding() karena constraint
