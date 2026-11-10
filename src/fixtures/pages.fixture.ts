@@ -37,6 +37,8 @@ import {
   AdminEmailSubscriptionsPage,
   AdminLocalizationPage,
   AdminLanguagePackagesPage,
+  AdminModulesPage,
+  AdminSocialMediaAuthPage,
 } from '../pages';
 
 interface Pages {
@@ -84,6 +86,8 @@ interface Pages {
   adminEmailSubscriptionsPage: AdminEmailSubscriptionsPage;
   adminLocalizationPage: AdminLocalizationPage;
   adminLanguagePackagesPage: AdminLanguagePackagesPage;
+  adminModulesPage: AdminModulesPage;
+  adminSocialMediaAuthPage: AdminSocialMediaAuthPage;
 }
 
 export const test = base.extend<Pages>({
@@ -218,6 +222,12 @@ export const test = base.extend<Pages>({
   },
   adminLanguagePackagesPage: async ({ page }, use) => {
     await use(new AdminLanguagePackagesPage(page));
+  },
+  adminModulesPage: async ({ page }, use) => {
+    await use(new AdminModulesPage(page));
+  },
+  adminSocialMediaAuthPage: async ({ page }, use) => {
+    await use(new AdminSocialMediaAuthPage(page));
   },
 });
 

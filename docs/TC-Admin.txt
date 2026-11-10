@@ -44,6 +44,8 @@ LEGEND SIMBOL SKENARIO
                TC-ADMIN-EMAILSUB-*    -> tests/admin/email-subscriptions/
                TC-ADMIN-LOCALIZATION-*-> tests/admin/localization/
                TC-ADMIN-LANGPACK-*    -> tests/admin/language-packages/
+               TC-ADMIN-MODULES-*     -> tests/admin/modules/
+               TC-ADMIN-SOCIALAUTH-*  -> tests/admin/social-media-authentication/
 
   CAKUPAN SAAT INI: 16 sub-screen Admin (13 + 3 Organization) SELESAI
   dari pass sebelumnya, PLUS pass keempat/dispatch ini sedang mengerjakan
@@ -254,9 +256,32 @@ LEGEND SIMBOL SKENARIO
     (pass kedua) untuk alasan serupa (UI tidak selalu reliable untuk
     verifikasi tegas).
 
-    MODULES, SOCIAL MEDIA AUTHENTICATION, OAUTH CLIENT, LDAP CONFIGURATION
-    -- lihat progress di SUMMARY; risk classification tiap satu
-    didokumentasikan di sini begitu TC-nya ditulis.
+    MODULES -- HIGH-RISK, VALIDATE-ONLY (Save TIDAK PERNAH diklik sama
+    sekali di 5 TC-nya, bukan cuma "dihindari saat kemungkinan gagal").
+    Alasan: men-disable module apa pun di sini (selain Admin yang
+    dikunci aplikasi sendiri) langsung menghilangkannya dari sidebar
+    SEMUA user demo publik ini, termasuk mungkin test suite lain yang
+    jalan konkuren. [TEMUAN PENTING] Admin Module punya switch dengan
+    HTML attribute `disabled` -- aplikasi sendiri mengunci module ini
+    (self-protection, tidak bisa mengunci diri sendiri keluar dari
+    Admin), dikonfirmasi live. [TEMUAN PROSES] AdminModulesPage.goto()
+    perlu menunggu GET /api/v2/admin/modules resolve dulu -- hydration
+    race yang sama pola dengan screen lain (checkbox sempat terbaca
+    "off" padahal server-nya "on").
+
+    SOCIAL MEDIA AUTHENTICATION -- HIGH-RISK, VALIDATE-ONLY (Save TIDAK
+    PERNAH diklik). Alasan: menambah provider di sini (Name, Provider
+    URL, Client ID, Client Secret) plausibel mengubah HALAMAN LOGIN yang
+    dilihat SEMUA user demo publik ini (beda dari OAuth Client yang
+    cuma soal API/mobile-app token issuance, bukan browser login page).
+    Di demo ini belum ada provider terdaftar ("No Records Found").
+    [TEMUAN] Name punya length limit 40 karakter, dikonfirmasi lewat
+    pesan on-blur "Should not exceed 40 characters" -- tidak pernah
+    diverifikasi sampai Save karena SAFETY CONSTRAINT di atas.
+
+    OAUTH CLIENT, LDAP CONFIGURATION -- lihat progress di SUMMARY; risk
+    classification tiap satu didokumentasikan di sini begitu TC-nya
+    ditulis.
 
   [TEMUAN PROSES, PENTING UNTUK SELURUH SUITE INI] Page object Admin yang
   goto()-nya membaca field value SEGERA setelah navigasi (tanpa menunggu
@@ -603,6 +628,30 @@ LEGEND SIMBOL SKENARIO
       `.oxd-select-dropdown` -- lihat CATATAN CAKUPAN CONFIGURATION untuk
       detail insiden & mitigasi penuh.
 
+    MODULES (Admin > Configuration > Modules)
+      URL    : /web/index.php/admin/viewModules
+      API    : GET /api/v2/admin/modules. TIDAK PERNAH diklik Save di
+               suite ini -- lihat CATATAN CAKUPAN CONFIGURATION.
+      11 module (confirmed live): Admin Module, Pim Module, Leave Module,
+      Time Module, Recruitment Module, Performance Module, Directory
+      Module, Maintenance Module, Mobile, Claim Module, Buzz -- masing-
+      masing `.orangehrm-module-field-row` dengan label `<p>` + switch
+      `.oxd-switch-wrapper`. [TEMUAN PENTING] Switch Admin Module punya
+      HTML attribute `disabled` (dikonfirmasi live) -- terkunci aplikasi
+      sendiri. Tombol: Save saja (tidak ada Reset/Cancel).
+
+    SOCIAL MEDIA AUTHENTICATION (Admin > Configuration > Social Media
+    Authentication)
+      URL    : /web/index.php/admin/openIdProvider
+      Add    : /web/index.php/admin/addAuthProvider
+      Belum ada provider terdaftar pada demo ini ("No Records Found").
+      Form Add: 4 field teks bebas, semua required (confirmed via "*
+      Required" + 4 pesan Required saat submit kosong): Name (limit 40
+      char, dikonfirmasi lewat pesan on-blur "Should not exceed 40
+      characters"), Provider URL, Client ID, Client Secret. Tombol:
+      Cancel, Save. TIDAK PERNAH diklik Save di suite ini -- lihat
+      CATATAN CAKUPAN CONFIGURATION.
+
   SECURITY: UPLOAD VALIDATION (TC-ADMIN-JOBTITLE-07/08, TC-ADMIN-
   CORPBRAND-04/05, pola sama dengan TC-PIM-ADD-28/29 dan
   TC-RECRUITMENT-CANDIDATE-11/12): file executable (header PE "MZ")
@@ -939,14 +988,43 @@ LEGEND SIMBOL SKENARIO
   04  TC-ADMIN-LANGPACK-04 (!)       Cancel membatalkan, jumlah baris tidak berubah      [DONE]
 
 ================================================================================
+  TEST CASES: CONFIGURATION - MODULES (5 TC) [VALIDATE-ONLY]
+================================================================================
+
+  NO  ID                   KATEGORI  DESKRIPSI                                        STATUS
+  --  -------------------  --------  -----------------------------------------------  -------
+  01  TC-ADMIN-MODULES-01  (+)       Form termuat, ke-11 module tampil, tombol Save    [DONE]
+  02  TC-ADMIN-MODULES-02  (!)       Switch Admin Module ter-disable (self-lock)        [DONE]
+  03  TC-ADMIN-MODULES-03  (+)       Baseline: semua 11 module dalam state enabled      [DONE]
+  04  TC-ADMIN-MODULES-04  (!)       Toggle switch Buzz TANPA Save -> tidak ter-persist,[DONE]
+                                     tidak ada POST/PUT terkirim
+  05  TC-ADMIN-MODULES-05  (!)       Module enabled konsisten dengan link di sidebar    [DONE]
+                                     (read-only cross-check)
+
+================================================================================
+  TEST CASES: CONFIGURATION - SOCIAL MEDIA AUTHENTICATION (5 TC) [VALIDATE-ONLY]
+================================================================================
+
+  NO  ID                      KATEGORI  DESKRIPSI                                     STATUS
+  --  ----------------------  --------  --------------------------------------------  -------
+  01  TC-ADMIN-SOCIALAUTH-01  (+)       Provider List termuat, tombol Add              [DONE]
+  02  TC-ADMIN-SOCIALAUTH-02  (-)       Submit kosong -> 4 Required, tidak ada POST    [DONE]
+  03  TC-ADMIN-SOCIALAUTH-03  (S)       XSS payload di Name -> tidak ada alert,         [DONE]
+                                        TIDAK PERNAH klik Save
+  04  TC-ADMIN-SOCIALAUTH-04  (!)       Cancel membatalkan, jumlah provider tidak        [DONE]
+                                        berubah
+  05  TC-ADMIN-SOCIALAUTH-05  (B)       Name 300 char -> "Should not exceed 40          [DONE]
+                                        characters" on-blur, TIDAK PERNAH klik Save
+
+================================================================================
   SUMMARY
 ================================================================================
 
-  Total TC: 116 sejauh ini (97 dari pass pertama-ketiga + 19 dari pass
+  Total TC: 126 sejauh ini (97 dari pass pertama-ketiga + 29 dari pass
   keempat/Configuration SEJAUH INI -- Email Configuration 5, Email
-  Subscriptions 5, Localization 5, Language Packages 4; Modules/Social
-  Media Authentication/OAuth Client/LDAP Configuration MASIH BERJALAN,
-  lihat progress terbaru di CATATAN CAKUPAN CONFIGURATION).
+  Subscriptions 5, Localization 5, Language Packages 4, Modules 5,
+  Social Media Authentication 5; OAuth Client/LDAP Configuration MASIH
+  BERJALAN, lihat progress terbaru di CATATAN CAKUPAN CONFIGURATION).
 
   Pass pertama (39): Users 6, Job Titles 8, Pay Grades 5, Employment
   Status 5, Job Categories 5, Work Shifts 5, Corporate Branding 5.
@@ -956,11 +1034,14 @@ LEGEND SIMBOL SKENARIO
 
   Pass ketiga (24): General Information 6, Locations 9, Structure 9.
 
-  Pass keempat/Configuration, sejauh ini (19): Email Configuration 5
+  Pass keempat/Configuration, sejauh ini (29): Email Configuration 5
   (VALIDATE-ONLY, Save tidak pernah diklik), Email Subscriptions 5
   (FULLY EXERCISED dengan restore-after-mutate), Localization 5
   (VALIDATE-ONLY, Save tidak pernah diklik), Language Packages 4
-  (FULLY EXERCISED dengan restore-after-mutate, diverifikasi via API).
+  (FULLY EXERCISED dengan restore-after-mutate, diverifikasi via API),
+  Modules 5 (VALIDATE-ONLY, Save tidak pernah diklik sama sekali),
+  Social Media Authentication 5 (VALIDATE-ONLY, Save tidak pernah
+  diklik sama sekali).
 
   Hard check() (pass/fail tegas) : 91 TC
   finding() (dokumentasi, bukan pass/fail tegas) : 11 TC -- Job Title

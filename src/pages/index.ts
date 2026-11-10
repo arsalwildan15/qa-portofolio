@@ -35,3 +35,5 @@ export { AdminEmailConfigurationPage } from './AdminEmailConfigurationPage';
 export { AdminEmailSubscriptionsPage } from './AdminEmailSubscriptionsPage';
 export { AdminLocalizationPage } from './AdminLocalizationPage';
 export { AdminLanguagePackagesPage } from './AdminLanguagePackagesPage';
+export { AdminModulesPage } from './AdminModulesPage';
+export { AdminSocialMediaAuthPage } from './AdminSocialMediaAuthPage';
