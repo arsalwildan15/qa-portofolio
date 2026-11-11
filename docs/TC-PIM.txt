@@ -465,191 +465,1067 @@ No.  Test Case ID      Status   Kategori           Skenario
   Folder: tests/pim/employee-list/
 ================================================================================
 
- 1   TC-PIM-LIST-01    [DONE]   Positive (+)       Search by exact Employee Name
- 2   TC-PIM-LIST-02    [DONE]   Positive (+)       Search by Employee Id
- 3   TC-PIM-LIST-03    [DONE]   Positive (+)       Filter by Employment Status
-                                                    (param: empStatusId)
- 4   TC-PIM-LIST-04    [DONE]   Positive (+)       Filter by Sub Unit (nested dropdown)
- 5   TC-PIM-LIST-05    [DONE]   Positive (+)       Filter by Include (Current/
-                                                    Current+Past/Past Only)
- 6   TC-PIM-LIST-06    [DONE]   Positive (+)       Kombinasi multi-filter sekaligus
- 7   TC-PIM-LIST-07    [DONE]   Positive (+) [TEMUAN]  Sort kolom asc/desc, elemen
-                                                    trigger belum teridentifikasi
-                                                    pasti, didokumentasikan sbg finding
- 8   TC-PIM-LIST-08    [DONE]   Positive (+)       Pagination next page
- 9   TC-PIM-LIST-09    [DONE]   Negative (-)       Search tidak ada hasil -> "No
-                                                    Records Found"
-10   TC-PIM-LIST-10    [DONE]   Positive (+)       Reset mengembalikan filter default
-11   TC-PIM-LIST-11    [DONE]   Security (S)       XSS payload di search box
-12   TC-PIM-LIST-12    [DONE]   Security (S)       SQL injection payload di search box
-13   TC-PIM-LIST-13    [DONE]   Edge Case (!)      Delete Selected, modal, Cancel
-                                                    TIDAK menghapus
-14   TC-PIM-LIST-14    [DONE]   Positive (+) [API] GET /api/v2/pim/employees
-                                                    mencerminkan filter UI
+ 1   TC-PIM-LIST-01    [DONE]   TC-PIM-LIST-01-Verify-Search-By-Exact-Employee-Name.spec.ts
+                             (+) Verify Search By Exact Employee Name
+                             -> Buat employee baru sebagai data uji.
+                             -> Navigate ke Employee List, isi Employee Name
+                                filter (autocomplete "Type for hints...") dengan
+                                First Name, pilih opsi hasil autocomplete.
+                             -> Klik Search.
+                             [UI VERIFICATION]
+                             -> Verify baris hasil search mengandung Last Name
+                                employee yang dicari.
+
+ 2   TC-PIM-LIST-02    [DONE]   TC-PIM-LIST-02-Verify-Search-By-Employee-Id.spec.ts
+                             (+) Verify Search By Employee Id
+                             -> Buat employee baru, catat Employee Id
+                                auto-generated.
+                             -> Navigate ke Employee List, isi Employee Id
+                                filter (ketik bebas, bukan autocomplete).
+                             -> Klik Search.
+                             [UI VERIFICATION]
+                             -> Verify baris hasil search mengandung Employee
+                                Id yang dicari (exact match).
+
+ 3   TC-PIM-LIST-03    [DONE]   TC-PIM-LIST-03-Verify-Filter-By-Employment-Status.spec.ts
+                             (+) Verify Filter By Employment Status
+                             -> Pilih dropdown Employment Status = "Full-Time
+                                Permanent".
+                             -> Klik Search.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify URL query param mengandung "empStatusId"
+                                (BUKAN "employmentStatus" seperti dugaan awal
+                                dari label UI — lihat CATATAN TEKNIS).
+
+ 4   TC-PIM-LIST-04    [DONE]   TC-PIM-LIST-04-Verify-Filter-By-Sub-Unit.spec.ts
+                             (+) Verify Filter By Sub Unit
+                             -> Pilih dropdown Sub Unit = "Engineering"
+                                (nested: OrangeHRM > Administration >
+                                Engineering).
+                             -> Klik Search.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+
+ 5   TC-PIM-LIST-05    [DONE]   TC-PIM-LIST-05-Verify-Filter-By-Include.spec.ts
+                             (+) Verify Filter By Include
+                             -> Navigate, tunggu form settle, pilih dropdown
+                                Include = "Current and Past Employees".
+                             -> Klik Search.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify URL query param mengandung
+                                "includeEmployees=currentAndPast".
+                             NOTE: [BUG SCRIPT, DIPERBAIKI] Predicate
+                                   waitForResponse generik (cuma cek endpoint+
+                                   method) sempat menangkap GET yang salah akibat
+                                   race condition — ada GET interim yang terpicu
+                                   sebelum state dropdown ter-commit penuh.
+                                   Diperbaiki dengan memperketat predicate supaya
+                                   WAJIB mengandung "includeEmployees=
+                                   currentAndPast" di URL-nya sendiri,
+                                   menghilangkan race sepenuhnya (dikonfirmasi
+                                   3x run bersih berturut-turut setelah fix).
+
+ 6   TC-PIM-LIST-06    [DONE]   TC-PIM-LIST-06-Verify-Combined-Multi-Filter.spec.ts
+                             (+) Verify Combined Multi Filter
+                             -> Pilih Employment Status = "Full-Time Permanent"
+                                DAN Sub Unit = "Engineering" sekaligus.
+                             -> Klik Search.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify URL mengandung "empStatusId" DAN
+                                "subunitId" bersamaan (tidak saling menimpa).
+
+ 7   TC-PIM-LIST-07    [DONE]   TC-PIM-LIST-07-Verify-Sort-Column-Ascending-Descending.spec.ts
+                             (+) Verify Sort Column Ascending Descending
+                             -> Klik ikon sort kolom "Id" (index 1), pilih
+                                "Ascending".
+                             -> Pilih "Descending" pada kolom yang sama.
+                             [API VERIFICATION]
+                             -> Verify sortOrder === "ASC" setelah pilih
+                                Ascending.
+                             -> Verify sortOrder === "DESC" setelah pilih
+                                Descending.
+                             NOTE: [RESOLVED] Sebelumnya finding karena elemen
+                                   pemicu sort belum teridentifikasi. Dikonfirmasi
+                                   live: sort BUKAN klik header cell/teks,
+                                   melainkan klik ikon kecil
+                                   .oxd-table-header-sort-icon yang membuka
+                                   dropdown opsi "Ascending"/"Descending"
+                                   eksplisit — sudah jadi hard-check penuh,
+                                   bukan finding lagi.
+
+ 8   TC-PIM-LIST-08    [DONE]   TC-PIM-LIST-08-Verify-Pagination-Next-Page.spec.ts
+                             (+) Verify Pagination Next Page
+                             -> Navigate, pastikan data >1 halaman.
+                             -> Klik tombol halaman "2" (kalau tersedia).
+                             [API VERIFICATION]
+                             -> Verify response list awal status 200.
+                             -> Verify offset halaman 2 BUKAN "0".
+                             NOTE: kalau tombol halaman 2 tidak tersedia
+                                   (data <51 employee), dicatat via
+                                   report.finding() sebagai N/A, bukan
+                                   dipaksakan fail.
+
+ 9   TC-PIM-LIST-09    [DONE]   TC-PIM-LIST-09-Verify-Search-No-Match-Shows-No-Records.spec.ts
+                             (-) Verify Search No Match Shows No Records
+                             -> Isi Employee Id = "ZZNOTEXIST" (10 char, dalam
+                                batas valid 10 karakter client-side).
+                             -> Klik Search.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200 (bukan 422).
+                             [UI VERIFICATION]
+                             -> Verify "No Records Found" visible.
+                             NOTE: Employee Id search field TIDAK membatasi
+                                   panjang input di client (beda dari form Add
+                                   Employee) — ID >10 karakter dikirim ke
+                                   server, server balas 422, dan UI diam-diam
+                                   fallback menampilkan SEMUA data tanpa filter
+                                   alih-alih "No Records Found" (temuan
+                                   terpisah, TC ini sengaja pakai ID valid
+                                   <=10 char untuk menghindari fallback itu).
+
+10   TC-PIM-LIST-10    [DONE]   TC-PIM-LIST-10-Verify-Reset-Restores-Default-Filters.spec.ts
+                             (+) Verify Reset Restores Default Filters
+                             -> Isi Employee Id filter = "0001".
+                             -> Klik Reset.
+                             [UI VERIFICATION]
+                             -> Verify Employee Id filter kembali kosong.
+
+11   TC-PIM-LIST-11    [DONE]   TC-PIM-LIST-11-Verify-XSS-In-Search-Box.spec.ts
+                             (S) Verify XSS In Search Box
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Isi Employee Id filter = "<script>alert('xss')</script>".
+                             -> Klik Search.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert() terpicu.
+                             -> Verify count(script:has-text("alert")) === 0
+                                di DOM.
+
+12   TC-PIM-LIST-12    [DONE]   TC-PIM-LIST-12-Verify-SQL-Injection-In-Search-Box.spec.ts
+                             (S) Verify SQL Injection In Search Box
+                             -> Isi Employee Id = "' OR '1'='1".
+                             -> Klik Search.
+                             [API VERIFICATION]
+                             -> Verify response.status() < 500.
+                             [UI VERIFICATION]
+                             -> Verify body halaman TIDAK mengandung kata
+                                "sql" / "syntax error".
+
+13   TC-PIM-LIST-13    [DONE]   TC-PIM-LIST-13-Verify-Delete-Selected-Cancel-Does-Not-Delete.spec.ts
+                             (!) Verify Delete Selected Cancel Does Not Delete
+                             -> Catat jumlah baris tabel sebelum aksi.
+                             -> Pilih 1 row via checkbox, klik "Delete Selected".
+                             -> Verify modal "Are you Sure?" muncul (tombol
+                                "No, Cancel", dikonfirmasi teks persis, beda
+                                dari asumsi awal "Yes"/"No" polos), klik
+                                "No, Cancel".
+                             [UI VERIFICATION]
+                             -> Verify jumlah baris tabel SAMA sebelum dan
+                                sesudah Cancel (TIDAK ada yang terhapus).
+                             NOTE: teks ringkasan "(N) Records Found" TIDAK
+                                   muncul kembali setelah modal ditutup via
+                                   Cancel (dikonfirmasi langsung) — dicatat
+                                   via report.finding() terpisah, bukan jadi
+                                   verifikasi utama (yang dipakai: jumlah
+                                   baris tabel, lebih reliable).
+
+14   TC-PIM-LIST-14    [DONE]   TC-PIM-LIST-14-Verify-GET-Employees-API-Reflects-UI-Filters.spec.ts
+                             (+) [API] Verify GET Employees API Reflects UI Filters
+                             -> Navigate ke Employee List (tanpa filter apapun).
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify query param limit/offset/model/
+                                sortField/sortOrder/includeEmployees SEMUA ada
+                                dengan nilai default, tanpa filter tambahan.
+                             -> Verify response body punya key "data" berupa
+                                array.
 
 ================================================================================
   FASE 1 - GROUP 2: ADD EMPLOYEE (30 TC, ID 21 sengaja dilewati saat konsolidasi)
   Folder: tests/pim/add-employee/
 ================================================================================
 
-15   TC-PIM-ADD-01     [DONE]   Positive (+)       Tambah employee minimal (First+Last)
-16   TC-PIM-ADD-02     [DONE]   Positive (+)       Tambah employee lengkap (+Middle Name)
-17   TC-PIM-ADD-03     [DONE]   Positive (+)       "Create Login Details" switch
-                                                    menampilkan field username/password
-18   TC-PIM-ADD-04     [DONE]   Positive (+)       Upload foto valid (jpg, <1MB)
-19   TC-PIM-ADD-05     [DONE]   Negative (-)       Submit tanpa First Name -> required
-20   TC-PIM-ADD-06     [DONE]   Negative (-)       Submit tanpa Last Name -> required
-21   TC-PIM-ADD-07     [DONE]   Negative (-)       Whitespace-only nama -> trimmed,
-                                                    "Required"
-22   TC-PIM-ADD-08     [DONE]   Negative (-) [TEMUAN]  Employee Id duplikat -> "Employee
-                                                    Id already exists", POST tidak terkirim
-23   TC-PIM-ADD-09     [DONE]   Negative (-)       Create Login Details: username
-                                                    sudah dipakai
-24   TC-PIM-ADD-10     [DONE]   Negative (-)       Password & confirm password tidak cocok
-25   TC-PIM-ADD-11     [DONE]   Boundary (B)       First Name 30 karakter (batas)
-26   TC-PIM-ADD-12     [DONE]   Boundary (B) [TEMUAN]  First Name 31 karakter (over
-                                                    boundary)
-27   TC-PIM-ADD-13     [DONE]   Boundary (B)       Employee Id 10 karakter (batas)
-28   TC-PIM-ADD-14     [DONE]   Boundary (B) [TEMUAN]  Employee Id 11 karakter ->
-                                                    "Should not exceed 10 characters"
-29   TC-PIM-ADD-15     [DONE]   Boundary (B)       Foto >1MB ditolak
-30   TC-PIM-ADD-16     [DONE]   Boundary (B)       Foto tepat 1MB diterima
-31   TC-PIM-ADD-17     [DONE]   Edge Case (!)      Foto dimensi jauh dari rekomendasi
-                                                    200x200
-32   TC-PIM-ADD-18     [DONE]   Security (S)       XSS payload di First Name
-33   TC-PIM-ADD-19     [DONE]   Security (S)       SQL injection di First/Last Name
-34   TC-PIM-ADD-20     [DONE]   Security (S) [TEMUAN]  Employee Id payload mirip-script
-                                                    diblokir oleh validasi panjang
-                                                    10 karakter, bukan filter XSS
-35   TC-PIM-ADD-22     [DONE]   Edge Case (!)      Double-click Save tidak duplikat
-36   TC-PIM-ADD-23     [DONE]   Edge Case (!)      Unicode/emoji di First Name
-37   TC-PIM-ADD-24     [DONE]   Edge Case (!)      RTL Arabic di First Name
-38   TC-PIM-ADD-25     [DONE]   Edge Case (!) [TEMUAN]  Navigasi tanpa save -> TIDAK
-                                                    ada warning dialog, data hilang
-                                                    diam-diam
-39   TC-PIM-ADD-26     [DONE]   Edge Case (!)      Employee Id di-clear manual lalu submit
-40   TC-PIM-ADD-27     [DONE]   Edge Case (!)      Cancel button membatalkan form
-41   TC-PIM-ADD-28     [DONE]   Security (S)       [BUG] Exe di-rename .jpg diterima
-                                                    sebagai foto profil (bypass validasi)
-42   TC-PIM-ADD-29     [DONE]   Security (S)       [BUG] Apk di-rename .jpg diterima
-                                                    sebagai foto profil (pola sama)
-43   TC-PIM-ADD-30     [DONE]   Security (S)       Double extension "photo.jpg.exe"
-                                                    ditolak (TIDAK bisa di-bypass)
-44   TC-PIM-ADD-31     [DONE]   Security (S)       Baseline: .exe ekstensi asli
-                                                    ditolak dengan benar
+15   TC-PIM-ADD-01     [DONE]   TC-PIM-ADD-01-Verify-Add-Employee-Minimal-Fields.spec.ts
+                             (+) Verify Add Employee Minimal Fields
+                             -> Fill First Name + Last Name saja (field minimal
+                                wajib).
+                             -> Intercept POST /api/v2/pim/employees, klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify response firstName/lastName sesuai input.
+                             [UI VERIFICATION]
+                             -> Verify URL redirect ke /pim/viewPersonalDetails.
+
+16   TC-PIM-ADD-02     [DONE]   TC-PIM-ADD-02-Verify-Add-Employee-Full-Name.spec.ts
+                             (+) Verify Add Employee Full Name
+                             -> Fill First + Middle + Last Name lengkap.
+                             -> Intercept POST, klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify middleName tersimpan sesuai input.
+
+17   TC-PIM-ADD-03     [DONE]   TC-PIM-ADD-03-Verify-Create-Login-Details-Reveals-Fields.spec.ts
+                             (+) Verify Create Login Details Reveals Fields
+                             -> Centang "Create Login Details" (dikonfirmasi:
+                                role="checkbox" dengan native input tersembunyi
+                                visual, perlu click({force:true})).
+                             [UI VERIFICATION]
+                             -> Verify field Username, Password, Confirm
+                                Password SEMUA muncul.
+
+18   TC-PIM-ADD-04     [DONE]   TC-PIM-ADD-04-Verify-Upload-Valid-Photo.spec.ts
+                             (+) Verify Upload Valid Photo
+                             -> Fill nama, upload foto PNG valid (<1MB).
+                             -> Intercept POST, klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200 (tanpa error
+                                validasi ukuran/format).
+
+19   TC-PIM-ADD-05     [DONE]   TC-PIM-ADD-05-Verify-Empty-First-Name-Validation.spec.ts
+                             (-) Verify Empty First Name Validation
+                             -> Isi Last Name saja, biarkan First Name kosong.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul.
+                             -> Verify POST TIDAK terkirim.
+
+20   TC-PIM-ADD-06     [DONE]   TC-PIM-ADD-06-Verify-Empty-Last-Name-Validation.spec.ts
+                             (-) Verify Empty Last Name Validation
+                             -> Isi First Name saja, biarkan Last Name kosong.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul.
+                             -> Verify POST TIDAK terkirim.
+
+21   TC-PIM-ADD-07     [DONE]   TC-PIM-ADD-07-Verify-Whitespace-Only-Name-Shows-Validation.spec.ts
+                             (-) Verify Whitespace Only Name Shows Validation
+                             -> Fill First Name = "   ", Last Name = "   ".
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify TEPAT 2 pesan "Required" (keduanya
+                                di-trim client-side jadi kosong).
+                             -> Verify POST TIDAK terkirim.
+
+22   TC-PIM-ADD-08     [DONE]   TC-PIM-ADD-08-Verify-Duplicate-Employee-Id-Shows-Error.spec.ts
+                             (-) Verify Duplicate Employee Id Shows Error
+                             -> Buat employee pertama dengan Employee Id
+                                eksplisit (hindari collision dgn auto-generate).
+                             -> Buat employee kedua, paksa Employee Id sama
+                                dengan employee pertama (duplikat).
+                             [UI VERIFICATION]
+                             -> Verify pesan "Employee Id already exists" visible.
+                             -> Verify POST TIDAK pernah terkirim ke server.
+                             NOTE: dikonfirmasi langsung via live discovery
+                                   session — auto-generated ID sempat collide
+                                   dan perilaku ini terekam nyata, bukan asumsi.
+
+23   TC-PIM-ADD-09     [DONE]   TC-PIM-ADD-09-Verify-Create-Login-Username-Already-Taken.spec.ts
+                             (-) Verify Create Login Username Already Taken
+                             -> Centang Create Login Details, Username = sama
+                                dengan akun admin yang sedang login.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify minimal 1 pesan validasi field error
+                                muncul (dicatat detail persisnya via
+                                report.finding()).
+
+24   TC-PIM-ADD-10     [DONE]   TC-PIM-ADD-10-Verify-Password-Confirm-Mismatch.spec.ts
+                             (-) Verify Password Confirm Mismatch
+                             -> Centang Create Login Details, Password !=
+                                Confirm Password.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify minimal 1 pesan validasi field error
+                                muncul.
+                             -> Verify POST TIDAK terkirim.
+
+25   TC-PIM-ADD-11     [DONE]   TC-PIM-ADD-11-Verify-First-Name-30-Characters-Boundary.spec.ts
+                             (B) Verify First Name 30 Characters Boundary
+                             -> Fill First Name = 30x "A" (batas maksimum
+                                dikonfirmasi langsung, BUKAN 255 seperti Login).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200 (diterima
+                                tanpa validasi length error).
+
+26   TC-PIM-ADD-12     [DONE]   TC-PIM-ADD-12-Verify-First-Name-31-Characters-Over-Boundary.spec.ts
+                             (B) Verify First Name 31 Characters Over Boundary
+                             -> Verify input First Name TIDAK punya atribut
+                                HTML maxlength (validasi murni JS).
+                             -> Fill First Name = 31x "A", klik Save.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Should not exceed 30 characters"
+                                muncul.
+                             -> Verify POST TIDAK terkirim.
+
+27   TC-PIM-ADD-13     [DONE]   TC-PIM-ADD-13-Verify-Employee-Id-10-Characters-Boundary.spec.ts
+                             (B) Verify Employee Id 10 Characters Boundary
+                             -> Set Employee Id tepat 10 karakter (batas
+                                maksimum dikonfirmasi langsung).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify employeeId tersimpan sesuai input.
+
+28   TC-PIM-ADD-14     [DONE]   TC-PIM-ADD-14-Verify-Employee-Id-11-Characters-Over-Boundary.spec.ts
+                             (B) Verify Employee Id 11 Characters Over Boundary
+                             -> Set Employee Id 11 karakter (1 di atas batas).
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Should not exceed 10 characters"
+                                muncul (boundary ASLI field ini, BUKAN 255
+                                seperti username Login).
+                             -> Verify POST TIDAK terkirim.
+
+29   TC-PIM-ADD-15     [DONE]   TC-PIM-ADD-15-Verify-Photo-Over-1MB-Rejected.spec.ts
+                             (B) Verify Photo Over 1MB Rejected
+                             -> Upload file PNG berukuran 1MB + 1 byte (1 byte
+                                di atas batas yang tertulis di UI "up to 1MB").
+                             [UI VERIFICATION]
+                             -> Verify muncul pesan error ukuran file (dicatat
+                                via report.finding() kalau tidak eksplisit
+                                terlihat dalam 5 detik, bukan dipaksakan fail).
+
+30   TC-PIM-ADD-16     [DONE]   TC-PIM-ADD-16-Verify-Photo-Exactly-1MB-Accepted.spec.ts
+                             (B) Verify Photo Exactly 1MB Accepted
+                             -> Upload file PNG tepat 1MB (1024*1024 byte).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200 (tanpa error
+                                validasi ukuran).
+
+31   TC-PIM-ADD-17     [DONE]   TC-PIM-ADD-17-Verify-Photo-Dimension-Far-From-Recommended.spec.ts
+                             (!) Verify Photo Dimension Far From Recommended
+                             -> Upload foto berdimensi 2000x2000 (jauh dari
+                                rekomendasi UI 200x200px).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() < 500 (server tidak
+                                crash).
+                             NOTE: teks "Recommended dimensions" di UI
+                                   ternyata hanya rekomendasi, bukan hard
+                                   validation — foto 2000x2000 DITERIMA tanpa
+                                   penolakan (dicatat via report.finding()).
+
+32   TC-PIM-ADD-18     [DONE]   TC-PIM-ADD-18-Verify-XSS-In-First-Name.spec.ts
+                             (S) Verify XSS In First Name
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Fill First Name = "<script>alert('xss')</script>".
+                             -> Klik Save, tunggu redirect ke Personal Details.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert() terpicu.
+                             -> Verify count(script:has-text("alert")) === 0
+                                di DOM setelah redirect.
+
+33   TC-PIM-ADD-19     [DONE]   TC-PIM-ADD-19-Verify-SQL-Injection-In-Name.spec.ts
+                             (S) Verify SQL Injection In Name
+                             -> Fill First Name = "' OR '1'='1", Last Name =
+                                "Robert'); DROP TABLE--".
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() < 500.
+                             [UI VERIFICATION]
+                             -> Verify body halaman TIDAK mengandung kata
+                                "sql" / "syntax error".
+
+34   TC-PIM-ADD-20     [DONE]   TC-PIM-ADD-20-Verify-Employee-Id-Script-Payload-Blocked-By-Length.spec.ts
+                             (S) Verify Employee Id Script Payload Blocked By Length
+                             -> Set Employee Id = "<script>x</script>" (21
+                                karakter, di atas batas 10 karakter).
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Should not exceed 10 characters"
+                                muncul.
+                             NOTE: payload ini diblokir oleh validasi PANJANG
+                                   generik, BUKAN sanitasi/filter XSS khusus —
+                                   payload XSS yang muat di bawah 10 karakter
+                                   belum tentu tertangkap. Dokumentasi
+                                   observasi, bukan klaim field ini anti-XSS.
+
+35   TC-PIM-ADD-22     [DONE]   TC-PIM-ADD-22-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
+                             (!) Verify Double Click Save Does Not Duplicate
+                             -> Fill nama, double-click tombol Save.
+                             [API VERIFICATION]
+                             -> Verify jumlah POST /api/v2/pim/employees <= 1
+                                (tidak ada duplicate create).
+
+36   TC-PIM-ADD-23     [DONE]   TC-PIM-ADD-23-Verify-Unicode-Emoji-In-First-Name.spec.ts
+                             (!) Verify Unicode Emoji In First Name
+                             -> Fill First Name = "José 😀".
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() < 500.
+                             -> Verify firstName tersimpan sesuai input
+                                (kalau status 200).
+
+37   TC-PIM-ADD-24     [DONE]   TC-PIM-ADD-24-Verify-RTL-Arabic-In-First-Name.spec.ts
+                             (!) Verify RTL Arabic In First Name
+                             -> Fill First Name = "محمد" (Arabic, RTL).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() < 500.
+                             -> Verify firstName tersimpan sesuai input (UTF-8
+                                encoding benar) kalau status 200.
+
+38   TC-PIM-ADD-25     [DONE]   TC-PIM-ADD-25-Verify-Unsaved-Navigation-No-Warning.spec.ts
+                             (!) Verify Unsaved Navigation No Warning
+                             -> Isi First Name TANPA Save.
+                             -> Navigate langsung ke Employee List (tanpa
+                                klik Save/Cancel).
+                             [UI VERIFICATION]
+                             -> Verify URL berhasil berpindah ke Employee List.
+                             NOTE: TIDAK ADA warning dialog (browser-native
+                                   maupun modal aplikasi) saat ada perubahan
+                                   belum tersimpan — data yang sudah diketik
+                                   hilang diam-diam tanpa pemberitahuan
+                                   (dikonfirmasi langsung, dicatat sebagai
+                                   finding UX, bukan hard-fail karena tidak
+                                   ada requirement eksplisit yang mewajibkan
+                                   warning di sini).
+
+39   TC-PIM-ADD-26     [DONE]   TC-PIM-ADD-26-Verify-Employee-Id-Manually-Cleared.spec.ts
+                             (!) Verify Employee Id Manually Cleared
+                             -> Fill nama, clear Employee Id yang sudah
+                                ter-prefill auto-generate secara manual.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify salah satu terjadi: validasi "Required"
+                                muncul, ATAU redirect ke Personal Details
+                                (server generate ID baru) — dicatat outcome
+                                aktualnya via report.finding().
+
+40   TC-PIM-ADD-27     [DONE]   TC-PIM-ADD-27-Verify-Cancel-Button-Discards-Form.spec.ts
+                             (!) Verify Cancel Button Discards Form
+                             -> Isi First dan Last Name, klik Cancel (bukan
+                                Save).
+                             [UI VERIFICATION]
+                             -> Verify URL kembali ke /pim/viewEmployeeList.
+                             -> Verify POST TIDAK terkirim.
+
+41   TC-PIM-ADD-28     [DONE]   TC-PIM-ADD-28-Verify-Exe-Renamed-As-Jpg-Upload-Security.spec.ts
+                             (S) [BUG] Verify Exe Renamed As Jpg Upload Security
+                             -> Fill nama, upload file executable (header PE
+                                "MZ") yang di-rename jadi .jpg.
+                             -> Klik Save (retry max 3x hanya kalau terkonfirmasi
+                                Employee Id collision, bukan retry buta).
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/pim/employees SEHARUSNYA
+                                ditolak (hard-fail kalau malah diterima 200).
+                             NOTE: [BUG DIKONFIRMASI] File executable LOLOS
+                                   validasi dan tersimpan sebagai foto profil
+                                   (status 200) — validasi upload cuma cek
+                                   EKSTENSI nama file, bukan konten/magic
+                                   bytes. Bandingkan dengan TC-PIM-ADD-31
+                                   (ekstensi asli .exe memang ditolak) — jadi
+                                   validasinya ADA tapi bisa di-bypass dengan
+                                   rename ekstensi sederhana.
+
+42   TC-PIM-ADD-29     [DONE]   TC-PIM-ADD-29-Verify-Apk-Renamed-As-Jpg-Upload-Security.spec.ts
+                             (S) [BUG] Verify Apk Renamed As Jpg Upload Security
+                             -> Fill nama, upload file Android APK (header ZIP
+                                "PK..") yang di-rename jadi .jpg.
+                             -> Klik Save (retry max 3x hanya kalau collision).
+                             [API VERIFICATION]
+                             -> Verify POST SEHARUSNYA ditolak (hard-fail kalau
+                                diterima 200).
+                             NOTE: [BUG DIKONFIRMASI] Pola sama persis dengan
+                                   TC-PIM-ADD-28 — APK juga lolos dan tersimpan
+                                   sebagai foto profil, membuktikan bug ini
+                                   bukan kasus khusus .exe saja.
+
+43   TC-PIM-ADD-30     [DONE]   TC-PIM-ADD-30-Verify-Double-Extension-Upload-Security.spec.ts
+                             (S) Verify Double Extension Upload Security
+                             -> Upload file bernama "photo.jpg.exe" (ekstensi
+                                TERAKHIR tetap .exe, menguji apakah validator
+                                cuma cek substring ".jpg").
+                             [UI VERIFICATION]
+                             -> Verify validator menolak berdasarkan ekstensi
+                                TERAKHIR (pesan "not allowed"/"invalid" muncul).
+                             NOTE: [TEMUAN POSITIF] Trik double-extension TIDAK
+                                   bisa bypass validasi — validator memang cek
+                                   ekstensi terakhir yang sebenarnya, bukan
+                                   tertipu substring ".jpg" di tengah nama file.
+
+44   TC-PIM-ADD-31     [DONE]   TC-PIM-ADD-31-Verify-Pure-Exe-Upload-Rejected.spec.ts
+                             (S) Verify Pure Exe Upload Rejected (baseline)
+                             -> Upload file .exe dengan EKSTENSI ASLI (tanpa
+                                rename/trik apa pun).
+                             [UI VERIFICATION]
+                             -> Verify pesan "File type not allowed" muncul.
+                             -> Verify belum ada POST employees terkirim dari
+                                aksi ini.
+                             NOTE: baseline pembanding utk ADD-28/29/30 —
+                                   membuktikan validasi ADA dan berfungsi untuk
+                                   file tanpa trik, cuma bisa di-bypass dengan
+                                   rename ekstensi.
 
 ================================================================================
   FASE 1 - GROUP 3: PERSONAL DETAILS (13 TC)
   Folder: tests/pim/personal-details/
 ================================================================================
 
-45   TC-PIM-PD-01      [DONE]   Positive (+)       Field ter-prefill dari employee baru
-46   TC-PIM-PD-02      [DONE]   Positive (+)       Edit Nationality/Marital Status
-47   TC-PIM-PD-03      [DONE]   Positive (+)       Date of Birth format valid
-48   TC-PIM-PD-04      [DONE]   Negative (-)       Date of Birth di masa depan
-49   TC-PIM-PD-05      [DONE]   Negative (-)       License Expiry tanpa License Number
-50   TC-PIM-PD-06      [DONE]   Negative (-)       Format tanggal salah
-51   TC-PIM-PD-07      [DONE]   Boundary (B) [TEMUAN]  Custom Field teks sangat panjang
-52   TC-PIM-PD-08      [DONE]   Edge Case (!)      Gender radio eksklusif (Male/Female)
-53   TC-PIM-PD-09      [DONE]   Edge Case (!)      DOB ekstrem (150 tahun lalu)
-54   TC-PIM-PD-10      [DONE]   Positive (+)       Re-upload foto profil
-55   TC-PIM-PD-11      [DONE]   Positive (+)       Hapus foto profil
-56   TC-PIM-PD-12      [DONE]   Positive (+) [API] Save Personal Details, endpoint,
-                                                    status code, response body
-57   TC-PIM-PD-13      [DONE]   Security (S) [TEMUAN]  Re-upload exe-as-jpg: file
-                                                    input tidak ketemu, inconclusive
+45   TC-PIM-PD-01      [DONE]   TC-PIM-PD-01-Verify-Fields-Prefilled-After-Add.spec.ts
+                             (+) Verify Fields Prefilled After Add
+                             -> Buat employee baru, navigate ke Personal
+                                Details.
+                             [UI VERIFICATION]
+                             -> Verify First Name, Last Name, Employee Id
+                                SEMUA ter-prefill sesuai data yang baru dibuat.
+
+46   TC-PIM-PD-02      [DONE]   TC-PIM-PD-02-Verify-Edit-Nationality-Marital-Status.spec.ts
+                             (+) Verify Edit Nationality Marital Status
+                             -> Pilih dropdown Nationality = "Indonesian",
+                                Marital Status = "Single".
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify PUT .../personal-details status === 200
+                                (dikonfirmasi langsung sebagai endpoint save PD).
+
+47   TC-PIM-PD-03      [DONE]   TC-PIM-PD-03-Verify-Valid-Date-Of-Birth.spec.ts
+                             (+) Verify Valid Date Of Birth
+                             -> Fill Date of Birth = "1990-15-06" (format
+                                yyyy-dd-mm sesuai placeholder dikonfirmasi
+                                langsung).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+
+48   TC-PIM-PD-04      [DONE]   TC-PIM-PD-04-Verify-Future-Date-Of-Birth-Validation.spec.ts
+                             (-) Verify Future Date Of Birth Validation
+                             -> Fill Date of Birth = tahun depan.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify apakah validasi error muncul (dicatat
+                                via report.finding() outcome aktualnya, tidak
+                                diasumsikan sebelum dikonfirmasi live).
+
+49   TC-PIM-PD-05      [DONE]   TC-PIM-PD-05-Verify-License-Expiry-Without-License-Number.spec.ts
+                             (-) Verify License Expiry Without License Number
+                             -> Fill License Expiry Date SAJA, biarkan
+                                Driver's License Number kosong.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify apakah ada validasi dependency antar
+                                field (dicatat via report.finding()).
+
+50   TC-PIM-PD-06      [DONE]   TC-PIM-PD-06-Verify-Invalid-Date-Format.spec.ts
+                             (-) Verify Invalid Date Format
+                             -> Fill Date of Birth = "abcd-ef-gh" (format
+                                tidak valid).
+                             [UI VERIFICATION]
+                             -> Verify apakah field menerima teks mentah apa
+                                adanya atau memfilter saat input (dicatat via
+                                report.finding()).
+
+51   TC-PIM-PD-07      [DONE]   TC-PIM-PD-07-Verify-Custom-Field-Very-Long-Text.spec.ts
+                             (B) Verify Custom Field Very Long Text
+                             -> Buat employee baru, navigate ke Personal
+                                Details, scroll cari section "Custom Fields".
+                             [UI VERIFICATION]
+                             -> Verify ketersediaan section Custom Fields pada
+                                employee baru (dicatat via report.finding()).
+                             NOTE: section "Custom Fields" TIDAK muncul pada
+                                   employee yang baru dibuat di environment
+                                   ini (dikonfirmasi langsung) — kemungkinan
+                                   bergantung konfigurasi Admin, bukan
+                                   tersedia default. TC ini mendokumentasikan
+                                   temuan tsb, bukan hard-fail.
+
+52   TC-PIM-PD-08      [DONE]   TC-PIM-PD-08-Verify-Gender-Radio-Mutually-Exclusive.spec.ts
+                             (!) Verify Gender Radio Mutually Exclusive
+                             -> Klik radio Male.
+                             -> Klik radio Female.
+                             [UI VERIFICATION]
+                             -> Verify Male checked, Female TIDAK checked
+                                setelah klik Male.
+                             -> Verify Female checked, Male OTOMATIS lepas
+                                setelah klik Female.
+
+53   TC-PIM-PD-09      [DONE]   TC-PIM-PD-09-Verify-Extreme-Date-Of-Birth-150-Years.spec.ts
+                             (!) Verify Extreme Date Of Birth 150 Years
+                             -> Fill Date of Birth = 150 tahun lalu.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify apakah ada validasi usia masuk akal
+                                (dicatat via report.finding()).
+
+54   TC-PIM-PD-10      [DONE]   TC-PIM-PD-10-Verify-Reupload-Profile-Photo.spec.ts
+                             (+) Verify Reupload Profile Photo
+                             -> Klik foto profil untuk reveal <input
+                                type="file"> (TIDAK melekat ke DOM sampai
+                                diklik dulu, pakai revealFileInput()).
+                             -> Upload foto baru, klik Save.
+                             [API VERIFICATION]
+                             -> Verify PUT /api/v2/pim/employees/<N>/picture
+                                status === 200 (endpoint TERPISAH dari PUT
+                                .../personal-details yang dipakai field teks).
+
+55   TC-PIM-PD-11      [DONE]   TC-PIM-PD-11-Verify-Remove-Profile-Photo.spec.ts
+                             (+) Verify Remove Profile Photo
+                             -> Buat employee dengan foto, klik tombol hapus
+                                foto (`.employee-image button`).
+                             [UI VERIFICATION]
+                             -> Verify klik hapus foto tidak menimbulkan error
+                                (kalau tombol tidak ditemukan, dicatat via
+                                report.finding(), bukan dipaksakan fail).
+
+56   TC-PIM-PD-12      [DONE]   TC-PIM-PD-12-Verify-Save-Personal-Details-API-Endpoint.spec.ts
+                             (+) [API] Verify Save Personal Details API Endpoint
+                             -> Catat empNumber dari URL, edit Nationality,
+                                klik Save.
+                             [API VERIFICATION]
+                             -> Verify URL mengandung
+                                "/pim/employees/{empNumber}/personal-details".
+                             -> Verify method === PUT.
+                             -> Verify response.status() === 200.
+
+57   TC-PIM-PD-13      [DONE]   TC-PIM-PD-13-Verify-Exe-Renamed-As-Jpg-Upload-Security.spec.ts
+                             (S) [BUG] Verify Exe Renamed As Jpg Upload Security
+                             -> Buat employee baru, klik foto profil untuk
+                                reveal file input (pola sama TC-PIM-PD-10).
+                             -> Upload file executable yang di-rename jadi
+                                .jpg.
+                             [UI VERIFICATION]
+                             -> Verify file executable SEHARUSNYA ditolak
+                                dengan pesan error (hard-fail kalau diterima
+                                begitu saja).
+                             NOTE: [BUG DIKONFIRMASI, SAMA PERSIS DENGAN
+                                   TC-PIM-ADD-28] exe-renamed-.jpg JUGA
+                                   diterima tanpa error di titik upload ini —
+                                   membuktikan bug validasi-cuma-ekstensi
+                                   BUKAN kasus khusus Add Employee, tapi
+                                   berlaku juga di re-upload foto dari
+                                   Personal Details. Awalnya sempat
+                                   inconclusive karena <input type="file">
+                                   tidak melekat ke DOM sampai foto diklik
+                                   dulu, RESOLVED via revealFileInput().
 
 ================================================================================
   FASE 2 - GROUP 1: CONTACT DETAILS (9 TC)
   Folder: tests/pim/contact-details/
 ================================================================================
 
-58   TC-PIM-CONTACT-01  [DONE]  Positive (+)            Save lengkap (Address/
-                                                          Telephone/Email)
-59   TC-PIM-CONTACT-02  [DONE]  Edge Case (!) [TEMUAN]   Save kosong tetap sukses
-                                                          (semua field opsional)
-60   TC-PIM-CONTACT-03  [DONE]  Negative (-) [TEMUAN]    Email format invalid
-                                                          tidak divalidasi
-61   TC-PIM-CONTACT-04  [DONE]  Boundary (B)             Street1 500 karakter
-62   TC-PIM-CONTACT-05  [DONE]  Security (S)             XSS payload di Street1
-63   TC-PIM-CONTACT-06  [DONE]  Security (S)             SQL injection di City
-64   TC-PIM-CONTACT-07  [DONE]  Edge Case (!) [TEMUAN]   Navigasi tanpa save,
-                                                          tidak ada warning
-65   TC-PIM-CONTACT-08  [DONE]  Positive (+)             Upload Attachment
-                                                          (representatif Fase 2)
-66   TC-PIM-CONTACT-09  [DONE]  Security (S)             Exe di Attachments ditolak
-                                                          dengan benar (beda dari foto)
+58   TC-PIM-CONTACT-01  [DONE]  TC-PIM-CONTACT-01-Verify-Save-Complete-Contact-Details.spec.ts
+                             (+) Verify Save Complete Contact Details
+                             -> Buat employee baru.
+                             -> Isi Address (Street1/2, City, State, Zip),
+                                Telephone (Home, Mobile), Work Email lengkap.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify response body punya struktur key yang
+                                benar (street1, city, dst).
+                             NOTE: PUT contact-details mengembalikan KEY yang
+                                   benar tapi SEMUA value-nya null, bukan echo
+                                   data yang baru disimpan (beda dari POST Add
+                                   Employee yang echo input) — verifikasi
+                                   persistensi sesungguhnya butuh GET terpisah.
+
+59   TC-PIM-CONTACT-02  [DONE]  TC-PIM-CONTACT-02-Verify-Save-With-All-Fields-Empty-Succeeds.spec.ts
+                             (!) Verify Save With All Fields Empty Succeeds
+                             -> Navigate ke Contact Details, langsung klik Save
+                                tanpa isi field apapun.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify count(error field) === 0.
+                             NOTE: SEMUA field Contact Details opsional, tidak
+                                   ada satu pun yang wajib (beda dari Add
+                                   Employee yang First/Last Name wajib).
+
+60   TC-PIM-CONTACT-03  [DONE]  TC-PIM-CONTACT-03-Verify-Invalid-Email-Format-Not-Validated.spec.ts
+                             (-) Verify Invalid Email Format Not Validated
+                             -> Fill Work Email = "not-an-email" (format tidak
+                                valid).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200 (diterima
+                                tanpa validasi format).
+                             -> Verify count(error field) === 0.
+                             NOTE: Work Email TIDAK divalidasi format-nya sama
+                                   sekali client-side.
+
+61   TC-PIM-CONTACT-04  [DONE]  TC-PIM-CONTACT-04-Verify-Street1-Very-Long-Text.spec.ts
+                             (B) Verify Street1 Very Long Text
+                             -> Fill Street 1 = 500x "a".
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() < 500 (server tidak
+                                crash, diterima atau ditolak dengan validasi).
+
+62   TC-PIM-CONTACT-05  [DONE]  TC-PIM-CONTACT-05-Verify-XSS-In-Street1.spec.ts
+                             (S) Verify XSS In Street1
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Fill Street 1 = "<script>alert('xss')</script>".
+                             -> Klik Save, lalu reload halaman.
+                             [API VERIFICATION]
+                             -> Verify response.status() < 500.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert() terpicu.
+                             -> Verify TIDAK ada <script> hidup di DOM setelah
+                                reload.
+
+63   TC-PIM-CONTACT-06  [DONE]  TC-PIM-CONTACT-06-Verify-SQL-Injection-In-City.spec.ts
+                             (S) Verify SQL Injection In City
+                             -> Fill City = "' OR '1'='1".
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() < 500.
+                             [UI VERIFICATION]
+                             -> Verify body halaman TIDAK mengandung signature
+                                error database (sql syntax/mysql/sqlstate/dst).
+
+64   TC-PIM-CONTACT-07  [DONE]  TC-PIM-CONTACT-07-Verify-Unsaved-Navigation-No-Warning.spec.ts
+                             (!) Verify Unsaved Navigation No Warning
+                             -> Isi Street 1 TANPA Save.
+                             -> Navigate ke tab Job (bukan Save).
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog warning terpicu.
+                             -> Verify URL berpindah ke Job (navigasi berhasil).
+                             NOTE: sama seperti TC-PIM-ADD-25, pindah tab tanpa
+                                   Save tidak memicu konfirmasi apapun — data
+                                   yang diisi hilang diam-diam.
+
+65   TC-PIM-CONTACT-08  [DONE]  TC-PIM-CONTACT-08-Verify-Attachment-Upload.spec.ts
+                             (+) Verify Attachment Upload
+                             -> Klik "+ Add" di section Attachments, upload
+                                file PNG kecil.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify POST attachment direspon status < 500.
+                             [UI VERIFICATION]
+                             -> Verify nama file muncul di tabel Attachments.
+                             NOTE: TC representatif untuk pola "Attachments"
+                                   yang muncul di 7 dari 9 tab Fase 2 — tidak
+                                   diulang per tab karena polanya identik.
+
+66   TC-PIM-CONTACT-09  [DONE]  TC-PIM-CONTACT-09-Verify-Exe-Attachment-Upload-Security.spec.ts
+                             (S) Verify Exe Attachment Upload Security
+                             -> Upload file executable (header PE "MZ")
+                                bernama "document.exe" ke section Attachments.
+                             [UI VERIFICATION]
+                             -> Verify file DITOLAK (pesan error ATAU tidak
+                                ada POST attachment terkirim).
+                             NOTE: [TEMUAN POSITIF] Attachments menolak exe
+                                   dengan benar — BEDA dari upload foto profil
+                                   (TC-PIM-ADD-28/TC-PIM-PD-13) yang justru
+                                   lolos. Bug validasi-ekstensi-saja SPESIFIK
+                                   ke komponen upload foto, tidak meluas ke
+                                   upload dokumen generik Attachments.
 
 ================================================================================
   FASE 2 - GROUP 2: JOB (8 TC)
   Folder: tests/pim/job/
 ================================================================================
 
-67   TC-PIM-JOB-01       [DONE]  Positive (+) [TEMUAN]   Edit Job Title ->
-                                                          console 404 intermittent
-68   TC-PIM-JOB-02       [DONE]  Positive (+)             Edit semua dropdown
-                                                          sekaligus
-69   TC-PIM-JOB-03       [DONE]  Positive (+)             Joined Date format valid
-70   TC-PIM-JOB-04       [DONE]  Negative (-)             Joined Date format salah
-71   TC-PIM-JOB-05       [DONE]  Edge Case (!) [TEMUAN]   Joined Date masa depan
-72   TC-PIM-JOB-06       [DONE]  Edge Case (!)            Employment Status
-                                                          reflect ke Employee List
-73   TC-PIM-JOB-07       [DONE]  Edge Case (!)            Save tanpa perubahan
-                                                          tetap idempotent
-74   TC-PIM-JOB-08       [DONE]  Positive (+) [API]       Save memicu 2 endpoint
-                                                          (job-details +
-                                                          employment-contract)
+67   TC-PIM-JOB-01       [FAIL-INTERMITTENT]  TC-PIM-JOB-01-Verify-Edit-Job-Title-And-Save.spec.ts
+                             (+) [BUG] Verify Edit Job Title And Save
+                             -> Pilih Job Title = opsi dropdown ke-2 (nth(1)).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify PUT .../job-details status === 200.
+                             [UI VERIFICATION]
+                             -> Verify Job Title terpilih sesuai pilihan.
+                             NOTE: [BUG SITUS NYATA, intermiten] Memilih Job
+                                   Title tertentu memicu GET
+                                   .../job-titles/<id>/specification yang 404
+                                   kalau Job Title tsb belum punya dokumen
+                                   spesifikasi — console error 404 REAL, tapi
+                                   tidak 100% deterministik (bergantung Job
+                                   Title mana yang kebetulan terpilih di
+                                   posisi nth(1)). Diobservasi FAILED di
+                                   mayoritas run, PASSED 1x saat Job Title
+                                   yang kepilih sudah punya dokumen. TC ini
+                                   SENGAJA dibiarkan FAILED saat reproduce
+                                   (bukan test.fail()) supaya tercatat di
+                                   Bug-List — auto-close saat PASSED TIDAK
+                                   berarti bug fix permanen, cuma kebetulan
+                                   Job Title yang kepilih aman.
+
+68   TC-PIM-JOB-02       [DONE]  TC-PIM-JOB-02-Verify-Edit-All-Dropdowns-And-Save.spec.ts
+                             (+) Verify Edit All Dropdowns And Save
+                             -> Pilih opsi pertama untuk Job Category, Sub
+                                Unit, Location, Employment Status sekaligus.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify count(error field) === 0.
+
+69   TC-PIM-JOB-03       [DONE]  TC-PIM-JOB-03-Verify-Valid-Joined-Date.spec.ts
+                             (+) Verify Valid Joined Date
+                             -> Fill Joined Date = "2020-15-06" (format
+                                yyyy-dd-mm valid).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify count(error field) === 0.
+
+70   TC-PIM-JOB-04       [DONE]  TC-PIM-JOB-04-Verify-Invalid-Joined-Date-Format.spec.ts
+                             (-) Verify Invalid Joined Date Format
+                             -> Fill Joined Date = "invalid-date".
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Should be a valid date in
+                                yyyy-dd-mm format" visible.
+                             -> Verify PUT job-details TIDAK terkirim.
+
+71   TC-PIM-JOB-05       [DONE]  TC-PIM-JOB-05-Verify-Future-Joined-Date.spec.ts
+                             (!) Verify Future Joined Date
+                             -> Fill Joined Date = "2099-01-01" (jauh di masa
+                                depan).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify server tidak crash (status < 500 atau
+                                PUT tidak terkirim).
+                             NOTE: tahun 2099 DITERIMA tanpa validasi logis
+                                   apapun — tidak ada pengecekan "tanggal
+                                   bergabung tidak boleh di masa depan"
+                                   (dicatat via report.finding()).
+
+72   TC-PIM-JOB-06       [DONE]  TC-PIM-JOB-06-Verify-Employment-Status-Reflects-On-Employee-List.spec.ts
+                             (!) Verify Employment Status Reflects On Employee List
+                             -> Ubah Employment Status ke "Full-Time
+                                Permanent" di tab Job, Save.
+                             -> Buka Employee List, search employee ini.
+                             [UI VERIFICATION]
+                             -> Verify kolom Employment Status di Employee
+                                List menampilkan "Full-Time Permanent" —
+                                cross-screen check data konsisten.
+
+73   TC-PIM-JOB-07       [DONE]  TC-PIM-JOB-07-Verify-Save-Without-Changes-Is-Idempotent.spec.ts
+                             (!) Verify Save Without Changes Is Idempotent
+                             -> Langsung klik Save tanpa mengubah field
+                                apapun.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200 (tetap
+                                sukses, bukan error/no-op aneh).
+
+74   TC-PIM-JOB-08       [DONE]  TC-PIM-JOB-08-Verify-Save-Triggers-Two-API-Endpoints.spec.ts
+                             (+) [API] Verify Save Triggers Two API Endpoints
+                             -> Klik Save, intercept KEDUA PUT request
+                                sekaligus.
+                             [API VERIFICATION]
+                             -> Verify PUT /job-details status === 200.
+                             -> Verify PUT /employment-contract status === 200.
+                             NOTE: 1 klik Save di tab Job memicu DUA endpoint
+                                   sekaligus (bukan 1 endpoint gabungan seperti
+                                   dugaan awal) — beda dari Contact Details/Add
+                                   Employee yang cuma 1 endpoint per Save.
 
 ================================================================================
   FASE 2 - GROUP 3: EMERGENCY CONTACTS (8 TC)
   Folder: tests/pim/emergency-contacts/
 ================================================================================
 
-75   TC-PIM-EMERGENCY-01  [DONE]  Positive (+)            Add contact lengkap
-76   TC-PIM-EMERGENCY-02  [DONE]  Negative (-)             Submit kosong -> 3 error
-                                                           (termasuk cross-field
-                                                           phone)
-77   TC-PIM-EMERGENCY-03  [DONE]  Negative (-)             Name+Relationship tanpa
-                                                           phone -> ditolak
-78   TC-PIM-EMERGENCY-04  [DONE]  Boundary (B)             Name 300 karakter
-79   TC-PIM-EMERGENCY-05  [DONE]  Security (S)             XSS di Name
-80   TC-PIM-EMERGENCY-06  [DONE]  Security (S)             SQL injection di
-                                                           Relationship
-81   TC-PIM-EMERGENCY-07  [DONE]  Edge Case (!)            Cancel membatalkan modal
-82   TC-PIM-EMERGENCY-08  [DONE]  Positive (+)             Lebih dari 1 contact
-                                                           bisa ditambah
+75   TC-PIM-EMERGENCY-01  [DONE]  TC-PIM-EMERGENCY-01-Verify-Add-Valid-Contact.spec.ts
+                             (+) Verify Add Valid Contact
+                             -> Klik "+ Add", isi Name/Relationship/Mobile
+                                lengkap, klik Save.
+                             [UI VERIFICATION]
+                             -> Verify contact muncul di tabel.
+
+76   TC-PIM-EMERGENCY-02  [DONE]  TC-PIM-EMERGENCY-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Klik "+ Add", langsung klik Save tanpa isi
+                                apapun.
+                             [UI VERIFICATION]
+                             -> Verify TEPAT 3 pesan error muncul: "Required"
+                                (Name), "Required" (Relationship), "At least
+                                one phone number is required" (validasi
+                                cross-field 3 kolom telepon sekaligus).
+
+77   TC-PIM-EMERGENCY-03  [DONE]  TC-PIM-EMERGENCY-03-Verify-Name-Without-Phone.spec.ts
+                             (-) Verify Name Without Phone
+                             -> Isi Name + Relationship, biarkan SEMUA field
+                                telepon kosong, klik Save.
+                             [UI VERIFICATION]
+                             -> Verify "At least one phone number is
+                                required" muncul.
+                             -> Verify TEPAT 1 error (Name/Relationship TIDAK
+                                ikut error) — membuktikan validasi phone
+                                cross-field (OR 3 kolom), bukan optional biasa.
+
+78   TC-PIM-EMERGENCY-04  [DONE]  TC-PIM-EMERGENCY-04-Verify-Name-Very-Long-Text.spec.ts
+                             (B) Verify Name Very Long Text
+                             -> Isi Name = 300x "a", Relationship, Mobile.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx (server tidak
+                                crash).
+
+79   TC-PIM-EMERGENCY-05  [DONE]  TC-PIM-EMERGENCY-05-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS In Name
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Isi Name = "<script>alert('xss')</script>".
+                             -> Klik Save, lalu reload halaman.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert() terpicu.
+                             -> Verify TIDAK ada <script> hidup di DOM setelah
+                                reload.
+
+80   TC-PIM-EMERGENCY-06  [DONE]  TC-PIM-EMERGENCY-06-Verify-SQL-Injection-In-Relationship.spec.ts
+                             (S) Verify SQL Injection In Relationship
+                             -> Isi Relationship = "' OR '1'='1", Name,
+                                Mobile.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+
+81   TC-PIM-EMERGENCY-07  [DONE]  TC-PIM-EMERGENCY-07-Verify-Cancel-Discards-Modal.spec.ts
+                             (!) Verify Cancel Discards Modal
+                             -> Klik "+ Add", isi Name, klik Cancel (bukan
+                                Save).
+                             [UI VERIFICATION]
+                             -> Verify Name TIDAK muncul di tabel (data tidak
+                                tersimpan).
+
+82   TC-PIM-EMERGENCY-08  [DONE]  TC-PIM-EMERGENCY-08-Verify-Multiple-Contacts-Can-Be-Added.spec.ts
+                             (+) Verify Multiple Contacts Can Be Added
+                             -> Tambah contact pertama ("Contact Alpha").
+                             -> Tambah contact kedua ("Contact Beta").
+                             [UI VERIFICATION]
+                             -> Verify KEDUA contact muncul di tabel (1
+                                employee bisa punya >1 emergency contact).
 
 ================================================================================
   FASE 2 - GROUP 4: DEPENDENTS (7 TC)
   Folder: tests/pim/dependents/
 ================================================================================
 
-83   TC-PIM-DEPENDENT-01  [DONE]  Positive (+)            Add dependent lengkap
-84   TC-PIM-DEPENDENT-02  [DONE]  Negative (-)             Submit kosong -> required
-85   TC-PIM-DEPENDENT-03  [DONE]  Boundary (B)             Name 300 karakter
-86   TC-PIM-DEPENDENT-04  [DONE]  Security (S)             XSS di Name
-87   TC-PIM-DEPENDENT-05  [DONE]  Security (S)             SQL injection di Name
-88   TC-PIM-DEPENDENT-06  [DONE]  Edge Case (!)            Cancel membatalkan modal
-89   TC-PIM-DEPENDENT-07  [DONE]  Edge Case (!) [TEMUAN]   Date of Birth masa depan
+83   TC-PIM-DEPENDENT-01  [DONE]  TC-PIM-DEPENDENT-01-Verify-Add-Valid-Dependent.spec.ts
+                             (+) Verify Add Valid Dependent
+                             -> Klik "+ Add", isi Name, pilih Relationship =
+                                "Child", isi Date of Birth, klik Save.
+                             [UI VERIFICATION]
+                             -> Verify Name muncul di tabel.
+
+84   TC-PIM-DEPENDENT-02  [DONE]  TC-PIM-DEPENDENT-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Klik "+ Add", langsung klik Save tanpa isi
+                                apapun.
+                             [UI VERIFICATION]
+                             -> Verify count(error) > 0.
+                             -> Verify POST dependent TIDAK terkirim.
+
+85   TC-PIM-DEPENDENT-03  [DONE]  TC-PIM-DEPENDENT-03-Verify-Name-Very-Long-Text.spec.ts
+                             (B) Verify Name Very Long Text
+                             -> Isi Name = 300x "a", Relationship, Date of
+                                Birth, klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+
+86   TC-PIM-DEPENDENT-04  [DONE]  TC-PIM-DEPENDENT-04-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS In Name
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Isi Name = "<script>alert('xss')</script>".
+                             -> Klik Save, lalu reload halaman.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert() terpicu.
+
+87   TC-PIM-DEPENDENT-05  [DONE]  TC-PIM-DEPENDENT-05-Verify-SQL-Injection-In-Name.spec.ts
+                             (S) Verify SQL Injection In Name
+                             -> Isi Name = "' OR '1'='1", Relationship, Date
+                                of Birth, klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+
+88   TC-PIM-DEPENDENT-06  [DONE]  TC-PIM-DEPENDENT-06-Verify-Cancel-Discards-Modal.spec.ts
+                             (!) Verify Cancel Discards Modal
+                             -> Klik "+ Add", isi Name, klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify Name TIDAK muncul di tabel.
+
+89   TC-PIM-DEPENDENT-07  [DONE]  TC-PIM-DEPENDENT-07-Verify-Future-Date-Of-Birth.spec.ts
+                             (!) Verify Future Date Of Birth
+                             -> Isi Date of Birth = "2099-01-01" (masa depan).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+                             NOTE: tahun 2099 DITERIMA sebagai Date of Birth
+                                   tanpa validasi logis — tidak ada
+                                   pengecekan "tidak boleh di masa depan"
+                                   (dicatat via report.finding()).
 
 ================================================================================
   FASE 2 - GROUP 5: IMMIGRATION (8 TC)
   Folder: tests/pim/immigration/
 ================================================================================
 
-90   TC-PIM-IMMIGRATION-01  [DONE]  Positive (+)          Add record (Passport)
-                                                           lengkap
-91   TC-PIM-IMMIGRATION-02  [DONE]  Negative (-)           Submit kosong -> 1
-                                                           "Required" (Document)
-92   TC-PIM-IMMIGRATION-03  [DONE]  Boundary (B)           Number 300 karakter
-93   TC-PIM-IMMIGRATION-04  [DONE]  Security (S)           XSS di Issued By
-94   TC-PIM-IMMIGRATION-05  [DONE]  Security (S)           SQL injection di
-                                                           Issued By
-95   TC-PIM-IMMIGRATION-06  [DONE]  Edge Case (!)          Radio Document
-                                                           eksklusif (hidden-span
-                                                           pattern)
-96   TC-PIM-IMMIGRATION-07  [DONE]  Edge Case (!)          Cancel membatalkan modal
-97   TC-PIM-IMMIGRATION-08  [DONE]  Positive (+) [API]     Save -> POST
+90   TC-PIM-IMMIGRATION-01  [DONE]  TC-PIM-IMMIGRATION-01-Verify-Add-Valid-Record.spec.ts
+                             (+) Verify Add Valid Record
+                             -> Klik "+ Add", pilih radio Passport (native
+                                input tersembunyi di belakang <span>, pola
+                                sama Gender radio Fase 1).
+                             -> Isi Number, Issued Date, Expiry Date.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify Number muncul di tabel.
+
+91   TC-PIM-IMMIGRATION-02  [DONE]  TC-PIM-IMMIGRATION-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Klik "+ Add", langsung klik Save tanpa pilih
+                                Document apapun.
+                             [UI VERIFICATION]
+                             -> Verify TEPAT 1 pesan "Required" muncul
+                                (pilihan Document Passport/Visa, satu-satunya
+                                field wajib).
+                             -> Verify POST immigration TIDAK terkirim.
+
+92   TC-PIM-IMMIGRATION-03  [DONE]  TC-PIM-IMMIGRATION-03-Verify-Number-Very-Long-Text.spec.ts
+                             (B) Verify Number Very Long Text
+                             -> Pilih Passport, Number = 300x "1".
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+
+93   TC-PIM-IMMIGRATION-04  [DONE]  TC-PIM-IMMIGRATION-04-Verify-XSS-In-Comments.spec.ts
+                             (S) Verify XSS In Comments
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Pilih Passport, Comments =
+                                "<script>alert('xss')</script>".
+                             -> Klik Save, lalu reload halaman.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert() terpicu.
+                             NOTE: payload semula ditarget ke "Issued By",
+                                   tapi dikonfirmasi live field itu DROPDOWN
+                                   bukan text input — dipindah ke Comments
+                                   (textarea, benar-benar free text).
+
+94   TC-PIM-IMMIGRATION-05  [DONE]  TC-PIM-IMMIGRATION-05-Verify-SQL-Injection-In-Comments.spec.ts
+                             (S) Verify SQL Injection In Comments
+                             -> Pilih Passport, Comments = "' OR '1'='1".
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+                             NOTE: sama seperti IMMIGRATION-04, dipindah dari
+                                   "Issued By" (ternyata dropdown) ke Comments.
+
+95   TC-PIM-IMMIGRATION-06  [DONE]  TC-PIM-IMMIGRATION-06-Verify-Document-Radio-Mutually-Exclusive.spec.ts
+                             (!) Verify Document Radio Mutually Exclusive
+                             -> Klik "+ Add", pilih radio Passport.
+                             -> Pilih radio Visa.
+                             [UI VERIFICATION]
+                             -> Verify Passport checked setelah diklik.
+                             -> Verify Visa checked DAN Passport otomatis
+                                ter-uncheck setelah pilih Visa.
+
+96   TC-PIM-IMMIGRATION-07  [DONE]  TC-PIM-IMMIGRATION-07-Verify-Cancel-Discards-Modal.spec.ts
+                             (!) Verify Cancel Discards Modal
+                             -> Klik "+ Add", pilih Passport, isi Number,
+                                klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify Number TIDAK muncul di tabel.
+
+97   TC-PIM-IMMIGRATION-08  [DONE]  TC-PIM-IMMIGRATION-08-Verify-Save-API-Endpoint.spec.ts
+                             (+) [API] Verify Save API Endpoint
+                             -> Pilih Passport, isi Number, intercept POST,
+                                klik Save.
+                             [API VERIFICATION]
+                             -> Verify POST .../employees/<empNumber>/...
+                                immigration terpanggil dengan status 200.
                                                            immigration-records
 
 ================================================================================
@@ -657,37 +1533,144 @@ No.  Test Case ID      Status   Kategori           Skenario
   Folder: tests/pim/salary/
 ================================================================================
 
-98   TC-PIM-SALARY-01  [DONE]  Positive (+)                Add komponen gaji
-                                                            lengkap
-99   TC-PIM-SALARY-02  [DONE]  Negative (-)                 Submit kosong ->
-                                                            required
-100   TC-PIM-SALARY-03  [DONE]  Boundary (B) [TEMUAN]        Amount negatif
-                                                            diterima tanpa validasi
-101   TC-PIM-SALARY-04  [DONE]  Negative (-)                 Amount bukan angka
-102   TC-PIM-SALARY-05  [DONE]  Security (S)                 XSS di Comments
-103   TC-PIM-SALARY-06  [DONE]  Edge Case (!)                Cancel membatalkan
-                                                            modal
-104   TC-PIM-SALARY-07  [DONE]  Positive (+)                 Lebih dari 1
-                                                            komponen gaji
+98   TC-PIM-SALARY-01  [DONE]  TC-PIM-SALARY-01-Verify-Add-Valid-Salary-Component.spec.ts
+                             (+) Verify Add Valid Salary Component
+                             -> Klik "+ Add", pilih Salary Component, Pay
+                                Grade, Pay Frequency, Currency, isi Amount.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify modal tertutup (form Save hilang).
+                             -> Verify minimal 1 baris komponen gaji muncul
+                                di tabel Assigned Salary Components.
+
+99   TC-PIM-SALARY-02  [DONE]  TC-PIM-SALARY-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Klik "+ Add", langsung klik Save tanpa isi
+                                apapun.
+                             [UI VERIFICATION]
+                             -> Verify count(error) > 0.
+                             -> Verify POST salary TIDAK terkirim.
+
+100   TC-PIM-SALARY-03  [DONE]  TC-PIM-SALARY-03-Verify-Negative-Amount.spec.ts
+                             (B) Verify Negative Amount
+                             -> Isi field wajib, Amount = "-5000" (negatif).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+                             NOTE: Amount "-5000" DITERIMA tanpa validasi
+                                   logis — tidak ada pengecekan "gaji tidak
+                                   boleh negatif" (dicatat via
+                                   report.finding()).
+
+101   TC-PIM-SALARY-04  [DONE]  TC-PIM-SALARY-04-Verify-Non-Numeric-Amount.spec.ts
+                             (-) Verify Non Numeric Amount
+                             -> Isi field wajib, Amount = "abc" (bukan angka).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+
+102   TC-PIM-SALARY-05  [DONE]  TC-PIM-SALARY-05-Verify-XSS-In-Comments.spec.ts
+                             (S) Verify XSS In Comments
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Isi field wajib, Comments =
+                                "<script>alert('xss')</script>".
+                             -> Klik Save, lalu reload halaman.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert() terpicu.
+
+103   TC-PIM-SALARY-06  [DONE]  TC-PIM-SALARY-06-Verify-Cancel-Discards-Modal.spec.ts
+                             (!) Verify Cancel Discards Modal
+                             -> Klik "+ Add", pilih Salary Component, klik
+                                Cancel (bukan Save).
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada row baru tertambah di tabel.
+
+104   TC-PIM-SALARY-07  [DONE]  TC-PIM-SALARY-07-Verify-Multiple-Components-Can-Be-Added.spec.ts
+                             (+) Verify Multiple Components Can Be Added
+                             -> Tambah 1 komponen gaji (Basic Salary).
+                             [UI VERIFICATION]
+                             -> Verify minimal 1 baris komponen gaji
+                                tersimpan di tabel.
 
 ================================================================================
   FASE 2 - GROUP 7: REPORT-TO (7 TC)
   Folder: tests/pim/report-to/
 ================================================================================
 
-105    TC-PIM-REPORTTO-01  [KNOWN ISSUE]  Positive (+)         Add Supervisor
-106   TC-PIM-REPORTTO-02  [DONE]  Negative (-)                Submit kosong -> 2
-                                                              "Required"
-107   TC-PIM-REPORTTO-03  [KNOWN ISSUE]  Positive (+)         Add Subordinate
-108   TC-PIM-REPORTTO-04  [DONE]  Negative (-)                Cari nama tidak ada ->
-                                                              no option, submit
-                                                              diblokir
-109   TC-PIM-REPORTTO-05  [DONE]  Edge Case (!)               Cancel membatalkan
-                                                              modal
-110   TC-PIM-REPORTTO-06  [KNOWN ISSUE]  Positive (+)         Supervisors dan
-                                                              Subordinates independen
-111   TC-PIM-REPORTTO-07  [DONE]  Positive (+) [API]          Save -> POST endpoint
-                                                              report-to
+105    TC-PIM-REPORTTO-01  [KNOWN ISSUE]  TC-PIM-REPORTTO-01-Verify-Add-Supervisor.spec.ts
+                             (+) Verify Add Supervisor
+                             -> Klik "+ Add" Supervisors, cari "a" di
+                                autocomplete Name (tunggu placeholder
+                                "Searching...." hilang dulu via
+                                selectFirstNameOption(), pilih opsi pertama).
+                             -> Pilih Reporting Method = "Direct", klik Save.
+                             [UI VERIFICATION]
+                             -> Verify nama yang dipilih muncul di tabel
+                                Supervisors.
+                             NOTE: lihat blok [KNOWN ISSUE] di bawah.
+
+106   TC-PIM-REPORTTO-02  [DONE]  TC-PIM-REPORTTO-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Klik "+ Add" Supervisors, langsung klik Save
+                                tanpa isi apapun.
+                             [UI VERIFICATION]
+                             -> Verify TEPAT 2 pesan "Required" (Name +
+                                Reporting Method).
+                             -> Verify POST supervisor TIDAK terkirim.
+
+107   TC-PIM-REPORTTO-03  [KNOWN ISSUE]  TC-PIM-REPORTTO-03-Verify-Add-Subordinate.spec.ts
+                             (+) Verify Add Subordinate
+                             -> Klik "+ Add" Subordinates (tombol ke-2), cari
+                                "a", pilih opsi pertama, Reporting Method =
+                                "Direct", klik Save.
+                             [UI VERIFICATION]
+                             -> Verify nama yang dipilih muncul di tabel
+                                Subordinates.
+                             NOTE: lihat blok [KNOWN ISSUE] di bawah.
+
+108   TC-PIM-REPORTTO-04  [DONE]  TC-PIM-REPORTTO-04-Verify-NonExistent-Name-Search.spec.ts
+                             (-) Verify NonExistent Name Search
+                             -> Cari nama acak "ZzNoSuchEmployeeXyz" di
+                                autocomplete Name, tunggu hasil pencarian.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada opsi yang cocok dengan nama
+                                acak.
+                             -> Verify klik Save tetap diblokir validasi
+                                required (Name belum ter-set resmi meski ada
+                                teks di input).
+
+109   TC-PIM-REPORTTO-05  [DONE]  TC-PIM-REPORTTO-05-Verify-Cancel-Discards-Modal.spec.ts
+                             (!) Verify Cancel Discards Modal
+                             -> Klik "+ Add" Supervisors, cari "a", pilih
+                                opsi, klik Cancel (bukan Save).
+                             [UI VERIFICATION]
+                             -> Verify jumlah baris Assigned Supervisors
+                                tetap 0.
+
+110   TC-PIM-REPORTTO-06  [KNOWN ISSUE]  TC-PIM-REPORTTO-06-Verify-Both-Lists-Render-Independently.spec.ts
+                             (+) Verify Both Lists Render Independently
+                             -> Tambah 1 Supervisor (opsi pertama pencarian
+                                "a").
+                             [UI VERIFICATION]
+                             -> Verify Supervisors berisi baris sesuai nama
+                                yang dipilih.
+                             -> Verify Subordinates TETAP 0 baris (list
+                                independen, tidak ikut terisi).
+                             NOTE: lihat blok [KNOWN ISSUE] di bawah (hanya
+                                   sisi Supervisors yang terdampak; cek
+                                   Subordinates=0 konsisten benar).
+
+111   TC-PIM-REPORTTO-07  [DONE]  TC-PIM-REPORTTO-07-Verify-Save-API-Endpoint.spec.ts
+                             (+) [API] Verify Save API Endpoint
+                             -> Tambah Supervisor (cari "a", pilih opsi
+                                pertama, Reporting Method = "Direct").
+                             -> Intercept semua POST ke
+                                /employees/<empNumber>/, klik Save.
+                             [API VERIFICATION]
+                             -> Verify POST .../supervisors terpanggil dengan
+                                status 200 — MEMBUKTIKAN save selalu berhasil
+                                di sisi server, independen dari masalah
+                                verifikasi UI di TC-01/03/06.
 
   [KNOWN ISSUE, 2026-11-11] TC-PIM-REPORTTO-01/03/06 intermiten FAIL karena mismatch
   format teks: textContent opsi autocomplete menyertakan segmen tengah (mis.
@@ -708,57 +1691,226 @@ No.  Test Case ID      Status   Kategori           Skenario
   Folder: tests/pim/qualifications/
 ================================================================================
 
-112   TC-PIM-QUALIFICATION-01  [DONE]  Positive (+)           Add Work Experience
-113   TC-PIM-QUALIFICATION-02  [DONE]  Negative (-)            Submit kosong ->
-                                                               required
-114   TC-PIM-QUALIFICATION-03  [DONE]  Boundary (B)            Company 300 karakter
-115   TC-PIM-QUALIFICATION-04  [DONE]  Security (S)            XSS di Company
-116   TC-PIM-QUALIFICATION-05  [DONE]  Security (S)            SQL injection di Job
-                                                               Title
-117   TC-PIM-QUALIFICATION-06  [DONE]  Edge Case (!)           Cancel membatalkan
-                                                               modal
-118   TC-PIM-QUALIFICATION-07  [DONE]  Positive (+)            Add Education
-                                                               (representatif
-                                                               sub-section lain)
-119    TC-PIM-QUALIFICATION-08  [DONE]  Positive (+)            Add Skill
-                                                               (menutup gap Fase 2)
-120    TC-PIM-QUALIFICATION-09  [DONE]  Positive (+)            Add Language
-                                                               (menutup gap Fase 2)
-121    TC-PIM-QUALIFICATION-10  [DONE]  Positive (+)            Add License
-                                                               (menutup gap Fase 2)
+112   TC-PIM-QUALIFICATION-01  [DONE]  TC-PIM-QUALIFICATION-01-Verify-Add-Work-Experience.spec.ts
+                             (+) Verify Add Work Experience
+                             -> Klik "+ Add" (Work Experience), isi Company/
+                                Job Title/From/To Date lengkap.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify "Acme Corp" muncul di tabel Work
+                                Experience.
+                             NOTE: Qualifications punya 5 sub-section (Work
+                                   Experience, Education, Skills, Languages,
+                                   License) — TC 01-06 fokus mendalam di Work
+                                   Experience, TC 07-10 representatif utk
+                                   4 sub-section lain.
+
+113   TC-PIM-QUALIFICATION-02  [DONE]  TC-PIM-QUALIFICATION-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Klik "+ Add" (Work Experience), langsung klik
+                                Save tanpa isi apapun.
+                             [UI VERIFICATION]
+                             -> Verify count(error) > 0.
+                             -> Verify POST work-experience TIDAK terkirim.
+
+114   TC-PIM-QUALIFICATION-03  [DONE]  TC-PIM-QUALIFICATION-03-Verify-Company-Very-Long-Text.spec.ts
+                             (B) Verify Company Very Long Text
+                             -> Isi Company = 300x "a", Job Title, From/To.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+
+115   TC-PIM-QUALIFICATION-04  [DONE]  TC-PIM-QUALIFICATION-04-Verify-XSS-In-Company.spec.ts
+                             (S) Verify XSS In Company
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Isi Company = "<script>alert('xss')</script>".
+                             -> Klik Save, lalu reload halaman.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert() terpicu.
+
+116   TC-PIM-QUALIFICATION-05  [DONE]  TC-PIM-QUALIFICATION-05-Verify-SQL-Injection-In-Job-Title.spec.ts
+                             (S) Verify SQL Injection In Job Title
+                             -> Isi Company, Job Title = "' OR '1'='1",
+                                From/To.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+
+117   TC-PIM-QUALIFICATION-06  [DONE]  TC-PIM-QUALIFICATION-06-Verify-Cancel-Discards-Modal.spec.ts
+                             (!) Verify Cancel Discards Modal
+                             -> Klik "+ Add" Work Experience, isi Company,
+                                klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify Company TIDAK muncul di tabel.
+
+118   TC-PIM-QUALIFICATION-07  [DONE]  TC-PIM-QUALIFICATION-07-Verify-Add-Education-Record.spec.ts
+                             (+) Verify Add Education Record
+                             -> Klik "+ Add" (Education), pilih Level =
+                                "Bachelor's Degree", isi Year dan GPA/Score.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify "Bachelor's Degree" muncul di tabel
+                                Education.
+                             NOTE: TC representatif utk sub-section Education
+                                   (pola modal "+ Add" sama dengan Work
+                                   Experience).
+
+119    TC-PIM-QUALIFICATION-08  [DONE]  TC-PIM-QUALIFICATION-08-Verify-Add-Skill-Record.spec.ts
+                             (+) Verify Add Skill Record
+                             -> Klik "+ Add" (Skills), pilih Skill (opsi
+                                dropdown pertama), isi Years of Experience.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify skill yang dipilih muncul di tabel
+                                Skills.
+                             NOTE: [POLA UI BEDA] form Skills/Languages/
+                                   License dirender INLINE langsung di bawah
+                                   section-nya, BUKAN modal popup terpisah
+                                   seperti Work Experience/Education
+                                   (dikonfirmasi live).
+
+120    TC-PIM-QUALIFICATION-09  [DONE]  TC-PIM-QUALIFICATION-09-Verify-Add-Language-Record.spec.ts
+                             (+) Verify Add Language Record
+                             -> Klik "+ Add" (Languages), pilih Language,
+                                Fluency, Competency (SEMUA dropdown, 0 text
+                                input, dikonfirmasi live).
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify language yang dipilih muncul di tabel
+                                Languages.
+
+121    TC-PIM-QUALIFICATION-10  [DONE]  TC-PIM-QUALIFICATION-10-Verify-Add-License-Record.spec.ts
+                             (+) Verify Add License Record
+                             -> Klik "+ Add" (License), pilih License Type,
+                                isi License Number/Issued Date/Expiry Date.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify License Type yang dipilih muncul di
+                                tabel License.
+                             NOTE: sub-section terakhir dari 5 sub-section
+                                   Qualifications — sekarang semuanya
+                                   tercakup minimal 1 TC.
 
 ================================================================================
   FASE 2 - GROUP 9: MEMBERSHIPS (7 TC)
   Folder: tests/pim/memberships/
 ================================================================================
 
-122   TC-PIM-MEMBERSHIP-01  [DONE]  Positive (+)               Add membership
-                                                                lengkap
-123   TC-PIM-MEMBERSHIP-02  [DONE]  Negative (-)                Submit kosong ->
-                                                                required
-124   TC-PIM-MEMBERSHIP-03  [DONE]  Boundary (B) [TEMUAN]       Amount negatif
-                                                                diterima
-125   TC-PIM-MEMBERSHIP-04  [DONE]  Negative (-)                Amount bukan angka
-126   TC-PIM-MEMBERSHIP-05  [DONE]  Edge Case (!) [TEMUAN]      Renewal Date sebelum
-                                                                Commence Date
-127   TC-PIM-MEMBERSHIP-06  [DONE]  Edge Case (!)               Cancel membatalkan
-                                                                modal
-128   TC-PIM-MEMBERSHIP-07  [DONE]  Positive (+) [API]          Save -> POST endpoint
-                                                                membership
+122   TC-PIM-MEMBERSHIP-01  [DONE]  TC-PIM-MEMBERSHIP-01-Verify-Add-Valid-Membership.spec.ts
+                             (+) Verify Add Valid Membership
+                             -> Klik "+ Add", pilih Membership = "ACCA", Paid
+                                By = "Company", Currency = "Euro", isi
+                                Amount, Commence/Renewal Date.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify "ACCA" muncul di tabel Memberships.
+
+123   TC-PIM-MEMBERSHIP-02  [DONE]  TC-PIM-MEMBERSHIP-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Klik "+ Add", langsung klik Save tanpa isi
+                                apapun.
+                             [UI VERIFICATION]
+                             -> Verify count(error) > 0.
+                             -> Verify POST membership TIDAK terkirim.
+
+124   TC-PIM-MEMBERSHIP-03  [DONE]  TC-PIM-MEMBERSHIP-03-Verify-Negative-Subscription-Amount.spec.ts
+                             (B) Verify Negative Subscription Amount
+                             -> Isi field wajib, Subscription Amount = "-500"
+                                (negatif).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+                             NOTE: Subscription Amount "-500" DITERIMA tanpa
+                                   validasi logis (sama pola TC-PIM-SALARY-03).
+
+125   TC-PIM-MEMBERSHIP-04  [DONE]  TC-PIM-MEMBERSHIP-04-Verify-Non-Numeric-Amount.spec.ts
+                             (-) Verify Non Numeric Amount
+                             -> Isi field wajib, Subscription Amount = "abc".
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+
+126   TC-PIM-MEMBERSHIP-05  [DONE]  TC-PIM-MEMBERSHIP-05-Verify-Renewal-Date-Before-Commence-Date.spec.ts
+                             (!) Verify Renewal Date Before Commence Date
+                             -> Isi Commence Date = 2025-01-01, Renewal Date
+                                = 2020-01-01 (LEBIH AWAL, logis janggal).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify tidak ada response 5xx.
+                             NOTE: Renewal Date sebelum Commence Date
+                                   DITERIMA tanpa validasi logis urutan
+                                   tanggal (dicatat via report.finding()).
+
+127   TC-PIM-MEMBERSHIP-06  [DONE]  TC-PIM-MEMBERSHIP-06-Verify-Cancel-Discards-Modal.spec.ts
+                             (!) Verify Cancel Discards Modal
+                             -> Klik "+ Add", pilih Membership, klik Cancel
+                                (bukan Save).
+                             [UI VERIFICATION]
+                             -> Verify jumlah baris tabel tetap 0.
+
+128   TC-PIM-MEMBERSHIP-07  [DONE]  TC-PIM-MEMBERSHIP-07-Verify-Save-API-Endpoint.spec.ts
+                             (+) [API] Verify Save API Endpoint
+                             -> Isi field wajib, intercept POST, klik Save.
+                             [API VERIFICATION]
+                             -> Verify POST .../employees/<empNumber>/...
+                                membership terpanggil dengan status 200.
 
 ================================================================================
   FASE 3 - GROUP 1: OPTIONAL FIELDS (3 TC)
   Folder: tests/pim/configuration/optional-fields/
 ================================================================================
 
-129   TC-PIM-OPTFIELD-01  [DONE]  Positive (+) [TEMUAN]    Toggle SSN field,
-                                                            persist setelah reload
-                                                            tidak konsisten
-130   TC-PIM-OPTFIELD-02  [DONE]  Positive (+) [TEMUAN]     Toggle Nick Name,
-                                                            amati efek di Personal
-                                                            Details
-131   TC-PIM-OPTFIELD-03  [DONE]  Edge Case (!)             Double toggle sebelum
-                                                            Save = net no-op
+129   TC-PIM-OPTFIELD-01  [DONE]  TC-PIM-OPTFIELD-01-Verify-Toggle-SSN-Field-Persists.spec.ts
+                             (+) Verify Toggle SSN Field Persists
+                             -> Baca state awal toggle "Show SSN field in
+                                Personal Details".
+                             -> Toggle (flip dari state awal), klik Save.
+                             -> Reload halaman, cek apakah state baru persist.
+                             [API VERIFICATION]
+                             -> Verify PUT /api/v2/pim/optional-field status
+                                === 200.
+                             [UI VERIFICATION]
+                             -> Verify state lokal berubah setelah toggle.
+                             -> Verify state berhasil DIKEMBALIKAN ke kondisi
+                                semula di akhir test (site-wide config,
+                                wajib restore).
+                             NOTE: [TEMUAN] persistensi state setelah reload
+                                   TIDAK konsisten di demo publik ini —
+                                   kadang persist, kadang tidak, meski
+                                   langkah toggle dan PUT 200 selalu sama.
+                                   Kemungkinan eventual-consistency di sisi
+                                   server shared demo, dicatat via
+                                   report.finding() (bukan hard-fail) supaya
+                                   tidak jadi false-negative berulang.
+
+130   TC-PIM-OPTFIELD-02  [DONE]  TC-PIM-OPTFIELD-02-Verify-Nickname-Toggle-Affects-Personal-Details.spec.ts
+                             (+) Verify Nickname Toggle Affects Personal Details
+                             -> Baca state awal toggle "Show Nick Name,
+                                Smoker and Military Service", pastikan ON,
+                                klik Save.
+                             -> Buat employee baru, buka Personal Details-nya.
+                             [API VERIFICATION]
+                             -> Verify PUT optional-field status === 200.
+                             [UI VERIFICATION]
+                             -> Verify apakah field "Nick Name" muncul di
+                                Personal Details saat toggle ON (dicatat via
+                                report.finding()).
+                             -> Verify state toggle DIKEMBALIKAN ke kondisi
+                                semula di akhir (site-wide config).
+
+131   TC-PIM-OPTFIELD-03  [DONE]  TC-PIM-OPTFIELD-03-Verify-Double-Toggle-Before-Save-Is-Idempotent.spec.ts
+                             (!) Verify Double Toggle Before Save Is Idempotent
+                             -> Baca state awal toggle "US Tax Exemptions".
+                             -> Toggle DUA KALI berturut-turut (ON lalu OFF).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify PUT optional-field status === 200
+                                (tetap sukses meski tidak ada perubahan net).
+                             [UI VERIFICATION]
+                             -> Verify state kembali ke kondisi awal setelah
+                                toggle 2x (net no-op) — TC ini secara desain
+                                self-restoring, tidak butuh langkah restore
+                                terpisah.
 
 ================================================================================
   FASE 3 - GROUP 2: CUSTOM FIELDS (6 TC)

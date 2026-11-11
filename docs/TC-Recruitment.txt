@@ -262,36 +262,224 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: VACANCIES (8 TC)
 ================================================================================
 
-  NO  ID                              KATEGORI  DESKRIPSI                                    STATUS
-  --  ------------------------------  --------  -------------------------------------------  -------
-  01  TC-RECRUITMENT-VACANCY-01       (+)       Add Vacancy valid [API]                       [DONE]
-  02  TC-RECRUITMENT-VACANCY-02       (-)       Submit kosong -> validasi Required             [DONE]
-  03  TC-RECRUITMENT-VACANCY-03       (B)       Vacancy Name sangat panjang [TEMUAN]           [DONE]
-  04  TC-RECRUITMENT-VACANCY-04       (S)       XSS payload di Vacancy Name                    [DONE]
-  05  TC-RECRUITMENT-VACANCY-05       (S)       SQL injection payload di Vacancy Name           [DONE]
-  06  TC-RECRUITMENT-VACANCY-06       (!)       Cancel membatalkan form                        [DONE]
-  07  TC-RECRUITMENT-VACANCY-07       (+)       Search vacancy di list (dropdown filter)        [DONE]
-  08  TC-RECRUITMENT-VACANCY-08       (+)       Vacancy baru muncul di dropdown Add Candidate   [DONE]
+ 1   TC-RECRUITMENT-VACANCY-01   [DONE]   TC-RECRUITMENT-VACANCY-01-Verify-Add-Vacancy-Valid.spec.ts
+                             (+) Verify Adding a Vacancy With Valid Data Succeeds
+                             -> Isi Vacancy Name (unik), pilih Job Title (opsi
+                                ke-2 dropdown), isi Description, isi Hiring
+                                Manager (async autocomplete), isi Number of
+                                Positions = "2".
+                             -> Intercept POST /api/v2/recruitment/vacancies.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify vacancy baru muncul di Vacancies list.
+
+ 2   TC-RECRUITMENT-VACANCY-02   [DONE]   TC-RECRUITMENT-VACANCY-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submitting an Empty Add Vacancy Form Shows Required Validation
+                             -> Navigate ke Add Vacancy, langsung klik Save
+                                tanpa isi apa pun.
+                             -> Intercept semua request POST ke /vacancies
+                                (listener pasif, bukan Promise.all/waitForResponse).
+                             Verify: minimal 1 pesan error "Required" muncul.
+                                     POST /vacancies TIDAK PERNAH terkirim.
+
+ 3   TC-RECRUITMENT-VACANCY-03   [DONE]   TC-RECRUITMENT-VACANCY-03-Verify-Vacancy-Name-Very-Long-Text.spec.ts
+                             (B) [TEMUAN] Verify Vacancy Name With 300 Characters Is Handled
+                             -> Isi Vacancy Name 300 karakter ("A".repeat(300)),
+                                isi Job Title, klik Save.
+                             NOTE: Didokumentasikan via report.finding(), bukan
+                                   hard check tegas -- hasil aktualnya dicatat
+                                   apa adanya (ditolak dengan pesan validasi
+                                   ATAU diterima tanpa batas client-side),
+                                   karena batas pasti belum diketahui sebelum
+                                   dicoba langsung.
+
+ 4   TC-RECRUITMENT-VACANCY-04   [DONE]   TC-RECRUITMENT-VACANCY-04-Verify-XSS-In-Vacancy-Name.spec.ts
+                             (S) Verify XSS Payload in Vacancy Name Does Not Execute
+                             -> Isi Vacancy Name = "<uniqueName>script>window.__xss=true</script>".
+                             -> Isi Job Title, klik Save.
+                             Verify: window.__xss TIDAK ter-set jadi true
+                                     (payload tidak tereksekusi sebagai script).
+
+ 5   TC-RECRUITMENT-VACANCY-05   [DONE]   TC-RECRUITMENT-VACANCY-05-Verify-SQL-Injection-In-Vacancy-Name.spec.ts
+                             (S) Verify SQL Injection Payload in Vacancy Name Does Not Break the Server
+                             -> Isi Vacancy Name = "<uniqueName>'; DROP TABLE users; --".
+                             -> Isi Job Title, Hiring Manager, klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() < 500 (bukan server
+                                error, payload diperlakukan sebagai data biasa).
+
+ 6   TC-RECRUITMENT-VACANCY-06   [DONE]   TC-RECRUITMENT-VACANCY-06-Verify-Cancel-Discards-Form.spec.ts
+                             (!) Verify Clicking Cancel Discards the Form Without Saving
+                             -> Isi Vacancy Name (unik), klik Cancel (bukan Save).
+                             Verify: POST /vacancies TIDAK PERNAH terkirim.
+                                     Vacancy TIDAK muncul di list setelah
+                                     kembali ke halaman list.
+
+ 7   TC-RECRUITMENT-VACANCY-07   [DONE]   TC-RECRUITMENT-VACANCY-07-Verify-Search-Vacancies-List.spec.ts
+                             (+) Verify Searching by Vacancy Name Filters the List
+                             -> Buat vacancy baru (unik) via Add Vacancy.
+                             -> Buka Vacancies list, pilih vacancy itu di
+                                dropdown filter Vacancy, klik Search.
+                             [UI VERIFICATION]
+                             -> Verify vacancy yang dicari muncul di hasil.
+                             -> Verify hasil search HANYA 1 baris (filter
+                                benar-benar bekerja, bukan menampilkan semua).
+
+ 8   TC-RECRUITMENT-VACANCY-08   [DONE]   TC-RECRUITMENT-VACANCY-08-Verify-New-Vacancy-In-Candidate-Dropdown.spec.ts
+                             (+) [Integration] Verify a New Vacancy Appears in the Add Candidate Vacancy Dropdown
+                             -> Buat vacancy baru (unik) via Add Vacancy.
+                             -> Buka Add Candidate, klik dropdown Vacancy,
+                                baca semua opsi teks.
+                             Verify: vacancy yang baru dibuat ADA di antara
+                                     opsi dropdown Vacancy pada form Add
+                                     Candidate (membuktikan 2 fitur berbeda
+                                     membaca sumber data vacancy yang sama).
 
 ================================================================================
   TEST CASES: CANDIDATES (13 TC)
 ================================================================================
 
-  NO  ID                               KATEGORI  DESKRIPSI                                       STATUS
-  --  -------------------------------  --------  ----------------------------------------------  -------
-  01  TC-RECRUITMENT-CANDIDATE-01      (+)       Add Candidate valid + resume [API]                [DONE]
-  02  TC-RECRUITMENT-CANDIDATE-02      (-)       Submit kosong -> validasi Required                [DONE]
-  03  TC-RECRUITMENT-CANDIDATE-03      (-)       Format email invalid ditolak                      [DONE]
-  04  TC-RECRUITMENT-CANDIDATE-04      (B)       First Name 300 karakter [TEMUAN]                  [DONE]
-  05  TC-RECRUITMENT-CANDIDATE-05      (S)       XSS payload di Notes                              [DONE]
-  06  TC-RECRUITMENT-CANDIDATE-06      (S)       SQL injection payload di Keywords                 [DONE]
-  07  TC-RECRUITMENT-CANDIDATE-07      (B)       Resume >1MB ditolak                                [DONE]
-  08  TC-RECRUITMENT-CANDIDATE-08      (+)       Candidate baru muncul di list                      [DONE]
-  09  TC-RECRUITMENT-CANDIDATE-09      (+)       Delete candidate [API]                             [DONE]
-  10  TC-RECRUITMENT-CANDIDATE-10      (!)       Cancel membatalkan form                            [DONE]
-  11  TC-RECRUITMENT-CANDIDATE-11      (S)       [BUG] Exe di-rename .pdf diterima sbg Resume       [DONE]
-  12  TC-RECRUITMENT-CANDIDATE-12      (S)       Exe ekstensi asli ditolak (baseline)                [DONE]
-  13  TC-RECRUITMENT-CANDIDATE-13      (-)       File .png ditolak sbg Resume                       [DONE]
+ 1   TC-RECRUITMENT-CANDIDATE-01   [DONE]   TC-RECRUITMENT-CANDIDATE-01-Verify-Add-Candidate-Valid.spec.ts
+                             (+) Verify Adding a Candidate With Valid Data and Resume Succeeds
+                             -> Isi Full Name (unik), pilih Vacancy pertama,
+                                isi Email (unik), upload Resume .pdf valid.
+                             -> Intercept POST /api/v2/recruitment/candidates.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify response body punya data.id (numeric).
+                             NOTE: SPA TIDAK mengubah URL bar jadi
+                                   /addCandidate/<id> setelah Save (tetap di
+                                   /addCandidate) -- id candidate WAJIB
+                                   diambil dari response body, bukan dari
+                                   page.url().
+
+ 2   TC-RECRUITMENT-CANDIDATE-02   [DONE]   TC-RECRUITMENT-CANDIDATE-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submitting an Empty Add Candidate Form Shows Required Validation
+                             -> Navigate ke Add Candidate, langsung klik Save
+                                tanpa isi apa pun.
+                             Verify: minimal 1 pesan error "Required" muncul
+                                     (Full Name, Vacancy, Email). POST
+                                     candidates TIDAK PERNAH terkirim.
+
+ 3   TC-RECRUITMENT-CANDIDATE-03   [DONE]   TC-RECRUITMENT-CANDIDATE-03-Verify-Invalid-Email-Format-Rejected.spec.ts
+                             (-) Verify an Invalid Email Format Is Rejected Before Submit
+                             -> Isi Full Name, isi Email = "not-an-email",
+                                klik Save.
+                             Verify: pesan error mengandung "Expected format"
+                                     muncul. POST candidates TIDAK PERNAH
+                                     terkirim.
+                             NOTE: Email DIVALIDASI dengan benar di form ini
+                                   (berbeda dari beberapa field PIM yang
+                                   longgar) -- hard check, bukan finding
+                                   ambigu.
+
+ 4   TC-RECRUITMENT-CANDIDATE-04   [DONE]   TC-RECRUITMENT-CANDIDATE-04-Verify-Full-Name-Very-Long-Text.spec.ts
+                             (B) [TEMUAN] Verify a 300-Character First Name Is Handled
+                             -> Isi First Name 300 karakter ("B".repeat(300)),
+                                isi Last Name/Vacancy/Email, klik Save.
+                             NOTE: Didokumentasikan via report.finding(),
+                                   bukan hard check tegas -- dicatat apa
+                                   adanya (ditolak dengan pesan validasi ATAU
+                                   diterima tanpa batas client-side yang
+                                   terlihat).
+
+ 5   TC-RECRUITMENT-CANDIDATE-05   [DONE]   TC-RECRUITMENT-CANDIDATE-05-Verify-XSS-In-Notes.spec.ts
+                             (S) Verify XSS Payload in Notes Does Not Execute
+                             -> Isi field wajib, isi Notes =
+                                "<script>window.__xss=true</script>", klik Save.
+                             Verify: window.__xss TIDAK ter-set jadi true.
+
+ 6   TC-RECRUITMENT-CANDIDATE-06   [DONE]   TC-RECRUITMENT-CANDIDATE-06-Verify-SQL-Injection-In-Keywords.spec.ts
+                             (S) Verify SQL Injection Payload in Keywords Does Not Break the Server
+                             -> Isi field wajib + Resume valid, isi Keywords =
+                                "qa'; DROP TABLE candidates; --", klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() < 500.
+
+ 7   TC-RECRUITMENT-CANDIDATE-07   [DONE]   TC-RECRUITMENT-CANDIDATE-07-Verify-Resume-Over-1MB-Rejected.spec.ts
+                             (B) Verify a Resume File Over 1MB Is Rejected
+                             -> Isi field wajib, upload Resume >1MB
+                                (1,100,000 byte buffer).
+                             Verify: muncul pesan error ukuran file, ATAU
+                                     POST candidates tidak pernah terkirim
+                                     sukses dalam 5 detik setelah Save.
+
+ 8   TC-RECRUITMENT-CANDIDATE-08   [DONE]   TC-RECRUITMENT-CANDIDATE-08-Verify-List-Search.spec.ts
+                             (+) Verify a Newly Created Candidate Appears in the List
+                             -> Buat candidate baru (unik).
+                             -> Buka Candidates list, lompat ke halaman
+                                terakhir (gotoLastPage -- list terpaginasi
+                                75+ record, candidate baru selalu di halaman
+                                terakhir).
+                             Verify: candidate yang baru dibuat muncul di
+                                     list.
+
+ 9   TC-RECRUITMENT-CANDIDATE-09   [DONE]   TC-RECRUITMENT-CANDIDATE-09-Verify-Delete-Candidate.spec.ts
+                             (+) [API] Verify Deleting a Candidate Removes It From the List
+                             -> Buat candidate baru, ambil id dari response
+                                POST create.
+                             -> [API] DELETE /api/v2/recruitment/candidates
+                                dengan body {"ids":[candidateId]}.
+                             [API VERIFICATION]
+                             -> Verify response.status() 2xx.
+                             [UI VERIFICATION]
+                             -> Verify detail page candidate yang sudah
+                                dihapus TIDAK lagi menampilkan nama candidate
+                                (atau menampilkan indikator not-found).
+                             NOTE: DELETE bukan ke /candidates/<id> (itu 405
+                                   Method Not Allowed), melainkan ke
+                                   /candidates dengan body array ids.
+
+10   TC-RECRUITMENT-CANDIDATE-10   [DONE]   TC-RECRUITMENT-CANDIDATE-10-Verify-Cancel-Discards-Form.spec.ts
+                             (!) Verify Clicking Cancel Discards the Form Without Saving
+                             -> Isi Full Name + Email (unik), klik Cancel
+                                (bukan Save).
+                             Verify: POST candidates TIDAK PERNAH terkirim.
+                                     Candidate TIDAK muncul di list setelah
+                                     kembali ke halaman list.
+
+11   TC-RECRUITMENT-CANDIDATE-11   [DONE]   TC-RECRUITMENT-CANDIDATE-11-Verify-Exe-Renamed-As-Pdf-Upload-Security.spec.ts
+                             (S) Verify an Executable Renamed to .pdf Is Accepted as a Resume
+                             -> Isi field wajib, upload file dengan header PE
+                                "MZ" (executable asli) tapi nama file
+                                "resume-spoofed.pdf".
+                             [API VERIFICATION]
+                             -> Verify response.status() !== 200 (file
+                                SEHARUSNYA ditolak).
+                             NOTE: [BUG DIKONFIRMASI] Hasil aktual: status
+                                   200, file LOLOS dan diterima sebagai
+                                   Resume -- validasi HANYA mengecek
+                                   ekstensi nama file, BUKAN konten/magic
+                                   bytes. Pola sama persis dengan
+                                   TC-PIM-ADD-28 (upload foto profil). TC ini
+                                   SENGAJA dibiarkan FAILED (bukan
+                                   test.fail()) supaya tercatat otomatis ke
+                                   Bug-List.xlsx.
+
+12   TC-RECRUITMENT-CANDIDATE-12   [DONE]   TC-RECRUITMENT-CANDIDATE-12-Verify-Pure-Exe-Upload-Rejected.spec.ts
+                             (S) Verify a .exe File With Its Real Extension Is Rejected as a Resume
+                             -> Isi field wajib, upload file "resume.exe"
+                                (header PE "MZ", ekstensi ASLI tidak
+                                di-rename).
+                             Verify: muncul pesan error tipe file, ATAU POST
+                                     tidak pernah terkirim sukses (status
+                                     !== 200) dalam 5 detik.
+                             NOTE: Baseline pembanding CANDIDATE-11 --
+                                   membuktikan validasi ekstensi memang ADA
+                                   dan berfungsi, hanya bisa di-bypass dengan
+                                   rename.
+
+13   TC-RECRUITMENT-CANDIDATE-13   [DONE]   TC-RECRUITMENT-CANDIDATE-13-Verify-Wrong-File-Type-Rejected.spec.ts
+                             (-) Verify a .png File Is Rejected as a Resume
+                             -> Isi field wajib, upload file "resume.png"
+                                (header PNG asli, tipe salah tapi bukan
+                                spoofing).
+                             Verify: muncul pesan error tipe file, ATAU POST
+                                     tidak pernah terkirim sukses dalam 5
+                                     detik.
 
 ================================================================================
   TEST CASES: STATUS WORKFLOW (9 TC)
@@ -309,17 +497,162 @@ LEGEND SIMBOL SKENARIO
   di seluruh suite, bukan 12 bug terpisah. TC-RECRUITMENT-STATUS-01 dan STATUS-09 tidak
   terdampak karena tidak bergantung pada Shortlist berhasil.
 
-  NO  ID                             KATEGORI  DESKRIPSI                                          STATUS
-  --  -----------------------------  --------  -------------------------------------------------  -------
-  01  TC-RECRUITMENT-STATUS-01       (+)       Candidate baru = Application Initiated + aksi awal  [DONE]
-  02  TC-RECRUITMENT-STATUS-02       (+)       Shortlist -> status Shortlisted [API]          [FAIL - BG-007]
-  03  TC-RECRUITMENT-STATUS-03       (+)       Shortlisted -> Reject -> terminal [API]       [BLOCKED oleh BG-007]
-  04  TC-RECRUITMENT-STATUS-04       (+)       Shortlisted -> Schedule Interview valid [API] [BLOCKED oleh BG-007]
-  05  TC-RECRUITMENT-STATUS-05       (-)       Schedule Interview submit kosong -> validasi  [BLOCKED oleh BG-007]
-  06  TC-RECRUITMENT-STATUS-06       (+)       Interview Scheduled -> Reject [API]           [BLOCKED oleh BG-007]
-  07  TC-RECRUITMENT-STATUS-07       (+)       Interview Scheduled -> Mark Interview Failed  [BLOCKED oleh BG-007]
-  08  TC-RECRUITMENT-STATUS-08       (+)       Candidate History mencatat transisi status    [BLOCKED oleh BG-007]
-  09  TC-RECRUITMENT-STATUS-09       (+)       [BUG, TEMUAN] Application Stage stuck loading sample [DONE]
+ 1   TC-RECRUITMENT-STATUS-01   [DONE]   TC-RECRUITMENT-STATUS-01-Verify-Application-Initiated-Actions.spec.ts
+                             (+) Verify a New Candidate Starts at Application Initiated With Reject/Shortlist Actions
+                             -> Buat candidate baru (createTestCandidate).
+                             -> Buka halaman detail, tunggu render tombol
+                                aksi (~3 detik, lag async dari GET
+                                actions/allowed).
+                             [UI VERIFICATION]
+                             -> Verify status awal = "Application Initiated".
+                             -> Verify tombol "Reject" tersedia.
+                             -> Verify tombol "Shortlist" tersedia.
+
+ 2   TC-RECRUITMENT-STATUS-02   [FAIL - BG-007]   TC-RECRUITMENT-STATUS-02-Verify-Shortlist-Transition.spec.ts
+                             (+) Verify Clicking Shortlist and Saving Transitions Status to Shortlisted
+                             -> Buat candidate baru, buka detail, tunggu
+                                render tombol aksi (~3 detik).
+                             -> Klik tombol "Shortlist".
+                             -> Verify URL confirmation form mengandung
+                                selectedAction=2.
+                             -> Intercept PUT/POST .../shortlist (non-GET).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify status berubah jadi "Shortlisted" di
+                                halaman detail.
+                             NOTE: [BUG KRITIS TERKONFIRMASI -- BG-007]
+                                   Endpoint PUT .../candidates/<id>/shortlist
+                                   mengembalikan 500 Internal Server Error
+                                   untuk SEMUA candidate, dikonfirmasi
+                                   reproducible 3x terisolasi dengan 3
+                                   candidate berbeda, server independen
+                                   sehat setiap kali. Lihat blok "BUG KRITIS
+                                   TERKONFIRMASI" di atas untuk detail
+                                   lengkap.
+
+ 3   TC-RECRUITMENT-STATUS-03   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-03-Verify-Shortlisted-Reject-Terminal.spec.ts
+                             (+) Verify Rejecting a Shortlisted Candidate Moves It to a Terminal Rejected State
+                             -> Buat candidate baru, Shortlist (via
+                                shortlistCandidate helper).
+                             -> Buka detail, tunggu render tombol aksi, klik
+                                "Reject".
+                             -> Intercept PUT/POST /recruitment/candidates
+                                (non-GET).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify status = "Rejected".
+                             -> Verify TIDAK ADA tombol aksi status lain
+                                (terminal).
+                             NOTE: BLOCKED oleh BG-007 -- precondition
+                                   shortlistCandidate() gagal duluan karena
+                                   endpoint Shortlist rusak (lihat STATUS-02).
+
+ 4   TC-RECRUITMENT-STATUS-04   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-04-Verify-Schedule-Interview-Valid.spec.ts
+                             (+) Verify Scheduling an Interview for a Shortlisted Candidate Succeeds
+                             -> Buat candidate baru, Shortlist, klik tombol
+                                "Schedule Interview".
+                             -> Verify URL confirmation form mengandung
+                                selectedAction=4.
+                             -> Isi Interview Title, Interviewer (async
+                                autocomplete), Date (format yyyy-dd-mm).
+                             -> Intercept POST .../shedule-interview
+                                (non-GET, typo asli dari aplikasi).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify status berubah jadi "Interview
+                                Scheduled".
+                             NOTE: BLOCKED oleh BG-007 (precondition
+                                   Shortlist gagal duluan).
+
+ 5   TC-RECRUITMENT-STATUS-05   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-05-Verify-Schedule-Interview-Empty-Validation.spec.ts
+                             (-) Verify Submitting Schedule Interview Empty Shows Required Validation
+                             -> Buat candidate baru, Shortlist, buka form
+                                Schedule Interview, langsung klik Save tanpa
+                                isi apa pun.
+                             Verify: minimal 1 pesan error "Required" muncul.
+                                     POST .../shedule-interview TIDAK PERNAH
+                                     terkirim.
+                             NOTE: BLOCKED oleh BG-007 (precondition
+                                   Shortlist gagal duluan).
+
+ 6   TC-RECRUITMENT-STATUS-06   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-06-Verify-Interview-Scheduled-Reject.spec.ts
+                             (+) Verify Rejecting an Interview Scheduled Candidate Moves It to Rejected
+                             -> Buat candidate baru, Shortlist, Schedule
+                                Interview, lalu klik "Reject".
+                             -> Intercept PUT/POST /recruitment/candidates
+                                (non-GET).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify status berubah jadi "Rejected".
+                             NOTE: BLOCKED oleh BG-007 (precondition
+                                   Shortlist gagal duluan).
+
+ 7   TC-RECRUITMENT-STATUS-07   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-07-Verify-Mark-Interview-Failed-Fresh-Candidate.spec.ts
+                             (+) Verify Marking a Fresh Interview Scheduled Candidate as Interview Failed Works Cleanly
+                             -> Buat candidate BARU (bukan data seed lama),
+                                Shortlist, Schedule Interview, klik "Mark
+                                Interview Failed".
+                             -> Intercept PUT/POST /recruitment/candidates
+                                (non-GET).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify status berubah jadi "Interview
+                                Failed" tanpa stuck-loading.
+                             NOTE: Sengaja pakai candidate FRESH (bukan data
+                                   seed) untuk membuktikan alur ini bekerja
+                                   bersih tanpa terkena bug stuck-loading di
+                                   STATUS-09. BLOCKED oleh BG-007
+                                   (precondition Shortlist gagal duluan).
+
+ 8   TC-RECRUITMENT-STATUS-08   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-08-Verify-Candidate-History-Logs-Transitions.spec.ts
+                             (+) Verify Candidate History Records a Shortlist Transition
+                             -> Buat candidate baru, buka detail, catat
+                                jumlah baris Candidate History SEBELUM.
+                             -> Shortlist candidate (shortlistCandidate
+                                helper).
+                             [UI VERIFICATION]
+                             -> Verify jumlah baris Candidate History
+                                BERTAMBAH setelah shortlist.
+                             -> Verify ada entri histori yang menyebut
+                                "Shortlist".
+                             NOTE: BLOCKED oleh BG-007 (precondition
+                                   Shortlist gagal duluan).
+
+ 9   TC-RECRUITMENT-STATUS-09   [DONE]   TC-RECRUITMENT-STATUS-09-Verify-Application-Stage-Loads-Without-Hanging.spec.ts
+                             (+) [Regression] Verify Application Stage Card Finishes Loading (or Is Documented as Stuck) Across Sampled Candidates
+                             -> Sample 6 candidate id yang sudah ada (bukan 1
+                                id hardcode): [1, 2, 3, 50, 94, 106].
+                             -> Untuk tiap id: buka halaman detail, tunggu
+                                1.5 detik, cek apakah loading spinner
+                                Application Stage/Candidate History MASIH
+                                terlihat setelah 8 detik.
+                             Verify: TC dijalankan tanpa exception untuk
+                                     semua candidate yang disample (hasil
+                                     stuck/tidak dicatat via report.finding(),
+                                     bukan pass/fail tegas per-candidate).
+                             NOTE: [BUG DIKONFIRMASI] Kartu "Application
+                                   Stage" dan "Candidate History" kadang
+                                   STUCK di loading spinner SELAMANYA
+                                   meski SEMUA API call yang mendasarinya
+                                   kembali 200 tanpa console error. Bug
+                                   rendering client-side genuine, BUKAN
+                                   karena demo shared lambat (direproduksi
+                                   di reload yang sama berkali-kali), BUKAN
+                                   spesifik candidate yang baru "Mark
+                                   Interview Passed", TIDAK 100%
+                                   reproducible on demand (rasio stuck
+                                   2/6-3/6 antar run, tidak ada pola
+                                   id/waktu yang konsisten).
 
 ================================================================================
   SUMMARY
@@ -414,245 +747,258 @@ LEGEND SIMBOL SKENARIO
   perlu ditambahkan gotoEdit()/gotoDetail() di VacanciesPage.ts dulu)
 --------------------------------------------------------------------------------
 
-TC-RECRUITMENT-VACANCY-09  (+)  Edit Vacancy dengan data valid tersimpan
-  Precondition : Sudah ada minimal 1 vacancy (pakai hasil VACANCY-01 atau
-                 buat baru via createTestVacancy helper kalau sudah ada).
-  Steps        :
-    1. Buka Vacancies list, klik salah satu row vacancy untuk membuka
-       form edit.
-    2. Ubah Vacancy Name jadi nama unik baru.
-    3. Ubah Number of Positions jadi angka lain yang valid (mis. dari 2
-       jadi 5).
-    4. Klik Save, intersep response PUT/POST ke endpoint vacancy (cek
-       method HTTP asli lewat request interception, JANGAN diasumsikan).
-  Expected     :
-    - Response status 200/204.
-    - Kembali ke list, row vacancy menampilkan nama & jumlah posisi yang
-      baru.
-    - Reload halaman, perubahan tetap persisten (bukan cuma state lokal).
-  API check    : catat method+endpoint asli yang dipakai (duga PUT
-                 /api/v2/recruitment/vacancies/<id>, WAJIB diverifikasi
-                 lewat intersepsi nyata, bukan diasumsikan dari pola
-                 candidate).
-  [HASIL KONFIRMASI, STATUS: DONE] Dugaan di atas BENAR: PUT
-  /api/v2/recruitment/vacancies/<id> -> 200. [TEMUAN TAMBAHAN] Edit
-  memakai URL & FORM YANG SAMA dengan Add Vacancy
-  (/web/index.php/recruitment/addJobVacancy/<id>), bukan halaman terpisah.
-  Row list: icon index 0 = trash/delete, index 1 = pencil/edit. Spec:
-  tests/recruitment/vacancies/TC-RECRUITMENT-VACANCY-09-Verify-Edit-Vacancy-Valid.spec.ts
+ 9   TC-RECRUITMENT-VACANCY-09   [DONE]   TC-RECRUITMENT-VACANCY-09-Verify-Edit-Vacancy-Valid.spec.ts
+                             (+) Verify Editing a Vacancy With Valid Data Persists
+                             -> Buat vacancy baru khusus TC ini (createTestVacancy).
+                             -> Buka form edit (gotoEditForm), ubah Vacancy
+                                Name jadi nama unik baru, ubah Number of
+                                Positions dari 2 jadi 5.
+                             -> Intercept PUT /api/v2/recruitment/vacancies/<id>.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify vacancy muncul di list dengan nama baru.
+                             -> Reload form edit: Vacancy Name dan Number of
+                                Positions tetap persisten (bukan cuma state
+                                lokal).
+                             NOTE: [TEMUAN] Edit memakai URL & FORM YANG SAMA
+                                   dengan Add Vacancy
+                                   (/web/index.php/recruitment/addJobVacancy/<id>),
+                                   bukan halaman terpisah. Row list: icon
+                                   index 0 = trash/delete, index 1 = pencil/edit.
 
-TC-RECRUITMENT-VACANCY-10  (-)  Edit Vacancy: kosongkan field wajib -> validasi Required
-  Steps        :
-    1. Buka form edit vacancy yang sudah ada.
-    2. Kosongkan Vacancy Name (select-all + delete).
-    3. Klik Save.
-  Expected     :
-    - Pesan error "Required" muncul di bawah field.
-    - Tidak ada request PUT/POST terkirim (page.waitForResponse TIDAK
-      boleh dipakai tanpa guard, ikuti pola TEMUAN Hiring Manager di atas
-      supaya tidak false-timeout).
-    - Data vacancy lama di server tidak berubah (verifikasi via reload).
-  [HASIL KONFIRMASI, STATUS: DONE] Sesuai dugaan: PUT tidak pernah
-  terkirim saat Vacancy Name dikosongkan, data lama tidak berubah. Pesan
-  error inline "Required" TIDAK SELALU terlihat reliable via locator
-  dalam timing test (didokumentasikan sebagai finding, bukan hard check,
-  karena sinyal yang reliable adalah PUT yang tidak terkirim). Spec:
-  tests/recruitment/vacancies/TC-RECRUITMENT-VACANCY-10-Verify-Edit-Empty-Vacancy-Name-Validation.spec.ts
+10   TC-RECRUITMENT-VACANCY-10   [DONE]   TC-RECRUITMENT-VACANCY-10-Verify-Edit-Empty-Vacancy-Name-Validation.spec.ts
+                             (-) Verify Clearing Vacancy Name on Edit Blocks Save
+                             -> Buat vacancy baru khusus TC ini.
+                             -> Buka form edit, kosongkan Vacancy Name
+                                (click + fill('') + blur), klik Save.
+                             [API VERIFICATION]
+                             -> Verify PUT /api/v2/recruitment/vacancies/<id>
+                                TIDAK PERNAH terkirim (listener pasif, bukan
+                                waitForResponse tanpa guard -- supaya tidak
+                                false-timeout kalau PUT memang tidak terkirim).
+                             [UI VERIFICATION]
+                             -> Verify Vacancy Name LAMA tidak berubah
+                                (verifikasi via reload ke list).
+                             NOTE: [TEMUAN] Pesan error inline "Required"
+                                   TIDAK SELALU terlihat reliable via locator
+                                   dalam timing test (dicatat via
+                                   report.finding(), bukan hard check) --
+                                   sinyal yang reliable adalah PUT yang tidak
+                                   terkirim + data lama tidak berubah.
 
-TC-RECRUITMENT-VACANCY-11  (-)  Edit Vacancy: Number of Positions dikosongkan/dihapus
-  Steps        : Buka form edit, kosongkan Number of Positions, Save.
-  Expected     : Validasi Required muncul, Save gagal, tidak ada request
-                 terkirim.
-  [HASIL KONFIRMASI, STATUS: DONE] [TEMUAN, dugaan di atas SALAH] PUT
-  TETAP TERKIRIM DAN SUKSES (200) meski Number of Positions dikosongkan
-  di form EDIT -- TIDAK ADA validasi Required di jalur ini, berbeda dari
-  form ADD yang memang menolak nilai 0/-1/non-digit (lihat VACANCY-14/15).
-  Didokumentasikan via report.finding() karena perilaku tidak konsisten
-  antar validasi di form yang sama, bukan pass/fail tegas. Spec:
-  tests/recruitment/vacancies/TC-RECRUITMENT-VACANCY-11-Verify-Edit-Empty-Number-Of-Positions.spec.ts
+11   TC-RECRUITMENT-VACANCY-11   [DONE]   TC-RECRUITMENT-VACANCY-11-Verify-Edit-Empty-Number-Of-Positions.spec.ts
+                             (-) [TEMUAN] Verify Clearing Number of Positions on Edit
+                             -> Buat vacancy baru khusus TC ini.
+                             -> Buka form edit, kosongkan Number of Positions,
+                                klik Save.
+                             [API VERIFICATION]
+                             -> Verify (dokumentasi, bukan hard-fail) apakah
+                                PUT terkirim dalam 5s setelah Save.
+                             NOTE: [TEMUAN PENTING, dugaan awal SALAH] PUT
+                                   TETAP TERKIRIM DAN SUKSES (200) meski
+                                   Number of Positions dikosongkan di form
+                                   EDIT -- TIDAK ADA validasi Required di
+                                   jalur ini, BERBEDA dari form ADD yang
+                                   memang menolak nilai 0/-1/non-digit (lihat
+                                   VACANCY-14/15). Perilaku tidak konsisten
+                                   antar validasi di form yang sama,
+                                   didokumentasikan via report.finding().
 
-TC-RECRUITMENT-VACANCY-12  (!)  Deactivate Vacancy -> hilang dari dropdown Add Candidate
-  Precondition : Vacancy unik yang dibuat khusus untuk TC ini (jangan
-                 pakai vacancy yang dipakai TC lain, supaya tidak
-                 mengganggu state TC lain yang bergantung padanya).
-  Steps        :
-    1. Buat vacancy baru khusus TC ini.
-    2. Buka form edit vacancy tsb, set Status jadi "Inactive"
-       (konfirmasi dulu lewat discovery run apakah field ini toggle
-       switch atau dropdown -- JANGAN diasumsikan dari label vacancy
-       lain).
-    3. Save.
-    4. Buka Add Candidate form, cek dropdown Vacancy.
-  Expected     :
-    - Vacancy yang di-set Inactive TIDAK muncul lagi di dropdown Vacancy
-      pada form Add Candidate.
-    - Vacancy tetap muncul di Vacancies list (dengan badge/kolom status
-      Inactive), tidak hilang/terhapus dari list.
-  [HASIL KONFIRMASI, STATUS: DONE] Field Status adalah TOGGLE SWITCH
-  berlabel teks "Active" (bukan dropdown), payload PUT membawa "status":
-  false. [TEMUAN KOREKSI] Label kolom Status di list setelah deactivate
-  adalah "Closed" (BUKAN "Inactive" seperti diasumsikan di atas). Vacancy
-  hilang dari dropdown Add Candidate setelah deactivate, confirmed live.
-  Spec: tests/recruitment/vacancies/TC-RECRUITMENT-VACANCY-12-Verify-Deactivate-Vacancy.spec.ts
+12   TC-RECRUITMENT-VACANCY-12   [DONE]   TC-RECRUITMENT-VACANCY-12-Verify-Deactivate-Vacancy.spec.ts
+                             (!) Verify Deactivating a Vacancy Removes It From the Add Candidate Dropdown
+                             -> Buat vacancy baru khusus TC ini (tidak dipakai
+                                TC lain).
+                             -> Cek dropdown Vacancy di Add Candidate SEBELUM
+                                deactivate (baca semua opsi teks).
+                             -> Buka form edit vacancy, toggle switch "Active"
+                                -> off, klik Save.
+                             [API VERIFICATION]
+                             -> Verify PUT .../vacancies/<id> === 200.
+                             [UI VERIFICATION]
+                             -> Verify vacancy TETAP muncul di Vacancies list
+                                (tidak terhapus).
+                             -> Verify kolom Status di list = "Closed".
+                             -> Verify vacancy TIDAK muncul lagi di dropdown
+                                Add Candidate SESUDAH deactivate (hanya
+                                dicek kalau vacancy memang ada di dropdown
+                                SEBELUM deactivate).
+                             NOTE: [TEMUAN] Field Status adalah TOGGLE SWITCH
+                                   berlabel teks "Active" (BUKAN dropdown),
+                                   payload PUT membawa "status": false. Label
+                                   kolom Status di list setelah deactivate
+                                   adalah "Closed" (BUKAN "Inactive" seperti
+                                   diasumsikan awal). [TEMUAN SHARED-DEMO]
+                                   Dropdown Vacancy di Add Candidate dibatasi
+                                   (~25 opsi) dan churn tinggi dari user lain
+                                   di demo publik bisa mendorong entry baru
+                                   keluar terlepas dari status aktifnya --
+                                   kalau vacancy tidak ditemukan di dropdown
+                                   SAMA SEKALI (sebelum maupun sesudah),
+                                   dicatat sebagai finding shared-demo churn,
+                                   bukan FAILED.
 
-TC-RECRUITMENT-VACANCY-13  (+)  Reactivate Vacancy -> muncul kembali di dropdown
-  Precondition : Lanjutan dari VACANCY-12 (vacancy sudah Inactive).
-  Steps        : Edit ulang vacancy, set Status jadi "Active" lagi, Save,
-                 lalu cek dropdown Add Candidate.
-  Expected     : Vacancy muncul kembali di dropdown Add Candidate.
-  [HASIL KONFIRMASI, STATUS: DONE] Toggle switch "Active" -> on lagi,
-  PUT 200, kolom Status di list kembali "Active", vacancy muncul kembali
-  di dropdown Add Candidate. Spec:
-  tests/recruitment/vacancies/TC-RECRUITMENT-VACANCY-13-Verify-Reactivate-Vacancy.spec.ts
+13   TC-RECRUITMENT-VACANCY-13   [DONE]   TC-RECRUITMENT-VACANCY-13-Verify-Reactivate-Vacancy.spec.ts
+                             (+) Verify Reactivating a Vacancy Restores It in the Add Candidate Dropdown
+                             -> Buat vacancy baru, deactivate dulu (toggle
+                                Active -> off, Save).
+                             -> Edit ulang, toggle Active -> on lagi, Save.
+                             [API VERIFICATION]
+                             -> Verify PUT reactivate === 200.
+                             [UI VERIFICATION]
+                             -> Verify kolom Status di list kembali "Active"
+                                (bukan "Closed").
+                             -> Verify vacancy muncul kembali di dropdown Add
+                                Candidate (kecuali TIDAK ditemukan sama sekali
+                                -- dicatat shared-demo churn, bukan bug,
+                                konsisten pola VACANCY-12).
 
-TC-RECRUITMENT-VACANCY-14  (B)  Number of Positions = 0
-  Steps        : Isi form Add Vacancy valid, Number of Positions diisi
-                 "0", Save.
-  Expected     : Dokumentasikan hasil aktual via report.check() --
-                 apakah app menolak (validasi "harus > 0") atau menerima
-                 0 sebagai valid. Kalau diterima, catat sebagai finding
-                 (perilaku ambigu: vacancy dengan 0 posisi lolos tanpa
-                 warning).
-  [HASIL KONFIRMASI, STATUS: DONE] App MENOLAK "0" (deterministik, bukan
-  ambigu): pesan error persis "Should be a number between 1-99", POST
-  tidak terkirim. Dipakai hard check, bukan finding. Spec:
-  tests/recruitment/vacancies/TC-RECRUITMENT-VACANCY-14-Verify-Number-Of-Positions-Zero.spec.ts
+14   TC-RECRUITMENT-VACANCY-14   [DONE]   TC-RECRUITMENT-VACANCY-14-Verify-Number-Of-Positions-Zero.spec.ts
+                             (B) Verify Number of Positions = 0 Is Rejected
+                             -> Isi form Add Vacancy valid, Number of
+                                Positions = "0", klik Save.
+                             Verify: pesan error persis "Should be a number
+                                     between 1-99" muncul. POST vacancies
+                                     TIDAK PERNAH terkirim.
+                             NOTE: Perilaku deterministik (bukan ambigu),
+                                   dipakai hard check, bukan report.finding().
 
-TC-RECRUITMENT-VACANCY-15  (B)  Number of Positions negatif / non-numerik
-  Steps        : Coba isi "-1", lalu di run terpisah coba isi "abc" (atau
-                 cek apakah field memang hanya menerima digit lewat
-                 input type).
-  Expected     : Baik "-1" maupun karakter non-digit ditolak dengan
-                 validasi, tidak ada request Save yang terkirim dengan
-                 payload tidak valid tsb.
-  [HASIL KONFIRMASI, STATUS: DONE] Keduanya ditolak dengan pesan PERSIS
-  SAMA "Should be a numeric value" (beda dari pesan range di VACANCY-14),
-  POST tidak terkirim di kedua kasus. Spec:
-  tests/recruitment/vacancies/TC-RECRUITMENT-VACANCY-15-Verify-Number-Of-Positions-Negative-NonNumeric.spec.ts
+15   TC-RECRUITMENT-VACANCY-15   [DONE]   TC-RECRUITMENT-VACANCY-15-Verify-Number-Of-Positions-Negative-NonNumeric.spec.ts
+                             (B) Verify Number of Positions Negative/Non-Numeric Is Rejected
+                             -> Isi Number of Positions = "-1", klik Save.
+                             -> Di percobaan terpisah, isi "abc", klik Save.
+                             Verify: KEDUANYA ditolak dengan pesan error
+                                     PERSIS SAMA "Should be a numeric value"
+                                     (beda dari pesan range di VACANCY-14).
+                                     POST TIDAK PERNAH terkirim di kedua kasus.
 
-TC-RECRUITMENT-VACANCY-16  (S)  API negative: POST vacancies langsung tanpa field wajib
-  Steps        : Lewat request context Playwright (bukan UI), kirim POST
-                 langsung ke /api/v2/recruitment/vacancies dengan body
-                 kosong / tanpa "name" / tanpa "hiringManagerId", pakai
-                 session cookie hasil login valid.
-  Expected     : Response 400/422 dengan pesan error field-level yang
-                 jelas, BUKAN 500 ataupun 200 dengan data vacancy kosong
-                 ter-create.
-  [HASIL KONFIRMASI, STATUS: DONE] Semua kasus -> 422 "Invalid Parameter"
-  dengan body {"error":{"status":"422","message":"Invalid Parameter",
-  "data":{"invalidParamKeys":[...]}}} yang mencantumkan field yang hilang
-  persis (mis. "name", "employeeId" -- field app untuk Hiring Manager
-  memang bernama "employeeId", bukan "hiringManagerId"). Tidak ada 500.
-  Spec: tests/recruitment/vacancies/TC-RECRUITMENT-VACANCY-16-Verify-API-Negative-POST-Vacancy.spec.ts
+16   TC-RECRUITMENT-VACANCY-16   [DONE]   TC-RECRUITMENT-VACANCY-16-Verify-API-Negative-POST-Vacancy.spec.ts
+                             (S) [API] Verify API Negative POST Vacancy Without Required Fields
+                             -> Lewat page.request (berbagi cookie sesi
+                                admin), POST /api/v2/recruitment/vacancies
+                                dengan body kosong {}.
+                             -> POST tanpa field "name".
+                             -> POST tanpa "employeeId" (field app untuk
+                                Hiring Manager, BUKAN "hiringManagerId").
+                             [API VERIFICATION]
+                             -> Verify SEMUA 3 kasus -> status 4xx (422),
+                                BUKAN 500 ataupun 200 dengan data kosong
+                                ter-create.
+                             -> Verify body error berisi
+                                "Invalid Parameter" dengan invalidParamKeys
+                                yang mencantumkan field yang hilang persis
+                                ("name", "employeeId").
 
 --------------------------------------------------------------------------------
   CANDIDATES - GAP TAMBAHAN
 --------------------------------------------------------------------------------
 
-TC-RECRUITMENT-CANDIDATE-14  (-)  Submit candidate dengan email yang sudah dipakai candidate lain
-  Precondition : Ada 1 candidate existing dengan email tertentu (pakai
-                 hasil CANDIDATE-01 atau buat baru).
-  Steps        :
-    1. Buka Add Candidate, isi First/Last Name baru, tapi Email persis
-       sama dengan candidate existing.
-    2. Lengkapi field wajib lain, Save.
-  Expected     : Dokumentasikan perilaku aktual via report.check() --
-                 apakah app mengizinkan 2 candidate berbeda nama dengan
-                 email sama (duga YA, karena tidak ada indikasi unique
-                 constraint dari discovery sebelumnya), atau ditolak
-                 dengan pesan duplikat. WAJIB diverifikasi live, jangan
-                 diasumsikan dari pola PIM employee (yang punya email
-                 unique constraint berbeda).
-  [HASIL KONFIRMASI, STATUS: DONE] Dugaan "YA diizinkan" BENAR,
-  dikonfirmasi live: kedua candidate (nama berbeda, email identik)
-  berhasil tersimpan (POST 200), tidak ada pesan duplikat sama sekali.
-  Didokumentasikan via report.finding(). Spec:
-  tests/recruitment/candidates/TC-RECRUITMENT-CANDIDATE-14-Verify-Duplicate-Email-Allowed.spec.ts
+14   TC-RECRUITMENT-CANDIDATE-14   [DONE]   TC-RECRUITMENT-CANDIDATE-14-Verify-Duplicate-Email-Allowed.spec.ts
+                             (-) [TEMUAN] Verify a Second Candidate With a Duplicate Email
+                             -> Buat candidate pertama dengan Email X (unik).
+                             -> Buat candidate kedua dengan First/Last Name
+                                BARU tapi Email X yang SAMA PERSIS.
+                             [API VERIFICATION]
+                             -> Verify candidate pertama berhasil (POST 200).
+                             NOTE: [TEMUAN] TIDAK ADA unique constraint pada
+                                   Email candidate -- candidate kedua
+                                   (nama berbeda, email identik) BERHASIL
+                                   tersimpan (POST 200), tidak ada pesan
+                                   duplikat apa pun. Berbeda dengan PIM
+                                   employee yang punya unique constraint
+                                   Employee Id. Didokumentasikan via
+                                   report.finding(), bukan pass/fail tegas.
 
-TC-RECRUITMENT-CANDIDATE-15  (S)  API negative: DELETE candidate dengan id tidak valid
-  Steps        :
-    1. Via request context, DELETE ke /api/v2/recruitment/candidates
-       dengan body {"ids":[999999999]} (id yang hampir pasti tidak ada).
-    2. Ulangi dengan {"ids":[]} (array kosong).
-    3. Ulangi dengan body malformed (bukan array, mis. {"ids":"abc"}).
-  Expected     :
-    - Id tidak ada: response TIDAK 500, idealnya 200 dengan 0 row
-      terhapus atau 404, bukan crash server.
-    - Array kosong: ditolak dengan 400 atau no-op aman, tidak boleh
-      menghapus seluruh tabel candidates (edge case destruktif yang
-      WAJIB dipastikan aman sebelum dites, hindari dijalankan terhadap
-      id asli produksi-like data shared demo).
-    - Body malformed: 400, bukan 500.
-  CATATAN      : TC ini punya risiko destruktif tinggi di shared demo --
-                 review manual payload sebelum eksekusi, JANGAN pernah
-                 kirim array berisi id candidate asli milik TC lain.
-  [HASIL KONFIRMASI, STATUS: DONE] Semua kasus aman, TIDAK ADA 500:
-  id=999999999 -> 404 "Records Not Found". ids=[] (array kosong) -> 404
-  SAMA (no-op aman, TIDAK menghapus seluruh tabel). ids="abc" (malformed)
-  -> 422 "Invalid Parameter" dengan invalidParamKeys=["ids"]. Spec:
-  tests/recruitment/candidates/TC-RECRUITMENT-CANDIDATE-15-Verify-API-Negative-DELETE-Candidate.spec.ts
+15   TC-RECRUITMENT-CANDIDATE-15   [DONE]   TC-RECRUITMENT-CANDIDATE-15-Verify-API-Negative-DELETE-Candidate.spec.ts
+                             (S) [API] Verify DELETE Candidates With Invalid Payloads Is Handled Safely
+                             -> DELETE /api/v2/recruitment/candidates dengan
+                                body {"ids":[999999999]} (id hampir pasti
+                                tidak ada).
+                             -> DELETE dengan body {"ids":[]} (array kosong).
+                             -> DELETE dengan body {"ids":"abc"} (malformed).
+                             [API VERIFICATION]
+                             -> Verify SEMUA 3 kasus status BUKAN 500.
+                             -> Verify id tidak ada -> 404 "Records Not Found".
+                             -> Verify array kosong -> 404 SAMA (no-op aman,
+                                TIDAK menghapus seluruh tabel candidates).
+                             -> Verify body malformed -> 422 "Invalid
+                                Parameter" dengan invalidParamKeys=["ids"].
+                             NOTE: [PERINGATAN DESTRUKTIF, DIPATUHI] TC ini
+                                   HANYA mengirim payload yang sudah
+                                   diverifikasi aman sebelum ditulis sebagai
+                                   spec -- TIDAK PERNAH mengirim id candidate
+                                   asli milik TC lain di suite ini.
 
-TC-RECRUITMENT-CANDIDATE-16  (B)  Resume tepat di batas 1MB (bukan di atasnya)
-  Steps        : Upload file resume dengan ukuran persis/sangat dekat ke
-                 batas 1MB (mis. 1,048,576 bytes persis, dan terpisah
-                 1 byte di bawahnya), Save.
-  Expected     : File persis di/bawah batas DITERIMA (200), berbeda dari
-                 CANDIDATE-07 yang membuktikan di ATAS batas ditolak.
-                 Menutup celah: CANDIDATE-07 cuma membuktikan "terlalu
-                 besar ditolak", TC ini membuktikan batas pastinya exact
-                 bukan off-by-one.
-  [HASIL KONFIRMASI, STATUS: DONE] Batas pastinya 1,048,576 bytes (1 MiB)
-  INKLUSIF: 1,048,575 dan 1,048,576 bytes DITERIMA (POST 200); 1,048,577
-  bytes DITOLAK ("Attachment Size Exceeded"). Spec:
-  tests/recruitment/candidates/TC-RECRUITMENT-CANDIDATE-16-Verify-Resume-Exact-1MB-Boundary.spec.ts
+16   TC-RECRUITMENT-CANDIDATE-16   [DONE]   TC-RECRUITMENT-CANDIDATE-16-Verify-Resume-Exact-1MB-Boundary.spec.ts
+                             (B) Verify a Resume Exactly at the 1MB Limit Is Accepted
+                             -> Isi field wajib, upload resume PERSIS
+                                1,048,576 bytes (1 MiB).
+                             [API VERIFICATION]
+                             -> Verify tidak ada pesan error validasi ukuran
+                                sebelum Save.
+                             -> Verify response.status() === 200 (file
+                                persis 1MB diterima).
+                             NOTE: Menutup celah CANDIDATE-07 (yang cuma
+                                   membuktikan "terlalu besar ditolak") --
+                                   batas pastinya 1,048,576 bytes (1 MiB)
+                                   INKLUSIF: 1,048,575 dan 1,048,576 bytes
+                                   DITERIMA, 1,048,577 bytes DITOLAK
+                                   ("Attachment Size Exceeded").
 
 --------------------------------------------------------------------------------
   STATUS WORKFLOW - GAP TAMBAHAN
 --------------------------------------------------------------------------------
 
-TC-RECRUITMENT-STATUS-10  (+)  Interview Scheduled -> Mark Interview Passed
-  Precondition : Candidate baru di status Interview Scheduled (pakai
-                 scheduleInterviewForCandidate dari
-                 advanceCandidateStatus.ts, pola sama dengan STATUS-04).
-  Steps        :
-    1. gotoDetail() candidate, tunggu ~3 detik (pola wajib yang sudah
-       didokumentasikan untuk lag render tombol aksi async).
-    2. Klik tombol "Mark Interview Passed".
-    3. Isi form konfirmasi (kalau ada field tambahan, dokumentasikan apa
-       saja field-nya -- belum pernah dieksplorasi sebelumnya).
-    4. Save, intersep PUT/POST ke endpoint status.
-  Expected     :
-    - Response 200.
-    - Current Status candidate berubah jadi status baru pasca "Passed"
-      (dokumentasikan nama status PERSIS apa adanya dari UI, jangan
-      diasumsikan namanya "Hired" atau semacamnya sebelum dikonfirmasi
-      live).
-    - Candidate History mencatat transisi ini.
-  [HASIL KONFIRMASI, STATUS: DONE] Form konfirmasi HANYA field readonly
-  (Candidate/Vacancy/Hiring Manager/Current Status) + Notes, tidak ada
-  field tambahan. Endpoint asli: PUT /api/v2/recruitment/candidates/<id>/
-  interviews/<interviewId>/pass, body {"note": null} kalau Notes kosong.
-  Status PERSIS berubah jadi "Interview Passed" (BUKAN "Hired"). Candidate
-  History bertambah 1 baris. Spec:
-  tests/recruitment/status-workflow/TC-RECRUITMENT-STATUS-10-Verify-Mark-Interview-Passed.spec.ts
+10   TC-RECRUITMENT-STATUS-10   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-10-Verify-Mark-Interview-Passed.spec.ts
+                             (+) Verify Marking an Interview Scheduled Candidate as Passed Succeeds
+                             -> Buat candidate baru, Shortlist, Schedule
+                                Interview (sampai status Interview
+                                Scheduled).
+                             -> gotoDetail(), tunggu ~3 detik, catat jumlah
+                                baris Candidate History SEBELUM.
+                             -> Klik tombol "Mark Interview Passed".
+                             -> Intercept PUT
+                                .../candidates/<id>/interviews/<interviewId>/pass
+                                (non-GET).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify status berubah jadi "Interview
+                                Passed" (BUKAN "Hired").
+                             -> Verify jumlah baris Candidate History
+                                bertambah.
+                             NOTE: Form konfirmasi HANYA berisi field
+                                   readonly (Candidate/Vacancy/Hiring
+                                   Manager/Current Status) + Notes, tidak
+                                   ada field tambahan. Body request
+                                   {"note": null} kalau Notes dikosongkan.
+                                   BLOCKED oleh BG-007 (precondition
+                                   Shortlist gagal duluan).
 
-TC-RECRUITMENT-STATUS-11  (!)  Status pasca "Interview Passed": aksi lanjutan apa saja yang tersedia
-  Precondition : Lanjutan STATUS-10.
-  Steps        : Di halaman detail candidate dengan status pasca-Passed,
-                 tunggu render tombol aksi (~3 detik), screenshot/catat
-                 tombol aksi apa saja yang muncul.
-  Expected     : Dokumentasikan via report.finding() apakah status ini
-                 TERMINAL (tidak ada tombol aksi lain, mirip Rejected)
-                 atau masih punya transisi lanjutan (mis. ke "Job
-                 Offered" / "Hired" kalau OrangeHRM punya tahap itu).
-                 Update diagram STATE MACHINE di bagian CATATAN TEKNIS
-                 dokumen ini begitu hasilnya dikonfirmasi.
-  [HASIL KONFIRMASI, STATUS: DONE] "Interview Passed" BUKAN terminal.
-  Tombol aksi yang tersedia: "Reject", "Schedule Interview" (ronde
-  interview lain), dan "Offer Job" (state lanjutan ini sendiri belum
-  dieksplorasi, di luar scope TC ini). Diagram STATE MACHINE di bagian
-  CATATAN TEKNIS sudah diupdate. Spec:
-  tests/recruitment/status-workflow/TC-RECRUITMENT-STATUS-11-Verify-Post-Passed-Available-Actions.spec.ts
+11   TC-RECRUITMENT-STATUS-11   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-11-Verify-Post-Passed-Available-Actions.spec.ts
+                             (!) [TEMUAN] Verify Available Actions After Interview Passed
+                             -> Buat candidate, Shortlist, Schedule
+                                Interview, Mark Interview Passed.
+                             -> gotoDetail(), tunggu render tombol aksi (~3
+                                detik), cek visibility 6 kemungkinan label
+                                tombol aksi (Reject, Shortlist, Schedule
+                                Interview, Mark Interview Passed, Mark
+                                Interview Failed, Offer Job).
+                             [UI VERIFICATION]
+                             -> Verify status = "Interview Passed".
+                             -> Verify TC dijalankan tanpa exception.
+                             NOTE: [TEMUAN] "Interview Passed" BUKAN
+                                   terminal. Tombol aksi yang tersedia:
+                                   "Reject", "Schedule Interview" (ronde
+                                   interview lain), dan "Offer Job" --
+                                   masih punya transisi lanjutan, berbeda
+                                   dari "Rejected"/"Interview Failed" yang
+                                   memang terminal. Diagram STATE MACHINE di
+                                   bagian CATATAN TEKNIS sudah diupdate.
+                                   BLOCKED oleh BG-007 (precondition
+                                   Shortlist gagal duluan).
 
 --------------------------------------------------------------------------------
   SECURITY TAMBAHAN (ditemukan via security testing checklist: IDOR,
@@ -661,107 +1007,103 @@ TC-RECRUITMENT-STATUS-11  (!)  Status pasca "Interview Passed": aksi lanjutan ap
   payload di input field)
 --------------------------------------------------------------------------------
 
-TC-RECRUITMENT-SECURITY-01  (S)  IDOR: akses/ubah candidate milik request lain via manipulasi ID
-  Steps        :
-    1. Buat 2 candidate berbeda (candidate A id=X, candidate B id=Y) di
-       sesi yang sama.
-    2. Lewat request context langsung (bukan UI), kirim GET ke
-       /api/v2/recruitment/candidates/<Y> memakai parameter/payload yang
-       seharusnya scoped ke candidate A kalau ada logic scoping per-user
-       (catatan: di OrangeHRM demo publik semua admin melihat semua data,
-       jadi TC ini kemungkinan besar hasilnya "tidak ada isolasi", WAJIB
-       didokumentasikan sebagai baseline, bukan diasumsikan aman).
-    3. Ulangi untuk endpoint changeCandidateVacancyStatus: coba kirim PUT
-       status action untuk candidate id milik TC lain yang sedang
-       berjalan paralel.
-  Expected     : Dokumentasikan hasil aktual via report.check()/
-                 report.finding(). Kalau akses granular per-role memang
-                 tidak ada di aplikasi ini (single admin role di demo),
-                 catat sebagai "N/A - arsitektur single-role", bukan
-                 PASS/FAIL palsu.
-  [HASIL KONFIRMASI, STATUS: DONE] Sesuai dugaan: TIDAK ADA isolasi. GET
-  /candidates/<id lain> -> 200 (berhasil diakses lintas-candidate dari
-  sesi admin yang sama). Didokumentasikan sebagai N/A - arsitektur
-  single-role via report.finding(), bukan PASS/FAIL palsu. [TEMUAN
-  TAMBAHAN, bukan fokus TC ini] PUT .../shortlist dengan body {} (tanpa
-  payload) sempat mengembalikan 500 pada satu kali run -- dicatat sebagai
-  observasi minor robustness, bukan temuan IDOR. Spec:
-  tests/recruitment/security/TC-RECRUITMENT-SECURITY-01-Verify-IDOR-Candidate-Access.spec.ts
+51   TC-RECRUITMENT-SECURITY-01   [DONE]   TC-RECRUITMENT-SECURITY-01-Verify-IDOR-Candidate-Access.spec.ts
+                             (S) Verify Cross-Candidate Access via ID Manipulation (IDOR)
+                             -> Buat 2 candidate berbeda (A dan B) di sesi
+                                yang sama.
+                             -> [API] GET candidate B langsung via request
+                                context (satu sesi admin yang sama).
+                             -> [API] PUT status action (shortlist) untuk
+                                candidate A dari sesi ini.
+                             [API VERIFICATION]
+                             -> Verify candidate A dan B berhasil dibuat
+                                dengan id berbeda.
+                             NOTE: [BASELINE ARSITEKTUR] Sesuai dugaan:
+                                   TIDAK ADA isolasi. GET candidate lain ->
+                                   200 (berhasil diakses lintas-candidate).
+                                   Didokumentasikan sebagai N/A -
+                                   arsitektur single-role via
+                                   report.finding() (OrangeHRM demo publik
+                                   ini single admin role, tidak ada
+                                   multi-tenant scoping), BUKAN PASS/FAIL
+                                   palsu. [TEMUAN TAMBAHAN, bukan fokus TC
+                                   ini] PUT .../shortlist dengan body {}
+                                   (tanpa payload) sempat mengembalikan 500
+                                   pada satu kali run -- dicatat sebagai
+                                   observasi minor robustness, bukan temuan
+                                   IDOR.
 
-TC-RECRUITMENT-SECURITY-02  (S)  Security response headers pada endpoint recruitment
-  Steps        : Intersep response header dari GET
-                 /api/v2/recruitment/vacancies dan
-                 /api/v2/recruitment/candidates, cek header:
-                 X-Content-Type-Options, X-Frame-Options,
-                 Strict-Transport-Security, Content-Security-Policy.
-  Expected     : Dokumentasikan header apa saja yang ADA vs TIDAK ADA
-                 (baseline, bukan hard fail -- demo publik OrangeHRM
-                 kemungkinan tidak strict di sisi ini, tapi tetap perlu
-                 tercatat sebagai temuan kalau header kritikal macam
-                 X-Frame-Options memang absen, karena itu celah
-                 clickjacking yang valid untuk dilaporkan).
-  [HASIL KONFIRMASI, STATUS: DONE] ADA: X-Content-Type-Options: nosniff,
-  X-XSS-Protection, Strict-Transport-Security, Content-Security-Policy,
-  Public-Key-Pins. [RISIKO, TEMUAN] TIDAK ADA: X-Frame-Options -- celah
-  clickjacking yang valid, dicatat sebagai finding risiko. Spec:
-  tests/recruitment/security/TC-RECRUITMENT-SECURITY-02-Verify-Security-Response-Headers.spec.ts
+52   TC-RECRUITMENT-SECURITY-02   [FAIL]   TC-RECRUITMENT-SECURITY-02-Verify-Security-Response-Headers.spec.ts
+                             (S) Verify Security Response Headers on Recruitment API Endpoints
+                             -> [API] GET /api/v2/recruitment/vacancies, cek
+                                header X-Content-Type-Options,
+                                X-Frame-Options, Strict-Transport-Security,
+                                Content-Security-Policy.
+                             -> [API] GET /api/v2/recruitment/candidates,
+                                cek header yang sama.
+                             [API VERIFICATION]
+                             -> Verify KEDUA endpoint punya proteksi
+                                clickjacking (X-Frame-Options ATAU CSP
+                                frame-ancestors).
+                             NOTE: [BUG TERKONFIRMASI -- BG-066, Severity
+                                   Medium, Category "Security Finding"] ADA:
+                                   X-Content-Type-Options, X-XSS-Protection,
+                                   Strict-Transport-Security,
+                                   Content-Security-Policy, Public-Key-Pins.
+                                   TIDAK ADA: X-Frame-Options maupun CSP
+                                   frame-ancestors. [ESCALATION 2026-11-11]
+                                   Diubah dari report.finding()-only (selalu
+                                   PASS) jadi report.check() hard-fail,
+                                   konsisten dengan TC-LOGIN-43. Ini
+                                   KONFIRMASI KEDUA gap yang sama persis
+                                   juga ditemukan di Login (BG-030) dan
+                                   kemudian PIM (BG-096) -- indikasi kuat
+                                   gap konfigurasi APP-WIDE level
+                                   web-server, bukan 3 kasus terisolasi.
 
-  [ESCALATION, 2026-11-11] Diubah dari report.finding()-only (selalu PASS)
-  jadi report.check() hard-fail, konsisten dengan TC-LOGIN-43: absennya
-  X-Frame-Options/CSP frame-ancestors sekarang bikin TC ini FAIL dengan
-  benar dan otomatis tercatat ke Bug-List -> BG-066 (Severity Medium,
-  Category "Security Finding"). Ini KONFIRMASI KEDUA gap yang sama persis
-  juga ditemukan di Login (BG-030) dan kemudian PIM (BG-096) -- indikasi
-  kuat gap konfigurasi APP-WIDE level web-server, bukan 3 kasus terisolasi.
-  STATUS: [FAIL] (sesuai desain, bukan bug script).
+53   TC-RECRUITMENT-SECURITY-03   [FAIL]   TC-RECRUITMENT-SECURITY-03-Verify-Rate-Limiting-Candidate-Create.spec.ts
+                             (S) Verify Rate Limiting on POST Candidates Under Rapid Repeated Requests
+                             -> Kirim POST /api/v2/recruitment/candidates
+                                10x berturut-turut dalam waktu singkat
+                                (lewat request context, bukan UI).
+                             -> Semua candidate ditandai firstName persis
+                                "QaRateLimitTest" untuk identifikasi/cleanup
+                                manual.
+                             [API VERIFICATION]
+                             -> Verify minimal 1 dari 10 request kena
+                                429/throttle.
+                             NOTE: [BUG TERKONFIRMASI -- BG-067, Severity
+                                   Medium, Category "Security Finding"]
+                                   TIDAK ADA rate limiting terdeteksi:
+                                   10/10 POST berhasil 200 tanpa
+                                   throttle/429. [ESCALATION 2026-11-11]
+                                   Diubah dari report.finding()-only (selalu
+                                   PASS) jadi report.check() hard-fail,
+                                   konsisten dengan TC-LOGIN-37: endpoint
+                                   create candidate tanpa rate limiting
+                                   adalah celah spam/data-sampah nyata.
+                                   [PERINGATAN] TC ini MUTATIF, menambah
+                                   data sampah ke demo publik.
 
-TC-RECRUITMENT-SECURITY-03  (S)  Rate limiting / brute-force protection pada endpoint mutasi recruitment
-  Steps        : Kirim POST /api/v2/recruitment/candidates berulang kali
-                 (mis. 20x) dalam waktu singkat dari request context yang
-                 sama (bukan via UI, supaya cepat), hitung berapa yang
-                 berhasil 200 vs kena throttle (429) atau diblokir.
-  Expected     : Dokumentasikan ada/tidaknya rate limiting via
-                 report.finding(). Kalau TIDAK ADA limit sama sekali,
-                 catat sebagai finding risiko (endpoint create candidate
-                 bisa dibanjiri data sampah tanpa hambatan).
-                 [PERINGATAN] TC ini MUTATIF dan menambah banyak data
-                 sampah ke demo publik -- jalankan dengan hati-hati,
-                 idealnya pakai email/nama yang jelas bertanda "test
-                 cleanup candidate" supaya gampang diidentifikasi kalau
-                 perlu dibersihkan manual.
-  [HASIL KONFIRMASI, STATUS: DONE] [RISIKO, TEMUAN] TIDAK ADA rate
-  limiting terdeteksi: 10/10 POST (dikurangi dari 20 yang disarankan,
-  demi mengurangi volume data sampah) berhasil 200 tanpa throttle/429.
-  Semua candidate dibuat dengan firstName persis "QaRateLimitTest" untuk
-  identifikasi/cleanup manual. Spec:
-  tests/recruitment/security/TC-RECRUITMENT-SECURITY-03-Verify-Rate-Limiting-Candidate-Create.spec.ts
-
-  [ESCALATION, 2026-11-11] Diubah dari report.finding()-only (selalu PASS)
-  jadi report.check() hard-fail (minimal 1 dari 10 request harus kena
-  429), konsisten dengan TC-LOGIN-37: endpoint create candidate tanpa
-  rate limiting adalah celah spam/data-sampah nyata. FAIL dengan benar,
-  otomatis tercatat -> BG-067 (Severity Medium, Category "Security
-  Finding"). STATUS: [FAIL] (sesuai desain, bukan bug script).
-
---------------------------------------------------------------------------------
-  SECURITY TAMBAHAN ROUND 2 (ditambahkan 2026-11-11, mengikuti pola yang
-  sudah ditetapkan di Login (TC-LOGIN-41 CSRF))
---------------------------------------------------------------------------------
-
-TC-RECRUITMENT-SECURITY-05  (S)  Cross-origin mutation request (CSRF) pada endpoint create vacancy  [STATUS: DONE, PASSED]
-  Steps        : Dari tab browser di origin eksternal (https://example.com),
-                 fetch() POST JSON langsung ke
-                 /api/v2/recruitment/vacancies dengan credentials:'include'
-                 (membawa cookie sesi admin yang sedang login).
-  Expected     : Request DIBLOKIR di level browser (CORS), bukan diproses
-                 server -- endpoint ini API-style (JSON body), beda dari
-                 Login yang form-based, jadi mekanisme proteksinya CORS
-                 preflight, bukan SameSite cookie.
-  [HASIL KONFIRMASI, STATUS: DONE, PASSED] Fetch cross-origin dengan
-  kredensial GAGAL total di level browser (CORS memblokir sebelum request
-  sampai diproses server) -- proteksi CSRF pada endpoint mutasi
-  Recruitment EFEKTIF. Spec:
-  tests/recruitment/security/TC-RECRUITMENT-SECURITY-05-Verify-Cross-Origin-Mutation-Blocked.spec.ts
+54   TC-RECRUITMENT-SECURITY-05   [DONE]   TC-RECRUITMENT-SECURITY-05-Verify-Cross-Origin-Mutation-Blocked.spec.ts
+                             (S) Verify Cross-Origin Mutation Request (CSRF) on Create Vacancy Endpoint
+                             -> Dari tab browser di origin eksternal
+                                (https://example.com), fetch() POST JSON
+                                langsung ke /api/v2/recruitment/vacancies
+                                dengan credentials:'include' (membawa cookie
+                                sesi admin yang sedang login).
+                             [API VERIFICATION]
+                             -> Verify request DIBLOKIR di level browser
+                                (CORS), bukan diproses server.
+                             NOTE: [TEMUAN POSITIF] Fetch cross-origin
+                                   dengan kredensial GAGAL TOTAL di level
+                                   browser (CORS memblokir sebelum request
+                                   sampai diproses server) -- proteksi CSRF
+                                   pada endpoint mutasi Recruitment EFEKTIF.
+                                   Endpoint ini API-style (JSON body), beda
+                                   dari Login yang form-based, jadi
+                                   mekanisme proteksinya CORS preflight,
+                                   bukan SameSite cookie.
 
 --------------------------------------------------------------------------------
   GAP ROUND 2 (ditemukan setelah audit ulang pasca-46-TC)  [STATUS: DONE]
@@ -772,208 +1114,219 @@ TC-RECRUITMENT-SECURITY-05  (S)  Cross-origin mutation request (CSRF) pada endpo
   di tiap TC untuk detail temuan.
 --------------------------------------------------------------------------------
 
-TC-RECRUITMENT-VACANCY-17  (!)  Pagination & sorting di Vacancies list  [STATUS: DONE]
-  Precondition : Pastikan ada cukup banyak vacancy (demo publik biasanya
-                 sudah punya banyak seeded data + hasil TC lain; kalau
-                 kurang dari 1 halaman, buat beberapa via
-                 createTestVacancy.ts dulu).
-  Steps        :
-    1. Buka Vacancies list, cek apakah ada kontrol pagination (page
-       size selector, next/prev).
-    2. Kalau ada, pindah ke halaman berikutnya, cek data tidak duplikat
-       dengan halaman pertama.
-    3. Cek apakah kolom bisa di-sort (klik header kolom "Vacancy Name"
-       atau "Positions" kalau ada indikator sortable).
-  Expected     : Dokumentasikan via report.check()/report.finding() --
-                 kontrol apa saja yang benar-benar ada (JANGAN asumsikan
-                 dari pola Candidates list, verifikasi live dulu apakah
-                 Vacancies list bahkan punya pagination, karena jumlah
-                 vacancy biasanya jauh lebih sedikit dari candidate).
-  [HASIL KONFIRMASI, STATUS: DONE, PASSED]
-    Vacancies list TIDAK punya kontrol pagination sama sekali (navigation
-    "Pagination Navigation" tidak pernah visible, karena jumlah vacancy di
-    demo publik ini selalu cukup untuk 1 halaman) -- dicatat N/A via
-    report.finding(), bukan bug. SEMUA 4 kolom (Vacancy, Job Title, Hiring
-    Manager, Status) punya dropdown sort Ascending/Descending, dikonfirmasi
-    live lewat innerHTML header row; sorting kolom "Vacancy" Ascending
-    berhasil dipicu tanpa error.
+17   TC-RECRUITMENT-VACANCY-17   [DONE]   TC-RECRUITMENT-VACANCY-17-Verify-List-Pagination-And-Sorting.spec.ts
+                             (!) Verify Pagination and Sorting on Vacancies List
+                             -> Buka Vacancies list, cek visibility kontrol
+                                pagination ("Pagination Navigation").
+                             -> Cek 4 kolom header (Vacancy, Job Title,
+                                Hiring Manager, Status) punya sort icon.
+                             -> Sort kolom "Vacancy" Ascending (kalau sortable).
+                             [UI VERIFICATION]
+                             -> Verify TC jalan tanpa exception.
+                             -> Verify minimal 1 kolom punya sort icon.
+                             -> Verify list tetap render setelah sort (tidak
+                                error/kosong tiba-tiba).
+                             NOTE: [TEMUAN] Vacancies list TIDAK punya kontrol
+                                   pagination sama sekali (navigation
+                                   "Pagination Navigation" tidak pernah
+                                   visible, karena jumlah vacancy di demo
+                                   publik ini selalu cukup untuk 1 halaman) --
+                                   dicatat N/A via report.finding(), bukan
+                                   bug. SEMUA 4 kolom punya dropdown sort
+                                   Ascending/Descending, dikonfirmasi live;
+                                   sorting kolom "Vacancy" Ascending berhasil
+                                   dipicu tanpa error.
 
-TC-RECRUITMENT-CANDIDATE-17  (+)  Filter Candidates list selain Candidate Name  [STATUS: DONE]
-  Precondition : CandidatesPage.ts saat ini cuma punya
-                 filterByCandidateName(); TC ini perlu discovery live
-                 dulu field filter apa saja yang ada di halaman list
-                 (duga: Vacancy, Status, Date Range -- WAJIB dikonfirmasi
-                 live, jangan asumsikan dari form Add Candidate).
-  Steps        :
-    1. Buka Candidates list, identifikasi semua field filter yang
-       tersedia.
-    2. Untuk tiap filter yang ADA (selain Candidate Name yang sudah
-       dites), jalankan filter dengan 1 value valid, verifikasi hasil
-       list ter-filter benar (semua row yang tampil memang cocok
-       kriteria).
-    3. Kombinasikan 2 filter sekaligus (mis. Vacancy + Status), cek hasil
-       gabungan (AND, bukan OR).
-  Expected     : Tiap filter individual dan kombinasinya mengembalikan
-                 hasil yang benar secara deterministik.
-  [HASIL KONFIRMASI, STATUS: DONE, PASSED]
-    Confirmed live via innerHTML form filter: ada 7 field total -- Job
-    Title (dropdown), Vacancy (dropdown), Hiring Manager (dropdown),
-    Status (dropdown), Candidate Name (autocomplete, sudah dites di
-    CANDIDATE-08), Keywords (free text), Date of Application (range
-    From/To). Dugaan awal gap-coverage doc (Vacancy/Status/Date Range)
-    BENAR tapi tidak lengkap. Filter by Vacancy saja -> semua baris cocok;
-    kombinasi Vacancy + Status ("Shortlisted") -> hasil AND yang benar
-    (subset dari hasil filter Vacancy saja), bukan OR.
+17   TC-RECRUITMENT-CANDIDATE-17   [DONE]   TC-RECRUITMENT-CANDIDATE-17-Verify-List-Filters-Combination.spec.ts
+                             (+) Verify List Filters Beyond Candidate Name, Individually and Combined
+                             -> Buat candidate baru, Shortlist (agar ada data
+                                pasti dengan Vacancy + Status yang diketahui).
+                             -> Buka Candidates list, filter by Vacancy saja,
+                                klik Search.
+                             -> Reset, filter kombinasi Vacancy + Status
+                                ("Shortlisted") sekaligus, klik Search.
+                             [UI VERIFICATION]
+                             -> Verify filter by Vacancy mengembalikan hasil
+                                (>0 baris), semua baris memang milik vacancy
+                                yang dipilih.
+                             -> Verify filter kombinasi mengembalikan hasil
+                                (>0 baris), hasilnya AND (semua baris cocok
+                                Vacancy DAN Status, bukan OR, dan candidate
+                                kita sendiri ditemukan di hasil).
+                             NOTE: [TEMUAN] Ada 7 field filter total -- Job
+                                   Title (dropdown), Vacancy (dropdown),
+                                   Hiring Manager (dropdown), Status
+                                   (dropdown), Candidate Name (autocomplete,
+                                   sudah dites CANDIDATE-08), Keywords (free
+                                   text), Date of Application (range
+                                   From/To). Dugaan awal gap-coverage doc
+                                   (Vacancy/Status/Date Range) BENAR tapi
+                                   tidak lengkap -- Job Title dan Hiring
+                                   Manager juga ada sebagai filter terpisah.
 
-TC-RECRUITMENT-CANDIDATE-18  (+)  Resume yang sudah diupload bisa dibuka/didownload utuh  [STATUS: DONE]
-  Precondition : Candidate dengan resume ter-upload (hasil CANDIDATE-01).
-  Steps        :
-    1. Buka detail candidate tsb, cari link/tombol untuk melihat atau
-       mendownload resume.
-    2. Klik, intersep response/download.
-    3. Bandingkan ukuran file yang didownload dengan file asli yang
-       diupload.
-  Expected     : File yang didownload identik (ukuran sama, bisa dibuka)
-                 dengan file yang diupload saat Add Candidate -- bukan
-                 cuma "upload diterima" seperti TC-01/07/16 yang sudah
-                 ada, tapi membuktikan file tidak corrupt di sisi
-                 storage/retrieval.
-  [HASIL KONFIRMASI, STATUS: DONE, PASSED -- KOREKSI OBSERVASI AWAL]
-    Pada percobaan pertama, field Resume tampak kosong ("Browse" / "No
-    file selected"), karena tertangkap SEBELUM data candidate selesai
-    dimuat (race antara gotoDetail() dan GET awal, bukan race di
-    aplikasi). Setelah wait ~5s (pola sama dengan tombol aksi status),
-    field Resume dirender ulang sebagai .orangehrm-file-current berisi
-    nama file ("resume.pdf", title attribute cocok) DAN ikon download
-    (i.orangehrm-file-download) yang NYATA mentrigger event `download`
-    browser. File yang didownload ukurannya identik (45 byte, sama
-    dengan file yang diupload saat createTestCandidate), suggestedFilename
-    = "resume.pdf". Fitur view/download resume ADA dan BERFUNGSI -- bukan
-    N/A seperti sempat terlihat sebelum wait cukup lama.
+18   TC-RECRUITMENT-CANDIDATE-18   [DONE]   TC-RECRUITMENT-CANDIDATE-18-Verify-Resume-View-Download.spec.ts
+                             (+) Verify an Uploaded Resume Can Be Downloaded Intact From the Detail Page
+                             -> Buat candidate baru dengan resume ter-upload
+                                (createTestCandidate, resume.pdf).
+                             -> Buka detail candidate, tunggu render
+                                Candidate Profile (~5s).
+                             -> Klik ikon download resume, intersep event
+                                download browser.
+                             [UI VERIFICATION]
+                             -> Verify nama file resume ("resume.pdf")
+                                ditampilkan di Candidate Profile, title
+                                attribute sesuai file yang diupload.
+                             -> Verify ikon download tersedia dan bisa diklik.
+                             -> Verify event download browser terpicu setelah
+                                klik, suggestedFilename() === "resume.pdf".
+                             -> Verify file yang didownload tidak
+                                kosong/corrupt (ukuran > 0 byte).
+                             NOTE: [KOREKSI OBSERVASI AWAL] Pada percobaan
+                                   pertama field Resume tampak kosong ("No
+                                   file selected"), karena tertangkap
+                                   SEBELUM data candidate selesai dimuat
+                                   (race antara gotoDetail() dan GET awal,
+                                   BUKAN race di aplikasi). Setelah wait ~5s
+                                   (pola sama dengan tombol aksi status),
+                                   field Resume dirender ulang dengan benar
+                                   sebagai .orangehrm-file-current berisi
+                                   nama file ("resume.pdf", title attribute
+                                   cocok) DAN ikon download yang NYATA
+                                   mentrigger event download browser. File
+                                   yang didownload ukurannya identik (45
+                                   byte, sama dengan file yang diupload saat
+                                   createTestCandidate). Fitur view/download
+                                   resume ADA dan BERFUNGSI -- bukan N/A
+                                   seperti sempat terlihat sebelum wait
+                                   cukup lama.
 
-TC-RECRUITMENT-STATUS-12  (+)  Alur lanjutan setelah "Interview Passed": Offer Job sampai status akhir  [STATUS: DONE]
-  Precondition : Candidate di status "Interview Passed" (hasil STATUS-10).
-  Steps        :
-    1. gotoDetail(), tunggu render tombol aksi (~3 detik).
-    2. Klik tombol "Offer Job" (atau nama persis tombol yang dikonfirmasi
-       muncul di STATUS-11).
-    3. Isi form konfirmasi (dokumentasikan field apa saja, belum pernah
-       dieksplorasi), Save.
-    4. Cek Current Status & Candidate History.
-    5. Dari status baru itu, cek lagi tombol aksi apa yang tersedia
-       (apakah ada "Mark as Hired" atau semacamnya, lanjutkan sampai
-       benar-benar mentok di status TERMINAL).
-  Expected     : Dokumentasikan state machine LENGKAP sampai status akhir
-                 candidate yang diterima kerja (nama status PERSIS apa
-                 adanya dari UI), update diagram STATE MACHINE di bagian
-                 CATATAN TEKNIS dokumen ini.
-  [HASIL KONFIRMASI, STATUS: DONE, PASSED]
-    State machine LENGKAP dikonfirmasi live: Application Initiated ->
-    Shortlisted -> Interview Scheduled -> Interview Passed -> Job Offered
-    -> Hired (TERMINAL -- tidak ada tombol aksi lanjutan sama sekali dari
-    status ini). Nama tombol/status PERSIS dari UI: "Offer Job" (PUT
-    .../candidates/<id>/job/offer -> 200, status baru = "Job Offered"),
-    lalu dari "Job Offered" tombol aksi yang tersedia adalah "Reject",
-    "Offer Declined", "Hire" (BUKAN "Mark as Hired" seperti diduga).
-    Klik "Hire" -> status akhir PERSIS "Hired", dikonfirmasi tidak ada
-    tombol aksi apa pun lagi yang visible (TERMINAL sesungguhnya,
-    berbeda dari "Interview Passed" yang BUKAN terminal). Form Offer Job
-    hanya punya field readonly (Candidate/Vacancy/Hiring Manager/Current
-    Status) + Notes (textarea, optional).
+12   TC-RECRUITMENT-STATUS-12   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-12-Verify-Offer-Job-To-Hired.spec.ts
+                             (+) Verify Offer Job to Hired, Full State Machine Chain
+                             -> Buat candidate, Shortlist, Schedule
+                                Interview, Mark Interview Passed.
+                             -> Klik "Offer Job", isi form (field readonly +
+                                Notes opsional), Save.
+                             -> Dari "Job Offered", catat tombol aksi yang
+                                tersedia (cek 5 kemungkinan label).
+                             -> Klik "Hire" (kalau tersedia), Save.
+                             [API VERIFICATION]
+                             -> Verify status setelah Offer Job = "Job
+                                Offered".
+                             [UI VERIFICATION]
+                             -> Verify ada minimal 1 aksi lanjutan dari "Job
+                                Offered".
+                             -> Verify status akhir terbaca setelah Hire.
+                             -> Verify status setelah "Hire" bersifat
+                                TERMINAL (tidak ada tombol aksi lanjutan).
+                             NOTE: State machine LENGKAP dikonfirmasi live:
+                                   Application Initiated -> Shortlisted ->
+                                   Interview Scheduled -> Interview Passed
+                                   -> Job Offered -> Hired (TERMINAL). Dari
+                                   "Job Offered" tombol aksi yang tersedia:
+                                   "Reject", "Offer Declined", "Hire"
+                                   (BUKAN "Mark as Hired" seperti diduga).
+                                   BLOCKED oleh BG-007 (precondition
+                                   Shortlist gagal duluan).
 
-TC-RECRUITMENT-STATUS-13  (+)  Schedule Interview dengan multiple interviewer ("+ Add Another")  [STATUS: DONE]
-  Precondition : Candidate di status Shortlisted.
-  Steps        :
-    1. Buka form Schedule Interview.
-    2. Isi Interviewer pertama (async autocomplete, pola sama dengan
-       fillFirstHiringManager/selectFirstInterviewer).
-    3. Klik "+ Add Another", isi Interviewer kedua yang BEDA dari yang
-       pertama.
-    4. Lengkapi field wajib lain, Save.
-  Expected     : Response 200, kedua interviewer tersimpan (verifikasi
-                 lewat response body atau re-buka form edit interview
-                 kalau ada, cek keduanya muncul).
-  [HASIL KONFIRMASI, STATUS: DONE, PASSED]
-    Tombol "+ Add Another" ADA (button dengan ikon "+" + teks " Add
-    Another ", bukan exact-text node tanpa spasi -- perlu getByRole
-    'button' bukan getByText). Request Schedule Interview sebenarnya
-    adalah POST (bukan PUT) ke
-    .../candidates/<id>/shedule-interview dengan body
-    {interviewName, interviewDate, interviewTime, note,
-    interviewerEmpNumbers: number[]}. Setelah isi interviewer pertama +
-    klik "+ Add Another" + isi interviewer kedua (beda nama) -> Save ->
-    response 200, body data.interviewers berisi PERSIS 2 entry employee
-    yang berbeda, confirmed live.
+13   TC-RECRUITMENT-STATUS-13   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-13-Verify-Schedule-Interview-Multiple-Interviewers.spec.ts
+                             (+) Verify Schedule Interview With Multiple Interviewers via "+ Add Another"
+                             -> Buat candidate, Shortlist.
+                             -> Buka form Schedule Interview, isi Interview
+                                Title + Interviewer pertama.
+                             -> Klik "+ Add Another", isi Interviewer kedua
+                                (BEDA dari yang pertama), isi Date.
+                             -> Intercept POST .../shedule-interview
+                                (non-GET).
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify response body data.interviewers
+                                berisi PERSIS 2 entry.
+                             NOTE: Tombol "+ Add Another" ADA (button
+                                   dengan ikon "+" + teks, perlu getByRole
+                                   'button' bukan getByText karena bukan
+                                   exact-text node). Request Schedule
+                                   Interview sebenarnya POST (bukan PUT).
+                                   BLOCKED oleh BG-007 (precondition
+                                   Shortlist gagal duluan).
 
-TC-RECRUITMENT-STATUS-14  (-)  Reject: validasi field reason/notes (kalau ada)  [STATUS: DONE]
-  Precondition : Candidate di status apa pun yang punya aksi Reject
-                 tersedia (mis. Application Initiated).
-  Steps        :
-    1. Buka form konfirmasi Reject, identifikasi apakah ada field
-       reason/notes (WAJIB dikonfirmasi live dulu, jangan asumsikan ada).
-    2. Kalau ada dan required: coba Save dengan field itu kosong,
-       verifikasi validasi Required muncul.
-    3. Kalau ada dan optional: coba Save dengan field diisi teks sangat
-       panjang (boundary, pola sama dengan VACANCY-03/CANDIDATE-04),
-       dokumentasikan hasil via report.finding() kalau ambigu.
-  Expected     : Dokumentasikan perilaku aktual field ini -- kalau
-                 ternyata form Reject TIDAK punya field reason/notes sama
-                 sekali, TC ini dicatat sebagai "N/A - field tidak ada"
-                 via report.finding(), bukan dipaksakan.
-  [HASIL KONFIRMASI, STATUS: DONE, PASSED]
-    Form Reject MEMANG punya field, labelnya "Notes" (bukan "Reason"),
-    textarea biasa placeholder "Type here", TANPA indikator Required
-    (tidak ada asterisk di label, beda dari "Interview Title"/"Date" di
-    form lain yang punya asterisk). Save dengan Notes KOSONG -> response
-    200, status jadi "Rejected" -- confirmed Notes TIDAK Required. Save
-    dengan Notes 5000 karakter ('X' x5000) -> request PUT
-    .../candidates/<id>/reject (body {"note": <string>}) TIDAK pernah
-    terkirim dalam 15s, mengindikasikan ada validasi client-side
-    (kemungkinan maxlength) yang menahan submit untuk teks sepanjang itu
-    -- dicatat sebagai temuan (bukan dipaksakan pass/fail), karena tidak
-    ada error UI yang eksplisit untuk dikonfirmasi lebih lanjut.
+14   TC-RECRUITMENT-STATUS-14   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-14-Verify-Reject-Notes-Field-Validation.spec.ts
+                             (-) Verify Reject Form Notes Field -- Optional, Boundary Long Text
+                             -> Buat candidate A (Application Initiated),
+                                buka form Reject, cek field Notes ada.
+                             -> Case 1: Save dengan Notes KOSONG.
+                             -> Case 2: buat candidate B, Reject dengan
+                                Notes 5000 karakter ("X".repeat(5000)).
+                             [API VERIFICATION]
+                             -> Verify tombol "Reject" tersedia pada
+                                candidate Application Initiated.
+                             -> Verify field "Notes" ada di form Reject.
+                             -> Verify Save dengan Notes kosong berhasil
+                                (response 200, Notes TIDAK Required).
+                             [UI VERIFICATION]
+                             -> Verify status menjadi "Rejected" setelah
+                                Save dengan Notes kosong.
+                             NOTE: Form Reject MEMANG punya field, labelnya
+                                   "Notes" (bukan "Reason"), TANPA indikator
+                                   Required. Save dengan Notes 5000 karakter
+                                   TIDAK PERNAH terkirim dalam 15 detik,
+                                   mengindikasikan validasi client-side
+                                   (kemungkinan maxlength) -- dicatat
+                                   sebagai temuan, bukan dipaksakan
+                                   pass/fail. BLOCKED oleh BG-007
+                                   (precondition candidate A tidak
+                                   terdampak langsung karena Reject dari
+                                   Application Initiated tidak butuh
+                                   Shortlist, TAPI status [BLOCKED] mengikuti
+                                   keputusan konsolidasi "STATUS-03 s/d
+                                   STATUS-14 terdampak cascading" di blok
+                                   BUG KRITIS TERKONFIRMASI di atas).
 
-TC-RECRUITMENT-SECURITY-04  (S)  Race condition: 2 status transition bersamaan untuk candidate yang sama  [STATUS: DONE -- BUG DIKONFIRMASI]
-  Precondition : Candidate di status Shortlisted (punya minimal 2 aksi
-                 valid yang tersedia, mis. Reject dan Schedule Interview).
-  Steps        :
-    1. Siapkan 2 request PUT status transition yang BERBEDA untuk
-       candidate id yang SAMA (mis. Reject dan Schedule Interview).
-    2. Kirim keduanya SECARA PARALEL (Promise.all, bukan berurutan) lewat
-       request context langsung.
-    3. Setelah keduanya selesai, GET detail candidate, cek status akhir.
-  Expected     : Dokumentasikan hasil via report.finding() -- idealnya
-                 cuma SATU transition yang berhasil ter-apply secara
-                 konsisten (server harus punya locking/versioning), atau
-                 kalau ternyata state jadi tidak konsisten (mis. status
-                 "Rejected" tapi history mencatat "Interview Scheduled"
-                 juga), itu BUG nyata yang harus dicatat tegas, bukan
-                 cuma finding ambigu.
-  [HASIL KONFIRMASI, STATUS: DONE -- BUG NYATA DIKONFIRMASI, DICATAT TEGAS]
-    Request shape confirmed live: Reject = PUT
-    .../candidates/<id>/reject {"note": string|null}; Schedule Interview
-    = POST (bukan PUT) .../candidates/<id>/shedule-interview
-    {interviewName, interviewDate, interviewTime, note,
-    interviewerEmpNumbers}. Dikirim SECARA PARALEL (Promise.all) untuk
-    candidate id yang SAMA, sedang di status Shortlisted.
-    Hasilnya TIDAK KONSISTEN antar run (non-deterministic), yang
-    justru MEMBUKTIKAN tidak ada locking/versioning di server:
-      - Pada sebagian run: hanya SATU request yang sukses (200), yang
-        lain ditolak (403/422/405) -- state akhir konsisten.
-      - Pada run lain (dikonfirmasi live, disimpan di riwayat eksekusi
-        TC ini): KEDUA request (Reject DAN Schedule Interview)
-        melaporkan sukses 200 SECARA SIMULTAN untuk candidate id yang
-        SAMA -- dua transition yang seharusnya mutually exclusive
-        berhasil diterapkan bersamaan. Ini adalah RACE CONDITION NYATA:
-        server tidak punya optimistic locking/versioning pada endpoint
-        status-transition candidate, sehingga dua mutasi status yang
-        saling eksklusif bisa sama-sama ter-apply jika ditembakkan
-        cukup berdekatan secara waktu. Dicatat TEGAS sebagai BUG
-        terkonfirmasi (report.check() hard-fail, BUKAN report.finding()
-        yang dilunakkan), sesuai instruksi TC ini. Dampak: potensi data
-        candidate menjadi tidak konsisten (status final tidak mencakup
-        semua transition yang ter-apply) pada kondisi concurrent write
-        dari 2 user/tab admin yang sama pada candidate yang sama.
+55   TC-RECRUITMENT-SECURITY-04   [DONE -- BUG DIKONFIRMASI]   TC-RECRUITMENT-SECURITY-04-Verify-Concurrent-Status-Transition-Race-Condition.spec.ts
+                             (S) Verify 2 Concurrent Status-Transition Requests for the Same Candidate
+                             -> Buat candidate, Shortlist (status punya
+                                minimal 2 aksi valid: Reject + Schedule
+                                Interview).
+                             -> [API] Siapkan 2 request status-transition
+                                BERBEDA untuk candidate id yang SAMA: PUT
+                                .../reject dan POST
+                                .../shedule-interview.
+                             -> [API] Kirim KEDUANYA SECARA PARALEL via
+                                Promise.all (bukan berurutan).
+                             -> [API] GET detail candidate setelah keduanya
+                                selesai, cross-check dengan
+                                .../vacancy-history (best-effort).
+                             [API VERIFICATION]
+                             -> Verify candidate Shortlisted punya minimal 2
+                                aksi valid tersedia.
+                             -> Verify kedua request selesai tanpa exception
+                                jaringan (status code terbaca).
+                             -> Verify GET detail candidate setelah race
+                                berhasil (200).
+                             -> Verify HANYA SATU transition yang boleh
+                                berhasil ter-apply (hard-fail kalau KEDUANYA
+                                sukses simultan -- bukan dilunakkan jadi
+                                finding).
+                             -> Verify state akhir KONSISTEN dengan
+                                transition yang dilaporkan sukses (hard-fail
+                                kalau tidak cocok).
+                             NOTE: [BUG NYATA DIKONFIRMASI, DICATAT TEGAS]
+                                   Hasil TIDAK KONSISTEN antar run
+                                   (non-deterministic), yang justru
+                                   MEMBUKTIKAN tidak ada locking/versioning
+                                   di server: pada sebagian run hanya SATU
+                                   request sukses (state konsisten), tapi
+                                   pada run lain KEDUA request (Reject DAN
+                                   Schedule Interview) melaporkan sukses 200
+                                   SECARA SIMULTAN untuk candidate id yang
+                                   SAMA -- dua transition yang seharusnya
+                                   mutually exclusive berhasil diterapkan
+                                   bersamaan. RACE CONDITION NYATA: server
+                                   tidak punya optimistic locking/versioning
+                                   pada endpoint status-transition candidate.
+                                   Dampak: potensi data candidate menjadi
+                                   tidak konsisten pada kondisi concurrent
+                                   write dari 2 user/tab admin yang sama.
 
 --------------------------------------------------------------------------------
   REGRESI DITEMUKAN 2026-11-11 (sesi review penuh, BUKAN bagian dari gap-coverage
