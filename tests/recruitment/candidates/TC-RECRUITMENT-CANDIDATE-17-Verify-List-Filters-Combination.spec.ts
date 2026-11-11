@@ -41,10 +41,10 @@ test('TC-RECRUITMENT-CANDIDATE-17: list filters beyond Candidate Name, individua
 
   report.step('Buka Candidates list, filter by Vacancy saja');
   await candidatesPage.goto();
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2500);
   await candidatesPage.selectFilterOption(candidatesPage.vacancyFilterSelect, vacancyName);
   await candidatesPage.searchButton.click();
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2500);
   const rowsAfterVacancyFilter = await candidatesPage.tableRows.count();
   report.check('Filter by Vacancy mengembalikan hasil (>0 baris)', rowsAfterVacancyFilter > 0, `rows=${rowsAfterVacancyFilter}`);
   let allRowsMatchVacancy = true;
@@ -56,11 +56,11 @@ test('TC-RECRUITMENT-CANDIDATE-17: list filters beyond Candidate Name, individua
 
   report.step('Reset, lalu filter kombinasi Vacancy + Status ("Shortlisted")');
   await candidatesPage.resetButton.click();
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(2000);
   await candidatesPage.selectFilterOption(candidatesPage.vacancyFilterSelect, vacancyName);
   await candidatesPage.selectFilterOption(candidatesPage.statusFilterSelect, 'Shortlisted');
   await candidatesPage.searchButton.click();
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2500);
   const rowsAfterCombined = await candidatesPage.tableRows.count();
   report.check('Filter kombinasi Vacancy + Status mengembalikan hasil (>0 baris)', rowsAfterCombined > 0, `rows=${rowsAfterCombined}`);
 

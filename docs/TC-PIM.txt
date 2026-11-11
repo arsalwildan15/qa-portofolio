@@ -47,14 +47,18 @@ LEGEND SIMBOL SKENARIO
 
   CAKUPAN: dengan ketiga fase ini, semua tab top-level PIM (Employee List,
   Add Employee, Personal Details + 9 sub-tab, Configuration, Reports) sudah
-  tercakup 100% (159 TC total, termasuk 8 TC security file upload lintas
-  4 titik upload yang berbeda, ditambahkan setelah Fase 3, lihat Catatan
-  Teknis "SECURITY: FILE UPLOAD VALIDATION" di bawah). Semua 5 sub-section
-  Qualifications (Work Experience, Education, Skills, Languages, License)
-  juga sudah tercakup (TC-PIM-QUALIFICATION-01 s/d 10), dan TC-PIM-LIST-07
-  (sort kolom) sudah di-resolve dari finding jadi hard-check penuh. PIM
-  tidak lagi punya gap/finding yang didokumentasikan sebagai "belum
-  tuntas" atau "inconclusive".
+  tercakup 100% (161 TC total: 159 fungsional, termasuk 8 TC security file
+  upload lintas 4 titik upload yang berbeda ditambahkan setelah Fase 3
+  (lihat Catatan Teknis "SECURITY: FILE UPLOAD VALIDATION" di bawah), + 2
+  TC security tambahan 2026-11-11 (IDOR, clickjacking header) di
+  tests/pim/security/ -- lihat section "SECURITY TAMBAHAN" di bagian TEST
+  CASES). Semua 5 sub-section Qualifications (Work Experience, Education,
+  Skills, Languages, License) juga sudah tercakup (TC-PIM-QUALIFICATION-01
+  s/d 10), dan TC-PIM-LIST-07 (sort kolom) sudah di-resolve dari finding
+  jadi hard-check penuh. PIM tidak lagi punya gap coverage yang
+  didokumentasikan sebagai "belum tuntas" atau "inconclusive" -- 3 TC
+  Report-to (REPORTTO-01/03/06) punya known issue intermiten di cara
+  verifikasi UI, didokumentasikan di entry masing2, BUKAN gap coverage.
 
   BELUM DICAKUP: modul Admin (terpisah dari PIM, 23+ sub-halaman: User
   Management, Job, Organization, Qualifications, Nationalities, Corporate
@@ -671,19 +675,33 @@ No.  Test Case ID      Status   Kategori           Skenario
   Folder: tests/pim/report-to/
 ================================================================================
 
-105    TC-PIM-REPORTTO-01  [DONE]  Positive (+)               Add Supervisor
+105    TC-PIM-REPORTTO-01  [KNOWN ISSUE]  Positive (+)         Add Supervisor
 106   TC-PIM-REPORTTO-02  [DONE]  Negative (-)                Submit kosong -> 2
                                                               "Required"
-107   TC-PIM-REPORTTO-03  [DONE]  Positive (+)                Add Subordinate
+107   TC-PIM-REPORTTO-03  [KNOWN ISSUE]  Positive (+)         Add Subordinate
 108   TC-PIM-REPORTTO-04  [DONE]  Negative (-)                Cari nama tidak ada ->
                                                               no option, submit
                                                               diblokir
 109   TC-PIM-REPORTTO-05  [DONE]  Edge Case (!)               Cancel membatalkan
                                                               modal
-110   TC-PIM-REPORTTO-06  [DONE]  Positive (+)                Supervisors dan
+110   TC-PIM-REPORTTO-06  [KNOWN ISSUE]  Positive (+)         Supervisors dan
                                                               Subordinates independen
 111   TC-PIM-REPORTTO-07  [DONE]  Positive (+) [API]          Save -> POST endpoint
                                                               report-to
+
+  [KNOWN ISSUE, 2026-11-11] TC-PIM-REPORTTO-01/03/06 intermiten FAIL karena mismatch
+  format teks: textContent opsi autocomplete menyertakan segmen tengah (mis.
+  "A8DCo 4Ys 010Z") yang TIDAK selalu identik dengan isi cell tabel (mis.
+  "A8DCo 010Z", tanpa "4Ys"), jadi getByText(selectedName) kadang tidak match
+  walau data TERBUKTI tersimpan benar (dikonfirmasi via TC-PIM-REPORTTO-07:
+  POST .../supervisors -> 200 nyata, dan via page snapshot DOM yang menunjukkan
+  row memang ada). Fitur Report-to SENDIRI bekerja benar -- ini murni
+  keterbatasan cara verifikasi UI. 4 percobaan perbaikan locator
+  (table-index, tbody tr, role-based getByRole) SEMUA gagal atau meregresi TC
+  lain yang tadinya PASS, sehingga DIKEMBALIKAN ke pendekatan text-match
+  original atas keputusan user. Perlu investigasi lebih lanjut di sesi lain
+  kalau ingin dituntaskan (lihat riwayat lengkap di
+  docs/QA-Review-Progress.md, bagian BATCH 3 — PIM).
 
 ================================================================================
   FASE 2 - GROUP 8: QUALIFICATIONS (10 TC)
@@ -828,10 +846,37 @@ No.  Test Case ID      Status   Kategori           Skenario
 159   TC-PIM-REPORT-06  [DONE]  Positive (+)                   Delete report
 
 ================================================================================
+  SECURITY TAMBAHAN (ditambahkan 2026-11-11 — PIM sebelumnya 0 TC untuk
+  IDOR/CSRF/rate-limiting/clickjacking, signifikan karena PIM meng-key semua
+  data personal via empNumber di URL, titik IDOR paling jelas di app ini)
+  Folder: tests/pim/security/
+================================================================================
+
+112   TC-PIM-SECURITY-01  [DONE]  Security (S)   IDOR: akses personal-details/salary
+                                                  employee lain via empNumber
+      -> Buat 2 employee (A, B). GET personal-details & salary employee B dari
+         sesi yang sama, navigasi UI langsung ke Personal Details employee B.
+      [HASIL] PASS. Personal-details employee B dapat diakses (status 200),
+      UI menampilkan data employee B dengan benar. N/A - arsitektur
+      single-role (semua admin melihat semua employee di demo publik ini),
+      konsisten preseden TC-RECRUITMENT-SECURITY-01 — dicatat sebagai
+      baseline resmi via report.finding(), bukan PASS/FAIL palsu.
+
+113   TC-PIM-SECURITY-02  [FAIL]  Security (S)   Clickjacking protection header
+                                                  (X-Frame-Options / CSP frame-ancestors)
+      -> GET Employee List page dan GET /api/v2/pim/employees, cek header.
+      [BUG TERKONFIRMASI — BG-096 di Bug-List.xlsx, Severity Medium, Category
+      "Security Finding"] X-Frame-Options TIDAK ADA sama sekali di kedua
+      endpoint, CSP tidak punya frame-ancestors. INI KONFIRMASI KETIGA gap
+      yang SAMA PERSIS ditemukan di Login (BG-030) dan Recruitment (BG-066) —
+      kuat mengindikasikan gap konfigurasi APP-WIDE level nginx/web-server,
+      bukan 3 kasus terisolasi per-modul.
+
+================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase) : 159
+  Total Test Cases (semua fase + security) : 161 (159 fungsional + 2 security)
 
   Fase 1 : 57
     Employee List    : 14

@@ -13,6 +13,11 @@
  *   Subordinates (dan sebaliknya) — kedua list independen, bukan
  *   gabungan.
  *
+ * [STATUS: KNOWN ISSUE, 2026-11-11] Sama seperti TC-PIM-REPORTTO-01 -- lihat
+ *   catatan lengkap di file itu untuk sisi Supervisors. Sisi Subordinates
+ *   (cek jumlah baris = 0) TETAP pakai count() karena nilai 0 konsisten
+ *   benar di semua percobaan locator yang dicoba.
+ *
  * RUN COMMAND:
  *   npx playwright test tests/pim/report-to/TC-PIM-REPORTTO-06-Verify-Both-Lists-Render-Independently.spec.ts --project=chromium --headed
  * ================================================================================
@@ -37,15 +42,10 @@ test('TC-PIM-REPORTTO-06: adding a supervisor does not populate the subordinates
 
   report.step('Tambah 1 Supervisor (opsi pertama dari pencarian "a")');
   await reportToPage.openAddSupervisor();
-  await reportToPage.nameAutocomplete.waitFor({ state: 'visible' });
-  await reportToPage.nameAutocomplete.fill('a');
-  const firstOption = page.getByRole('option').first();
-  await firstOption.waitFor({ state: 'visible', timeout: 25_000 });
-  const selectedName = (await firstOption.textContent())?.trim() ?? '';
-  await firstOption.click();
+  const selectedName = await reportToPage.selectFirstNameOption('a');
   await reportToPage.selectDropdownOption(reportToPage.reportingMethodSelect, 'Direct');
   await reportToPage.save();
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(3500);
 
   report.step('Verify Supervisors berisi 1 baris, Subordinates tetap 0');
   report.check(

@@ -9,16 +9,20 @@
  * ================================================================================
  *
  * TUJUAN:
- *   Mendokumentasikan header security apa saja yang ADA vs TIDAK ADA pada
- *   response GET /api/v2/recruitment/vacancies dan .../candidates.
+ *   Memverifikasi header clickjacking protection (X-Frame-Options ATAU CSP
+ *   frame-ancestors) ADA pada response GET /api/v2/recruitment/vacancies
+ *   dan .../candidates — bukan sekadar mendokumentasikan ada/tidaknya. Per
+ *   2026-11-11, TC ini diubah dari report.finding()-only menjadi hard
+ *   check, konsisten dengan TC-LOGIN-43: absennya proteksi clickjacking
+ *   harus FAIL + tercatat otomatis ke Bug-List selama kondisi ini masih
+ *   benar, bukan cuma jadi catatan yang selalu PASS.
  *   [CONFIRMED via discovery run]:
  *     ADA   : x-content-type-options: nosniff, x-xss-protection,
  *             strict-transport-security, content-security-policy,
  *             public-key-pins.
- *     TIDAK ADA : X-Frame-Options -- [TEMUAN RISIKO] absennya header ini
- *             adalah celah clickjacking yang valid untuk dilaporkan (API
- *             ini bisa di-embed dalam iframe lintas origin tanpa
- *             pembatasan browser).
+ *     TIDAK ADA : X-Frame-Options -- [BUG] absennya header ini adalah
+ *             celah clickjacking nyata (API ini bisa di-embed dalam
+ *             iframe lintas origin tanpa pembatasan browser).
  *
  * RUN COMMAND:
  *   npx playwright test tests/recruitment/security/TC-RECRUITMENT-SECURITY-02-Verify-Security-Response-Headers.spec.ts --project=chromium --headed
@@ -50,11 +54,22 @@ test('TC-RECRUITMENT-SECURITY-02: security response headers on recruitment API e
     return { present, missing, headers };
   }
 
+  function hasClickjackingProtection(result: { headers: Record<string, string | undefined> }): boolean {
+    const xfo = result.headers['x-frame-options'];
+    const csp = result.headers['content-security-policy'] ?? '';
+    return xfo !== undefined || /frame-ancestors/i.test(csp);
+  }
+
   report.step('[API] GET /api/v2/recruitment/vacancies, cek header security');
   const vacancies = await checkEndpoint('/web/index.php/api/v2/recruitment/vacancies');
   report.finding(
     'Header security pada GET /api/v2/recruitment/vacancies',
     `Ada: [${vacancies.present.join(', ')}]. Tidak ada: [${vacancies.missing.join(', ') || 'tidak ada yang hilang'}].`,
+  );
+  report.check(
+    'GET /api/v2/recruitment/vacancies punya proteksi clickjacking (X-Frame-Options atau CSP frame-ancestors)',
+    hasClickjackingProtection(vacancies),
+    `missing=[${vacancies.missing.join(', ')}]`,
   );
 
   report.step('[API] GET /api/v2/recruitment/candidates, cek header security');
@@ -63,17 +78,11 @@ test('TC-RECRUITMENT-SECURITY-02: security response headers on recruitment API e
     'Header security pada GET /api/v2/recruitment/candidates',
     `Ada: [${candidates.present.join(', ')}]. Tidak ada: [${candidates.missing.join(', ') || 'tidak ada yang hilang'}].`,
   );
-
-  report.check('TC dijalankan tanpa exception (baseline dokumentasi, bukan hard fail)', true);
-
-  if (vacancies.missing.includes('x-frame-options') || candidates.missing.includes('x-frame-options')) {
-    report.finding(
-      '[RISIKO] X-Frame-Options TIDAK ADA pada endpoint recruitment',
-      'Absennya X-Frame-Options (atau frame-ancestors di CSP) adalah celah clickjacking yang valid: response ' +
-        'API bisa di-embed dalam iframe lintas origin tanpa pembatasan browser. Worth melaporkan meski demo ' +
-        'publik ini kemungkinan tidak strict di sisi ini.',
-    );
-  }
+  report.check(
+    'GET /api/v2/recruitment/candidates punya proteksi clickjacking (X-Frame-Options atau CSP frame-ancestors)',
+    hasClickjackingProtection(candidates),
+    `missing=[${candidates.missing.join(', ')}]`,
+  );
 
   report.print();
 });

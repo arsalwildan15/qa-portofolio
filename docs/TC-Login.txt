@@ -328,6 +328,84 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              Verify: heading "Hacked" TIDAK muncul sebagai
                                      elemen DOM nyata.
 
+41   TC-LOGIN-41    [DONE]   TC-LOGIN-41-Verify-Cross-Origin-Login-CSRF-Protection.spec.ts
+                             (S) Verify Cross-Origin Login CSRF Protection
+                             -> Navigate browser ke origin eksternal
+                                (https://example.com) — bukan curl dengan header
+                                Origin/Referer di-forge manual (hasil curl
+                                MENYESATKAN, lihat NOTE).
+                             -> Dari origin itu, submit <form method="POST">
+                                ASLI ke /web/index.php/auth/validate dengan
+                                kredensial valid ("Admin"/"admin123"), supaya
+                                header Origin/Referer otentik dari browser.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 302.
+                             -> Verify Location mengarah ke "/auth/login"
+                                (GAGAL), BUKAN "/dashboard/index" — walau
+                                kredensial yang dikirim VALID.
+                             [UI VERIFICATION]
+                             -> Verify browser TIDAK ikut ter-redirect ke
+                                domain OrangeHRM (tetap di example.com).
+                             NOTE: [TEMUAN POSITIF] Proteksi CSRF EFEKTIF.
+                                   Kemungkinan besar karena cookie sesi
+                                   SameSite=Lax (lihat TC-LOGIN-01) tidak
+                                   dikirim browser pada navigasi top-level
+                                   cross-site via POST, sehingga handshake sesi
+                                   yang dibutuhkan server untuk proses auth
+                                   gagal. Verifikasi awal via curl dengan
+                                   header Origin/Referer di-set manual sempat
+                                   memberi hasil SALAH (terlihat "tidak ada
+                                   proteksi") karena curl tidak pernah membawa
+                                   cookie sesi yang valid dari kunjungan
+                                   GET /auth/login sebelumnya — kesimpulan
+                                   security HARUS selalu diverifikasi via
+                                   browser automation asli, bukan curl dengan
+                                   header rekayasa.
+
+42   TC-LOGIN-42    [DONE]   TC-LOGIN-42-Verify-Session-ID-Regenerated-After-Login.spec.ts
+                             (S) Verify Session ID Is Regenerated After Login
+                             -> GET /auth/login, catat nilai cookie sesi
+                                "orangehrm" SEBELUM login (anonymous session).
+                             -> Login dengan kredensial valid, catat nilai
+                                cookie sesi SESUDAH login.
+                             Verify: nilai cookie SESUDAH login BERBEDA dari
+                                     SEBELUM login (mencegah session fixation
+                                     — attacker tidak bisa "menanam" session id
+                                     ke korban sebelum korban login).
+                             NOTE: [TEMUAN POSITIF, dikonfirmasi 2026-11-11]
+                                   Session ID BERUBAH setelah login — proteksi
+                                   session fixation bekerja. Run pertama
+                                   sempat gagal di check tambahan "tidak ada
+                                   console error" karena net::ERR_CONNECTION_RESET
+                                   — dikonfirmasi ROOT CAUSE-nya environment
+                                   (server demo publik sedang gangguan
+                                   infrastruktur berkepanjangan hari itu,
+                                   independen dikonfirmasi lewat screenshot
+                                   500 Internal Server Error dari user),
+                                   BUKAN bug aplikasi/script. Tercatat sempat
+                                   ke Bug-List sebagai BG-029 lalu DIKOREKSI
+                                   jadi Status=Closed, Category="Environment
+                                   Noise (Not a Bug)" dengan root cause
+                                   analysis lengkap di kolom Notes.
+
+43   TC-LOGIN-43    [FAIL]   TC-LOGIN-43-Verify-Clickjacking-Protection-Header.spec.ts
+                             (S) Verify Clickjacking Protection Header on Login Page
+                             [API VERIFICATION]
+                             -> GET /web/index.php/auth/login.
+                             Verify: header "X-Frame-Options" ADA, ATAU
+                                     "Content-Security-Policy" punya directive
+                                     "frame-ancestors".
+                             NOTE: [BUG TERKONFIRMASI — BG-030 di Bug-List.xlsx,
+                                   Severity Medium, Category "Security
+                                   Finding"] Halaman login TIDAK mengirim
+                                   X-Frame-Options sama sekali, CSP yang ada
+                                   TIDAK punya frame-ancestors — konsisten
+                                   dengan temuan serupa di
+                                   TC-RECRUITMENT-SECURITY-02 (gap level
+                                   aplikasi/web-server, bukan kasus
+                                   terisolasi). Run bersih, FAIL dengan benar,
+                                   otomatis tercatat ke Bug-List.
+
 ================================================================================
   GROUP 5 — UNEXPECTED / EDGE CASES
 ================================================================================
@@ -377,13 +455,26 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              Verify: response.status() < 500, redirect ke
                                      "/auth/login" (tidak bypass auth).
 
-37   TC-LOGIN-37    [DONE]   TC-LOGIN-37-Verify-Rapid-Multiple-Failed-Logins.spec.ts
+37   TC-LOGIN-37    [FAIL]   TC-LOGIN-37-Verify-Rapid-Multiple-Failed-Logins.spec.ts
                              (!) Verify Rapid Multiple Failed Logins (Brute Force Probe)
-                             -> Loop 5x kredensial salah berturut-turut.
-                             Verify: setiap attempt status < 500. Jika ada
-                                     429/Retry-After, dicatat via console.log
-                                     sebagai temuan (demo publik saat ini
-                                     tidak menunjukkan rate limiting).
+                             -> Loop 5x kredensial salah berturut-turut, verify
+                                setiap attempt status < 500 (tidak crash).
+                             -> Attempt ke-6: verify server menerapkan
+                                rate limiting/lockout (expect status 429).
+                             NOTE: [BUG TERKONFIRMASI — BG-026 di Bug-List.xlsx,
+                                   Severity Medium, Category "Security Finding"]
+                                   Attempt ke-6 TETAP status 302 (diproses
+                                   normal seperti attempt ke-1), BUKAN 429 —
+                                   TIDAK ADA rate limiting/brute-force
+                                   protection sama sekali. Dikonfirmasi
+                                   reproducible di 2 run terpisah dengan hasil
+                                   identik. TC ini SENGAJA ditulis untuk FAIL
+                                   selama kondisi ini masih benar (bukan cuma
+                                   dicatat sebagai "temuan" di dokumentasi),
+                                   supaya bugListReporter otomatis mencatatnya
+                                   ke Bug-List resmi dan auto-close sendiri
+                                   kalau rate limiting benar-benar
+                                   diimplementasikan di masa depan.
 
 38   TC-LOGIN-38    [DONE]   TC-LOGIN-38-Verify-Back-Button-After-Login.spec.ts
                              (!) Verify Browser Back Button After Login Stays Consistent
@@ -413,12 +504,18 @@ No.  Test Case ID   Status   Skenario / Deskripsi
   SUMMARY
 ================================================================================
 
-  Total Test Cases : 40
+  Total Test Cases : 43
   Positive         : 6  (TC-01 s/d TC-06)
   Negative         : 9  (TC-07 s/d TC-12, TC-14 s/d TC-16)
   Boundary         : 4  (TC-17 s/d TC-20)
-  Security         : 7  (TC-21 s/d TC-27)
+  Security         : 10 (TC-21 s/d TC-27, TC-41 s/d TC-43)
   Unexpected/Edge  : 14 (TC-13, TC-28 s/d TC-40)
+
+  STATUS PER 2026-11-11 (hasil regression audit penuh, SEMUA 43 TC SUDAH
+  berhasil dijalankan sampai selesai — BATCH 1 TUNTAS 100%):
+    [DONE] 41 | [FAIL by design, bug sistem terkonfirmasi] 2
+      (TC-37 -> BG-026 rate limiting hilang, Severity Medium;
+       TC-43 -> BG-030 clickjacking header hilang, Severity Medium)
 
 ================================================================================
   TEMUAN SELAMA EKSPLORASI (bukan bug, tapi worth dicatat)
@@ -440,8 +537,20 @@ No.  Test Case ID   Status   Skenario / Deskripsi
 
   5. "Logout" dirender sebagai menuitem di dropdown, bukan <a role="link">.
 
-  6. Tidak ditemukan rate limiting / lockout setelah 5x percobaan login
-     gagal berturut-turut pada demo publik ini. (TC-LOGIN-37)
+  6. [BUG — BG-026, Medium] Tidak ditemukan rate limiting / lockout sama
+     sekali setelah 5x percobaan login gagal berturut-turut — attempt ke-6
+     diproses normal (302), bukan diblokir (429). Dikonfirmasi reproducible.
+     (TC-LOGIN-37)
+
+  7. [TEMUAN POSITIF] Proteksi CSRF pada login EFEKTIF — form cross-origin
+     dengan kredensial valid tetap gagal login (kemungkinan besar via
+     SameSite=Lax cookie yang tidak terkirim pada POST cross-site).
+     (TC-LOGIN-41)
+
+  8. [GAP — mengarah ke bug, perlu konfirmasi run resmi] Halaman login
+     TIDAK mengirim X-Frame-Options, CSP tidak punya frame-ancestors —
+     clickjacking gap, konsisten dengan TC-RECRUITMENT-SECURITY-02.
+     (TC-LOGIN-43)
 
 ================================================================================
   CATATAN EKSEKUSI

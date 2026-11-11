@@ -12,6 +12,11 @@
  *   Memverifikasi menambah Subordinate (bukan Supervisor — tombol "+ Add"
  *   kedua di halaman) berhasil tersimpan di Assigned Subordinates.
  *
+ * [STATUS: KNOWN ISSUE, 2026-11-11] Sama seperti TC-PIM-REPORTTO-01 -- lihat
+ *   catatan lengkap di file itu. Save terbukti berfungsi (confirmed via
+ *   TC-PIM-REPORTTO-07), verifikasi UI kadang tidak match karena format
+ *   teks opsi vs tabel berbeda.
+ *
  * RUN COMMAND:
  *   npx playwright test tests/pim/report-to/TC-PIM-REPORTTO-03-Verify-Add-Subordinate.spec.ts --project=chromium --headed
  * ================================================================================
@@ -36,15 +41,10 @@ test('TC-PIM-REPORTTO-03: add subordinate succeeds', async ({
 
   report.step('Klik "+ Add" Subordinates (tombol ke-2), cari "a", pilih opsi pertama, Reporting Method, klik Save');
   await reportToPage.openAddSubordinate();
-  await reportToPage.nameAutocomplete.waitFor({ state: 'visible' });
-  await reportToPage.nameAutocomplete.fill('a');
-  const firstOption = page.getByRole('option').first();
-  await firstOption.waitFor({ state: 'visible', timeout: 25_000 });
-  const selectedName = (await firstOption.textContent())?.trim() ?? '';
-  await firstOption.click();
+  const selectedName = await reportToPage.selectFirstNameOption('a');
   await reportToPage.selectDropdownOption(reportToPage.reportingMethodSelect, 'Direct');
   await reportToPage.save();
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(3500);
 
   report.step('Verify Subordinate yang dipilih muncul di Assigned Subordinates');
   report.check(

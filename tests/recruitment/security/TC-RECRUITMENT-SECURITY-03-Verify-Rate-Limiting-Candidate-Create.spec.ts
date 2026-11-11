@@ -9,9 +9,14 @@
  * ================================================================================
  *
  * TUJUAN:
- *   Mendokumentasikan ada/tidaknya rate limiting pada POST
- *   /api/v2/recruitment/candidates saat dikirim berulang kali dalam waktu
- *   singkat.
+ *   Memverifikasi rate limiting ADA pada POST /api/v2/recruitment/candidates
+ *   saat dikirim berulang kali dalam waktu singkat (bukan sekadar
+ *   mendokumentasikan ada/tidaknya — per 2026-11-11, TC ini diubah dari
+ *   report.finding()-only menjadi hard check, konsisten dengan TC-LOGIN-37:
+ *   endpoint mutasi data tanpa rate limiting adalah celah nyata — bisa
+ *   dibanjiri data sampah/spam tanpa hambatan — dan harus FAIL + tercatat
+ *   otomatis ke Bug-List selama kondisi ini masih benar, bukan cuma jadi
+ *   catatan "finding" yang selalu PASS.
  *
  *   [PERINGATAN DESTRUKTIF, DIPATUHI]: TC ini MUTATIF dan menambah data ke
  *   demo publik. Setiap candidate yang dibuat di sini diberi nama depan
@@ -59,20 +64,19 @@ test('TC-RECRUITMENT-SECURITY-03: rate limiting on POST candidates under rapid r
   report.check('TC dijalankan tanpa exception', true);
   report.check(`Semua ${REQUEST_COUNT} request diproses tanpa error 500`, statuses.every((s) => s !== 500), `statuses=${JSON.stringify(statuses)}`);
 
-  if (throttledCount > 0) {
-    report.finding(
-      'Rate limiting TERDETEKSI pada POST candidates',
-      `${throttledCount} dari ${REQUEST_COUNT} request kena 429/throttle. statuses=${JSON.stringify(statuses)}`,
-    );
-  } else {
-    report.finding(
-      '[RISIKO] TIDAK ADA rate limiting terdeteksi pada POST candidates',
-      `Semua ${REQUEST_COUNT} request dalam waktu singkat diproses tanpa throttle (success=${successCount}, ` +
-        `other=${otherCount}, statuses=${JSON.stringify(statuses)}). Endpoint create candidate bisa dibanjiri ` +
-        'data sampah tanpa hambatan dari sisi server. Semua candidate yang dibuat di TC ini ditandai firstName ' +
-        '"QaRateLimitTest" untuk memudahkan pembersihan manual kalau diperlukan.',
-    );
-  }
+  report.check(
+    `Rate limiting ADA pada POST candidates (minimal 1 dari ${REQUEST_COUNT} request kena 429/throttle)`,
+    throttledCount > 0,
+    `throttled=${throttledCount}/${REQUEST_COUNT} | success=${successCount} | other=${otherCount} | ` +
+      `statuses=${JSON.stringify(statuses)} (tidak ada rate limiting berarti endpoint create candidate bisa ` +
+      'dibanjiri data sampah/spam tanpa hambatan dari sisi server)',
+  );
+
+  report.finding(
+    'Identifikasi data test',
+    `Semua candidate yang dibuat di TC ini ditandai firstName "QaRateLimitTest" untuk memudahkan pembersihan ` +
+      'manual kalau diperlukan.',
+  );
 
   report.print();
 });

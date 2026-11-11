@@ -297,16 +297,28 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: STATUS WORKFLOW (9 TC)
 ================================================================================
 
+  [BUG KRITIS TERKONFIRMASI, 2026-11-11 -- BG-007, Severity High, Category "Bug (Confirmed)"]
+  Endpoint PUT .../api/v2/recruitment/candidates/<id>/shortlist mengembalikan 500 Internal
+  Server Error untuk SEMUA candidate saat ini -- dikonfirmasi REPRODUCIBLE SECARA DETERMINISTIK
+  3x berturut, TERISOLASI (1 TC saja per run, bukan batch), dengan 3 candidate BERBEDA (id
+  106/107/108), server independen dikonfirmasi sehat via curl sebelum tiap percobaan (bukan
+  outage/flakiness). Ini BUKAN environment noise (sempat salah diklasifikasi begitu di 2
+  percobaan awal hari ini sebelum diisolasi dan diverifikasi ulang). Shortlist adalah transisi
+  status PALING AWAL dan jadi prasyarat (via shortlistCandidate() helper) untuk hampir semua
+  TC status-workflow lain (STATUS-03 s/d STATUS-14) -- bug ini menyebabkan CASCADING FAILURE
+  di seluruh suite, bukan 12 bug terpisah. TC-RECRUITMENT-STATUS-01 dan STATUS-09 tidak
+  terdampak karena tidak bergantung pada Shortlist berhasil.
+
   NO  ID                             KATEGORI  DESKRIPSI                                          STATUS
   --  -----------------------------  --------  -------------------------------------------------  -------
   01  TC-RECRUITMENT-STATUS-01       (+)       Candidate baru = Application Initiated + aksi awal  [DONE]
-  02  TC-RECRUITMENT-STATUS-02       (+)       Shortlist -> status Shortlisted [API]                [DONE]
-  03  TC-RECRUITMENT-STATUS-03       (+)       Shortlisted -> Reject -> terminal [API]              [DONE]
-  04  TC-RECRUITMENT-STATUS-04       (+)       Shortlisted -> Schedule Interview valid [API]        [DONE]
-  05  TC-RECRUITMENT-STATUS-05       (-)       Schedule Interview submit kosong -> validasi         [DONE]
-  06  TC-RECRUITMENT-STATUS-06       (+)       Interview Scheduled -> Reject [API]                  [DONE]
-  07  TC-RECRUITMENT-STATUS-07       (+)       Interview Scheduled -> Mark Interview Failed (fresh) [DONE]
-  08  TC-RECRUITMENT-STATUS-08       (+)       Candidate History mencatat transisi status           [DONE]
+  02  TC-RECRUITMENT-STATUS-02       (+)       Shortlist -> status Shortlisted [API]          [FAIL - BG-007]
+  03  TC-RECRUITMENT-STATUS-03       (+)       Shortlisted -> Reject -> terminal [API]       [BLOCKED oleh BG-007]
+  04  TC-RECRUITMENT-STATUS-04       (+)       Shortlisted -> Schedule Interview valid [API] [BLOCKED oleh BG-007]
+  05  TC-RECRUITMENT-STATUS-05       (-)       Schedule Interview submit kosong -> validasi  [BLOCKED oleh BG-007]
+  06  TC-RECRUITMENT-STATUS-06       (+)       Interview Scheduled -> Reject [API]           [BLOCKED oleh BG-007]
+  07  TC-RECRUITMENT-STATUS-07       (+)       Interview Scheduled -> Mark Interview Failed  [BLOCKED oleh BG-007]
+  08  TC-RECRUITMENT-STATUS-08       (+)       Candidate History mencatat transisi status    [BLOCKED oleh BG-007]
   09  TC-RECRUITMENT-STATUS-09       (+)       [BUG, TEMUAN] Application Stage stuck loading sample [DONE]
 
 ================================================================================
@@ -694,6 +706,15 @@ TC-RECRUITMENT-SECURITY-02  (S)  Security response headers pada endpoint recruit
   clickjacking yang valid, dicatat sebagai finding risiko. Spec:
   tests/recruitment/security/TC-RECRUITMENT-SECURITY-02-Verify-Security-Response-Headers.spec.ts
 
+  [ESCALATION, 2026-11-11] Diubah dari report.finding()-only (selalu PASS)
+  jadi report.check() hard-fail, konsisten dengan TC-LOGIN-43: absennya
+  X-Frame-Options/CSP frame-ancestors sekarang bikin TC ini FAIL dengan
+  benar dan otomatis tercatat ke Bug-List -> BG-066 (Severity Medium,
+  Category "Security Finding"). Ini KONFIRMASI KEDUA gap yang sama persis
+  juga ditemukan di Login (BG-030) dan kemudian PIM (BG-096) -- indikasi
+  kuat gap konfigurasi APP-WIDE level web-server, bukan 3 kasus terisolasi.
+  STATUS: [FAIL] (sesuai desain, bukan bug script).
+
 TC-RECRUITMENT-SECURITY-03  (S)  Rate limiting / brute-force protection pada endpoint mutasi recruitment
   Steps        : Kirim POST /api/v2/recruitment/candidates berulang kali
                  (mis. 20x) dalam waktu singkat dari request context yang
@@ -714,6 +735,33 @@ TC-RECRUITMENT-SECURITY-03  (S)  Rate limiting / brute-force protection pada end
   Semua candidate dibuat dengan firstName persis "QaRateLimitTest" untuk
   identifikasi/cleanup manual. Spec:
   tests/recruitment/security/TC-RECRUITMENT-SECURITY-03-Verify-Rate-Limiting-Candidate-Create.spec.ts
+
+  [ESCALATION, 2026-11-11] Diubah dari report.finding()-only (selalu PASS)
+  jadi report.check() hard-fail (minimal 1 dari 10 request harus kena
+  429), konsisten dengan TC-LOGIN-37: endpoint create candidate tanpa
+  rate limiting adalah celah spam/data-sampah nyata. FAIL dengan benar,
+  otomatis tercatat -> BG-067 (Severity Medium, Category "Security
+  Finding"). STATUS: [FAIL] (sesuai desain, bukan bug script).
+
+--------------------------------------------------------------------------------
+  SECURITY TAMBAHAN ROUND 2 (ditambahkan 2026-11-11, mengikuti pola yang
+  sudah ditetapkan di Login (TC-LOGIN-41 CSRF))
+--------------------------------------------------------------------------------
+
+TC-RECRUITMENT-SECURITY-05  (S)  Cross-origin mutation request (CSRF) pada endpoint create vacancy  [STATUS: DONE, PASSED]
+  Steps        : Dari tab browser di origin eksternal (https://example.com),
+                 fetch() POST JSON langsung ke
+                 /api/v2/recruitment/vacancies dengan credentials:'include'
+                 (membawa cookie sesi admin yang sedang login).
+  Expected     : Request DIBLOKIR di level browser (CORS), bukan diproses
+                 server -- endpoint ini API-style (JSON body), beda dari
+                 Login yang form-based, jadi mekanisme proteksinya CORS
+                 preflight, bukan SameSite cookie.
+  [HASIL KONFIRMASI, STATUS: DONE, PASSED] Fetch cross-origin dengan
+  kredensial GAGAL total di level browser (CORS memblokir sebelum request
+  sampai diproses server) -- proteksi CSRF pada endpoint mutasi
+  Recruitment EFEKTIF. Spec:
+  tests/recruitment/security/TC-RECRUITMENT-SECURITY-05-Verify-Cross-Origin-Mutation-Blocked.spec.ts
 
 --------------------------------------------------------------------------------
   GAP ROUND 2 (ditemukan setelah audit ulang pasca-46-TC)  [STATUS: DONE]
@@ -927,6 +975,23 @@ TC-RECRUITMENT-SECURITY-04  (S)  Race condition: 2 status transition bersamaan u
         semua transition yang ter-apply) pada kondisi concurrent write
         dari 2 user/tab admin yang sama pada candidate yang sama.
 
+--------------------------------------------------------------------------------
+  REGRESI DITEMUKAN 2026-11-11 (sesi review penuh, BUKAN bagian dari gap-coverage
+  awal -- STATUS-10 s/d STATUS-14 di atas tadinya [STATUS: DONE, PASSED] di sesi
+  sebelumnya, tapi SEKARANG gagal karena regresi BG-007)
+--------------------------------------------------------------------------------
+
+  [REGRESI] TC-RECRUITMENT-STATUS-10/11/12/13/14 yang tadinya PASSED (lihat blok
+  "[HASIL KONFIRMASI, STATUS: DONE]" masing-masing di atas, dari sesi sebelumnya)
+  SEKARANG GAGAL di regression run 2026-11-11, BUKAN karena TC-nya berubah, tapi
+  karena SEMUANYA bergantung pada shortlistCandidate() helper sebagai prasyarat
+  (langsung atau tidak langsung via scheduleInterviewForCandidate), dan helper itu
+  sendiri sekarang gagal akibat BG-007 (PUT .../shortlist -> 500 untuk SEMUA
+  candidate, dikonfirmasi reproducible 3x terisolasi, lihat blok BUG KRITIS di
+  bagian "TEST CASES: STATUS WORKFLOW" di atas). Begitu BG-007 di-fix, TC-TC ini
+  diharapkan kembali PASSED tanpa perlu diubah sama sekali (logic-nya sendiri
+  tidak salah, terbukti benar di sesi sebelumnya).
+
 ================================================================================
   SUMMARY GAP COVERAGE
 ================================================================================
@@ -948,11 +1013,23 @@ TC-RECRUITMENT-SECURITY-04  (S)  Race condition: 2 status transition bersamaan u
   Setelah ROUND 1, total keseluruhan modul Recruitment: 30 (existing)
   + 16 (gap round 1) = 46 TC, SEMUA [DONE] dan sudah dijalankan live.
 
-  Setelah ROUND 2: 46 + 7 = 53 TC, SEMUA [DONE]. Tidak ada TC yang
-  gugur jadi N/A -- ketujuhnya berhasil diimplementasikan sebagai
-  pemeriksaan otomatis nyata (termasuk CANDIDATE-18 yang awalnya sempat
-  terlihat N/A tapi ternyata fitur-nya ADA setelah wait render yang
-  cukup, lihat koreksi di TC tersebut).
+  Setelah ROUND 2: 46 + 7 = 53 TC. Tidak ada TC yang gugur jadi N/A --
+  ketujuhnya berhasil diimplementasikan sebagai pemeriksaan otomatis nyata
+  (termasuk CANDIDATE-18 yang awalnya sempat terlihat N/A tapi ternyata
+  fitur-nya ADA setelah wait render yang cukup, lihat koreksi di TC
+  tersebut).
+
+  [UPDATE 2026-11-11, review penuh] +1 TC baru (SECURITY-05, CSRF cross-
+  origin mutation) -> total 54 TC. SECURITY-02 dan SECURITY-03 di-escalate
+  dari finding-only jadi hard-fail (lihat catatan [ESCALATION] masing2 di
+  atas). REGRESI DITEMUKAN: BG-007 (PUT .../shortlist -> 500 untuk semua
+  candidate, dikonfirmasi reproducible 3x terisolasi) menyebabkan
+  STATUS-02 s/d STATUS-14 (kecuali STATUS-01/09) GAGAL di regression run
+  terbaru -- lihat blok "BUG KRITIS TERKONFIRMASI" di bagian "TEST CASES:
+  STATUS WORKFLOW" dan blok "REGRESI DITEMUKAN" setelah SECURITY TAMBAHAN
+  di atas untuk detail lengkap. Status aktual saat ini BUKAN "SEMUA
+  [DONE]" lagi -- lihat kolom STATUS di tabel ringkas STATUS WORKFLOW
+  untuk status per-TC yang akurat.
 
   Prasyarat implementasi (SUDAH DIKERJAKAN, dicatat di sini sebagai jejak
   apa yang dilakukan, bukan lagi rencana):

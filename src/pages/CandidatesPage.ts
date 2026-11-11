@@ -187,7 +187,7 @@ export class CandidatesPage extends BasePage {
     const numberedButtons = pagination.getByRole('button').filter({ hasText: /^\d+$/ });
     const count = await numberedButtons.count();
     if (count > 0) await numberedButtons.nth(count - 1).click();
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(1500);
   }
 
   statusActionButton(label: string): Locator {

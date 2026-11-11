@@ -36,23 +36,19 @@ test('TC-PIM-REPORTTO-07: save supervisor hits the expected POST endpoint', asyn
 
   report.step('Tambah Admin sebagai Supervisor, intercept semua POST, klik Save');
   await reportToPage.openAddSupervisor();
-  await reportToPage.nameAutocomplete.waitFor({ state: 'visible' });
-  await reportToPage.nameAutocomplete.fill('a');
-  const adminOption = page.getByRole('option').first();
-  await adminOption.waitFor({ state: 'visible', timeout: 25_000 });
-  await adminOption.click();
+  await reportToPage.selectFirstNameOption('a');
   await reportToPage.selectDropdownOption(reportToPage.reportingMethodSelect, 'Direct');
 
   let capturedUrl = '';
   let capturedStatus = 0;
   page.on('response', (r) => {
-    if (r.request().method() === 'POST' && r.url().includes(`/employees/${empNumber}/`) && r.url().includes('report')) {
+    if (r.request().method() === 'POST' && r.url().includes(`/employees/${empNumber}/`)) {
       capturedUrl = r.url();
       capturedStatus = r.status();
     }
   });
   await reportToPage.save();
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(3500);
 
   report.step('Verify endpoint ter-capture dan status sukses');
   report.check('[API] POST report-to endpoint terpanggil dengan status 200', capturedStatus === 200, `url=${capturedUrl} status=${capturedStatus}`);

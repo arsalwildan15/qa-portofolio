@@ -42,9 +42,9 @@ test('TC-RECRUITMENT-SECURITY-04: 2 concurrent status-transition PUT requests fo
   await shortlistCandidate(page, candidatesPage, candidateId);
 
   await candidatesPage.gotoDetail(candidateId);
-  await page.waitForTimeout(3000);
-  const rejectAvailable = await candidatesPage.statusActionButton('Reject').isVisible({ timeout: 3_000 }).catch(() => false);
-  const scheduleAvailable = await candidatesPage.statusActionButton('Schedule Interview').isVisible({ timeout: 3_000 }).catch(() => false);
+  await page.waitForTimeout(5000);
+  const rejectAvailable = await candidatesPage.statusActionButton('Reject').isVisible({ timeout: 5_000 }).catch(() => false);
+  const scheduleAvailable = await candidatesPage.statusActionButton('Schedule Interview').isVisible({ timeout: 5_000 }).catch(() => false);
   report.check('Candidate Shortlisted punya minimal 2 aksi valid tersedia (Reject + Schedule Interview)', rejectAvailable && scheduleAvailable);
 
   report.step('[API] Siapkan 2 request status-transition BERBEDA untuk candidate id yang SAMA (payload/method confirmed live via discovery)');

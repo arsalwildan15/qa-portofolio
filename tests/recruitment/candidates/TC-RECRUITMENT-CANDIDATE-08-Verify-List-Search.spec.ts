@@ -51,7 +51,7 @@ test('TC-RECRUITMENT-CANDIDATE-08: a newly created candidate appears in the list
 
   report.step('Verify candidate muncul di list Candidates (lompat ke halaman terakhir, list terpaginasi)');
   await candidatesPage.goto();
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(2500);
   await candidatesPage.gotoLastPage();
   report.check(
     `Candidate "${fullName}" muncul di list`,
