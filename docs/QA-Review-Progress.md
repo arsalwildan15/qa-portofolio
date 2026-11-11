@@ -640,8 +640,84 @@ ini, bukan karena pekerjaan belum tuntas):**
 - 3 TC PIM Report-to (REPORTTO-01/03/06) -- known issue verifikasi UI, fitur sudah confirmed
   bekerja via TC API terpisah.
 
-Kalau ada sesi baru yang melanjutkan task ini: TIDAK ADA next action wajib tersisa. Baca
-bagian ini dulu untuk konfirmasi semua 4 batch benar2 tuntas sebelum mulai kerjaan baru.
+Kalau ada sesi baru yang melanjutkan task ini: TIDAK ADA next action wajib tersisa dari 4
+batch original. Baca bagian ini dulu untuk konfirmasi semua 4 batch benar2 tuntas.
+
+---
+
+## BATCH 5 — BUZZ (modul BARU, scope expansion atas permintaan user 2026-11-11)
+
+User minta explore menu OrangeHRM lain di luar 4 modul original. Discovery dilakukan ke 8 menu
+(Time, Performance, Dashboard, Directory, Maintenance, Claim, Buzz, My Info) -- user pilih
+**Buzz** sbg prioritas (ada fitur upload foto/video, pola bug yang sudah terbukti 4x di modul
+lain: extension-only validation).
+
+**Temuan discovery:**
+- Performance & Claim: halaman BLANK TOTAL untuk akun ini (tidak ada data assigned, tidak ada
+  empty-state message) -- di luar scope Buzz, dicatat sbg temuan tapi belum ditindaklanjuti.
+- My Info: redundan dgn PIM (screen sama persis, beda konteks self-view) -- skip.
+- Maintenance: fitur "Purge Employee" destruktif, gated re-auth -- HIGH RISK kalau dikerjakan,
+  belum masuk scope manapun.
+- Dashboard, Directory: nilai testing rendah/redundan, belum masuk scope manapun.
+
+**Buzz dibangun dari NOL** (belum ada page object/folder test sebelumnya):
+- src/pages/BuzzPage.ts (page object baru)
+- Fixture pages.fixture.ts diupdate (tambah buzzPage)
+- tests/buzz/ (8 TC fungsional: post teks valid/kosong/boundary-panjang/cancel/double-click,
+  like, comment, comment-kosong)
+- tests/buzz/security/ (7 TC: XSS, SQLi, exe-renamed-jpg via Share Photo, baseline exe asli
+  ditolak, exe-renamed-mp4 via Share Video, clickjacking (konfirmasi ke-5 kalau reproduce),
+  IDOR read-only baseline)
+
+Total 15 TC baru. Typecheck bersih. Server dicek sehat (3x, 0.76-0.81s) sebelum run.
+
+**UPDATE 2026-11-11 (lanjutan): BATCH 5 (BUZZ) SELESAI DI-ROOT-CAUSE, 100% TUNTAS.**
+
+Regression run pertama (bb21c86xb): 6 passed, 9 failed. Investigasi penuh per-TC dilakukan
+(bukan asumsi), ditemukan 2 bug SCRIPT nyata (bukan bug sistem) di `src/pages/BuzzPage.ts`
+yang baru dibuat sesi ini & belum pernah divalidasi live:
+
+1. **postCards selector salah** -- `.orangehrm-buzz-post` cuma match div HEADER post
+   (avatar/nama/timestamp), TIDAK berisi body text/like/comment/stats. Dibuktikan via
+   `card.innerHTML()` langsung di browser. Diperbaiki jadi `.oxd-sheet.orangehrm-buzz`
+   (wrapper penuh). Bug ini yang bikin TC-06/07/08 hang sampai habis 45s timeout ("Target
+   page, context or browser has been closed").
+2. **Comment input selector salah** -- box comment adalah `<input placeholder="Write your
+   comment...">` TANPA atribut `type` sama sekali (bukan `type="text"`), jadi
+   `input[type="text"]` tidak pernah match, dan `.last()` malah ambil textarea composer utama.
+   Diperbaiki jadi `card.getByPlaceholder(/write your comment/i)`, di-scope ke card yang benar.
+
+**Temuan app nyata (bukan bug):** post baru TIDAK muncul di feed via client-side update --
+dibuktikan dengan polling hingga 9 detik tanpa reload, tetap 0. Perlu `page.reload()` manual.
+Ditambahkan helper `BuzzPage.reloadAndFindCard()` dan dipakai di semua TC yang butuh menemukan
+post sendiri (01, 06, 07, 08).
+
+**"Share Video" ternyata field URL, bukan file upload** -- TC-BUZZ-SECURITY-05 awal (exe
+renamed .mp4) salah asumsi, dibuktikan via screenshot modal "Share Video" = textbox "Paste
+Video URL" + tombol "Share" terpisah. TC lama dihapus, ditulis ulang sbg
+TC-BUZZ-SECURITY-05-Verify-Malicious-Video-Url-Rejected (javascript: URI injection test).
+
+**3 bug sistem nyata dikonfirmasi** (masuk Bug-List):
+- BG-173 (reopened, severity tetap): file .exe di-rename .jpg DITERIMA via Share Photo --
+  konfirmasi ke-5 extension-only-validation (pola sama PIM/Recruitment/Admin). Reproduksi
+  FLAKY (3/5 run diterima, 2/5 ditolak) -- diinvestigasi 5x run terpisah, tetap diklasifikasi
+  CONFIRMED BUG karena reproduce mayoritas, bukan false positive.
+- BG-175: missing X-Frame-Options/CSP frame-ancestors -- konfirmasi ke-5 app-wide (Login/
+  Recruitment/PIM/Admin/Buzz), severity Medium disamakan preseden.
+- BG-178: double-click submit kirim 2x POST, bikin 2 post duplikat -- race condition sama
+  pola BG-009 Recruitment, severity High disamakan preseden.
+
+BG-179/180/181/182/183 (semua artefak run pertama yg script-bug, sudah auto-closed oleh
+bugListReporter saat retest pass) -- tidak perlu tindakan manual lagi.
+
+Regresi final (full suite, default reporter, tanpa --reporter=list): **12 passed, 3 failed
+(correct/expected)**. docs/TC-Buzz.txt ditulis lengkap format detail. README.md diupdate
+(baris Buzz di tabel Test Coverage + subsection baru, total TC project 397 -> 412).
+
+**SISA UNTUK SESI BERIKUTNYA:**
+  - Commit + push (HATI-HATI: jangan ada trailer Claude, author harus
+    Arsal <arsalwildann@gmail.com>, SELALU cek `git log -1 --format="%an <%ae>"` sebelum push).
+  - Tanya user apakah mau lanjut ke menu lain (Time, dll) atau cukup Buzz saja utk Batch 5.
 
 ### UPDATE 2026-11-11: BATCH 1 (LOGIN) SEKARANG 100% TUNTAS.
 - TC-LOGIN-42: run bersih, PASS (session ID berubah, proteksi fixation bekerja). Sempat ada 1

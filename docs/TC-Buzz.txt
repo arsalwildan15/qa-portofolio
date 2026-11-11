@@ -1,0 +1,301 @@
+================================================================================
+  DAFTAR TEST CASE — BUZZ
+  Modul    : Buzz (Social Feed Internal)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/buzz/viewBuzz
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+  [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+
+  FORMAT ID  : TC-BUZZ-XX
+  FILE       : TC-BUZZ-XX-Verify-Name-In-English.spec.ts
+  FOLDER     : tests/buzz/ (positif/negatif/edge), tests/buzz/security/ (security)
+
+================================================================================
+  FUNGSI & IMPACT MODUL — BUZZ
+================================================================================
+
+  Buzz adalah social feed internal OrangeHRM: karyawan menulis post teks/
+  foto/link video yang langsung BROADCAST ke SELURUH karyawan yang login
+  (bukan scoped ke tim/role tertentu seperti Admin/PIM/Recruitment yang
+  cuma terbatas HR/admin). Fitur inti: tulis post, like, comment, share,
+  filter (Most Recent/Most Liked/Most Commented Posts).
+
+  IMPACT kalau ada validation gap di sini LEBIH LUAS dibanding modul lain:
+  satu post berbahaya (XSS, file executable) langsung terlihat SEMUA
+  karyawan begitu mereka buka Buzz, bukan cuma 1 record employee/candidate
+  tertentu seperti di PIM/Recruitment.
+
+================================================================================
+  CATATAN TEKNIS — BUZZ PAGE
+  Dikonfirmasi via Playwright discovery run live terhadap OrangeHRM OS 5.9
+================================================================================
+
+  URL        : /web/index.php/buzz/viewBuzz
+  Framework  : Vue 3 + OXD Design System (oxd-* components)
+
+  LOCATORS (CONFIRMED):
+    Composer trigger        : page.getByRole('button', { name: /post/i }).first()
+    Post textarea            : page.locator('textarea').first()
+    Share Photos button       : page.getByText(/share photo/i).first()
+    Share Video button        : page.getByText(/share video/i).first()
+    File input (photo)        : page.locator('input[type="file"]')
+    Submit "Post" button      : page.getByRole('button', { name: /^post$/i }).last()
+    Post card wrapper          : page.locator('.oxd-sheet.orangehrm-buzz')
+                                 [TEMUAN] '.orangehrm-buzz-post' (tanpa prefix
+                                 '.oxd-sheet') HANYA cocok dengan div HEADER
+                                 post (avatar/nama/timestamp) — TIDAK berisi
+                                 body text, tombol like/comment/share, atau
+                                 stats row. Card wrapper yang benar (berisi
+                                 semuanya) adalah '.oxd-sheet.orangehrm-buzz'.
+                                 Bug ini awalnya bikin 6 TC gagal dengan error
+                                 "browser has been closed" karena like/comment
+                                 button tidak pernah ketemu dan hang sampai
+                                 test timeout membunuh context.
+    Like control              : card.locator('svg.orangehrm-heart-icon, .orangehrm-heart-icon-circle')
+    Comment icon button        : card.locator('button:has(i.bi-chat-text-fill)')
+    Comment input              : card.getByPlaceholder(/write your comment/i)
+                                 [TEMUAN] Input ini TIDAK PUNYA atribut `type`
+                                 sama sekali di DOM (bukan type="text"), jadi
+                                 selector CSS input[type="text"] tidak pernah
+                                 match. Harus pakai placeholder-based locator,
+                                 di-scope ke card yang benar (comment box
+                                 di-inject per-card saat ikon comment diklik,
+                                 bukan box global).
+    Video URL input            : page.getByPlaceholder(/paste video url/i)
+                                 [TEMUAN] "Share Video" BUKAN file upload —
+                                 ini field teks "Paste Video URL" + tombol
+                                 "Share" terpisah dari composer utama. TC
+                                 security awal yang mengasumsikan file upload
+                                 ditulis ulang (lihat TC-BUZZ-SECURITY-05).
+    Kebab menu (post options)  : card.locator('button:has(i.bi-three-dots)')
+    Stats row (Likes/Comments) : card.locator('.orangehrm-buzz-stats-row')
+
+  PERILAKU PENTING — POST BARU TIDAK MUNCUL VIA CLIENT-SIDE UPDATE:
+    [TEMUAN] Setelah submit post baru (POST /api/v2/buzz/posts sukses
+    200), post TIDAK langsung muncul di feed tanpa reload — dibuktikan
+    dengan polling cardByText() hingga 9 detik tanpa reload: tetap 0.
+    Perlu `page.reload()` eksplisit untuk melihat post sendiri. Ini
+    perilaku aplikasi asli (UX finding), BUKAN bug script — semua TC
+    yang perlu menemukan post sendiri memakai helper
+    `BuzzPage.reloadAndFindCard(marker)` untuk mengakomodasi ini.
+
+  API ENDPOINT (CONFIRMED):
+    POST /api/v2/buzz/posts        — buat post baru (teks/foto)
+                                      Response: {"data":{"post":{"id":N},...}}
+    GET  /api/v2/buzz/posts        — ambil daftar post (feed)
+    GET  /api/v2/buzz/posts/:id/comments — ambil comment suatu post
+
+================================================================================
+  TEST CASES
+================================================================================
+
+No.  Test Case ID   Status   Skenario / Deskripsi
+---  -------------  -------  -----------------------------------------------
+
+================================================================================
+  GROUP 1 — POSITIVE CASES (Happy Path)
+================================================================================
+
+ 1   TC-BUZZ-01     [DONE]   TC-BUZZ-01-Verify-Add-Text-Post-Valid.spec.ts
+                             (+) Verify Add Text Post Valid
+                             -> Klik composer, isi teks post unik, klik Post.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200 untuk
+                                POST /api/v2/buzz/posts.
+                             [UI VERIFICATION]
+                             -> Reload, verify post muncul di feed
+                                (reloadAndFindCard).
+                             NOTE: post baru tidak muncul tanpa reload
+                             (lihat Catatan Teknis) — bukan bug, UX asli app.
+
+ 2   TC-BUZZ-02     [DONE]   TC-BUZZ-02-Verify-Empty-Post-Blocked.spec.ts
+                             (+/-) Verify Empty Post Text Is Blocked
+                             -> Buka composer tanpa isi teks, coba klik Post.
+                             Verify: tombol Post disabled ATAU tidak ada
+                             POST request terkirim.
+
+ 3   TC-BUZZ-03     [DONE]   TC-BUZZ-03-Verify-Post-Very-Long-Text.spec.ts
+                             (+/B) Verify Posting Very Long Text Succeeds
+                             -> Isi teks post dengan ribuan karakter, submit.
+                             Verify: tidak error/crash, response status OK.
+
+ 6   TC-BUZZ-06     [DONE]   TC-BUZZ-06-Verify-Like-Post.spec.ts
+                             (+) Verify Like A Post
+                             -> Buat post baru, reload (reloadAndFindCard).
+                             -> Catat stats "N Likes" sebelum, klik ikon Like.
+                             [API VERIFICATION]
+                             -> Verify ada network request like (non-GET,
+                                mengandung "like" di URL).
+                             [UI VERIFICATION]
+                             -> Verify counter "N Likes" bertambah
+                                (statsBefore !== statsAfter).
+
+ 7   TC-BUZZ-07     [DONE]   TC-BUZZ-07-Verify-Comment-On-Post.spec.ts
+                             (+) Verify Comment On A Post
+                             -> Buat post baru, reload, klik ikon comment,
+                                isi comment input (scoped ke card), Enter.
+                             [API VERIFICATION]
+                             -> Verify ada network request comment.
+                             [UI VERIFICATION]
+                             -> Verify counter "N Comments" bertambah.
+                             -> Verify teks comment terlihat di halaman.
+
+================================================================================
+  GROUP 2 — NEGATIVE / UNEXPECTED / EDGE CASES
+================================================================================
+
+ 4   TC-BUZZ-04     [DONE]   TC-BUZZ-04-Verify-Cancel-Discards-Post.spec.ts
+                             (!) Verify Closing Composer Discards Post
+                             -> Isi teks di composer, TUTUP modal (bukan
+                                klik Post) via tombol close atau Escape.
+                             Verify: TIDAK ada POST /api/v2/buzz/posts
+                             terkirim, dan post TIDAK muncul di feed
+                             setelah reload.
+
+ 5   TC-BUZZ-05     [DONE]   TC-BUZZ-05-Verify-Double-Click-Submit-No-Duplicate.spec.ts
+                             (!) Verify Rapid Double-Click Submit Does Not
+                             Duplicate Post
+                             -> Isi composer, klik tombol Post 2x secepat
+                                mungkin (Promise.all).
+                             Verify: jumlah POST request terkirim === 1,
+                             dan post muncul tepat 1 kali di feed.
+                             STATUS AKTUAL: GAGAL (BUG, lihat Bug-List BG-178)
+                             -> tombol Post tidak di-disable selama request
+                             berjalan, sehingga double-click mengirim 2x
+                             POST dan membuat 2 post identik ter-broadcast
+                             ke seluruh karyawan. Pola sama dengan BG-009
+                             (Recruitment candidate create race condition).
+
+ 8   TC-BUZZ-08     [DONE]   TC-BUZZ-08-Verify-Empty-Comment-Blocked.spec.ts
+                             (-) Verify Empty Comment Is Blocked
+                             -> Buat post baru, klik ikon comment, LANGSUNG
+                                tekan Enter tanpa isi apa pun.
+                             Verify: counter Comments TIDAK berubah, TIDAK
+                             ada network request comment terkirim.
+
+================================================================================
+  GROUP 3 — SECURITY
+================================================================================
+
+ 9   TC-BUZZ-SECURITY-01  [DONE]  TC-BUZZ-SECURITY-01-Verify-XSS-In-Post-Text.spec.ts
+                             (S) Verify XSS Payload In Post Text Is Not Executed
+                             -> Isi post dengan payload <script>/<img onerror>,
+                                submit.
+                             Verify: payload tidak dieksekusi sebagai script
+                             (tidak ada dialog/alert muncul), teks payload
+                             tampil sebagai teks biasa di feed (escaped).
+
+10   TC-BUZZ-SECURITY-02  [DONE]  TC-BUZZ-SECURITY-02-Verify-SQL-Injection-In-Post-Text.spec.ts
+                             (S) Verify SQL Injection Payload Does Not Break App
+                             -> Isi post dengan payload SQLi (OR '1'='1',
+                                DROP TABLE, dll), submit.
+                             Verify: response status < 500 (server tidak
+                             crash), feed masih bisa diakses & render normal
+                             setelahnya (minimal 1 card visible setelah
+                             reload + wait 3s).
+
+11   TC-BUZZ-SECURITY-03  [DONE]  TC-BUZZ-SECURITY-03-Verify-Exe-Renamed-As-Jpg-Photo-Upload.spec.ts
+                             (S) Verify Executable Renamed As .jpg Rejected
+                             Via Share Photo
+                             -> Klik Share Photo, upload file dengan magic
+                                bytes EXE (MZ header) tapi nama "x.jpg" dan
+                                mimeType image/jpeg, submit.
+                             Verify: file SEHARUSNYA ditolak (bukan 200).
+                             STATUS AKTUAL: GAGAL (BUG, konfirmasi ke-5,
+                             lihat Bug-List BG-173) -> validasi hanya cek
+                             ekstensi nama file, bukan magic bytes/konten
+                             — pola identik PIM Add Employee/Personal
+                             Details, Recruitment Resume, Admin Job
+                             Title/Corporate Branding. NOTE: reproduksi
+                             FLAKY (3 dari 5 run terkonfirmasi diterima,
+                             2 dari 5 ditolak) — root cause non-deterministic
+                             sudah diinvestigasi (bukan bug script: response
+                             ditunggu 30s, bukan di-skip saat timeout),
+                             tetap diklasifikasikan CONFIRMED BUG karena
+                             reproduce mayoritas dan konsisten dengan pola
+                             app-wide yang sudah 4x dikonfirmasi.
+
+12   TC-BUZZ-SECURITY-04  [DONE]  TC-BUZZ-SECURITY-04-Verify-Pure-Exe-Rejected-Photo-Upload.spec.ts
+                             (S) Verify Pure .exe (Real Extension) Rejected
+                             As Photo
+                             -> Klik Share Photo, upload file .exe dengan
+                                ekstensi ASLI (bukan di-rename), submit.
+                             Verify: file DITOLAK (baseline — membuktikan
+                             validasi ekstensi memang ADA, cuma gampang
+                             dilewati dengan rename seperti TC-SECURITY-03).
+
+13   TC-BUZZ-SECURITY-05  [DONE]  TC-BUZZ-SECURITY-05-Verify-Malicious-Video-Url-Rejected.spec.ts
+                             (S) Verify Malicious Video URL Input Is Not
+                             Executed
+                             -> Klik Share Video, paste javascript:alert(...)
+                                sebagai "Video URL", klik Share.
+                             Verify: payload TIDAK dieksekusi (tidak ada
+                             dialog muncul).
+                             NOTE: TC ini DITULIS ULANG dari versi awal yang
+                             salah asumsi "Share Video" = file upload. Live
+                             discovery membuktikan "Share Video" adalah
+                             field teks "Paste Video URL", bukan file
+                             upload — TC awal (menguji file upload) dihapus
+                             karena menguji fitur yang tidak ada.
+
+14   TC-BUZZ-SECURITY-06  [DONE]  TC-BUZZ-SECURITY-06-Verify-Clickjacking-Protection-Header.spec.ts
+                             (S) Verify Clickjacking Protection Header
+                             -> [API] GET halaman Buzz dan GET
+                                /api/v2/buzz/posts, cek header
+                                X-Frame-Options / CSP frame-ancestors.
+                             Verify: salah satu header proteksi clickjacking
+                             ada.
+                             STATUS AKTUAL: GAGAL (BUG, konfirmasi ke-5
+                             app-wide, lihat Bug-List BG-175) -> gap yang
+                             sama persis dengan Login(BG-030)/
+                             Recruitment(BG-066)/PIM(BG-096)/Admin(BG-145).
+                             Kemungkinan besar satu config nginx/web-server
+                             app-wide yang hilang, bukan gap per-modul.
+
+15   TC-BUZZ-SECURITY-07  [DONE]  TC-BUZZ-SECURITY-07-Verify-IDOR-Post-Access.spec.ts
+                             (S) Verify IDOR On Post/Comment Access (Baseline)
+                             -> Buat post sendiri, catat id. [API] GET
+                                comments utk post id LEBIH RENDAH (read-only,
+                                tidak mengubah apa pun).
+                             Verify: TC jalan tanpa exception (dokumentasi
+                             baseline).
+                             NOTE: Hasil "bisa diakses" adalah N/A — demo
+                             publik ini single-role (semua admin melihat
+                             semua data), konsisten preseden
+                             TC-RECRUITMENT-SECURITY-01/TC-PIM-SECURITY-01.
+                             Dibatasi read-only (GET) dengan sengaja karena
+                             data di demo publik ini milik seed data/
+                             employee lain dan TIDAK BOLEH dimodifikasi/
+                             dihapus oleh TC ini.
+
+================================================================================
+  RINGKASAN HASIL REGRESI TERAKHIR (11 Nov 2026)
+================================================================================
+
+  Total TC         : 15
+  PASSED           : 12
+  FAILED (BUG)     : 3  -> TC-BUZZ-SECURITY-03 (BG-173, flaky repro),
+                           TC-BUZZ-SECURITY-06 (BG-175),
+                           TC-BUZZ-05 (BG-178)
+  False positive/false passed : 0 (semua failure di-root-cause, 2 script
+                                   bug ditemukan & diperbaiki di
+                                   src/pages/BuzzPage.ts sebelum sign-off:
+                                   card wrapper selector salah, dan comment
+                                   input selector salah karena atribut
+                                   type tidak ada di DOM)
+
+  RUN COMMAND (semua TC):
+    npx playwright test tests/buzz --project=chromium --workers=1

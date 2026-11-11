@@ -185,8 +185,9 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Admin | 138 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 161 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 54 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
+| Buzz | 15 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Leave | 1 | N/A |
-| **Total** | **397** | |
+| **Total** | **412** | |
 
 ### Login (43 TCs)
 
@@ -235,6 +236,17 @@ IDOR on personal-details/salary access confirmed N/A (single-role architecture, 
 Vacancies incl. edit/deactivate/pagination/sorting (17), Candidates incl. resume upload/download and list filters (18), candidate status workflow state machine through to terminal "Hired" (14), cross-cutting security: IDOR, response headers, rate limiting, concurrent-write race condition, cross-origin mutation/CSRF (5).
 
 **Critical confirmed bug:** the candidate Shortlist endpoint (`PUT .../candidates/<id>/shortlist`) returns a 500 Internal Server Error for every candidate — confirmed reproducible in isolation across 3 separate candidates, with the server independently verified healthy each time. Since Shortlist is the earliest status transition and a prerequisite for almost every other status-workflow TC, this one bug cascades into failures across most of that suite.
+
+### Buzz (15 TCs)
+
+OrangeHRM's internal social feed, broadcasting posts to every logged-in employee company-wide rather than a scoped role — the widest blast radius of any module tested, so validation gaps here were treated as higher-impact. Covers: text posts incl. empty/very-long boundary (3), like/comment incl. empty-comment rejection (3), composer cancel/discard and rapid double-click-submit edge cases (2), plus 7 security TCs — XSS, SQL injection, extension-only file-upload bypass via "Share Photo", a baseline rejected-`.exe` control, a malicious-URL check on the text-only "Share Video" field, clickjacking headers, and a read-only IDOR baseline.
+
+**Confirmed bugs:**
+- Extension-only validation on the "Share Photo" upload accepts an executable renamed to `.jpg` — same pattern as PIM/Recruitment/Admin, now reproduced in the module with the widest broadcast radius. Reproduction is flaky (3 of 5 isolated reruns accepted the file, 2 rejected it) but still classified as a confirmed bug given it reproduces the majority of the time and matches a pattern already deterministic elsewhere.
+- Rapid double-click on the composer's "Post" button is not debounced, sending 2 identical POST requests and creating 2 duplicate posts broadcast to the whole company — the same race-condition pattern as Recruitment's candidate-creation bug.
+- Missing `X-Frame-Options` / CSP `frame-ancestors` — the **5th app-wide confirmation** of the same clickjacking gap also found in Login, Recruitment, PIM, and Admin.
+
+"Share Video" turned out to be a paste-a-URL field, not a file upload — an initial TC assumed otherwise and was rewritten after live discovery corrected it. IDOR on post/comment access confirmed N/A (same single-role architecture as other modules). A new post does not appear in the feed via client-side state update — a page reload is required to see your own post — documented as an app UX characteristic, not a bug.
 
 **Other confirmed bugs:**
 - Resume upload accepts an executable disguised as a `.pdf` — same extension-only validation pattern as PIM

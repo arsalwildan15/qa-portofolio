@@ -41,6 +41,7 @@ import {
   AdminSocialMediaAuthPage,
   AdminOAuthClientPage,
   AdminLdapConfigurationPage,
+  BuzzPage,
 } from '../pages';
 
 interface Pages {
@@ -92,6 +93,7 @@ interface Pages {
   adminSocialMediaAuthPage: AdminSocialMediaAuthPage;
   adminOAuthClientPage: AdminOAuthClientPage;
   adminLdapConfigurationPage: AdminLdapConfigurationPage;
+  buzzPage: BuzzPage;
 }
 
 export const test = base.extend<Pages>({
@@ -238,6 +240,9 @@ export const test = base.extend<Pages>({
   },
   adminLdapConfigurationPage: async ({ page }, use) => {
     await use(new AdminLdapConfigurationPage(page));
+  },
+  buzzPage: async ({ page }, use) => {
+    await use(new BuzzPage(page));
   },
 });
 

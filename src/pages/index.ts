@@ -39,3 +39,4 @@ export { AdminModulesPage } from './AdminModulesPage';
 export { AdminSocialMediaAuthPage } from './AdminSocialMediaAuthPage';
 export { AdminOAuthClientPage } from './AdminOAuthClientPage';
 export { AdminLdapConfigurationPage } from './AdminLdapConfigurationPage';
+export { BuzzPage } from './BuzzPage';
