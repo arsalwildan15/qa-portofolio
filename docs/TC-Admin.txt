@@ -856,6 +856,23 @@ LEGEND SIMBOL SKENARIO
                              ikut rusak. KONFIRMASI KE-1 dari bug app-wide
                              yang sama (lihat juga PIM, Recruitment, Buzz).
 
+ 9   TC-ADMIN-USER-09   [DONE]   TC-ADMIN-USER-09-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
+                             (!) Verify Double-Click Save Does Not Duplicate
+                             -> Isi form user valid, klik Save 2x secepat
+                                mungkin.
+                             Verify: TIDAK ada user duplikat tersimpan.
+                             STATUS AKTUAL: 2 POST terkirim (client tidak
+                             debounce, gap minor), TAPI data TIDAK
+                             terduplikat -- request ke-2 ditolak server dgn
+                             422 (validasi unique-username). Console-error
+                             check GAGAL (BUG, lihat Bug-List BG-204) ->
+                             penanganan response 422 tsb memicu "Uncaught
+                             exception: fe" yang SAMA PERSIS dgn bug
+                             app-wide TC-ADMIN-USER-08, kali ini lewat
+                             jalur validasi error asli (bukan simulasi
+                             network-drop) -- memperkuat bukti trigger-nya
+                             ANY non-2xx response.
+
 ================================================================================
   TEST CASES: JOB TITLES (8 TC)
 ================================================================================
@@ -924,6 +941,17 @@ LEGEND SIMBOL SKENARIO
                                 (baseline pembanding TC-07: validasi memang
                                 ADA, tapi bisa di-bypass dengan rename
                                 ekstensi).
+
+ 9   TC-ADMIN-JOBTITLE-09   [DONE]   TC-ADMIN-JOBTITLE-09-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
+                             (!) Verify Double-Click Save Does Not Duplicate
+                             -> Isi Job Title valid, klik Save 2x secepat
+                                mungkin.
+                             Verify: TIDAK ada job title duplikat tersimpan.
+                             STATUS AKTUAL: sama persis dgn TC-ADMIN-USER-09
+                             -- 2 POST terkirim, data TIDAK terduplikat
+                             (server tolak request ke-2 dgn 422), tapi
+                             console-error check GAGAL (BUG, lihat Bug-List
+                             BG-203) krn "Uncaught exception: fe" yang sama.
 
 ================================================================================
   TEST CASES: PAY GRADES (5 TC)
@@ -1995,10 +2023,12 @@ LEGEND SIMBOL SKENARIO
   SUMMARY
 ================================================================================
 
-  Total TC: 140 (138 dari pass pertama-keempat+security + 2 TC edge case
+  Total TC: 142 (138 dari pass pertama-keempat+security + 4 TC edge case
   ditambahkan 2026-11-12: TC-ADMIN-USER-07 refresh mid-submit PASSED,
   TC-ADMIN-USER-08 connection-drop mid-submit FAILED -- BUG APLIKASI
-  TERKONFIRMASI, lihat BG-199). Dengan ini, SEMUA ~16 sub-screen Admin
+  TERKONFIRMASI, lihat BG-199; TC-ADMIN-USER-09 & TC-ADMIN-JOBTITLE-09
+  double-click FAILED -- konfirmasi lagi bug yang sama via jalur 422
+  validasi, lihat BG-203/204). Dengan ini, SEMUA ~16 sub-screen Admin
   (13 sub-screen pass pertama-kedua + 3 sub-screen Organization pass
   ketiga + 8 sub-screen Configuration pass keempat) + security
   lintas-screen + edge-case koneksi SELESAI dicakup -- Admin module

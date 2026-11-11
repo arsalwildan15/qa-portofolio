@@ -182,14 +182,16 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Module | TCs | Docs |
 |--------|----:|------|
 | Login | 45 | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| Admin | 140 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
+| Admin | 142 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 163 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
-| Recruitment | 56 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
+| Recruitment | 58 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 29 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Leave | 1 | N/A |
-| **Total** | **434** | |
+| **Total** | **438** | |
 
 **Cross-cutting edge cases (2026-11-12):** two scenarios flagged as commonly-forgotten in test design — refreshing mid-submit and a dropped connection mid-submit — were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails due to a dropped network connection, the SPA throws an unhandled JS exception that reaches the console/global error handler instead of being caught at its source, identically reproduced (same exception name) in Admin, PIM, Recruitment, and Buzz. The app does still show the user a generic "Unexpected Error!" toast in all four cases — this is a code-level error-handling defect, not a silent failure the user would never notice. Login is unaffected — its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
+
+A third scenario — rapid double-click on Save — was then extended to the two modules that didn't have it yet (Admin Users/Job Titles, Recruitment Candidates/Vacancies; Login, PIM, and Buzz already covered it). This surfaced two more distinct confirmed bugs: a genuine data-integrity issue on Recruitment Candidates (double-click creates two real duplicate records, since this form neither debounces the button nor enforces a unique-email constraint server-side) and a client-side crash on Recruitment Vacancies (`Cannot read properties of undefined (reading 'id')` in the app's own save handler). On Admin, double-click reproduced the same app-wide unhandled-exception bug again — this time triggered by a real 422 validation conflict rather than a simulated network drop, which is good independent evidence the underlying defect reacts to any non-2xx response, not just network failures.
 
 ### Login (45 TCs)
 
@@ -201,7 +203,7 @@ Organized into `tests/login/positive/`, `negative/`, `boundary/`, `security/`, a
 
 CSRF and session-fixation checks confirmed **effective** (no bug). Re-verifying the full suite after reorganizing these files into subfolders also surfaced and fixed 2 script bugs unrelated to the reorganization itself: a race condition reading the post-login URL before the redirect completed (`TC-LOGIN-29`), and a cross-origin CSRF check whose UI assertion expected the browser to stay on the attacker's origin, when a real form POST always follows its redirect as normal top-level navigation (`TC-LOGIN-41`) — neither affected the tests' underlying security conclusions.
 
-### Admin (140 TCs)
+### Admin (142 TCs)
 
 Full coverage across all ~16 Admin sub-screens:
 
@@ -221,6 +223,7 @@ Full coverage across all ~16 Admin sub-screens:
 - A freshly-added Organization Structure unit can't be renamed afterward — editing resends its untouched optional `unitId`/`description` as `null`, server rejects with HTTP 422 — `TC-ADMIN-STRUCTURE-07`
 - Missing `X-Frame-Options` / CSP `frame-ancestors` — the **4th app-wide confirmation** of the same clickjacking gap also found in Login, Recruitment, and PIM
 - When a create-user request fails due to a dropped network connection, the SPA throws an unhandled JS exception that reaches the console instead of being caught at its source (a generic "Unexpected Error!" toast is still shown to the user, so this is a code-level defect rather than a silent failure) — the **1st of 4 identical confirmations** of this app-wide gap — see also PIM, Recruitment, and Buzz
+- The same unhandled-exception bug reproduces again on double-click (Users and Job Titles), this time triggered by a real HTTP 422 validation conflict rather than a simulated dropped connection — good independent evidence the defect reacts to any non-2xx response. No duplicate data is created in either case; the server's own unique-name validation rejects the second request.
 
 Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-executable payload by decoding it as a real image client-side. IDOR TCs (Skills, Nationalities, Locations) found no multi-tenant boundary to breach — consistent with this demo's single-admin-role architecture, documented as N/A rather than a false-positive vulnerability. Cross-origin mutation (CSRF) on pay-grade creation confirmed **blocked by CORS** (no bug).
 
@@ -235,13 +238,15 @@ Full module coverage, no open functional gaps: Employee List (14), Add Employee 
 
 IDOR on personal-details/salary access confirmed N/A (single-role architecture, same as other modules). Report-to's "Add Supervisor/Subordinate" TCs (3) have a known intermittent UI-verification issue — the underlying save is confirmed working via its own API-level TC, only the text-match assertion is unreliable.
 
-### Recruitment (56 TCs)
+### Recruitment (58 TCs)
 
 Vacancies incl. edit/deactivate/pagination/sorting (17), Candidates incl. resume upload/download and list filters (18), candidate status workflow state machine through to terminal "Hired" (14), cross-cutting security: IDOR, response headers, rate limiting, concurrent-write race condition, cross-origin mutation/CSRF (5).
 
 **Critical confirmed bug:** the candidate Shortlist endpoint (`PUT .../candidates/<id>/shortlist`) returns a 500 Internal Server Error for every candidate — confirmed reproducible in isolation across 3 separate candidates, with the server independently verified healthy each time. Since Shortlist is the earliest status transition and a prerequisite for almost every other status-workflow TC, this one bug cascades into failures across most of that suite.
 
 Also confirmed: the same unhandled-exception-on-dropped-connection bug as Admin and PIM (**3rd of 4 confirmations**), reproduced identically on create-candidate.
+
+Two more distinct bugs confirmed on double-click: rapid double-clicking Save on Add Candidate creates two genuinely duplicate candidate records — this form neither debounces the button nor enforces a unique-email constraint server-side (candidates allow duplicate emails by design, per `TC-RECRUITMENT-CANDIDATE-14`), confirmed via the raw API response bodies returning two distinct candidate IDs, not just a UI-list count. The same scenario on Add Vacancy instead crashes the app's own save handler (`Cannot read properties of undefined (reading 'id')`) without creating a duplicate — a client-side defect, not a data-integrity one.
 
 ### Buzz (29 TCs)
 

@@ -1137,6 +1137,25 @@ LEGEND SIMBOL SKENARIO
                                    sorting kolom "Vacancy" Ascending berhasil
                                    dipicu tanpa error.
 
+18   TC-RECRUITMENT-VACANCY-18   [DONE]   TC-RECRUITMENT-VACANCY-18-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
+                             (!) Verify Double-Click Save Does Not Duplicate
+                             -> Isi form vacancy valid, klik Save 2x
+                                secepat mungkin.
+                             Verify: TIDAK ada vacancy duplikat tersimpan,
+                             TIDAK ada console error.
+                             STATUS AKTUAL: GAGAL (BUG NYATA & BERBEDA dari
+                             bug app-wide network-drop, lihat Bug-List
+                             BG-206) -> hanya 1 POST sempat terkirim (data
+                             TIDAK terduplikat, postCount=1, count=1), TAPI
+                             klik kedua memicu TypeError "Cannot read
+                             properties of undefined (reading 'id')" di
+                             handler Proxy.onSave milik app -- indikasi
+                             onSave tidak guard terhadap dipanggil ganda/
+                             state yang belum siap. Deterministik reproduce
+                             3x. Severity Medium: code-quality defect
+                             nyata, dampak ke user minim krn tidak ada
+                             kehilangan/korup data.
+
 17   TC-RECRUITMENT-CANDIDATE-17   [DONE]   TC-RECRUITMENT-CANDIDATE-17-Verify-List-Filters-Combination.spec.ts
                              (+) Verify List Filters Beyond Candidate Name, Individually and Combined
                              -> Buat candidate baru, Shortlist (agar ada data
@@ -1225,6 +1244,28 @@ LEGEND SIMBOL SKENARIO
                              menampilkan toast generic "Unexpected Error!"
                              ke user (bukan silent failure) -- bug-nya di
                              penanganan exception level kode.
+
+21   TC-RECRUITMENT-CANDIDATE-21   [DONE]   TC-RECRUITMENT-CANDIDATE-21-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
+                             (!) Verify Double-Click Save Does Not Duplicate
+                             -> Isi form candidate valid, klik Save 2x
+                                secepat mungkin, baca body response TIAP
+                                POST langsung (ground truth, bukan via UI
+                                list/pagination yang terbukti tidak
+                                reliable utk kasus ini).
+                             Verify: kedua response sukses (200) TIDAK
+                             boleh menghasilkan candidate id berbeda.
+                             STATUS AKTUAL: GAGAL (BUG NYATA & BERBEDA dari
+                             BG-009, lihat Bug-List BG-205) -> client TIDAK
+                             debounce tombol Save DAN TIDAK ada validasi
+                             unique server-side (konsisten CANDIDATE-14:
+                             "duplicate email diizinkan") -- double-click
+                             membuat 2 candidate record BERBEDA ID yang
+                             SUNGGUHAN tersimpan (dikonfirmasi via response
+                             body: id=107 dan id=108 pada 1 run). Intermiten:
+                             2 dari 3 run isolasi mereproduce duplikat
+                             nyata, 1 run hanya 1 request sempat terkirim
+                             (window race sempit). Severity High -- data
+                             integrity nyata terdampak, bukan cosmetic.
 
 12   TC-RECRUITMENT-STATUS-12   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-12-Verify-Offer-Job-To-Hired.spec.ts
                              (+) Verify Offer Job to Hired, Full State Machine Chain
@@ -1398,13 +1439,18 @@ LEGEND SIMBOL SKENARIO
   fitur-nya ADA setelah wait render yang cukup, lihat koreksi di TC
   tersebut).
 
-  [UPDATE 2026-11-12] +2 TC baru (CANDIDATE-19 refresh mid-submit PASSED,
-  CANDIDATE-20 connection-drop mid-submit) -> total 56 TC. CANDIDATE-20
-  mengonfirmasi bug APP-WIDE yang sama dgn TC-ADMIN-USER-08/TC-PIM-ADD-33
-  -- "Uncaught exception: fe" lolos ke console saat POST create-candidate
-  gagal krn koneksi terputus (app tetap menampilkan toast generic
-  "Unexpected Error!" ke user, bukan silent failure). Konfirmasi ke-3
-  dari 4 modul (lihat docs/TC-Admin.txt, TC-PIM.txt, TC-Buzz.txt).
+  [UPDATE 2026-11-12] +4 TC baru (CANDIDATE-19 refresh mid-submit PASSED,
+  CANDIDATE-20 connection-drop mid-submit, CANDIDATE-21 & VACANCY-18
+  double-click) -> total 58 TC. CANDIDATE-20 mengonfirmasi bug APP-WIDE
+  yang sama dgn TC-ADMIN-USER-08/TC-PIM-ADD-33 -- "Uncaught exception: fe"
+  lolos ke console saat POST create-candidate gagal krn koneksi terputus
+  (app tetap menampilkan toast generic "Unexpected Error!" ke user, bukan
+  silent failure). Konfirmasi ke-3 dari 4 modul (lihat docs/TC-Admin.txt,
+  TC-PIM.txt, TC-Buzz.txt). CANDIDATE-21 mengonfirmasi BUG BARU & BERBEDA
+  (BG-205, Severity High): double-click Save membuat 2 candidate record
+  duplikat SUNGGUHAN tersimpan (data integrity nyata, bukan cosmetic).
+  VACANCY-18 mengonfirmasi BUG BARU LAIN (BG-206, Severity Medium): double-
+  click memicu TypeError di handler onSave app.
 
   [UPDATE 2026-11-11, review penuh] +1 TC baru (SECURITY-05, CSRF cross-
   origin mutation) -> total 54 TC. SECURITY-02 dan SECURITY-03 di-escalate

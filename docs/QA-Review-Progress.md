@@ -1143,3 +1143,51 @@ baru). docs/Bug-List.xlsx dicek ulang, tidak ada duplikat baru.
     Buzz Edit Post/Delete Comment/pagination, PIM Terminate Employee, Admin filter kombinasi/
     bulk action, Login reset password flow sesungguhnya).
   - Tahap 4: regresi penuh semua modul + dokumentasi final.
+
+### UPDATE 2026-11-12: TAHAP 2 -- ratakan coverage double-click submit ke Admin & Recruitment.
+
+6 TC baru ditambahkan: TC-ADMIN-USER-09, TC-ADMIN-JOBTITLE-09, TC-RECRUITMENT-CANDIDATE-21,
+TC-RECRUITMENT-VACANCY-18 (Login/PIM/Buzz sudah punya sebelumnya, tidak diulang).
+
+**Hasil regresi final: 0 passed, 4 failed -- SEMUA correctly-failing, 3 bug berbeda
+terkonfirmasi:**
+
+1. **Admin (Users + Job Titles)**: double-click mengirim 2 POST, tapi data TIDAK terduplikat --
+   request ke-2 ditolak server dgn 422 (validasi unique-name/username). Namun penanganan
+   response 422 itu sendiri memicu "Uncaught exception: fe" yang SAMA PERSIS dgn bug app-wide
+   yang sudah dikonfirmasi via simulasi network-drop (BG-199/200/201/202, Tahap 1) -- kali ini
+   lewat jalur validasi error ASLI, bukan simulasi. Ini bukti independen kuat bahwa trigger bug
+   ini ANY non-2xx response, bukan cuma network failure. Masuk Bug-List sbg BG-203 (Job Titles),
+   BG-204 (Users), Severity Medium.
+
+2. **Recruitment Candidates**: BUG BARU & BERBEDA dari BG-009 (BG-009 soal race condition
+   status-transition, bukan create) -- double-click Save di Add Candidate TIDAK di-debounce
+   client-side DAN TIDAK ada validasi unique server-side (konsisten TC-RECRUITMENT-CANDIDATE-14:
+   "duplicate email diizinkan"). Verifikasi awal via UI list+pagination (gotoLastPage) TERBUKTI
+   TIDAK RELIABLE (hasil count berubah-ubah 0/1/2 antar run) -- diperbaiki dgn membaca body
+   response TIAP POST langsung sbg ground truth. Hasil: 2 dari 3 run isolasi menghasilkan 2
+   candidate id BERBEDA yang SUNGGUHAN tersimpan (contoh: id=107 & id=108), 1 run hanya 1
+   request sempat terkirim (window race sempit). Masuk Bug-List sbg BG-205, Severity High --
+   data integrity nyata terdampak.
+
+3. **Recruitment Vacancies**: BUG BARU LAIN -- double-click memicu TypeError "Cannot read
+   properties of undefined (reading 'id')" di handler Proxy.onSave milik app, deterministik
+   reproduce 3x. Data TIDAK terduplikat (hanya 1 POST sempat terkirim). Masuk Bug-List sbg
+   BG-206, Severity Medium -- code-quality defect, dampak ke user minim.
+
+**Bug script ditemukan & diperbaiki selama investigasi:** verifikasi duplikat di Recruitment
+Candidates awalnya pakai `gotoLastPage()` + `rowByText()` (pola yang sama dipakai di TC lain
+modul ini) -- ternyata TIDAK RELIABLE utk kasus spesifik ini krn demo punya 100+ candidate
+record dan pagination state tidak deterministik antar run. Diperbaiki dgn baca response body
+POST langsung (ground truth paling akurat, tidak bergantung UI/pagination sama sekali).
+
+Bug-List dicek ulang: tidak ada duplikat baru (1 kesalahan kolom sempat terjadi saat edit --
+nilai "Open" salah ketik ke kolom "Assigned To" alih-alih tetap di "Status" -- langsung
+diperbaiki). docs/TC-Admin.txt (+2 TC, Total 140->142), docs/TC-Recruitment.txt (+4 TC, Total
+54->58, perhitungan sebelumnya di Tahap 1 adalah 56 jadi total akhir 58). README.md diupdate.
+
+**SISA TAHAP 3-4 (belum dikerjakan, menunggu arahan user):**
+  - Tahap 3: investigasi ulang bug Shortlist 500 Recruitment, Buzz Edit Post/Delete Comment/
+    pagination, PIM Terminate Employee, Admin filter kombinasi/bulk action, Login reset
+    password flow sesungguhnya.
+  - Tahap 4: regresi penuh semua modul + dokumentasi final.
