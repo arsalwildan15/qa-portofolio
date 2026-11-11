@@ -17,7 +17,7 @@ End-to-end test automation suite for the [OrangeHRM demo application](https://op
 | Language | TypeScript (strict mode) |
 | Reporting | [Allure Report](https://allurereport.org/) + Playwright HTML report |
 | Code quality | ESLint + Prettier |
-| CI/CD | GitHub Actions → Allure report published to GitHub Pages |
+| CI/CD | GitHub Actions (type-check + lint on every push) |
 
 ## Architecture
 
