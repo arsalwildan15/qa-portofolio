@@ -255,15 +255,72 @@ If targeting a different environment for a local run, set these in `.env` (copie
 
 ## Test Coverage
 
-| Module | Scenarios | Docs |
-|--------|-----------|------|
-| Login | 43 TCs: positive, negative, boundary, security, edge. 2 confirmed bugs: (1) no rate limiting/lockout after repeated failed logins; (2) missing `X-Frame-Options`/CSP `frame-ancestors` (clickjacking). CSRF and session-fixation checks confirmed effective (no bug) | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| Admin | 136 TCs, full module coverage across all ~16 Admin sub-screens, see docs/TC-Admin.txt. Users (6), Job Titles incl. file-upload security (8), Pay Grades (5), Employment Status (5), Job Categories (5), Work Shifts (5), Corporate Branding logo/banner upload security -- validate-only, never clicks "Publish" since it would change the shared demo's global theme (5), Qualifications > Skills incl. a second Description field and a dedicated IDOR TC (8), Education -- confirmed to use a "Level" field label rather than "Name" (5), Licenses (5), Languages (5), Memberships -- admin-level master data, distinct from PIM's employee-level Qualifications/Memberships tabs (5), Nationalities -- confirmed to hold ~196 real seed records with no UI search/filter, so its Add/Delete TCs verify via the API directly rather than scanning table rows (6), Organization > General Information -- a single global record with an Edit switch, every mutating TC restores the original value afterward (6), Locations -- 9 fields with a real server-backed Name-uniqueness check and an edit-form URL with the id directly in the path (IDOR) (9), Structure -- a genuine hierarchical org-chart tree, gated behind an Edit switch (9). Configuration (39 TCs, all 8 sub-screens): a risk-driven methodology classifies each sub-screen by actual blast radius on this shared public demo rather than a blanket rule -- Email Configuration (5), Localization (5), Modules (5), Social Media Authentication (5) and LDAP Configuration (5, the highest-risk screen in the suite, per the app's own data-corruption warning) are all VALIDATE-ONLY: client-side/on-blur validation and (for LDAP) its separate non-mutating "Test Connection" probe are exercised, but Save is never clicked, since a bad write here would change infrastructure shared by every concurrent demo user. Email Subscriptions (5), Language Packages (4) and OAuth Client (5) are FULLY EXERCISED with save-then-restore or add-then-delete, after confirming live they're additive/reversible (OAuth Client in particular registers API/mobile-app token clients, not the browser login page, correcting an initial higher-risk assumption). 2 confirmed bugs in the earlier passes: (1) Job Title's "Job Specification" file upload accepts an executable renamed to `.jpg` (same extension-only validation pattern as PIM/Recruitment, TC-ADMIN-JOBTITLE-07); (2) a freshly-added Organization Structure unit cannot be renamed afterward -- editing it resends its untouched optional `unitId`/`description` fields as `null`, and the server rejects the update with HTTP 422 (TC-ADMIN-STRUCTURE-07). Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-executable payload by attempting to decode it as a real image client-side. IDOR TCs (Skills, Nationalities, Locations) found no multi-tenant boundary to breach -- consistent with this demo's single-admin-role architecture, documented as N/A rather than a false-positive vulnerability, same pattern as TC-RECRUITMENT-SECURITY-01 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
-| PIM | 161 TCs, full module coverage with no open functional gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs, plus 2 IDOR/clickjacking security TCs. Confirmed bugs: (1) extension-only validation lets an executable disguised as a photo through on both profile-photo upload points; (2) missing `X-Frame-Options`/CSP `frame-ancestors` on Employee List -- the **3rd app-wide confirmation** of the same clickjacking gap also found in Login and Recruitment. IDOR on personal-details/salary access confirmed N/A (single-role architecture, same as other modules). Report-to's "Add Supervisor/Subordinate" TCs (3) are a known intermittent UI-verification issue -- the underlying save is confirmed working via its own API-level TC, only the text-match assertion is unreliable | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
-| Recruitment | 54 TCs: Vacancies incl. edit/deactivate/pagination/sorting (17), Candidates incl. resume upload/download, list filters (18), candidate status workflow state machine through to terminal "Hired" (14), cross-cutting security: IDOR, response headers, rate limiting, concurrent-write race condition, cross-origin mutation/CSRF (5). **Critical confirmed bug:** the candidate Shortlist endpoint (`PUT .../candidates/<id>/shortlist`) returns a 500 Internal Server Error for every candidate, confirmed reproducible in isolation across 3 separate candidates with the server independently verified healthy each time -- since Shortlist is the earliest status transition and a prerequisite for almost every other status-workflow TC, this one bug cascades into failures across most of that suite. Other confirmed bugs: (1) resume upload accepts an executable disguised as a .pdf, same extension-only validation pattern as PIM; (2) a genuine race condition on the candidate status-transition endpoint -- two mutually-exclusive concurrent status changes (Reject vs. Schedule Interview) on the same candidate can both report success with no server-side locking/versioning; (3) missing `X-Frame-Options` (clickjacking, same app-wide gap as Login/PIM); (4) no rate limiting on candidate creation. Cross-origin mutation (CSRF) on vacancy creation confirmed blocked by CORS (no bug). Plus a documented intermittent client-side rendering bug (Application Stage/Candidate History cards occasionally stuck loading forever with no underlying API error) | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
-| Leave | Submitting without entitlement is correctly blocked (see note below) | N/A |
+| Module | TCs | Docs |
+|--------|----:|------|
+| Login | 43 | [docs/TC-Login.txt](docs/TC-Login.txt) |
+| Admin | 136 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
+| PIM | 161 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| Recruitment | 54 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
+| Leave | 1 | N/A |
+| **Total** | **395** | |
 
-> **Note on the Leave suite:** the public demo account has no assigned leave entitlement, so a successful application can't be exercised. Instead the test verifies the deterministic behavior that's actually there: an insufficient-balance message once a date range is selected.
+### Login (43 TCs)
+
+Positive, negative, boundary, security, edge.
+
+**Confirmed bugs:**
+- No rate limiting/lockout after repeated failed logins
+- Missing `X-Frame-Options` / CSP `frame-ancestors` (clickjacking)
+
+CSRF and session-fixation checks confirmed **effective** (no bug).
+
+### Admin (136 TCs)
+
+Full coverage across all ~16 Admin sub-screens:
+
+- User Management > Users (6)
+- Job: Job Titles incl. file-upload security (8), Pay Grades (5), Employment Status (5), Job Categories (5), Work Shifts (5)
+- Corporate Branding: logo/banner upload security — validate-only, never clicks "Publish" since it would change the shared demo's global theme (5)
+- Qualifications: Skills incl. a second Description field + IDOR (8), Education — confirmed to use a "Level" field label rather than "Name" (5), Licenses (5), Languages (5), Memberships — admin-level master data, distinct from PIM's employee-level tabs (5)
+- Nationalities — confirmed ~196 real seed records with no UI search/filter, so Add/Delete TCs verify via the API directly (6)
+- Organization: General Information — single global record with an Edit switch, every mutating TC restores the original value afterward (6); Locations — 9 fields, real server-backed Name-uniqueness check, edit-form URL with the id in the path / IDOR (9); Structure — genuine hierarchical org-chart tree, gated behind an Edit switch (9)
+- Configuration (39 TCs, all 8 sub-screens) — risk-driven methodology, classified by actual blast radius on the shared public demo rather than a blanket rule:
+  - **Validate-only** (never clicks Save, since a bad write would change shared infrastructure): Email Configuration (5), Localization (5), Modules (5), Social Media Authentication (5), LDAP Configuration (5, highest-risk screen in the suite per the app's own data-corruption warning)
+  - **Fully exercised** (save-then-restore / add-then-delete, confirmed additive/reversible): Email Subscriptions (5), Language Packages (4), OAuth Client (5 — registers API/mobile-app token clients, not the login page, correcting an initial higher-risk assumption)
+
+**Confirmed bugs:**
+- Job Title's "Job Specification" file upload accepts an executable renamed to `.jpg` (same extension-only validation pattern as PIM/Recruitment) — `TC-ADMIN-JOBTITLE-07`
+- A freshly-added Organization Structure unit can't be renamed afterward — editing resends its untouched optional `unitId`/`description` as `null`, server rejects with HTTP 422 — `TC-ADMIN-STRUCTURE-07`
+
+Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-executable payload by decoding it as a real image client-side. IDOR TCs (Skills, Nationalities, Locations) found no multi-tenant boundary to breach — consistent with this demo's single-admin-role architecture, documented as N/A rather than a false-positive vulnerability.
+
+### PIM (161 TCs)
+
+Full module coverage, no open functional gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs and 2 IDOR/clickjacking security TCs.
+
+**Confirmed bugs:**
+- Extension-only validation lets an executable disguised as a photo through on both profile-photo upload points
+- Missing `X-Frame-Options` / CSP `frame-ancestors` on Employee List — the **3rd app-wide confirmation** of the same clickjacking gap also found in Login and Recruitment
+
+IDOR on personal-details/salary access confirmed N/A (single-role architecture, same as other modules). Report-to's "Add Supervisor/Subordinate" TCs (3) have a known intermittent UI-verification issue — the underlying save is confirmed working via its own API-level TC, only the text-match assertion is unreliable.
+
+### Recruitment (54 TCs)
+
+Vacancies incl. edit/deactivate/pagination/sorting (17), Candidates incl. resume upload/download and list filters (18), candidate status workflow state machine through to terminal "Hired" (14), cross-cutting security: IDOR, response headers, rate limiting, concurrent-write race condition, cross-origin mutation/CSRF (5).
+
+**Critical confirmed bug:** the candidate Shortlist endpoint (`PUT .../candidates/<id>/shortlist`) returns a 500 Internal Server Error for every candidate — confirmed reproducible in isolation across 3 separate candidates, with the server independently verified healthy each time. Since Shortlist is the earliest status transition and a prerequisite for almost every other status-workflow TC, this one bug cascades into failures across most of that suite.
+
+**Other confirmed bugs:**
+- Resume upload accepts an executable disguised as a `.pdf` — same extension-only validation pattern as PIM
+- A genuine race condition on the candidate status-transition endpoint: two mutually-exclusive concurrent status changes (Reject vs. Schedule Interview) on the same candidate can both report success, with no server-side locking/versioning
+- Missing `X-Frame-Options` (clickjacking, same app-wide gap as Login/PIM)
+- No rate limiting on candidate creation
+
+Cross-origin mutation (CSRF) on vacancy creation confirmed **blocked by CORS** (no bug). Plus a documented intermittent client-side rendering bug (Application Stage/Candidate History cards occasionally stuck loading forever with no underlying API error).
+
+### Leave (1 TC)
+
+> The public demo account has no assigned leave entitlement, so a successful application can't be exercised. Instead the test verifies the deterministic behavior that's actually there: an insufficient-balance message once a date range is selected.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 
