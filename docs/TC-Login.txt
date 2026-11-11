@@ -21,7 +21,17 @@ LEGEND SIMBOL SKENARIO
 
   FORMAT ID  : TC-LOGIN-XX
   FILE       : TC-LOGIN-XX-Verify-Name-In-English.spec.ts
-  FOLDER     : tests/login/
+  FOLDER     : tests/login/positive/ (Group 1), tests/login/negative/ (Group 2),
+               tests/login/boundary/ (Group 3), tests/login/security/ (Group 4),
+               tests/login/edge/ (Group 5)
+               [REORGANISASI 12 Nov 2026]: sebelumnya flat tests/login/*.spec.ts,
+               dipecah ke subfolder PERSIS mengikuti 5 grup di bawah, supaya
+               struktur folder konsisten dgn modul lain (Recruitment, Buzz).
+               Path import relatif & header komentar "Path"/"RUN COMMAND" di
+               setiap file sudah disesuaikan. Isi/logika tiap TC TIDAK berubah
+               akibat reorganisasi ini kecuali 2 perbaikan bug script yang
+               ditemukan saat verifikasi regresi pasca-reorganisasi (lihat
+               catatan di TC-LOGIN-29 dan TC-LOGIN-41 di bawah).
 
 ================================================================================
   CATATAN TEKNIS — LOGIN PAGE
@@ -344,8 +354,23 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                                 (GAGAL), BUKAN "/dashboard/index" — walau
                                 kredensial yang dikirim VALID.
                              [UI VERIFICATION]
-                             -> Verify browser TIDAK ikut ter-redirect ke
-                                domain OrangeHRM (tetap di example.com).
+                             -> Verify browser berakhir di halaman login
+                                (gagal), BUKAN di dashboard.
+                             NOTE [BUG SCRIPT, diperbaiki 12 Nov 2026]: assertion
+                                   UI semula salah — mengharapkan browser TETAP
+                                   di origin eksternal (example.com). Padahal
+                                   <form method="POST"> yang di-submit.form()
+                                   SELALU mengikuti redirect 302 sbg navigasi
+                                   top-level browser normal (CORS tidak berlaku
+                                   utk navigasi, hanya utk fetch/XHR) — jadi
+                                   browser MEMANG akan berakhir di domain
+                                   OrangeHRM (di halaman /auth/login yang gagal,
+                                   BUKAN /dashboard/index). Assertion diperbaiki
+                                   jadi cek halaman tujuan akhir, bukan origin;
+                                   terbukti 3x pass bersih setelah fix. Bug ini
+                                   TIDAK mengubah kesimpulan keamanan (check
+                                   [API] #1/#2 di atas sudah cukup membuktikan
+                                   proteksi CSRF efektif).
                              NOTE: [TEMUAN POSITIF] Proteksi CSRF EFEKTIF.
                                    Kemungkinan besar karena cookie sesi
                                    SameSite=Lax (lihat TC-LOGIN-01) tidak
@@ -418,7 +443,16 @@ No.  Test Case ID   Status   Skenario / Deskripsi
 29   TC-LOGIN-29    [DONE]   TC-LOGIN-29-Verify-Login-With-Enter-Key.spec.ts
                              (!) Verify Login Can Be Submitted via Enter Key
                              -> Tekan Enter di field Password, bukan klik tombol.
-                             Verify: URL berubah ke "/dashboard/index".
+                             Verify: URL berubah ke "/dashboard/index" (pakai
+                             urlMatchesWithWait, menunggu redirect selesai).
+                             NOTE [BUG SCRIPT, diperbaiki 12 Nov 2026]: semula
+                                   page.url() dibaca SINKRON langsung setelah
+                                   tekan Enter, tanpa menunggu redirect selesai
+                                   — race condition (terbukti flaky: gagal 2
+                                   dari 3 run tanpa perubahan kode). Diperbaiki
+                                   pakai helper urlMatchesWithWait() yang
+                                   menunggu URL match sebelum assert; terbukti
+                                   3x pass bersih setelah fix.
 
 30   TC-LOGIN-30    [DONE]   TC-LOGIN-30-Verify-Double-Click-Login-Button.spec.ts
                              (!) Verify Double Click Login Button Does Not Submit Twice

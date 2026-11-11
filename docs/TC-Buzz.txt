@@ -21,7 +21,15 @@ LEGEND SIMBOL SKENARIO
 
   FORMAT ID  : TC-BUZZ-XX
   FILE       : TC-BUZZ-XX-Verify-Name-In-English.spec.ts
-  FOLDER     : tests/buzz/ (positif/negatif/edge), tests/buzz/security/ (security)
+  FOLDER     : tests/buzz/posts/ (lifecycle post: create/cancel/delete/boundary),
+               tests/buzz/engagement/ (like/comment/share/interact post lain),
+               tests/buzz/feed-filters/ (tab Most Liked/Most Commented),
+               tests/buzz/security/ (security)
+               [REORGANISASI 12 Nov 2026]: sebelumnya flat tests/buzz/*.spec.ts
+               (kecuali security/), dipecah ke subfolder per kategori supaya
+               konsisten dengan struktur modul lain (Recruitment: candidates/
+               vacancies/status-workflow/security). Path import relatif & header
+               komentar "Path"/"RUN COMMAND" di setiap file sudah disesuaikan.
 
 ================================================================================
   FUNGSI & IMPACT MODUL — BUZZ
@@ -81,6 +89,20 @@ LEGEND SIMBOL SKENARIO
                                  security awal yang mengasumsikan file upload
                                  ditulis ulang (lihat TC-BUZZ-SECURITY-05).
     Kebab menu (post options)  : card.locator('button:has(i.bi-three-dots)')
+    Kebab menu item "Delete Post" / "Edit Post" : page.locator('.orangehrm-buzz-post-header-config-item', { hasText: label })
+    Share button               : card.locator('button:has(i.bi-share-fill)')
+                                 [TEMUAN] Klik ikon Share membuka dialog modal
+                                 "Share Post" TERPISAH (komposer sendiri + tombol
+                                 "Share" sendiri, bukan tombol "Post" composer
+                                 utama) — mem-repost ke feed sendiri & menambah
+                                 counter Shares pada post asli.
+                                 Confirmed via screenshot 2026-11-11.
+    Filter tab "Most Liked Posts" / "Most Commented Posts" : page.getByRole('button', { name: /most liked posts/i | /most commented posts/i })
+                                 [TEMUAN] Mengganti tab TIDAK memanggil ulang
+                                 /api/v2/buzz/posts seperti load awal — endpoint
+                                 yang dipanggil adalah /api/v2/buzz/feed?sortField=...
+                                 (endpoint BERBEDA). TC yang mengecek "ada GET
+                                 request" harus match kedua pola endpoint ini.
     Stats row (Likes/Comments) : card.locator('.orangehrm-buzz-stats-row')
 
   PERILAKU PENTING — POST BARU TIDAK MUNCUL VIA CLIENT-SIDE UPDATE:
@@ -153,6 +175,65 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              -> Verify counter "N Comments" bertambah.
                              -> Verify teks comment terlihat di halaman.
 
+ 9   TC-BUZZ-09     [DONE]   TC-BUZZ-09-Verify-Photo-Upload-Valid.spec.ts
+                             (+) Verify Valid Photo Upload Succeeds
+                             -> Klik Share Photo, upload PNG valid (bukan
+                                payload security), isi teks, submit.
+                             Verify: response 200, post dengan <img> muncul
+                             di feed setelah reload.
+                             NOTE: PASS konsisten saat dijalankan terisolasi
+                             (3x), tapi FLAKY dalam full-batch regression run
+                             (gagal timeout menunggu response upload saat
+                             dijalankan berurutan setelah 20+ TC lain) — upload
+                             binary data di demo publik shared makan waktu
+                             variabel. Fitur-nya sendiri TERBUKTI BEKERJA
+                             NORMAL (bukan bug aplikasi), lihat Bug-List
+                             BG-192 (ditutup sbg flaky test, bukan defect).
+
+10   TC-BUZZ-10     [DONE]   TC-BUZZ-10-Verify-Unlike-Post.spec.ts
+                             (+) Verify Unlike A Post (Toggle Like Off)
+                             -> Buat post, klik Like (0->1), klik Like LAGI
+                                (1->0).
+                             Verify: klik kedua mengembalikan counter ke
+                             nilai semula (toggle off), bukan terus bertambah.
+
+11   TC-BUZZ-11     [DONE]   TC-BUZZ-11-Verify-Delete-Own-Post.spec.ts
+                             (+) Verify Delete Own Post
+                             -> Buat post, buka kebab menu, klik "Delete Post",
+                                konfirmasi dialog "Yes, Delete" (pola sama
+                                dgn semua flow delete lain di app ini).
+                             Verify: post TIDAK muncul lagi di feed setelah
+                             reload.
+
+12   TC-BUZZ-12     [DONE]   TC-BUZZ-12-Verify-Share-Post-Increments-Counter.spec.ts
+                             (+) Verify Sharing A Post Increments The Shares
+                             Counter
+                             -> Buat post, klik ikon Share, submit dialog
+                                "Share Post" terpisah.
+                             Verify: counter "N Shares" pada post ASLI
+                             bertambah setelah di-share.
+
+13   TC-BUZZ-13     [DONE]   TC-BUZZ-13-Verify-Most-Liked-Posts-Filter.spec.ts
+                             (+) Verify "Most Liked Posts" Filter Tab
+                             -> Klik tab "Most Liked Posts".
+                             Verify: memicu GET /api/v2/buzz/feed (bukan
+                             /posts), tab jadi aktif, feed ter-render ulang.
+
+14   TC-BUZZ-14     [DONE]   TC-BUZZ-14-Verify-Most-Commented-Posts-Filter.spec.ts
+                             (+) Verify "Most Commented Posts" Filter Tab
+                             -> Sama seperti TC-13 tapi titik filter terpisah
+                             (tidak boleh diasumsikan sama tanpa diuji).
+
+15   TC-BUZZ-15     [DONE]   TC-BUZZ-15-Verify-Interact-With-Other-Employee-Post.spec.ts
+                             (+) Verify Like/Comment On Another Employee's
+                             Post
+                             -> Semua TC like/comment lain hanya menguji post
+                                MILIK SENDIRI. TC ini menguji like+comment pada
+                                post seed data lain yang SUDAH ADA di feed
+                                (bukan buatan TC ini sendiri).
+                             Verify: like & comment keduanya berhasil pada
+                             post milik employee lain.
+
 ================================================================================
   GROUP 2 — NEGATIVE / UNEXPECTED / EDGE CASES
 ================================================================================
@@ -185,6 +266,15 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                                 tekan Enter tanpa isi apa pun.
                              Verify: counter Comments TIDAK berubah, TIDAK
                              ada network request comment terkirim.
+
+16   TC-BUZZ-16     [DONE]   TC-BUZZ-16-Verify-Photo-Only-No-Text-Post.spec.ts
+                             (B) Verify Post With Only A Photo And No Text
+                             Succeeds
+                             -> Upload foto valid, JANGAN isi teks apa pun,
+                                klik Post.
+                             Verify: dokumentasi perilaku boundary (kombinasi
+                             "ada foto, teks kosong") — kontras dengan TC-02
+                             yang menguji "tidak ada foto, teks kosong".
 
 ================================================================================
   GROUP 3 — SECURITY
@@ -281,21 +371,72 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              employee lain dan TIDAK BOLEH dimodifikasi/
                              dihapus oleh TC ini.
 
+16   TC-BUZZ-SECURITY-08  [DONE]  TC-BUZZ-SECURITY-08-Verify-XSS-In-Comment-Text.spec.ts
+                             (S) Verify XSS Payload In Comment Text
+                             -> TC-SECURITY-01 hanya menguji XSS di teks POST.
+                                Comment adalah titik input terpisah, submit
+                                payload <img onerror> sbg comment.
+                             Verify: payload TIDAK dieksekusi sbg script.
+
+17   TC-BUZZ-SECURITY-09  [DONE]  TC-BUZZ-SECURITY-09-Verify-SQL-Injection-In-Comment-Text.spec.ts
+                             (S) Verify SQL Injection Payload In Comment Text
+                             -> Sama seperti TC-SECURITY-02 tapi titik input
+                                terpisah (comment, bukan body post).
+                             Verify: response comment < 500, feed tetap
+                             render normal setelahnya.
+                             NOTE: PASS konsisten saat terisolasi, FLAKY dalam
+                             full-batch run (timing render feed melambat
+                             seiring data test menumpuk) — sama kelas root
+                             cause dgn TC-BUZZ-09. Bukan bug aplikasi, lihat
+                             Bug-List BG-194 (ditutup sbg flaky test).
+
+18   TC-BUZZ-SECURITY-10  [DONE]  TC-BUZZ-SECURITY-10-Verify-Cross-Origin-Mutation-Blocked.spec.ts
+                             (S) Verify Cross-Origin Mutation Request (CSRF)
+                             Blocked
+                             -> Dari tab origin eksternal (example.com), fetch()
+                                POST JSON ke /api/v2/buzz/posts dgn
+                                credentials:'include'. Pola sama dgn
+                                TC-RECRUITMENT-SECURITY-05/TC-ADMIN-SECURITY-02.
+                             Verify: fetch GAGAL di level browser (CORS
+                             memblokir), bukan diproses server.
+
+19   TC-BUZZ-SECURITY-11  [DONE]  TC-BUZZ-SECURITY-11-Verify-Rate-Limiting-Post-Creation.spec.ts
+                             (S) Verify Rate Limiting On Rapid Post Creation
+                             -> [API] Kirim 8x POST /api/v2/buzz/posts
+                                berturut-turut, cek ada/tidaknya 429/throttle.
+                             Verify: minimal 1 dari 8 request kena rate limit.
+                             STATUS AKTUAL: GAGAL (BUG BARU, lihat Bug-List
+                             BG-185) -> 8/8 request sukses 200, TIDAK ADA
+                             rate limiting sama sekali. Lebih berisiko
+                             dibanding modul lain krn hasil spam BROADCAST ke
+                             seluruh karyawan (bukan cuma 1 record), bukan
+                             cuma data sampah di 1 tabel. Pola sama dgn
+                             BG-026 (Login) dan BG-067 (Recruitment).
+
 ================================================================================
-  RINGKASAN HASIL REGRESI TERAKHIR (11 Nov 2026)
+  RINGKASAN HASIL REGRESI TERAKHIR (12 Nov 2026)
 ================================================================================
 
-  Total TC         : 15
-  PASSED           : 12
-  FAILED (BUG)     : 3  -> TC-BUZZ-SECURITY-03 (BG-173, flaky repro),
-                           TC-BUZZ-SECURITY-06 (BG-175),
-                           TC-BUZZ-05 (BG-178)
-  False positive/false passed : 0 (semua failure di-root-cause, 2 script
-                                   bug ditemukan & diperbaiki di
-                                   src/pages/BuzzPage.ts sebelum sign-off:
-                                   card wrapper selector salah, dan comment
-                                   input selector salah karena atribut
-                                   type tidak ada di DOM)
+  Total TC         : 27
+  PASSED           : 21
+  FAILED (BUG, dikonfirmasi) : 4
+    -> TC-BUZZ-05 (BG-178, double-click race condition, High)
+    -> TC-BUZZ-SECURITY-03 (BG-173, upload bypass, High, flaky repro)
+    -> TC-BUZZ-SECURITY-06 (BG-175, clickjacking, Medium)
+    -> TC-BUZZ-SECURITY-11 (BG-185, rate limiting tidak ada, Medium)
+  FAILED (FLAKY, BUKAN BUG aplikasi) : 2
+    -> TC-BUZZ-09 (BG-192, Closed — upload foto PASS terisolasi 3x, flaky
+       hanya dalam full-batch run)
+    -> TC-BUZZ-SECURITY-09 (BG-194, Closed — sama kelas, PASS terisolasi)
+  False positive/false passed : 0 (semua failure di-root-cause satu per
+                                   satu; beberapa bug SCRIPT ditemukan &
+                                   diperbaiki selama proses: selector card
+                                   wrapper, selector comment-input, regex
+                                   tombol konfirmasi delete, asumsi endpoint
+                                   filter tab yang salah, locator .last()
+                                   tidak stabil, timeout upload terlalu
+                                   pendek — semua terdokumentasi di Catatan
+                                   Teknis di atas)
 
   RUN COMMAND (semua TC):
     npx playwright test tests/buzz --project=chromium --workers=1

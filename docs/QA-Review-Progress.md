@@ -719,6 +719,75 @@ Regresi final (full suite, default reporter, tanpa --reporter=list): **12 passed
     Arsal <arsalwildann@gmail.com>, SELALU cek `git log -1 --format="%an <%ae>"` sebelum push).
   - Tanya user apakah mau lanjut ke menu lain (Time, dll) atau cukup Buzz saja utk Batch 5.
 
+### UPDATE 2026-11-12: BATCH 5 (BUZZ) DIPERLUAS -- COVERAGE GAP DITUTUP, 12 TC BARU.
+
+User minta review ulang: apakah 15 TC Buzz sudah benar-benar lengkap? Jawaban jujur: BELUM.
+Gap yang ditemukan dan ditutup dengan 12 TC baru (total Buzz 15 -> 27 TC):
+
+**Fungsional baru:** TC-BUZZ-09 (upload foto valid, positive -- sebelumnya cuma ada sisi
+security/negative), TC-BUZZ-10 (unlike/toggle like off), TC-BUZZ-11 (delete own post),
+TC-BUZZ-12 (share post + counter Shares), TC-BUZZ-13/14 (filter tab Most Liked/Most
+Commented Posts), TC-BUZZ-15 (like/comment pada post milik EMPLOYEE LAIN, bukan cuma post
+sendiri), TC-BUZZ-16 (boundary: foto ada + teks kosong, kontras dgn TC-02 yg foto kosong +
+teks kosong).
+
+**Security baru:** SECURITY-08 (XSS di comment, bukan cuma di post text), SECURITY-09 (SQLi
+di comment), SECURITY-10 (CSRF cross-origin create post, pola sama Recruitment/Admin),
+SECURITY-11 (rate limiting create post).
+
+**Bug APLIKASI baru dikonfirmasi:** SECURITY-11 GAGAL -- 8/8 request create-post sukses
+tanpa throttle sama sekali, TIDAK ADA rate limiting (BG-185, severity Medium, konsisten pola
+BG-026 Login / BG-067 Recruitment, tapi blast radius lebih luas krn broadcast company-wide).
+
+**Bug SCRIPT ditemukan & diperbaiki selama investigasi 12 TC baru ini** (bukan bug aplikasi):
+  1. TC-BUZZ-09: timeout upload terlalu pendek (15s->45s, upload binary data makan waktu
+     variabel di demo publik).
+  2. TC-BUZZ-11: regex tombol konfirmasi delete salah (`/^(yes, delete|delete|confirm)$/i`
+     exact-match gagal krn accessible name punya whitespace ekstra) -> diperbaiki jadi
+     unanchored `/Yes, Delete/i` sama seperti pola di AdminJobTitlesPage dkk.
+  3. TC-BUZZ-13/14: asumsi endpoint salah -- ganti filter tab memanggil
+     `/api/v2/buzz/feed?sortField=...`, BUKAN `/api/v2/buzz/posts` seperti load awal -> regex
+     match diperluas ke kedua pola endpoint.
+  4. TC-BUZZ-15: locator `.postCards.last()` tidak stabil -- makin lama suite berjalan, makin
+     banyak post menumpuk (termasuk 8 post sampah dari SECURITY-11 rate-limit test), `.last()`
+     jadi post yang sangat jauh di scroll, bikin test exceed time budget. Diganti `.nth(1)`.
+
+**2 TC terbukti flaky-under-load (BUKAN bug aplikasi), PASS konsisten saat isolated 3x tapi
+gagal dalam full-batch run serial (25+ TC berurutan, demo publik melambat):** TC-BUZZ-09
+(upload foto) dan TC-BUZZ-SECURITY-09 (SQLi comment). Didokumentasikan apa adanya di
+docs/TC-Buzz.txt, Bug-List entry terkait (BG-192, BG-194) ditutup dgn kategori "Bukan Bug
+(Flaky Test)".
+
+**Reorganisasi folder (permintaan user, konsistensi dgn modul lain):**
+- `tests/buzz/` (flat, kecuali security/) -> `posts/`, `engagement/`, `feed-filters/`,
+  `security/`.
+- `tests/login/` (flat) -> `positive/`, `negative/`, `boundary/`, `security/`, `edge/` (persis
+  5 grup di docs/TC-Login.txt).
+- Semua path import relatif disesuaikan (+1 level `../`), DAN header komentar "Path" +
+  "RUN COMMAND" di SETIAP file spec juga disesuaikan dgn folder barunya (bukan cuma pindah
+  file doang).
+
+**Verifikasi regresi pasca-reorganisasi menemukan 2 bug SCRIPT lagi di Login (bukan bug
+aplikasi, tidak terkait folder move itu sendiri -- cuma kebetulan ketemu saat re-run penuh):**
+  1. TC-LOGIN-29 (Enter key login): race condition, `page.url()` dibaca sinkron tanpa
+     menunggu redirect -> diperbaiki pakai `urlMatchesWithWait()`.
+  2. TC-LOGIN-41 (CSRF cross-origin): assertion UI salah, mengharapkan browser tetap di origin
+     eksternal padahal form POST memang akan ikut redirect 302 sbg navigasi normal -> assertion
+     diperbaiki jadi cek halaman tujuan akhir (harus /auth/login, bukan /dashboard/index).
+  Keduanya terbukti 3x pass bersih setelah fix, tidak mengubah kesimpulan keamanan TC-41.
+
+**Bug-List.xlsx dibersihkan dari duplikat** yang muncul akibat bugListReporter re-run
+berkali-kali selama investigasi: BG-191 (dup BG-178), BG-196 (dup BG-026), BG-198 (dup
+BG-030) ditutup sbg duplikat; BG-173/BG-193 (sama2 soal upload-bypass SECURITY-03)
+dikonsolidasi jadi satu entry kanonis BG-173 Open; BG-174 (test SECURITY-05 lama yg sudah
+dihapus/ditulis ulang) ditutup sbg obsolete.
+
+**Hasil regresi final:** Buzz 21 passed / 6 failed (4 bug nyata + 2 flaky-under-load, semua
+ter-root-cause, 0 false positive/false passed). Login 41 passed / 2 failed (TC-LOGIN-37
+BG-026, TC-LOGIN-43 BG-030, keduanya expected).
+
+Total TC project: 412 -> 424. Semua perubahan di atas sudah di-commit & push.
+
 ### UPDATE 2026-11-11: BATCH 1 (LOGIN) SEKARANG 100% TUNTAS.
 - TC-LOGIN-42: run bersih, PASS (session ID berubah, proteksi fixation bekerja). Sempat ada 1
   check sampingan ("tidak ada console error") gagal karena net::ERR_CONNECTION_RESET -> masuk

@@ -185,19 +185,19 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Admin | 138 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 161 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 54 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
-| Buzz | 15 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
+| Buzz | 27 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Leave | 1 | N/A |
-| **Total** | **412** | |
+| **Total** | **424** | |
 
 ### Login (43 TCs)
 
-Positive, negative, boundary, security, edge.
+Organized into `tests/login/positive/`, `negative/`, `boundary/`, `security/`, and `edge/` — one subfolder per scenario group, the same per-category structure used by the other modules.
 
 **Confirmed bugs:**
 - No rate limiting/lockout after repeated failed logins
 - Missing `X-Frame-Options` / CSP `frame-ancestors` (clickjacking)
 
-CSRF and session-fixation checks confirmed **effective** (no bug).
+CSRF and session-fixation checks confirmed **effective** (no bug). Re-verifying the full suite after reorganizing these files into subfolders also surfaced and fixed 2 script bugs unrelated to the reorganization itself: a race condition reading the post-login URL before the redirect completed (`TC-LOGIN-29`), and a cross-origin CSRF check whose UI assertion expected the browser to stay on the attacker's origin, when a real form POST always follows its redirect as normal top-level navigation (`TC-LOGIN-41`) — neither affected the tests' underlying security conclusions.
 
 ### Admin (138 TCs)
 
@@ -237,16 +237,17 @@ Vacancies incl. edit/deactivate/pagination/sorting (17), Candidates incl. resume
 
 **Critical confirmed bug:** the candidate Shortlist endpoint (`PUT .../candidates/<id>/shortlist`) returns a 500 Internal Server Error for every candidate — confirmed reproducible in isolation across 3 separate candidates, with the server independently verified healthy each time. Since Shortlist is the earliest status transition and a prerequisite for almost every other status-workflow TC, this one bug cascades into failures across most of that suite.
 
-### Buzz (15 TCs)
+### Buzz (27 TCs)
 
-OrangeHRM's internal social feed, broadcasting posts to every logged-in employee company-wide rather than a scoped role — the widest blast radius of any module tested, so validation gaps here were treated as higher-impact. Covers: text posts incl. empty/very-long boundary (3), like/comment incl. empty-comment rejection (3), composer cancel/discard and rapid double-click-submit edge cases (2), plus 7 security TCs — XSS, SQL injection, extension-only file-upload bypass via "Share Photo", a baseline rejected-`.exe` control, a malicious-URL check on the text-only "Share Video" field, clickjacking headers, and a read-only IDOR baseline.
+OrangeHRM's internal social feed, broadcasting posts to every logged-in employee company-wide rather than a scoped role — the widest blast radius of any module tested, so validation gaps here were treated as higher-impact. Organized into `tests/buzz/posts/` (post lifecycle: create/cancel/delete/boundary), `tests/buzz/engagement/` (like/unlike/comment/share/interacting with another employee's post), `tests/buzz/feed-filters/` (the Most Liked / Most Commented tabs), and `tests/buzz/security/` — the same per-category subfolder structure used by Recruitment. Covers: text posts incl. empty/very-long boundary and photo-only boundary (4), valid photo upload, like/unlike, delete own post, comment incl. empty-comment rejection, share-post counter, viewing another employee's post (7), feed filter tabs (2), composer cancel/discard and rapid double-click-submit edge cases (2), plus 11 security TCs — XSS and SQL injection on both post text and comment text, extension-only file-upload bypass via "Share Photo" with a rejected-`.exe` baseline control, a malicious-URL check on the text-only "Share Video" field, cross-origin mutation (CSRF), clickjacking headers, rate limiting on post creation, and a read-only IDOR baseline.
 
 **Confirmed bugs:**
-- Extension-only validation on the "Share Photo" upload accepts an executable renamed to `.jpg` — same pattern as PIM/Recruitment/Admin, now reproduced in the module with the widest broadcast radius. Reproduction is flaky (3 of 5 isolated reruns accepted the file, 2 rejected it) but still classified as a confirmed bug given it reproduces the majority of the time and matches a pattern already deterministic elsewhere.
+- Extension-only validation on the "Share Photo" upload accepts an executable renamed to `.jpg` — same pattern as PIM/Recruitment/Admin, now reproduced in the module with the widest broadcast radius. Reproduction is flaky (roughly 3 of 5 isolated reruns accepted the file) but still classified as a confirmed bug given it reproduces the majority of the time and matches a pattern already deterministic elsewhere.
 - Rapid double-click on the composer's "Post" button is not debounced, sending 2 identical POST requests and creating 2 duplicate posts broadcast to the whole company — the same race-condition pattern as Recruitment's candidate-creation bug.
+- No rate limiting on post creation — 8 rapid POST requests all succeeded with no throttling, the same gap already confirmed on Login and Recruitment, but higher-impact here since the result is broadcast company-wide rather than written to one record.
 - Missing `X-Frame-Options` / CSP `frame-ancestors` — the **5th app-wide confirmation** of the same clickjacking gap also found in Login, Recruitment, PIM, and Admin.
 
-"Share Video" turned out to be a paste-a-URL field, not a file upload — an initial TC assumed otherwise and was rewritten after live discovery corrected it. IDOR on post/comment access confirmed N/A (same single-role architecture as other modules). A new post does not appear in the feed via client-side state update — a page reload is required to see your own post — documented as an app UX characteristic, not a bug.
+"Share Video" turned out to be a paste-a-URL field, not a file upload — an initial TC assumed otherwise and was rewritten after live discovery corrected it. IDOR on post/comment access confirmed N/A (same single-role architecture as other modules). A new post does not appear in the feed via client-side state update — a page reload is required to see your own post — documented as an app UX characteristic, not a bug. Two TCs (valid photo upload, SQL injection in comment text) pass reliably in isolation but are flaky when run as part of the full sequential suite, a timing characteristic of the shared public demo under load rather than a product defect.
 
 **Other confirmed bugs:**
 - Resume upload accepts an executable disguised as a `.pdf` — same extension-only validation pattern as PIM
