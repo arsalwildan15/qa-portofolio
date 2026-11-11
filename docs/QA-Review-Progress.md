@@ -1105,13 +1105,23 @@ pakai `route.abort('failed')` (simulasi network failure asli).
 
 **Bug APLIKASI BARU dikonfirmasi -- APP-WIDE, bukan isolated ke 1 modul:** saat request
 POST create/save gagal krn koneksi jaringan terputus, SPA (Admin, PIM, Recruitment, Buzz)
-melempar "Uncaught exception: fe" yang TIDAK tertangani (nama exception persis sama di
-keempat modul -- indikasi satu shared HTTP-client wrapper, bukan 4 bug terpisah), alih-alih
-menampilkan pesan error yang graceful ke user. Dikonfirmasi deterministik 3x reproduce di
-SETIAP modul yang diuji. Screenshot Admin bahkan menunjukkan tabel list gagal render (stuck
-loading spinner) setelah insiden ini, indikasi state SPA ikut rusak lebih luas dari sekadar
-pesan error yang hilang. Login TIDAK terpengaruh krn arsitekturnya berbeda (form POST
-navigasi top-level asli, bukan fetch/XHR) -- dikonfirmasi terpisah, bukan diasumsikan.
+melempar "Uncaught exception: fe" yang lolos ke console/window error handler (nama exception
+persis sama di keempat modul -- indikasi satu shared HTTP-client wrapper, bukan 4 bug
+terpisah), alih-alih ditangkap rapi di titik asalnya. Dikonfirmasi deterministik 3x reproduce
+di SETIAP modul yang diuji.
+
+KOREKSI PENTING (verifikasi ulang 2026-11-12 setelah user bertanya "sudah dipastikan genuine
+bug?"): klaim awal "tidak ada pesan error ke user" TERNYATA TIDAK AKURAT. Dicek ulang via
+page.innerText() di keempat modul -- app SEBENARNYA menampilkan toast generic "Error /
+Unexpected Error!" ke user di semua 4 kasus, BUKAN silent failure total. Bug yang tetap valid:
+exception-nya lolos tidak tertangani ke console (code-level error-handling defect, toast yang
+muncul kemungkinan dari fallback/global error boundary terpisah, bukan try/catch yang benar
+di kode pemanggil). Semua Bug-List notes dan docs/TC-*.txt terkait sudah dikoreksi supaya
+tidak melebih-lebihkan dampak ke user. Screenshot Admin masih menunjukkan tabel list gagal
+render (stuck loading spinner) setelah insiden ini -- observasi terpisah yang tetap valid,
+indikasi state SPA ikut terganggu di luar sekadar toast error. Login TIDAK terpengaruh krn
+arsitekturnya berbeda (form POST navigasi top-level asli, bukan fetch/XHR) -- dikonfirmasi
+terpisah, bukan diasumsikan.
 
 Masuk Bug-List sbg BG-199 (Admin, konfirmasi ke-1), BG-201 (PIM, ke-2), BG-202 (Recruitment,
 ke-3), BG-200 (Buzz, ke-4), semua Severity dikoreksi Low -> Medium, saling di-cross-reference

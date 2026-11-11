@@ -840,9 +840,16 @@ LEGEND SIMBOL SKENARIO
                              STATUS AKTUAL: Console-error check GAGAL (BUG
                              APLIKASI TERKONFIRMASI, lihat Bug-List BG-199)
                              -> SPA melempar "Uncaught exception: fe" yang
-                             tidak tertangani saat network request gagal,
-                             alih-alih menampilkan pesan error yang
-                             graceful. Deterministik reproduce 3x. Tabel
+                             lolos ke console/window error handler saat
+                             network request gagal. KOREKSI 2026-11-12
+                             (verifikasi ulang lebih teliti): klaim awal
+                             "tidak ada pesan error ke user" TIDAK AKURAT --
+                             app SEBENARNYA menampilkan toast generic
+                             "Error / Unexpected Error!", jadi bukan silent
+                             failure. Yang tetap jadi bug nyata: exception
+                             tsb TIDAK ditangkap rapi di titik asalnya (toast
+                             kemungkinan dari fallback/global error boundary
+                             terpisah). Deterministik reproduce 3x. Tabel
                              list Users bahkan terbukti gagal render (stuck
                              loading spinner) setelah insiden ini pada 1
                              screenshot verifikasi -- indikasi state SPA
@@ -1999,13 +2006,17 @@ LEGEND SIMBOL SKENARIO
 
   UPDATE 2026-11-12: TC-ADMIN-USER-08 mengonfirmasi bug APP-WIDE (bukan
   isolated ke Admin) -- saat request POST create/save gagal krn koneksi
-  terputus, SPA melempar "Uncaught exception: fe" yang tidak tertangani,
-  alih-alih pesan error graceful. Direproduksi IDENTIK di PIM Add
-  Employee, Recruitment Candidates, dan Buzz Create Post (lihat
-  docs/TC-PIM.txt, TC-Recruitment.txt, TC-Buzz.txt) -- nama exception yang
-  sama persis di semua modul mengindikasikan satu shared HTTP-client
-  wrapper yang jadi akar masalah, bukan 4 bug terpisah. Login TIDAK
-  terpengaruh (arsitektur beda, form POST navigasi asli bukan XHR).
+  terputus, SPA melempar "Uncaught exception: fe" yang lolos ke console
+  alih-alih ditangkap rapi di titik asalnya. KOREKSI (verifikasi ulang
+  lebih teliti): app TETAP menampilkan toast generic "Error / Unexpected
+  Error!" ke user (bukan silent failure) -- bug-nya ada di level
+  penanganan exception di kode, bukan di pengalaman user yang terlihat.
+  Direproduksi IDENTIK di PIM Add Employee, Recruitment Candidates, dan
+  Buzz Create Post (lihat docs/TC-PIM.txt, TC-Recruitment.txt,
+  TC-Buzz.txt) -- nama exception yang sama persis di semua modul
+  mengindikasikan satu shared HTTP-client wrapper yang jadi akar masalah,
+  bukan 4 bug terpisah. Login TIDAK terpengaruh (arsitektur beda, form
+  POST navigasi asli bukan XHR).
 
   Pass pertama (39): Users 6, Job Titles 8, Pay Grades 5, Employment
   Status 5, Job Categories 5, Work Shifts 5, Corporate Branding 5.

@@ -986,6 +986,10 @@ No.  Test Case ID      Status   Kategori           Skenario
                              Bug-List BG-201) -> SPA melempar "Uncaught
                              exception: fe" identik dgn Admin
                              (TC-ADMIN-USER-08). Deterministik reproduce 3x.
+                             NOTE: app tetap menampilkan toast generic
+                             "Error / Unexpected Error!" ke user (bukan
+                             silent failure) -- bug-nya di penanganan
+                             exception level kode, bukan di pengalaman user.
 
 ================================================================================
   FASE 1 - GROUP 3: PERSONAL DETAILS (13 TC)
@@ -2325,9 +2329,11 @@ No.  Test Case ID      Status   Kategori           Skenario
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12)
 
   UPDATE 2026-11-12: TC-PIM-ADD-33 mengonfirmasi bug APP-WIDE yang sama
-  dgn TC-ADMIN-USER-08 -- "Uncaught exception: fe" tidak tertangani saat
-  POST create-employee gagal krn koneksi terputus. Konfirmasi ke-2 dari
-  4 modul (lihat docs/TC-Admin.txt, TC-Recruitment.txt, TC-Buzz.txt).
+  dgn TC-ADMIN-USER-08 -- "Uncaught exception: fe" lolos ke console saat
+  POST create-employee gagal krn koneksi terputus (app tetap menampilkan
+  toast generic "Unexpected Error!" ke user, bukan silent failure).
+  Konfirmasi ke-2 dari 4 modul (lihat docs/TC-Admin.txt,
+  TC-Recruitment.txt, TC-Buzz.txt).
 
   Fase 1 : 57
     Employee List    : 14

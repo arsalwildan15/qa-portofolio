@@ -1221,7 +1221,10 @@ LEGEND SIMBOL SKENARIO
                              Bug-List BG-202) -> SPA melempar "Uncaught
                              exception: fe" identik dgn Admin
                              (TC-ADMIN-USER-08) dan PIM (TC-PIM-ADD-33).
-                             Deterministik reproduce 3x.
+                             Deterministik reproduce 3x. NOTE: app tetap
+                             menampilkan toast generic "Unexpected Error!"
+                             ke user (bukan silent failure) -- bug-nya di
+                             penanganan exception level kode.
 
 12   TC-RECRUITMENT-STATUS-12   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-12-Verify-Offer-Job-To-Hired.spec.ts
                              (+) Verify Offer Job to Hired, Full State Machine Chain
@@ -1398,9 +1401,10 @@ LEGEND SIMBOL SKENARIO
   [UPDATE 2026-11-12] +2 TC baru (CANDIDATE-19 refresh mid-submit PASSED,
   CANDIDATE-20 connection-drop mid-submit) -> total 56 TC. CANDIDATE-20
   mengonfirmasi bug APP-WIDE yang sama dgn TC-ADMIN-USER-08/TC-PIM-ADD-33
-  -- "Uncaught exception: fe" tidak tertangani saat POST create-candidate
-  gagal krn koneksi terputus (konfirmasi ke-3 dari 4 modul, lihat
-  docs/TC-Admin.txt, TC-PIM.txt, TC-Buzz.txt).
+  -- "Uncaught exception: fe" lolos ke console saat POST create-candidate
+  gagal krn koneksi terputus (app tetap menampilkan toast generic
+  "Unexpected Error!" ke user, bukan silent failure). Konfirmasi ke-3
+  dari 4 modul (lihat docs/TC-Admin.txt, TC-PIM.txt, TC-Buzz.txt).
 
   [UPDATE 2026-11-11, review penuh] +1 TC baru (SECURITY-05, CSRF cross-
   origin mutation) -> total 54 TC. SECURITY-02 dan SECURITY-03 di-escalate

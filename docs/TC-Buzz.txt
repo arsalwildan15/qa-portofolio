@@ -297,7 +297,10 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              APLIKASI, konfirmasi ke-4 app-wide, lihat
                              Bug-List BG-200) -> SPA melempar "Uncaught
                              exception: fe" identik dgn Admin/PIM/
-                             Recruitment. Deterministik reproduce 3x. Ini
+                             Recruitment. Deterministik reproduce 3x. NOTE:
+                             app tetap menampilkan toast generic "Unexpected
+                             Error!" ke user (bukan silent failure) -- bug-
+                             nya di penanganan exception level kode. Ini
                              KONFIRMASI TERAKHIR yang melengkapi bukti bug
                              ini app-wide di semua modul SPA (Login tidak
                              terpengaruh krn arsitektur form-nya berbeda).
