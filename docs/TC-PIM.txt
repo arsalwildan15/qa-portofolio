@@ -1917,85 +1917,334 @@ No.  Test Case ID      Status   Kategori           Skenario
   Folder: tests/pim/configuration/custom-fields/
 ================================================================================
 
-132   TC-PIM-CUSTOMFIELD-01  [DONE]  Positive (+)            Add custom field valid
-133   TC-PIM-CUSTOMFIELD-02  [DONE]  Negative (-)             Submit kosong ->
-                                                              3 required
-134   TC-PIM-CUSTOMFIELD-03  [DONE]  Positive (+)             Delete custom field
-135   TC-PIM-CUSTOMFIELD-04  [DONE]  Negative (-)             Field Name duplikat
-                                                              ditolak "Already
-                                                              exists"
-136   TC-PIM-CUSTOMFIELD-05  [DONE]  Boundary (B) [TEMUAN]    Field Name 200
-                                                              karakter
-137   TC-PIM-CUSTOMFIELD-06  [DONE]  Security (S)             XSS di Field Name
+132   TC-PIM-CUSTOMFIELD-01  [DONE]  TC-PIM-CUSTOMFIELD-01-Verify-Add-Valid-Custom-Field.spec.ts
+                             (+) Verify Add Valid Custom Field
+                             -> Klik Add, isi Field Name, pilih Screen =
+                                "Personal Details", Type = "Text or Number".
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify custom field baru terlihat di list
+                                setelah reload.
+
+133   TC-PIM-CUSTOMFIELD-02  [DONE]  TC-PIM-CUSTOMFIELD-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Klik Add, langsung klik Save tanpa isi
+                                apapun.
+                             [UI VERIFICATION]
+                             -> Verify count(error) >= 3 (Field Name, Screen,
+                                Type).
+                             -> Verify POST custom-field TIDAK terkirim.
+
+134   TC-PIM-CUSTOMFIELD-03  [DONE]  TC-PIM-CUSTOMFIELD-03-Verify-Delete-Custom-Field.spec.ts
+                             (+) Verify Delete Custom Field
+                             -> Buat custom field baru.
+                             -> Hapus via icon trash + konfirmasi "Yes,
+                                Delete".
+                             [API VERIFICATION]
+                             -> Verify DELETE response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify field terlihat sebelum delete.
+                             -> Verify field TIDAK lagi terlihat setelah
+                                delete.
+
+135   TC-PIM-CUSTOMFIELD-04  [DONE]  TC-PIM-CUSTOMFIELD-04-Verify-Duplicate-Field-Name.spec.ts
+                             (-) Verify Duplicate Field Name
+                             -> Buat custom field pertama.
+                             -> Coba buat custom field kedua dengan Field
+                                Name SAMA PERSIS.
+                             [UI VERIFICATION]
+                             -> Verify error "Already exists" muncul.
+                             -> Verify hanya ADA 1 field dengan nama ini
+                                (duplikat tidak tersimpan).
+
+136   TC-PIM-CUSTOMFIELD-05  [DONE]  TC-PIM-CUSTOMFIELD-05-Verify-Field-Name-Very-Long-Text.spec.ts
+                             (B) Verify Field Name Very Long Text
+                             -> Isi Field Name = 200 karakter.
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify apakah ditolak validasi client-side
+                                atau diterima tersimpan apa adanya (dicatat
+                                via report.finding()).
+                             NOTE: pernah terobservasi 500 + uncaught
+                                   exception saat TC ini dijalankan
+                                   BERBARENGAN dengan TC lain yang juga
+                                   menulis ke custom-fields (parallel run),
+                                   tapi saat diisolasi selalu bersih —
+                                   kemungkinan race condition concurrent
+                                   write di server demo, BUKAN defect terkait
+                                   panjang Field Name itu sendiri.
+
+137   TC-PIM-CUSTOMFIELD-06  [DONE]  TC-PIM-CUSTOMFIELD-06-Verify-XSS-In-Field-Name.spec.ts
+                             (S) Verify XSS In Field Name
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Isi Field Name = "<script>alert(1)</script>".
+                             -> Klik Save, reload list.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert terpicu.
 
 ================================================================================
   FASE 3 - GROUP 3: DATA IMPORT (6 TC)
   Folder: tests/pim/configuration/data-import/
 ================================================================================
 
-138   TC-PIM-DATAIMPORT-01  [DONE]  Positive (+) [API]        Upload CSV valid,
-                                                              meta.success === 1
-139   TC-PIM-DATAIMPORT-02  [DONE]  Boundary (B)               File > 1MB ditolak
-140   TC-PIM-DATAIMPORT-03  [DONE]  Negative (-)                File bukan CSV
-                                                              ditolak
-141   TC-PIM-DATAIMPORT-04  [DONE]  Negative (-)                Submit tanpa file
-                                                              -> required
-142    TC-PIM-DATAIMPORT-05  [DONE]  Security (S)                Exe di-rename .csv
-                                                              ditolak (status 400)
-143    TC-PIM-DATAIMPORT-06  [DONE]  Security (S)                Baseline: .exe ekstensi
-                                                              asli ditolak
+138   TC-PIM-DATAIMPORT-01  [DONE]  TC-PIM-DATAIMPORT-01-Verify-Valid-CSV-Upload.spec.ts
+                             (+) [API] Verify Valid CSV Upload
+                             -> Pilih file CSV valid (kolom sesuai sample
+                                resmi, hanya First/Last Name compulsory).
+                             -> Klik Upload.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             -> Verify meta.success === 1 dan meta.failed === 0.
+                             [UI VERIFICATION]
+                             -> Verify employee hasil import ditemukan di
+                                Employee List (atau dicatat via
+                                report.finding() kalau tidak muncul di
+                                autocomplete dalam 5s, meta.success API sudah
+                                cukup konfirmasi sukses).
+
+139   TC-PIM-DATAIMPORT-02  [DONE]  TC-PIM-DATAIMPORT-02-Verify-File-Over-1MB-Rejected.spec.ts
+                             (B) Verify File Over 1MB Rejected
+                             -> Pilih file CSV 1MB + 1 byte (di atas batas
+                                "Accepts up to 1MB").
+                             -> Klik Upload.
+                             [UI VERIFICATION]
+                             -> Verify upload DITOLAK (tidak ada POST
+                                csv-import ATAU muncul pesan error ukuran).
+
+140   TC-PIM-DATAIMPORT-03  [DONE]  TC-PIM-DATAIMPORT-03-Verify-Wrong-File-Type-Rejected.spec.ts
+                             (-) Verify Wrong File Type Rejected
+                             -> Pilih file PNG (bukan CSV).
+                             -> Klik Upload.
+                             [UI VERIFICATION]
+                             -> Verify upload DITOLAK (tidak ada POST
+                                csv-import ATAU muncul pesan error format).
+
+141   TC-PIM-DATAIMPORT-04  [DONE]  TC-PIM-DATAIMPORT-04-Verify-Submit-Without-File-Validation.spec.ts
+                             (-) Verify Submit Without File Validation
+                             -> Langsung klik Upload tanpa pilih file.
+                             [UI VERIFICATION]
+                             -> Verify count(error) > 0.
+                             -> Verify POST csv-import TIDAK terkirim.
+
+142    TC-PIM-DATAIMPORT-05  [DONE]  TC-PIM-DATAIMPORT-05-Verify-Exe-Renamed-As-Csv-Upload-Security.spec.ts
+                             (S) Verify Exe Renamed As Csv Upload Security
+                             -> Upload file executable (header PE "MZ") yang
+                                di-rename jadi .csv.
+                             -> Klik Upload (timeout pendek 10s).
+                             [API VERIFICATION]
+                             -> Verify kalau ADA response: status >= 400
+                                (ditolak, bukan diproses).
+                             NOTE: beda dari upload foto profil, endpoint ini
+                                   memproses ISI file sebagai data (bukan
+                                   cuma simpan file mentah) — exe-as-csv yang
+                                   "lolos" bisa berarti server mencoba parse
+                                   konten biner sebagai CSV (potensi
+                                   hang/DoS), bukan cuma tersimpan diam-diam.
+                                   Kalau TIDAK ADA response dalam 10s, dicatat
+                                   via report.finding() sebagai ambigu (perlu
+                                   investigasi manual lanjutan), bukan
+                                   hard-fail. HASIL AKTUAL: ditolak dengan
+                                   benar (status 400).
+
+143    TC-PIM-DATAIMPORT-06  [DONE]  TC-PIM-DATAIMPORT-06-Verify-Pure-Exe-Upload-Rejected.spec.ts
+                             (S) Verify Pure Exe Upload Rejected (baseline)
+                             -> Upload file .exe dengan EKSTENSI ASLI (tanpa
+                                rename).
+                             [UI VERIFICATION]
+                             -> Verify pesan "File type not allowed" muncul.
+                             NOTE: baseline pembanding utk DATAIMPORT-05, pola
+                                   sama dengan TC-PIM-ADD-31.
 
 ================================================================================
   FASE 3 - GROUP 4: REPORTING METHODS (5 TC)
   Folder: tests/pim/configuration/reporting-methods/
 ================================================================================
 
-144   TC-PIM-REPORTMETHOD-01  [DONE]  Positive (+)             Add reporting
-                                                               method valid
-145   TC-PIM-REPORTMETHOD-02  [DONE]  Negative (-)              Submit kosong ->
-                                                               required
-146   TC-PIM-REPORTMETHOD-03  [DONE]  Negative (-)              Name duplikat
-                                                               ditolak
-147   TC-PIM-REPORTMETHOD-04  [DONE]  Positive (+)              Delete reporting
-                                                               method
-148   TC-PIM-REPORTMETHOD-05  [DONE]  Security (S)              XSS di Name
+144   TC-PIM-REPORTMETHOD-01  [DONE]  TC-PIM-REPORTMETHOD-01-Verify-Add-Valid-Reporting-Method.spec.ts
+                             (+) Verify Add Valid Reporting Method
+                             -> Klik Add, isi Name.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify reporting method baru terlihat di list
+                                setelah reload.
+
+145   TC-PIM-REPORTMETHOD-02  [DONE]  TC-PIM-REPORTMETHOD-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Klik Add, langsung klik Save tanpa isi
+                                apapun.
+                             [UI VERIFICATION]
+                             -> Verify count(error) > 0.
+                             -> Verify POST reporting-methods TIDAK terkirim.
+
+146   TC-PIM-REPORTMETHOD-03  [DONE]  TC-PIM-REPORTMETHOD-03-Verify-Duplicate-Name.spec.ts
+                             (-) Verify Duplicate Name
+                             -> Buat reporting method pertama.
+                             -> Coba buat reporting method kedua dengan Name
+                                SAMA PERSIS.
+                             [UI VERIFICATION]
+                             -> Verify apakah ditolak dengan error, ATAU
+                                diterima sebagai duplikat (dicatat via
+                                report.check()/report.finding() sesuai hasil
+                                observasi live, tidak diasumsikan sebelum
+                                dikonfirmasi).
+
+147   TC-PIM-REPORTMETHOD-04  [DONE]  TC-PIM-REPORTMETHOD-04-Verify-Delete-Reporting-Method.spec.ts
+                             (+) Verify Delete Reporting Method
+                             -> Buat reporting method baru.
+                             -> Hapus via icon trash + konfirmasi "Yes,
+                                Delete".
+                             [API VERIFICATION]
+                             -> Verify DELETE response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify terlihat sebelum delete, TIDAK
+                                terlihat setelah delete.
+
+148   TC-PIM-REPORTMETHOD-05  [DONE]  TC-PIM-REPORTMETHOD-05-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS In Name
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Isi Name = "<script>alert(1)</script>".
+                             -> Klik Save, reload list.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert terpicu.
 
 ================================================================================
   FASE 3 - GROUP 5: TERMINATION REASONS (5 TC)
   Folder: tests/pim/configuration/termination-reasons/
 ================================================================================
 
-149   TC-PIM-TERMREASON-01  [DONE]  Positive (+)               Add termination
-                                                               reason valid
-150   TC-PIM-TERMREASON-02  [DONE]  Negative (-)                Submit kosong ->
-                                                               required
-151   TC-PIM-TERMREASON-03  [DONE]  Edge Case (!) [TEMUAN]      Name duplikat
-                                                               silently blocked
-                                                               (tanpa error UI,
-                                                               beda dari
-                                                               Reporting Methods)
-152   TC-PIM-TERMREASON-04  [DONE]  Positive (+)                Delete termination
-                                                               reason
-153   TC-PIM-TERMREASON-05  [DONE]  Security (S)                XSS di Name
+149   TC-PIM-TERMREASON-01  [DONE]  TC-PIM-TERMREASON-01-Verify-Add-Valid-Termination-Reason.spec.ts
+                             (+) Verify Add Valid Termination Reason
+                             -> Klik Add, isi Name.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify termination reason baru terlihat di
+                                list setelah reload.
+
+150   TC-PIM-TERMREASON-02  [DONE]  TC-PIM-TERMREASON-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Klik Add, langsung klik Save tanpa isi
+                                apapun.
+                             [UI VERIFICATION]
+                             -> Verify count(error) > 0.
+                             -> Verify POST termination-reasons TIDAK
+                                terkirim.
+
+151   TC-PIM-TERMREASON-03  [DONE]  TC-PIM-TERMREASON-03-Verify-Duplicate-Name.spec.ts
+                             (!) [TEMUAN] Verify Duplicate Name
+                             -> Buat termination reason pertama.
+                             -> Coba buat termination reason kedua dengan
+                                Name SAMA PERSIS.
+                             [UI VERIFICATION]
+                             -> Verify apakah ditolak error ATAU diterima
+                                sebagai duplikat.
+                             NOTE: dikonfirmasi live hasilnya SILENTLY
+                                   BLOCKED (TIDAK ada error UI yang muncul,
+                                   TAPI duplikat tetap tidak tersimpan
+                                   sebagai row kedua) — berbeda dari
+                                   Reporting Methods (TC-PIM-REPORTMETHOD-03)
+                                   yang menunjukkan error eksplisit. Dicatat
+                                   via report.finding() karena inkonsistensi
+                                   behavior antar 2 screen Configuration yang
+                                   mirip.
+
+152   TC-PIM-TERMREASON-04  [DONE]  TC-PIM-TERMREASON-04-Verify-Delete-Termination-Reason.spec.ts
+                             (+) Verify Delete Termination Reason
+                             -> Buat termination reason baru.
+                             -> Hapus via icon trash + konfirmasi "Yes,
+                                Delete".
+                             [API VERIFICATION]
+                             -> Verify DELETE response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify terlihat sebelum delete, TIDAK
+                                terlihat setelah delete.
+
+153   TC-PIM-TERMREASON-05  [DONE]  TC-PIM-TERMREASON-05-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS In Name
+                             -> Setup page.on('dialog') untuk deteksi alert.
+                             -> Isi Name = "<script>alert(1)</script>".
+                             -> Klik Save, reload list.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog alert terpicu.
 
 ================================================================================
   FASE 3 - GROUP 6: REPORTS (6 TC)
   Folder: tests/pim/reports/
 ================================================================================
 
-154   TC-PIM-REPORT-01  [DONE]  Positive (+)                   Search report
-                                                               existing via
-                                                               autocomplete
-155   TC-PIM-REPORT-02  [DONE]  Positive (+) [API]              Add report (Name +
-                                                               Display Field)
-156   TC-PIM-REPORT-03  [DONE]  Negative (-)                    Submit kosong ->
-                                                               required
-157   TC-PIM-REPORT-04  [DONE]  Negative (-) [TEMUAN]           Save tanpa Display
-                                                               Field = silent
-                                                               no-op, tanpa error
-158   TC-PIM-REPORT-05  [DONE]  Edge Case (!)                   Cancel membatalkan
-                                                               form
-159   TC-PIM-REPORT-06  [DONE]  Positive (+)                   Delete report
+154   TC-PIM-REPORT-01  [DONE]  TC-PIM-REPORT-01-Verify-Search-Existing-Report.spec.ts
+                             (+) Verify Search Existing Report
+                             -> Buka Reports list, verify minimal 1 report
+                                bawaan muncul ("PIM Sample Report").
+                             -> Cari "PIM Sample Report" via filter Report
+                                Name (autocomplete), klik Search.
+                             [UI VERIFICATION]
+                             -> Verify minimal 1 report muncul di list awal.
+                             -> Verify SEMUA hasil pencarian mengandung "PIM
+                                Sample Report" (list ter-filter benar).
+
+155   TC-PIM-REPORT-02  [DONE]  TC-PIM-REPORT-02-Verify-Add-Report-Name-Only.spec.ts
+                             (+) [API] Verify Add Report With Required Fields
+                             -> Isi Report Name, pilih Display Field Group =
+                                "Personal" > Field = "First Name", klik "+"
+                                untuk menambahkan ke daftar.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify report baru terlihat di list.
+                             NOTE: [TEMUAN] dugaan awal "Report Name
+                                   satu-satunya field required" TERNYATA
+                                   SALAH — minimal 1 Display Field WAJIB
+                                   ditambahkan dulu via tombol "+" sebelum
+                                   Save benar-benar submit (lihat
+                                   REPORT-04 utk pembuktian).
+
+156   TC-PIM-REPORT-03  [DONE]  TC-PIM-REPORT-03-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Empty Submit Validation
+                             -> Buka form Add Report, langsung klik Save
+                                tanpa isi apapun.
+                             [UI VERIFICATION]
+                             -> Verify count(error) > 0 (validasi Required
+                                utk Report Name).
+                             -> Verify POST reports/defined TIDAK terkirim.
+
+157   TC-PIM-REPORT-04  [DONE]  TC-PIM-REPORT-04-Verify-Save-Without-Display-Field-Silently-No-Ops.spec.ts
+                             (-) [TEMUAN] Verify Save Without Display Field Silently No-Ops
+                             -> Isi Report Name SAJA (TANPA menambah Display
+                                Field via tombol "+").
+                             -> Klik Save.
+                             [UI VERIFICATION]
+                             -> Verify POST reports/defined TIDAK terkirim.
+                             NOTE: TIDAK ADA pesan error terlihat sama sekali
+                                   — silent no-op, form tetap di halaman yang
+                                   sama tanpa penjelasan ke user. Ini UX issue
+                                   nyata: user tidak tahu kenapa Save "tidak
+                                   bereaksi".
+
+158   TC-PIM-REPORT-05  [DONE]  TC-PIM-REPORT-05-Verify-Cancel-Discards-Form.spec.ts
+                             (!) Verify Cancel Discards Form
+                             -> Isi Report Name, klik Cancel (bukan Save).
+                             [UI VERIFICATION]
+                             -> Verify URL kembali ke Reports list.
+                             -> Verify POST TIDAK terkirim, report TIDAK
+                                muncul di list.
+
+159   TC-PIM-REPORT-06  [DONE]  TC-PIM-REPORT-06-Verify-Delete-Report.spec.ts
+                             (+) Verify Delete Report
+                             -> Buat report baru (Name + Display Field).
+                             -> Hapus via icon trash + konfirmasi "Yes,
+                                Delete".
+                             [API VERIFICATION]
+                             -> Verify DELETE response.status() === 200.
+                             [UI VERIFICATION]
+                             -> Verify terlihat sebelum delete, TIDAK
+                                terlihat setelah delete.
 
 ================================================================================
   SECURITY TAMBAHAN (ditambahkan 2026-11-11 — PIM sebelumnya 0 TC untuk
@@ -2004,25 +2253,45 @@ No.  Test Case ID      Status   Kategori           Skenario
   Folder: tests/pim/security/
 ================================================================================
 
-112   TC-PIM-SECURITY-01  [DONE]  Security (S)   IDOR: akses personal-details/salary
-                                                  employee lain via empNumber
-      -> Buat 2 employee (A, B). GET personal-details & salary employee B dari
-         sesi yang sama, navigasi UI langsung ke Personal Details employee B.
-      [HASIL] PASS. Personal-details employee B dapat diakses (status 200),
-      UI menampilkan data employee B dengan benar. N/A - arsitektur
-      single-role (semua admin melihat semua employee di demo publik ini),
-      konsisten preseden TC-RECRUITMENT-SECURITY-01 — dicatat sebagai
-      baseline resmi via report.finding(), bukan PASS/FAIL palsu.
+112   TC-PIM-SECURITY-01  [DONE]  TC-PIM-SECURITY-01-Verify-IDOR-Employee-Personal-Data-Access.spec.ts
+                             (S) Verify IDOR Employee Personal Data Access
+                             -> Buat 2 employee berbeda (A, B).
+                             -> GET personal-details & salary employee B dari
+                                sesi admin yang sama.
+                             -> Navigasi UI langsung ke Personal Details
+                                employee B.
+                             [API VERIFICATION]
+                             -> Verify response GET personal-details employee
+                                B (baseline, bukan hard-fail).
+                             [UI VERIFICATION]
+                             -> Verify UI menampilkan data employee B dengan
+                                benar.
+                             NOTE: PASS — personal-details employee B DAPAT
+                                   diakses (status 200). N/A - arsitektur
+                                   single-role (semua admin melihat semua
+                                   employee di demo publik ini), konsisten
+                                   preseden TC-RECRUITMENT-SECURITY-01 —
+                                   dicatat sebagai baseline resmi via
+                                   report.finding(), bukan PASS/FAIL palsu.
 
-113   TC-PIM-SECURITY-02  [FAIL]  Security (S)   Clickjacking protection header
-                                                  (X-Frame-Options / CSP frame-ancestors)
-      -> GET Employee List page dan GET /api/v2/pim/employees, cek header.
-      [BUG TERKONFIRMASI — BG-096 di Bug-List.xlsx, Severity Medium, Category
-      "Security Finding"] X-Frame-Options TIDAK ADA sama sekali di kedua
-      endpoint, CSP tidak punya frame-ancestors. INI KONFIRMASI KETIGA gap
-      yang SAMA PERSIS ditemukan di Login (BG-030) dan Recruitment (BG-066) —
-      kuat mengindikasikan gap konfigurasi APP-WIDE level nginx/web-server,
-      bukan 3 kasus terisolasi per-modul.
+113   TC-PIM-SECURITY-02  [FAIL]  TC-PIM-SECURITY-02-Verify-Clickjacking-Protection-Header.spec.ts
+                             (S) [BUG] Verify Clickjacking Protection Header
+                             -> GET Employee List page.
+                             -> GET /api/v2/pim/employees.
+                             [API VERIFICATION]
+                             -> Verify kedua endpoint punya proteksi
+                                clickjacking (X-Frame-Options ATAU CSP
+                                frame-ancestors).
+                             NOTE: [BUG TERKONFIRMASI — BG-096 di
+                                   Bug-List.xlsx, Severity Medium, Category
+                                   "Security Finding"] X-Frame-Options TIDAK
+                                   ADA sama sekali di kedua endpoint, CSP
+                                   tidak punya frame-ancestors. INI KONFIRMASI
+                                   KETIGA gap yang SAMA PERSIS ditemukan di
+                                   Login (BG-030) dan Recruitment (BG-066) —
+                                   kuat mengindikasikan gap konfigurasi
+                                   APP-WIDE level nginx/web-server, bukan 3
+                                   kasus terisolasi per-modul.
 
 ================================================================================
   SUMMARY
