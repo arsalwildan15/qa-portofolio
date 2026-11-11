@@ -182,11 +182,11 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Module | TCs | Docs |
 |--------|----:|------|
 | Login | 43 | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| Admin | 136 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
+| Admin | 138 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 161 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 54 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Leave | 1 | N/A |
-| **Total** | **395** | |
+| **Total** | **397** | |
 
 ### Login (43 TCs)
 
@@ -198,7 +198,7 @@ Positive, negative, boundary, security, edge.
 
 CSRF and session-fixation checks confirmed **effective** (no bug).
 
-### Admin (136 TCs)
+### Admin (138 TCs)
 
 Full coverage across all ~16 Admin sub-screens:
 
@@ -211,12 +211,14 @@ Full coverage across all ~16 Admin sub-screens:
 - Configuration (39 TCs, all 8 sub-screens) — risk-driven methodology, classified by actual blast radius on the shared public demo rather than a blanket rule:
   - **Validate-only** (never clicks Save, since a bad write would change shared infrastructure): Email Configuration (5), Localization (5), Modules (5), Social Media Authentication (5), LDAP Configuration (5, highest-risk screen in the suite per the app's own data-corruption warning)
   - **Fully exercised** (save-then-restore / add-then-delete, confirmed additive/reversible): Email Subscriptions (5), Language Packages (4), OAuth Client (5 — registers API/mobile-app token clients, not the login page, correcting an initial higher-risk assumption)
+- Security: clickjacking header + CSRF cross-origin mutation (2)
 
 **Confirmed bugs:**
 - Job Title's "Job Specification" file upload accepts an executable renamed to `.jpg` (same extension-only validation pattern as PIM/Recruitment) — `TC-ADMIN-JOBTITLE-07`
 - A freshly-added Organization Structure unit can't be renamed afterward — editing resends its untouched optional `unitId`/`description` as `null`, server rejects with HTTP 422 — `TC-ADMIN-STRUCTURE-07`
+- Missing `X-Frame-Options` / CSP `frame-ancestors` — the **4th app-wide confirmation** of the same clickjacking gap also found in Login, Recruitment, and PIM
 
-Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-executable payload by decoding it as a real image client-side. IDOR TCs (Skills, Nationalities, Locations) found no multi-tenant boundary to breach — consistent with this demo's single-admin-role architecture, documented as N/A rather than a false-positive vulnerability.
+Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-executable payload by decoding it as a real image client-side. IDOR TCs (Skills, Nationalities, Locations) found no multi-tenant boundary to breach — consistent with this demo's single-admin-role architecture, documented as N/A rather than a false-positive vulnerability. Cross-origin mutation (CSRF) on pay-grade creation confirmed **blocked by CORS** (no bug).
 
 ### PIM (161 TCs)
 

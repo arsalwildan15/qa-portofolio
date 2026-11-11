@@ -43,10 +43,10 @@ test('TC-ADMIN-EMPSTATUS-01: adding an employment status with valid data succeed
   report.step('Verify response POST employment-statuses, dan status muncul di list');
   report.check('[API] status === 200', resp.status() === 200, `status=${resp.status()}`);
   await adminEmploymentStatusPage.goto();
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(3000);
   report.check(
     `Employment status "${name}" muncul di list`,
-    await adminEmploymentStatusPage.rowByName(name).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await adminEmploymentStatusPage.rowByName(name).first().isVisible({ timeout: 10_000 }).catch(() => false),
   );
 
   report.print();

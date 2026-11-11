@@ -43,8 +43,8 @@ test('TC-ADMIN-LICENSE-03: a SQL injection payload in License Name does not brea
 
   report.step('Verify: list masih berfungsi normal setelah payload (tidak ada server error)');
   await adminLicensesPage.goto();
-  await page.waitForTimeout(1200);
-  const listStillWorks = await adminLicensesPage.tableRows.first().isVisible({ timeout: 5_000 }).catch(() => false);
+  await page.waitForTimeout(3000);
+  const listStillWorks = await adminLicensesPage.tableRows.first().isVisible({ timeout: 10_000 }).catch(() => false);
   report.check('List Licenses masih berfungsi normal setelah payload SQLi', listStillWorks, `postStatus=${resp?.status() ?? 'tidak ada'}`);
 
   report.print();

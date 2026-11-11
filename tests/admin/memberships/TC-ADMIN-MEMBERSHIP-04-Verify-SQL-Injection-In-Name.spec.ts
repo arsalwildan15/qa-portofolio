@@ -43,8 +43,8 @@ test('TC-ADMIN-MEMBERSHIP-04: a SQL injection payload in Membership Name does no
 
   report.step('Verify: list masih berfungsi normal setelah payload (tidak ada server error)');
   await adminMembershipsListPage.goto();
-  await page.waitForTimeout(1200);
-  const listStillWorks = await adminMembershipsListPage.tableRows.first().isVisible({ timeout: 5_000 }).catch(() => false);
+  await page.waitForTimeout(3000);
+  const listStillWorks = await adminMembershipsListPage.tableRows.first().isVisible({ timeout: 10_000 }).catch(() => false);
   report.check('List Memberships masih berfungsi normal setelah payload SQLi', listStillWorks, `postStatus=${resp?.status() ?? 'tidak ada'}`);
 
   report.print();

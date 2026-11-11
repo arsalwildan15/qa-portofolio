@@ -59,11 +59,13 @@ LEGEND SIMBOL SKENARIO
   (9), Structure (9). Pass keempat (39 TC): semua 8 sub-screen Admin >
   Configuration -- Email Configuration (5), Email Subscriptions (5),
   Localization (5), Language Packages (4), Modules (5), Social Media
-  Authentication (5), OAuth Client (5), LDAP Configuration (5). Total TC:
-  136.
+  Authentication (5), OAuth Client (5), LDAP Configuration (5). Pass
+  kelima (2 TC, 2026-11-11): Security -- clickjacking header (FAIL,
+  BG-145, konfirmasi ke-4 app-wide setelah Login/Recruitment/PIM) dan
+  CSRF cross-origin mutation (PASS, diblokir CORS). Total TC: 138.
 
   BELUM DICAKUP: TIDAK ADA -- semua scope Admin yang direncanakan di
-  seluruh 4 pass sudah selesai dikerjakan.
+  seluruh 5 pass sudah selesai dikerjakan.
 
   CATATAN CAKUPAN ORGANIZATION > STRUCTURE (live discovery, dispatch
   ini): screen ini BUKAN flat list seperti semua sub-screen Admin
@@ -769,365 +771,1200 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: USER MANAGEMENT - USERS (6 TC)
 ================================================================================
 
-  NO  ID                      KATEGORI  DESKRIPSI                                       STATUS
-  --  ----------------------  --------  ----------------------------------------------  -------
-  01  TC-ADMIN-USER-01        (+)       Add User valid (role ESS, employee valid)        [DONE]
-  02  TC-ADMIN-USER-02        (-)       Submit kosong -> validasi Required                [DONE]
-  03  TC-ADMIN-USER-03        (-)       Password dan Confirm Password tidak sama          [DONE]
-  04  TC-ADMIN-USER-04        (S)       XSS payload di Username                           [DONE]
-  05  TC-ADMIN-USER-05        (S)       SQL injection payload di search Username          [DONE]
-  06  TC-ADMIN-USER-06        (!)       Cancel membatalkan form Add User                  [DONE]
+ 1   TC-ADMIN-USER-01   [DONE]   TC-ADMIN-USER-01-Verify-Add-User-Valid.spec.ts
+                             (+) Verify Add User Valid (Role ESS, Employee Valid)
+                             -> Isi Username, User Role = ESS, Employee Name
+                                (autocomplete), Status = Enabled, Password +
+                                Confirm Password sama.
+                             -> Klik Save.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/users -> 200.
+                             [UI VERIFICATION]
+                             -> Verify user baru muncul di list Users.
+
+ 2   TC-ADMIN-USER-02   [DONE]   TC-ADMIN-USER-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form Add User tanpa isi apa pun.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-USER-03   [DONE]   TC-ADMIN-USER-03-Verify-Password-Mismatch.spec.ts
+                             (-) Verify Password dan Confirm Password Tidak Sama
+                             -> Isi Password dan Confirm Password dengan nilai
+                                BERBEDA, submit.
+                             [UI VERIFICATION]
+                             -> Verify pesan validasi mismatch muncul, POST
+                                TIDAK terkirim.
+
+ 4   TC-ADMIN-USER-04   [DONE]   TC-ADMIN-USER-04-Verify-XSS-In-Username.spec.ts
+                             (S) Verify XSS Payload di Username Disanitasi
+                             -> Isi Username dengan payload XSS
+                                ("<script>alert(1)</script>" atau sejenis).
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 5   TC-ADMIN-USER-05   [DONE]   TC-ADMIN-USER-05-Verify-SQL-Injection-In-Search.spec.ts
+                             (S) Verify SQL Injection Payload di Search Username
+                             -> Isi search box Username dengan payload SQLi
+                                ("' OR '1'='1").
+                             [UI VERIFICATION]
+                             -> Verify list tetap berfungsi normal (tidak error
+                                500/crash), hasil search "No Records Found" atau
+                                kosong, tidak membocorkan data lain.
+
+ 6   TC-ADMIN-USER-06   [DONE]   TC-ADMIN-USER-06-Verify-Cancel-Discards-Form.spec.ts
+                             (!) Verify Cancel Membatalkan Form Add User
+                             -> Buka form Add User, isi sebagian field, klik
+                                Cancel.
+                             [UI VERIFICATION]
+                             -> Verify kembali ke list Users, user baru TIDAK
+                                tersimpan.
 
 ================================================================================
   TEST CASES: JOB TITLES (8 TC)
 ================================================================================
 
-  NO  ID                         KATEGORI  DESKRIPSI                                        STATUS
-  --  -------------------------  --------  -----------------------------------------------  -------
-  01  TC-ADMIN-JOBTITLE-01       (+)       Add Job Title valid                               [DONE]
-  02  TC-ADMIN-JOBTITLE-02       (-)       Submit kosong -> validasi Required                [DONE]
-  03  TC-ADMIN-JOBTITLE-03       (B)       Job Title sangat panjang (300 char) [TEMUAN]       [DONE]
-  04  TC-ADMIN-JOBTITLE-04       (S)       XSS payload di Job Title                           [DONE]
-  05  TC-ADMIN-JOBTITLE-05       (!)       Cancel membatalkan form                            [DONE]
-  06  TC-ADMIN-JOBTITLE-06       (+)       Delete Job Title yang baru dibuat                  [DONE]
-  07  TC-ADMIN-JOBTITLE-07       (S)       File executable di-rename .jpg sbg Job Spec        [DONE]
-  08  TC-ADMIN-JOBTITLE-08       (S)       File .exe ekstensi asli ditolak (baseline)          [DONE]
+ 1   TC-ADMIN-JOBTITLE-01   [DONE]   TC-ADMIN-JOBTITLE-01-Verify-Add-Job-Title-Valid.spec.ts
+                             (+) Verify Add Job Title Valid
+                             -> Isi Job Title, Job Description, submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/job-titles -> 200.
+                             [UI VERIFICATION]
+                             -> Verify Job Title baru muncul di list.
+
+ 2   TC-ADMIN-JOBTITLE-02   [DONE]   TC-ADMIN-JOBTITLE-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Job Title.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-JOBTITLE-03   [DONE]   TC-ADMIN-JOBTITLE-03-Verify-Job-Title-Very-Long-Text.spec.ts
+                             (B) Verify Job Title Sangat Panjang (300 Karakter) [TEMUAN]
+                             -> Isi Job Title 300 karakter, submit.
+                             NOTE: Hasil didokumentasikan via report.finding()
+                                   (perilaku ambigu/boundary limit tidak pasti),
+                                   bukan pass/fail tegas.
+
+ 4   TC-ADMIN-JOBTITLE-04   [DONE]   TC-ADMIN-JOBTITLE-04-Verify-XSS-In-Job-Title.spec.ts
+                             (S) Verify XSS Payload di Job Title Disanitasi
+                             -> Isi Job Title dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 5   TC-ADMIN-JOBTITLE-05   [DONE]   TC-ADMIN-JOBTITLE-05-Verify-Cancel-Discards-Form.spec.ts
+                             (!) Verify Cancel Membatalkan Form
+                             -> Isi sebagian field, klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify kembali ke list, Job Title baru TIDAK
+                                tersimpan.
+
+ 6   TC-ADMIN-JOBTITLE-06   [DONE]   TC-ADMIN-JOBTITLE-06-Verify-Delete-Job-Title.spec.ts
+                             (+) Verify Delete Job Title yang Baru Dibuat
+                             -> Buat Job Title baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify Job Title tidak lagi muncul di list.
+
+ 7   TC-ADMIN-JOBTITLE-07   [FAIL]   TC-ADMIN-JOBTITLE-07-Verify-Exe-Renamed-As-Jpg-Upload-Security.spec.ts
+                             (S) Verify File Executable Di-rename .jpg sebagai Job Specification
+                             -> Upload file executable (header PE "MZ") dengan
+                                ekstensi di-rename jadi .jpg sebagai "Job
+                                Specification".
+                             [UI VERIFICATION]
+                             -> Verify file DITOLAK dengan pesan error.
+                             NOTE: [BUG TERKONFIRMASI -- BG-014 di Bug-List.xlsx]
+                                   File LOLOS validasi dan tersimpan tanpa
+                                   error -- validasi hanya cek ekstensi nama
+                                   file, bukan konten/magic bytes, pola sama
+                                   dengan TC-PIM-ADD-28 dan
+                                   TC-RECRUITMENT-CANDIDATE-11.
+
+ 8   TC-ADMIN-JOBTITLE-08   [DONE]   TC-ADMIN-JOBTITLE-08-Verify-Pure-Exe-Rejected.spec.ts
+                             (S) Verify File .exe Ekstensi Asli Ditolak (Baseline)
+                             -> Upload file .exe TANPA rename (ekstensi asli)
+                                sebagai Job Specification.
+                             [UI VERIFICATION]
+                             -> Verify file DITOLAK dengan pesan error
+                                (baseline pembanding TC-07: validasi memang
+                                ADA, tapi bisa di-bypass dengan rename
+                                ekstensi).
 
 ================================================================================
   TEST CASES: PAY GRADES (5 TC)
 ================================================================================
 
-  NO  ID                        KATEGORI  DESKRIPSI                                     STATUS
-  --  ------------------------  --------  ---------------------------------------------  -------
-  01  TC-ADMIN-PAYGRADE-01      (+)       Add Pay Grade valid                            [DONE]
-  02  TC-ADMIN-PAYGRADE-02      (-)       Submit kosong -> validasi Required              [DONE]
-  03  TC-ADMIN-PAYGRADE-03      (S)       XSS payload di Name                             [DONE]
-  04  TC-ADMIN-PAYGRADE-04      (!)       Duplicate name (nama pay grade existing)        [DONE]
-  05  TC-ADMIN-PAYGRADE-05      (+)       Delete Pay Grade yang baru dibuat               [DONE]
+ 1   TC-ADMIN-PAYGRADE-01   [DONE]   TC-ADMIN-PAYGRADE-01-Verify-Add-Pay-Grade-Valid.spec.ts
+                             (+) Verify Add Pay Grade Valid
+                             -> Isi Name, submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/pay-grades -> 200.
+                             [UI VERIFICATION]
+                             -> Verify Pay Grade baru muncul di list.
+
+ 2   TC-ADMIN-PAYGRADE-02   [DONE]   TC-ADMIN-PAYGRADE-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-PAYGRADE-03   [DONE]   TC-ADMIN-PAYGRADE-03-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name Disanitasi
+                             -> Isi Name dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 4   TC-ADMIN-PAYGRADE-04   [DONE]   TC-ADMIN-PAYGRADE-04-Verify-Duplicate-Name.spec.ts
+                             (!) Verify Duplicate Name (Nama Pay Grade Existing)
+                             -> Isi Name dengan nama pay grade yang sudah ada,
+                                submit.
+                             NOTE: Hasil didokumentasikan apa adanya (bukan
+                                   seperti Location yang punya uniqueness
+                                   server-backed nyata).
+
+ 5   TC-ADMIN-PAYGRADE-05   [DONE]   TC-ADMIN-PAYGRADE-05-Verify-Delete-Pay-Grade.spec.ts
+                             (+) Verify Delete Pay Grade yang Baru Dibuat
+                             -> Buat Pay Grade baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify Pay Grade tidak lagi muncul di list.
 
 ================================================================================
   TEST CASES: EMPLOYMENT STATUS (5 TC)
 ================================================================================
 
-  NO  ID                         KATEGORI  DESKRIPSI                                     STATUS
-  --  -------------------------  --------  ---------------------------------------------  -------
-  01  TC-ADMIN-EMPSTATUS-01      (+)       Add Employment Status valid                    [DONE]
-  02  TC-ADMIN-EMPSTATUS-02      (-)       Submit kosong -> validasi Required              [DONE]
-  03  TC-ADMIN-EMPSTATUS-03      (S)       SQL injection payload di Name                   [DONE]
-  04  TC-ADMIN-EMPSTATUS-04      (!)       Duplicate name (nama existing, cth "Full-Time") [DONE]
-  05  TC-ADMIN-EMPSTATUS-05      (+)       Delete Employment Status yang baru dibuat       [DONE]
+ 1   TC-ADMIN-EMPSTATUS-01   [DONE]   TC-ADMIN-EMPSTATUS-01-Verify-Add-Employment-Status-Valid.spec.ts
+                             (+) Verify Add Employment Status Valid
+                             -> Isi Name, submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/employment-statuses -> 200.
+                             [UI VERIFICATION]
+                             -> Verify Employment Status baru muncul di list.
+
+ 2   TC-ADMIN-EMPSTATUS-02   [DONE]   TC-ADMIN-EMPSTATUS-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-EMPSTATUS-03   [DONE]   TC-ADMIN-EMPSTATUS-03-Verify-SQL-Injection-In-Name.spec.ts
+                             (S) Verify SQL Injection Payload di Name
+                             -> Isi Name dengan payload SQLi, submit.
+                             [UI VERIFICATION]
+                             -> Verify list masih berfungsi normal setelah
+                                payload (tidak ada server error/crash).
+
+ 4   TC-ADMIN-EMPSTATUS-04   [DONE]   TC-ADMIN-EMPSTATUS-04-Verify-Duplicate-Name.spec.ts
+                             (!) Verify Duplicate Name (Nama Existing, cth "Full-Time")
+                             -> Isi Name dengan nama status yang sudah ada,
+                                submit.
+                             NOTE: Hasil didokumentasikan apa adanya.
+
+ 5   TC-ADMIN-EMPSTATUS-05   [DONE]   TC-ADMIN-EMPSTATUS-05-Verify-Delete-Employment-Status.spec.ts
+                             (+) Verify Delete Employment Status yang Baru Dibuat
+                             -> Buat Employment Status baru, hapus via icon
+                                trash.
+                             [UI VERIFICATION]
+                             -> Verify status tidak lagi muncul di list.
 
 ================================================================================
   TEST CASES: JOB CATEGORIES (5 TC)
 ================================================================================
 
-  NO  ID                     KATEGORI  DESKRIPSI                                     STATUS
-  --  ---------------------  --------  ---------------------------------------------  -------
-  01  TC-ADMIN-JOBCAT-01     (+)       Add Job Category valid                         [DONE]
-  02  TC-ADMIN-JOBCAT-02     (-)       Submit kosong -> validasi Required              [DONE]
-  03  TC-ADMIN-JOBCAT-03     (S)       XSS payload di Name                             [DONE]
-  04  TC-ADMIN-JOBCAT-04     (!)       Duplicate name (nama existing, cth "Executive") [DONE]
-  05  TC-ADMIN-JOBCAT-05     (+)       Delete Job Category yang baru dibuat            [DONE]
+ 1   TC-ADMIN-JOBCAT-01   [DONE]   TC-ADMIN-JOBCAT-01-Verify-Add-Job-Category-Valid.spec.ts
+                             (+) Verify Add Job Category Valid
+                             -> Isi Name, submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/job-categories -> 200.
+                             [UI VERIFICATION]
+                             -> Verify Job Category baru muncul di list.
+
+ 2   TC-ADMIN-JOBCAT-02   [DONE]   TC-ADMIN-JOBCAT-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-JOBCAT-03   [DONE]   TC-ADMIN-JOBCAT-03-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name Disanitasi
+                             -> Isi Name dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 4   TC-ADMIN-JOBCAT-04   [DONE]   TC-ADMIN-JOBCAT-04-Verify-Duplicate-Name.spec.ts
+                             (!) Verify Duplicate Name (Nama Existing, cth "Executive")
+                             -> Isi Name dengan nama kategori yang sudah ada,
+                                submit.
+                             NOTE: Hasil didokumentasikan apa adanya.
+
+ 5   TC-ADMIN-JOBCAT-05   [DONE]   TC-ADMIN-JOBCAT-05-Verify-Delete-Job-Category.spec.ts
+                             (+) Verify Delete Job Category yang Baru Dibuat
+                             -> Buat Job Category baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify kategori tidak lagi muncul di list.
 
 ================================================================================
   TEST CASES: WORK SHIFTS (5 TC)
 ================================================================================
 
-  NO  ID                   KATEGORI  DESKRIPSI                                        STATUS
-  --  -------------------  --------  -----------------------------------------------  -------
-  01  TC-ADMIN-SHIFT-01    (+)       Add Work Shift valid (From < To)                  [DONE]
-  02  TC-ADMIN-SHIFT-02    (-)       Submit kosong -> validasi Required                 [DONE]
-  03  TC-ADMIN-SHIFT-03    (!)       From = To (durasi shift 0 jam / 24 jam) [TEMUAN]   [DONE]
-  04  TC-ADMIN-SHIFT-04    (S)       XSS payload di Shift Name                         [DONE]
-  05  TC-ADMIN-SHIFT-05    (+)       Delete Work Shift yang baru dibuat                [DONE]
+ 1   TC-ADMIN-SHIFT-01   [DONE]   TC-ADMIN-SHIFT-01-Verify-Add-Work-Shift-Valid.spec.ts
+                             (+) Verify Add Work Shift Valid (From < To)
+                             -> Isi Shift Name, From, To (From < To), submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/work-shifts -> 200.
+                             [UI VERIFICATION]
+                             -> Verify Work Shift baru muncul di list, Duration
+                                Per Day terhitung otomatis.
+
+ 2   TC-ADMIN-SHIFT-02   [DONE]   TC-ADMIN-SHIFT-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Shift Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-SHIFT-03   [DONE]   TC-ADMIN-SHIFT-03-Verify-From-Equals-To.spec.ts
+                             (!) Verify From = To (Durasi Shift 0 Jam / 24 Jam) [TEMUAN]
+                             -> Isi From dan To dengan nilai yang SAMA, submit.
+                             NOTE: Hasil didokumentasikan via report.finding()
+                                   (ambigu apakah dihitung 0 jam atau 24 jam).
+
+ 4   TC-ADMIN-SHIFT-04   [DONE]   TC-ADMIN-SHIFT-04-Verify-XSS-In-Shift-Name.spec.ts
+                             (S) Verify XSS Payload di Shift Name Disanitasi
+                             -> Isi Shift Name dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 5   TC-ADMIN-SHIFT-05   [DONE]   TC-ADMIN-SHIFT-05-Verify-Delete-Work-Shift.spec.ts
+                             (+) Verify Delete Work Shift yang Baru Dibuat
+                             -> Buat Work Shift baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify shift tidak lagi muncul di list.
 
 ================================================================================
   TEST CASES: CORPORATE BRANDING (5 TC)
 ================================================================================
 
-  NO  ID                       KATEGORI  DESKRIPSI                                       STATUS
-  --  -----------------------  --------  ----------------------------------------------  -------
-  01  TC-ADMIN-CORPBRAND-01    (+)       Form termuat dengan 3 file input + tombol        [DONE]
-                                         Reset/Preview/Publish
-  02  TC-ADMIN-CORPBRAND-02    (-)       [VALIDATE-ONLY] File .txt sbg Client Logo        [DONE]
-                                         ditolak client-side (TIDAK klik Publish)
-  03  TC-ADMIN-CORPBRAND-03    (S)       [VALIDATE-ONLY] File .exe ekstensi asli sbg      [DONE]
-                                         Client Logo ditolak client-side (baseline,
-                                         TIDAK klik Publish)
-  04  TC-ADMIN-CORPBRAND-04    (S)       [VALIDATE-ONLY] File executable di-rename .png   [DONE]
-                                         sbg Client Logo -- cek error client-side SAJA
-                                         (TIDAK klik Publish, lihat SAFETY CONSTRAINT)
-  05  TC-ADMIN-CORPBRAND-05    (S)       [VALIDATE-ONLY] File executable di-rename .png   [DONE]
-                                         sbg Login Banner -- cek error client-side SAJA
-                                         (TIDAK klik Publish, lihat SAFETY CONSTRAINT)
+ 1   TC-ADMIN-CORPBRAND-01   [DONE]   TC-ADMIN-CORPBRAND-01-Verify-Form-Elements.spec.ts
+                             (+) Verify Form Termuat dengan 3 File Input + Tombol
+                             [UI VERIFICATION]
+                             -> Verify 3 file input (Client Logo, Client
+                                Banner, Login Banner), 6 color picker, tombol
+                                Reset/Preview/Publish semua visible.
+
+ 2   TC-ADMIN-CORPBRAND-02   [FAIL]   TC-ADMIN-CORPBRAND-02-Verify-Txt-File-Rejected-Client-Logo.spec.ts
+                             (-) [VALIDATE-ONLY] Verify File .txt Ditolak sebagai Client Logo
+                             -> Upload file .txt sebagai Client Logo. TIDAK
+                                PERNAH klik Publish (safety constraint -- demo
+                                bersama).
+                             [UI VERIFICATION]
+                             -> Verify pesan error client-side muncul ("File
+                                type not allowed" atau sejenis).
+                             NOTE: Lihat BG-010 di Bug-List.xlsx untuk detail
+                                   hasil aktual.
+
+ 3   TC-ADMIN-CORPBRAND-03   [FAIL]   TC-ADMIN-CORPBRAND-03-Verify-Pure-Exe-Rejected-Client-Logo.spec.ts
+                             (S) [VALIDATE-ONLY] Verify File .exe Ekstensi Asli Ditolak (Baseline)
+                             -> Upload file .exe TANPA rename sebagai Client
+                                Logo. TIDAK PERNAH klik Publish.
+                             [UI VERIFICATION]
+                             -> Verify pesan error client-side muncul.
+                             NOTE: Lihat BG-011 di Bug-List.xlsx untuk detail
+                                   hasil aktual.
+
+ 4   TC-ADMIN-CORPBRAND-04   [FAIL]   TC-ADMIN-CORPBRAND-04-Verify-Exe-Renamed-As-Png-Client-Logo.spec.ts
+                             (S) [VALIDATE-ONLY] Verify File Executable Di-rename .png sebagai Client Logo
+                             -> Upload file executable di-rename jadi .png
+                                sebagai Client Logo. TIDAK PERNAH klik Publish
+                                (lihat SAFETY CONSTRAINT -- Publish mengubah
+                                theme global demo publik).
+                             [UI VERIFICATION]
+                             -> Verify apakah client-side validation menangkap
+                                payload ini.
+                             NOTE: [BUG TERKONFIRMASI -- BG-012 di Bug-List.xlsx]
+                                   Dicatat via report.finding() karena
+                                   constraint VALIDATE-ONLY membuat hasilnya
+                                   tidak bisa dipastikan pass/fail tegas
+                                   terhadap perilaku server-side (tidak sampai
+                                   Publish).
+
+ 5   TC-ADMIN-CORPBRAND-05   [FAIL]   TC-ADMIN-CORPBRAND-05-Verify-Exe-Renamed-As-Png-Login-Banner.spec.ts
+                             (S) [VALIDATE-ONLY] Verify File Executable Di-rename .png sebagai Login Banner
+                             -> Upload file executable di-rename jadi .png
+                                sebagai Login Banner. TIDAK PERNAH klik Publish.
+                             [UI VERIFICATION]
+                             -> Verify apakah client-side validation menangkap
+                                payload ini.
+                             NOTE: [BUG TERKONFIRMASI -- BG-013 di Bug-List.xlsx]
+                                   Sama pola dengan TC-04, dicatat via
+                                   report.finding().
 
 ================================================================================
   TEST CASES: QUALIFICATIONS - SKILLS (8 TC)
 ================================================================================
 
-  NO  ID                   KATEGORI  DESKRIPSI                                        STATUS
-  --  -------------------  --------  -----------------------------------------------  -------
-  01  TC-ADMIN-SKILL-01    (+)       Add Skill valid (Name + Description)              [DONE]
-  02  TC-ADMIN-SKILL-02    (-)       Submit kosong -> validasi Required                [DONE]
-  03  TC-ADMIN-SKILL-03    (B)       Name sangat panjang (300 char) [TEMUAN]           [DONE]
-  04  TC-ADMIN-SKILL-04    (S)       XSS payload di Name                               [DONE]
-  05  TC-ADMIN-SKILL-05    (S)       SQL injection payload di Description              [DONE]
-  06  TC-ADMIN-SKILL-06    (!)       Cancel membatalkan form                           [DONE]
-  07  TC-ADMIN-SKILL-07    (+)       Delete Skill yang baru dibuat                     [DONE]
-  08  TC-ADMIN-SKILL-08    (S)       IDOR: cross-record access + bogus-id handling     [DONE]
-                                     pada PUT/DELETE by id
+ 1   TC-ADMIN-SKILL-01   [DONE]   TC-ADMIN-SKILL-01-Verify-Add-Skill-Valid.spec.ts
+                             (+) Verify Add Skill Valid (Name + Description)
+                             -> Isi Name + Description, submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/skills -> 200,
+                                response menyertakan description yang diisi.
+                             [UI VERIFICATION]
+                             -> Verify Skill baru muncul di list.
+
+ 2   TC-ADMIN-SKILL-02   [DONE]   TC-ADMIN-SKILL-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-SKILL-03   [DONE]   TC-ADMIN-SKILL-03-Verify-Name-Very-Long-Text.spec.ts
+                             (B) Verify Name Sangat Panjang (300 Karakter) [TEMUAN]
+                             -> Isi Name 300 karakter, submit.
+                             NOTE: Hasil didokumentasikan via report.finding().
+
+ 4   TC-ADMIN-SKILL-04   [DONE]   TC-ADMIN-SKILL-04-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name Disanitasi
+                             -> Isi Name dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 5   TC-ADMIN-SKILL-05   [DONE]   TC-ADMIN-SKILL-05-Verify-SQL-Injection-In-Description.spec.ts
+                             (S) Verify SQL Injection Payload di Description
+                             -> Isi Name valid + Description dengan payload
+                                SQLi, submit.
+                             [UI VERIFICATION]
+                             -> Verify list Skills masih berfungsi normal
+                                setelah payload (tidak ada server error).
+
+ 6   TC-ADMIN-SKILL-06   [DONE]   TC-ADMIN-SKILL-06-Verify-Cancel-Discards-Form.spec.ts
+                             (!) Verify Cancel Membatalkan Form
+                             -> Isi sebagian field, klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify Skill baru TIDAK tersimpan.
+
+ 7   TC-ADMIN-SKILL-07   [DONE]   TC-ADMIN-SKILL-07-Verify-Delete-Skill.spec.ts
+                             (+) Verify Delete Skill yang Baru Dibuat
+                             -> Buat Skill baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify Skill tidak lagi muncul di list.
+
+ 8   TC-ADMIN-SKILL-08   [DONE]   TC-ADMIN-SKILL-08-Verify-IDOR.spec.ts
+                             (S) Verify IDOR: Cross-record Access + Bogus-id Handling
+                             -> GET/PUT/DELETE via id milik record lain dan id
+                                bogus yang tidak ada.
+                             [API VERIFICATION]
+                             -> Verify bogus-id handling aman (404 bersih,
+                                bukan 500/stack-trace leak).
+                             NOTE: [N/A - arsitektur single-role] Cross-record
+                                   access TIDAK dibatasi, dicatat via
+                                   report.finding() karena demo ini single-
+                                   admin-role (bukan kerentanan IDOR valid
+                                   dalam konteks ini), pola sama dengan
+                                   TC-RECRUITMENT-SECURITY-01.
 
 ================================================================================
   TEST CASES: QUALIFICATIONS - EDUCATION (5 TC)
 ================================================================================
 
-  NO  ID                 KATEGORI  DESKRIPSI                                        STATUS
-  --  -----------------  --------  -----------------------------------------------  -------
-  01  TC-ADMIN-EDU-01    (+)       Add Education Level valid ("Level", bukan "Name") [DONE]
-  02  TC-ADMIN-EDU-02    (-)       Submit kosong -> validasi Required                [DONE]
-  03  TC-ADMIN-EDU-03    (S)       XSS payload di Level                              [DONE]
-  04  TC-ADMIN-EDU-04    (!)       Duplicate Level name                              [DONE]
-  05  TC-ADMIN-EDU-05    (+)       Delete Education Level yang baru dibuat           [DONE]
+ 1   TC-ADMIN-EDU-01   [DONE]   TC-ADMIN-EDU-01-Verify-Add-Education-Valid.spec.ts
+                             (+) Verify Add Education Level Valid ("Level", Bukan "Name")
+                             -> Isi field Level (BUKAN "Name" -- label berbeda
+                                dari 4 sub-screen Qualifications lain), submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/educations -> 200.
+                             [UI VERIFICATION]
+                             -> Verify Level baru muncul di list.
+
+ 2   TC-ADMIN-EDU-02   [DONE]   TC-ADMIN-EDU-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Level.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-EDU-03   [DONE]   TC-ADMIN-EDU-03-Verify-XSS-In-Level.spec.ts
+                             (S) Verify XSS Payload di Level Disanitasi
+                             -> Isi Level dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 4   TC-ADMIN-EDU-04   [DONE]   TC-ADMIN-EDU-04-Verify-Duplicate-Level.spec.ts
+                             (!) Verify Duplicate Level Name
+                             -> Isi Level dengan nama yang sudah ada, submit.
+                             NOTE: Hasil didokumentasikan apa adanya.
+
+ 5   TC-ADMIN-EDU-05   [DONE]   TC-ADMIN-EDU-05-Verify-Delete-Education.spec.ts
+                             (+) Verify Delete Education Level yang Baru Dibuat
+                             -> Buat Level baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify Level tidak lagi muncul di list.
 
 ================================================================================
   TEST CASES: QUALIFICATIONS - LICENSES (5 TC)
 ================================================================================
 
-  NO  ID                     KATEGORI  DESKRIPSI                                    STATUS
-  --  ---------------------  --------  -------------------------------------------  -------
-  01  TC-ADMIN-LICENSE-01    (+)       Add License valid                             [DONE]
-  02  TC-ADMIN-LICENSE-02    (-)       Submit kosong -> validasi Required            [DONE]
-  03  TC-ADMIN-LICENSE-03    (S)       SQL injection payload di Name                 [DONE]
-  04  TC-ADMIN-LICENSE-04    (!)       Cancel membatalkan form                       [DONE]
-  05  TC-ADMIN-LICENSE-05    (+)       Delete License yang baru dibuat               [DONE]
+ 1   TC-ADMIN-LICENSE-01   [DONE]   TC-ADMIN-LICENSE-01-Verify-Add-License-Valid.spec.ts
+                             (+) Verify Add License Valid
+                             -> Isi Name, submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/licenses -> 200.
+                             [UI VERIFICATION]
+                             -> Verify License baru muncul di list.
+
+ 2   TC-ADMIN-LICENSE-02   [DONE]   TC-ADMIN-LICENSE-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-LICENSE-03   [DONE]   TC-ADMIN-LICENSE-03-Verify-SQL-Injection-In-Name.spec.ts
+                             (S) Verify SQL Injection Payload di Name
+                             -> Isi Name dengan payload SQLi, submit.
+                             [UI VERIFICATION]
+                             -> Verify list License masih berfungsi normal
+                                setelah payload.
+
+ 4   TC-ADMIN-LICENSE-04   [DONE]   TC-ADMIN-LICENSE-04-Verify-Cancel-Discards-Form.spec.ts
+                             (!) Verify Cancel Membatalkan Form
+                             -> Isi sebagian field, klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify License baru TIDAK tersimpan.
+
+ 5   TC-ADMIN-LICENSE-05   [DONE]   TC-ADMIN-LICENSE-05-Verify-Delete-License.spec.ts
+                             (+) Verify Delete License yang Baru Dibuat
+                             -> Buat License baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify License tidak lagi muncul di list.
 
 ================================================================================
   TEST CASES: QUALIFICATIONS - LANGUAGES (5 TC)
 ================================================================================
 
-  NO  ID                  KATEGORI  DESKRIPSI                                       STATUS
-  --  ------------------  --------  ----------------------------------------------  -------
-  01  TC-ADMIN-LANG-01    (+)       Add Language valid                               [DONE]
-  02  TC-ADMIN-LANG-02    (-)       Submit kosong -> validasi Required               [DONE]
-  03  TC-ADMIN-LANG-03    (B)       Name sangat panjang (300 char) [TEMUAN]          [DONE]
-  04  TC-ADMIN-LANG-04    (S)       XSS payload di Name                              [DONE]
-  05  TC-ADMIN-LANG-05    (+)       Delete Language yang baru dibuat                 [DONE]
+ 1   TC-ADMIN-LANG-01   [DONE]   TC-ADMIN-LANG-01-Verify-Add-Language-Valid.spec.ts
+                             (+) Verify Add Language Valid
+                             -> Isi Name, submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/languages -> 200.
+                             [UI VERIFICATION]
+                             -> Verify Language baru muncul di list.
+
+ 2   TC-ADMIN-LANG-02   [DONE]   TC-ADMIN-LANG-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-LANG-03   [DONE]   TC-ADMIN-LANG-03-Verify-Name-Very-Long-Text.spec.ts
+                             (B) Verify Name Sangat Panjang (300 Karakter) [TEMUAN]
+                             -> Isi Name 300 karakter, submit.
+                             NOTE: Hasil didokumentasikan via report.finding().
+
+ 4   TC-ADMIN-LANG-04   [DONE]   TC-ADMIN-LANG-04-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name Disanitasi
+                             -> Isi Name dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 5   TC-ADMIN-LANG-05   [DONE]   TC-ADMIN-LANG-05-Verify-Delete-Language.spec.ts
+                             (+) Verify Delete Language yang Baru Dibuat
+                             -> Buat Language baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify Language tidak lagi muncul di list.
 
 ================================================================================
   TEST CASES: QUALIFICATIONS - MEMBERSHIPS (5 TC)
 ================================================================================
 
-  NO  ID                         KATEGORI  DESKRIPSI                                STATUS
-  --  -------------------------  --------  ---------------------------------------  -------
-  01  TC-ADMIN-MEMBERSHIP-01     (+)       Add Membership valid                      [DONE]
-  02  TC-ADMIN-MEMBERSHIP-02     (-)       Submit kosong -> validasi Required        [DONE]
-  03  TC-ADMIN-MEMBERSHIP-03     (!)       Duplicate name                            [DONE]
-  04  TC-ADMIN-MEMBERSHIP-04     (S)       SQL injection payload di Name             [DONE]
-  05  TC-ADMIN-MEMBERSHIP-05     (+)       Delete Membership yang baru dibuat        [DONE]
+ 1   TC-ADMIN-MEMBERSHIP-01   [DONE]   TC-ADMIN-MEMBERSHIP-01-Verify-Add-Membership-Valid.spec.ts
+                             (+) Verify Add Membership Valid
+                             -> Isi Name, submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/memberships -> 200.
+                             [UI VERIFICATION]
+                             -> Verify Membership baru muncul di list.
+                             NOTE: Ini master-data Admin-level, BEDA dari tab
+                                   Memberships level-karyawan di PIM.
+
+ 2   TC-ADMIN-MEMBERSHIP-02   [DONE]   TC-ADMIN-MEMBERSHIP-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-MEMBERSHIP-03   [DONE]   TC-ADMIN-MEMBERSHIP-03-Verify-Duplicate-Name.spec.ts
+                             (!) Verify Duplicate Name
+                             -> Isi Name dengan nama yang sudah ada, submit.
+                             NOTE: Hasil didokumentasikan apa adanya.
+
+ 4   TC-ADMIN-MEMBERSHIP-04   [DONE]   TC-ADMIN-MEMBERSHIP-04-Verify-SQL-Injection-In-Name.spec.ts
+                             (S) Verify SQL Injection Payload di Name
+                             -> Isi Name dengan payload SQLi, submit.
+                             [UI VERIFICATION]
+                             -> Verify list Membership masih berfungsi normal
+                                setelah payload.
+
+ 5   TC-ADMIN-MEMBERSHIP-05   [DONE]   TC-ADMIN-MEMBERSHIP-05-Verify-Delete-Membership.spec.ts
+                             (+) Verify Delete Membership yang Baru Dibuat
+                             -> Buat Membership baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify Membership tidak lagi muncul di list.
 
 ================================================================================
   TEST CASES: NATIONALITIES (6 TC)
 ================================================================================
 
-  NO  ID                          KATEGORI  DESKRIPSI                                       STATUS
-  --  --------------------------  --------  ----------------------------------------------  -------
-  01  TC-ADMIN-NATIONALITY-01     (+)       Add Nationality valid (verifikasi via API         [DONE]
-                                            GET by id, lihat TEMUAN ~196 record)
-  02  TC-ADMIN-NATIONALITY-02     (-)       Submit kosong -> validasi Required                [DONE]
-  03  TC-ADMIN-NATIONALITY-03     (S)       XSS payload di Name                               [DONE]
-  04  TC-ADMIN-NATIONALITY-04     (S)       IDOR: GET cross-record (read-only) + bogus-id      [DONE]
-                                            PUT/DELETE handling (TIDAK menyentuh seed asli)
-  05  TC-ADMIN-NATIONALITY-05     (!)       Cancel membatalkan form                            [DONE]
-  06  TC-ADMIN-NATIONALITY-06     (+)       Delete Nationality yang baru dibuat (via API,       [DONE]
-                                            lihat TEMUAN ~196 record)
+ 1   TC-ADMIN-NATIONALITY-01   [DONE]   TC-ADMIN-NATIONALITY-01-Verify-Add-Nationality-Valid.spec.ts
+                             (+) Verify Add Nationality Valid
+                             -> Isi Name, submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/nationalities -> 200,
+                                lalu GET by id langsung (BUKAN scan baris UI).
+                             NOTE: Data berisi ~196 record REAL tanpa search/
+                                   filter UI -- row baru tidak selalu masuk 50
+                                   baris pertama yang di-render, jadi
+                                   verifikasi via API, bukan scan UI (adaptasi
+                                   disengaja, bukan TC yang dilemahkan).
+
+ 2   TC-ADMIN-NATIONALITY-02   [DONE]   TC-ADMIN-NATIONALITY-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong Menampilkan Validasi Required
+                             -> Submit form tanpa isi Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-NATIONALITY-03   [DONE]   TC-ADMIN-NATIONALITY-03-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name Disanitasi
+                             -> Isi Name dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 4   TC-ADMIN-NATIONALITY-04   [DONE]   TC-ADMIN-NATIONALITY-04-Verify-IDOR.spec.ts
+                             (S) Verify IDOR: GET Cross-record (Read-only) + Bogus-id Handling
+                             -> GET cross-record (read-only) dan PUT/DELETE
+                                dengan id bogus. SENGAJA TIDAK PERNAH
+                                memodifikasi/menghapus record seed asli.
+                             [API VERIFICATION]
+                             -> Verify bogus-id handling aman.
+                             NOTE: [N/A - arsitektur single-role], pola sama
+                                   dengan TC-ADMIN-SKILL-08.
+
+ 5   TC-ADMIN-NATIONALITY-05   [DONE]   TC-ADMIN-NATIONALITY-05-Verify-Cancel-Discards-Form.spec.ts
+                             (!) Verify Cancel Membatalkan Form
+                             -> Isi sebagian field, klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify Nationality baru TIDAK tersimpan.
+
+ 6   TC-ADMIN-NATIONALITY-06   [DONE]   TC-ADMIN-NATIONALITY-06-Verify-Delete-Nationality.spec.ts
+                             (+) Verify Delete Nationality yang Baru Dibuat
+                             -> Buat Nationality baru, hapus via DELETE API
+                                langsung (bukan scan UI, lihat TEMUAN ~196
+                                record di TC-01).
+                             [API VERIFICATION]
+                             -> Verify GET by id setelah delete -> 404.
 
 ================================================================================
   TEST CASES: ORGANIZATION - GENERAL INFORMATION (6 TC)
 ================================================================================
 
-  NO  ID                  KATEGORI  DESKRIPSI                                        STATUS
-  --  ------------------  --------  -----------------------------------------------  -------
-  01  TC-ADMIN-ORGGI-01   (+)       Toggle Edit, ubah Notes, Save -> tersimpan,       [DONE]
-                                     restore ke nilai asli
-  02  TC-ADMIN-ORGGI-02   (-)       Kosongkan Organization Name (required) ->        [DONE]
-                                     validasi Required, tidak ada PUT terkirim
-  03  TC-ADMIN-ORGGI-03   (B)       Organization Name 300 char [TEMUAN: ditolak      [DONE]
-                                     client-side, limit 100 char]
-  04  TC-ADMIN-ORGGI-04   (S)       XSS payload di Organization Name                 [DONE]
-  05  TC-ADMIN-ORGGI-05   (S)       SQL injection payload di Tax ID                  [DONE]
-  06  TC-ADMIN-ORGGI-06   (!)       Toggle Edit off TANPA Save -- tidak ada tombol    [DONE]
-                                     Cancel, data tidak tersimpan di server
-                                     [TEMUAN: quirk tampilan field]
+ 1   TC-ADMIN-ORGGI-01   [DONE]   TC-ADMIN-ORGGI-01-Verify-Edit-Save-Restore.spec.ts
+                             (+) Verify Toggle Edit, Ubah Notes, Save -> Tersimpan, Restore
+                             -> Toggle switch "Edit", ubah Notes, klik Save.
+                             [API VERIFICATION]
+                             -> Verify PUT /api/v2/admin/organization -> 200.
+                             [UI VERIFICATION]
+                             -> Verify Notes berubah, lalu restore ke nilai
+                                asli di akhir test (record GLOBAL, dilihat
+                                semua user demo publik).
+
+ 2   TC-ADMIN-ORGGI-02   [DONE]   TC-ADMIN-ORGGI-02-Verify-Empty-Organization-Name.spec.ts
+                             (-) Verify Kosongkan Organization Name (Required)
+                             -> Toggle Edit, kosongkan Organization Name,
+                                submit.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, PUT TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-ORGGI-03   [DONE]   TC-ADMIN-ORGGI-03-Verify-Organization-Name-Very-Long-Text.spec.ts
+                             (B) Verify Organization Name 300 Karakter [TEMUAN]
+                             -> Isi Organization Name 300 karakter, submit.
+                             NOTE: DITOLAK client-side, limit 100 karakter
+                                   ("Should not exceed 100 characters").
+
+ 4   TC-ADMIN-ORGGI-04   [DONE]   TC-ADMIN-ORGGI-04-Verify-XSS-In-Organization-Name.spec.ts
+                             (S) Verify XSS Payload di Organization Name
+                             -> Isi Organization Name dengan payload XSS.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger setelah
+                                save/reload.
+
+ 5   TC-ADMIN-ORGGI-05   [DONE]   TC-ADMIN-ORGGI-05-Verify-SQL-Injection-In-Tax-ID.spec.ts
+                             (S) Verify SQL Injection Payload di Tax ID
+                             -> Isi Tax ID dengan payload SQLi, submit.
+                             [UI VERIFICATION]
+                             -> Verify tidak ada server error/crash.
+
+ 6   TC-ADMIN-ORGGI-06   [DONE]   TC-ADMIN-ORGGI-06-Verify-Toggle-Edit-Off-Without-Save.spec.ts
+                             (!) Verify Toggle Edit Off TANPA Save
+                             -> Toggle Edit on, ubah field, toggle Edit off
+                                TANPA klik Save (TIDAK ADA tombol Cancel di
+                                screen ini).
+                             [API VERIFICATION]
+                             -> Verify TIDAK ada PUT terkirim (dikonfirmasi
+                                via direct GET API).
+                             NOTE: [TEMUAN] Quirk tampilan: field yang sudah
+                                   disabled lagi tetap menampilkan teks yang
+                                   baru diketik sampai halaman direload (stale
+                                   displayed value), BUKAN kehilangan data
+                                   nyata -- dicatat via report.finding().
 
 ================================================================================
   TEST CASES: ORGANIZATION - LOCATIONS (9 TC)
 ================================================================================
 
-  NO  ID                     KATEGORI  DESKRIPSI                                       STATUS
-  --  ---------------------  --------  ----------------------------------------------  -------
-  01  TC-ADMIN-LOCATION-01   (+)       Add Location valid (Name, City, Country)         [DONE]
-  02  TC-ADMIN-LOCATION-02   (-)       Submit kosong -> Required di Name DAN City       [DONE]
-  03  TC-ADMIN-LOCATION-03   (B)       Name sangat panjang (300 char) [TEMUAN: ditolak   [DONE]
-                                       client-side, limit 100 char]
-  04  TC-ADMIN-LOCATION-04   (S)       XSS payload di Name                              [DONE]
-  05  TC-ADMIN-LOCATION-05   (S)       SQL injection payload di Name                     [DONE]
-  06  TC-ADMIN-LOCATION-06   (!)       Cancel membatalkan form Add Location              [DONE]
-  07  TC-ADMIN-LOCATION-07   (!)       Duplicate Name -> DITOLAK ("Already exists",      [DONE]
-                                       validasi uniqueness server-backed nyata)
-  08  TC-ADMIN-LOCATION-08   (+)       Delete Location yang baru dibuat                  [DONE]
-  09  TC-ADMIN-LOCATION-09   (S)       IDOR: cross-record access + bogus-id handling     [DONE]
-                                       pada PUT/DELETE by id
+ 1   TC-ADMIN-LOCATION-01   [DONE]   TC-ADMIN-LOCATION-01-Verify-Add-Location-Valid.spec.ts
+                             (+) Verify Add Location Valid (Name, City, Country)
+                             -> Isi Name, City, Country, submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/locations -> 200.
+                             [UI VERIFICATION]
+                             -> Verify Location baru muncul di list.
+
+ 2   TC-ADMIN-LOCATION-02   [DONE]   TC-ADMIN-LOCATION-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong -> Required di Name DAN City
+                             -> Submit form tanpa isi apa pun.
+                             [UI VERIFICATION]
+                             -> Verify 2 pesan "Required" muncul (Name DAN
+                                City -- SATU-SATUNYA 2 field required di form
+                                ini), POST TIDAK terkirim.
+
+ 3   TC-ADMIN-LOCATION-03   [DONE]   TC-ADMIN-LOCATION-03-Verify-Name-Very-Long-Text.spec.ts
+                             (B) Verify Name Sangat Panjang (300 Karakter) [TEMUAN]
+                             -> Isi Name 300 karakter, submit.
+                             NOTE: DITOLAK client-side, limit 100 karakter.
+
+ 4   TC-ADMIN-LOCATION-04   [DONE]   TC-ADMIN-LOCATION-04-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name Disanitasi
+                             -> Isi Name dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 5   TC-ADMIN-LOCATION-05   [DONE]   TC-ADMIN-LOCATION-05-Verify-SQL-Injection-In-Name.spec.ts
+                             (S) Verify SQL Injection Payload di Name
+                             -> Isi Name dengan payload SQLi, submit.
+                             [UI VERIFICATION]
+                             -> Verify list masih berfungsi normal.
+
+ 6   TC-ADMIN-LOCATION-06   [DONE]   TC-ADMIN-LOCATION-06-Verify-Cancel-Discards-Form.spec.ts
+                             (!) Verify Cancel Membatalkan Form Add Location
+                             -> Isi sebagian field, klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify Location baru TIDAK tersimpan.
+
+ 7   TC-ADMIN-LOCATION-07   [DONE]   TC-ADMIN-LOCATION-07-Verify-Duplicate-Name.spec.ts
+                             (!) Verify Duplicate Name -> Ditolak ("Already Exists")
+                             -> Isi Name dengan nama Location yang sudah ada,
+                                blur field.
+                             [API VERIFICATION]
+                             -> Verify GET /api/v2/core/validation/unique
+                                terpanggil saat blur, submit kedua TIDAK
+                                terkirim.
+                             NOTE: Validasi uniqueness SERVER-BACKED nyata,
+                                   BEDA dari Pay Grade yang duplikatnya cuma
+                                   didokumentasikan apa adanya.
+
+ 8   TC-ADMIN-LOCATION-08   [DONE]   TC-ADMIN-LOCATION-08-Verify-Delete-Location.spec.ts
+                             (+) Verify Delete Location yang Baru Dibuat
+                             -> Buat Location baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify Location tidak lagi muncul di list.
+
+ 9   TC-ADMIN-LOCATION-09   [DONE]   TC-ADMIN-LOCATION-09-Verify-IDOR.spec.ts
+                             (S) Verify IDOR: Cross-record Access + Bogus-id Handling
+                             -> PUT/DELETE via id milik record lain dan id
+                                bogus (form edit menaruh id langsung di URL
+                                /admin/saveLocation/{id}).
+                             [API VERIFICATION]
+                             -> Verify bogus id -> 404 bersih ("Record(s) Not
+                                Found"), bukan 500/stack-trace leak.
+                             NOTE: [N/A - arsitektur single-role] Cross-record
+                                   access TIDAK dibatasi, dicatat via
+                                   report.finding().
 
 ================================================================================
   TEST CASES: ORGANIZATION - STRUCTURE (9 TC)
 ================================================================================
 
-  NO  ID                      KATEGORI  DESKRIPSI                                       STATUS
-  --  ----------------------  --------  ----------------------------------------------  -------
-  01  TC-ADMIN-STRUCTURE-01   (+)       Add Organization Unit di bawah root valid        [DONE]
-  02  TC-ADMIN-STRUCTURE-02   (-)       Submit kosong -> Required di Name                [DONE]
-  03  TC-ADMIN-STRUCTURE-03   (B)       Name sangat panjang (300 char) [TEMUAN]          [DONE]
-  04  TC-ADMIN-STRUCTURE-04   (S)       XSS payload di Name                              [DONE]
-  05  TC-ADMIN-STRUCTURE-05   (S)       SQL injection payload di Name                     [DONE]
-  06  TC-ADMIN-STRUCTURE-06   (!)       Cancel membatalkan dialog Add Organization Unit  [DONE]
-  07  TC-ADMIN-STRUCTURE-07   (+)       Rename unit baru -> [BUG] HTTP 422, unitId/      [FAILED]
-                                        description null ditolak saat edit
-  08  TC-ADMIN-STRUCTURE-08   (+)       Delete Organization Unit yang baru dibuat         [DONE]
-  09  TC-ADMIN-STRUCTURE-09   (!)       Add child unit di bawah unit lain (bukan root)    [DONE]
-                                        -> bersarang benar, hierarki bertingkat terbukti
+ 1   TC-ADMIN-STRUCTURE-01   [DONE]   TC-ADMIN-STRUCTURE-01-Verify-Add-Unit-Under-Root.spec.ts
+                             (+) Verify Add Organization Unit di Bawah Root Valid
+                             -> Pilih root node ("OrangeHRM"), klik "Add",
+                                isi Name (satu-satunya required), submit modal.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/subunits -> 200.
+                             [UI VERIFICATION]
+                             -> Verify unit baru muncul di tree (expand node
+                                root kalau perlu).
+
+ 2   TC-ADMIN-STRUCTURE-02   [DONE]   TC-ADMIN-STRUCTURE-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong -> Required di Name
+                             -> Submit modal Add tanpa isi Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul, POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-STRUCTURE-03   [DONE]   TC-ADMIN-STRUCTURE-03-Verify-Name-Very-Long-Text.spec.ts
+                             (B) Verify Name Sangat Panjang (300 Karakter) [TEMUAN]
+                             -> Isi Name 300 karakter, submit.
+                             NOTE: Hasil didokumentasikan via report.finding(),
+                                   dibersihkan di akhir test.
+
+ 4   TC-ADMIN-STRUCTURE-04   [DONE]   TC-ADMIN-STRUCTURE-04-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name Disanitasi
+                             -> Isi Name dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 5   TC-ADMIN-STRUCTURE-05   [DONE]   TC-ADMIN-STRUCTURE-05-Verify-SQL-Injection-In-Name.spec.ts
+                             (S) Verify SQL Injection Payload di Name
+                             -> Isi Name dengan payload SQLi, submit.
+                             [UI VERIFICATION]
+                             -> Verify tree masih berfungsi normal.
+
+ 6   TC-ADMIN-STRUCTURE-06   [DONE]   TC-ADMIN-STRUCTURE-06-Verify-Cancel-Discards-Dialog.spec.ts
+                             (!) Verify Cancel Membatalkan Dialog Add Organization Unit
+                             -> Isi sebagian field, klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify unit baru TIDAK tersimpan di tree.
+
+ 7   TC-ADMIN-STRUCTURE-07   [FAIL]   TC-ADMIN-STRUCTURE-07-Verify-Edit-Unit-Rename.spec.ts
+                             (+) Verify Rename Unit Baru via Edit Icon
+                             -> Buat unit baru (unitId/description kosong),
+                                klik icon edit (pencil), ubah HANYA Name,
+                                submit.
+                             [API VERIFICATION]
+                             -> Verify PUT /api/v2/admin/subunits/{id} -> 200.
+                             [UI VERIFICATION]
+                             -> Verify unit dengan nama baru muncul di tree.
+                             NOTE: [BUG TERKONFIRMASI -- BG-025 di
+                                   Bug-List.xlsx] PUT DITOLAK HTTP 422
+                                   "Invalid Parameter" (unitId, description).
+                                   Root cause: create menyimpan unitId=""/
+                                   description="" sebagai `null`, tapi edit
+                                   mem-prefill dari `null` tsb dan server
+                                   menolak `null` untuk field yang sama saat
+                                   update, walau KEDUA field itu opsional
+                                   (bukan di daftar "* Required"). Regresi
+                                   nyata antara flow Add (longgar) dan Edit
+                                   (strict) untuk field opsional yang sama.
+                                   Cleanup tetap jalan meski assertion gagal
+                                   (expect.soft).
+
+ 8   TC-ADMIN-STRUCTURE-08   [DONE]   TC-ADMIN-STRUCTURE-08-Verify-Delete-Unit.spec.ts
+                             (+) Verify Delete Organization Unit yang Baru Dibuat
+                             -> Buat unit baru, hapus via icon trash (urutan:
+                                trash LALU pencil LALU plus).
+                             [UI VERIFICATION]
+                             -> Verify unit tidak lagi muncul di tree.
+
+ 9   TC-ADMIN-STRUCTURE-09   [DONE]   TC-ADMIN-STRUCTURE-09-Verify-Add-Child-Unit.spec.ts
+                             (!) Verify Add Child Unit di Bawah Unit Lain (Bukan Root)
+                             -> Buat unit A, lalu buat unit B sebagai child
+                                dari unit A (bukan dari root).
+                             [UI VERIFICATION]
+                             -> Verify unit B bersarang benar di bawah A
+                                setelah expand node A (TIDAK auto-expand,
+                                perlu klik chevron toggle), hierarki
+                                bertingkat terbukti via API tree mode.
 
 ================================================================================
   TEST CASES: CONFIGURATION - EMAIL CONFIGURATION (5 TC) [VALIDATE-ONLY]
 ================================================================================
 
-  NO  ID                        KATEGORI  DESKRIPSI                                     STATUS
-  --  ------------------------  --------  ---------------------------------------------  -------
-  01  TC-ADMIN-EMAILCONFIG-01   (+)       Form termuat (Mail Sent As, Sending Method,     [DONE]
-                                          Reset/Save)
-  02  TC-ADMIN-EMAILCONFIG-02   (-)       Mail Sent As kosong -> Required on-blur,        [DONE]
-                                          TIDAK PERNAH klik Save
-  03  TC-ADMIN-EMAILCONFIG-03   (S)       XSS payload di Mail Sent As -> format ditolak   [DONE]
-                                          on-blur, TIDAK PERNAH klik Save
-  04  TC-ADMIN-EMAILCONFIG-04   (!)       Switch Sending Method (Sendmail<->SMTP)         [DONE]
-                                          menampilkan field kondisional yang benar
-  05  TC-ADMIN-EMAILCONFIG-05   (B)       Mail Sent As 300 char -> "Should not exceed     [DONE]
-                                          100 characters" on-blur, TIDAK PERNAH klik Save
+ 1   TC-ADMIN-EMAILCONFIG-01   [DONE]   TC-ADMIN-EMAILCONFIG-01-Verify-Form-Elements.spec.ts
+                             (+) [VALIDATE-ONLY] Verify Form Termuat (Mail Sent As, Sending Method, Reset/Save)
+                             [UI VERIFICATION]
+                             -> Verify field Mail Sent As, 3 radio Sending
+                                Method (SECURE SMTP/SMTP/Sendmail), tombol
+                                Reset/Save visible.
+
+ 2   TC-ADMIN-EMAILCONFIG-02   [DONE]   TC-ADMIN-EMAILCONFIG-02-Verify-Empty-Mail-Sent-As.spec.ts
+                             (-) [VALIDATE-ONLY] Verify Mail Sent As Kosong -> Required On-blur
+                             -> Kosongkan Mail Sent As, blur field. TIDAK
+                                PERNAH klik Save (SMTP global demo publik).
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul on-blur.
+
+ 3   TC-ADMIN-EMAILCONFIG-03   [DONE]   TC-ADMIN-EMAILCONFIG-03-Verify-XSS-In-Mail-Sent-As.spec.ts
+                             (S) [VALIDATE-ONLY] Verify XSS Payload di Mail Sent As -> Format Ditolak
+                             -> Isi Mail Sent As dengan payload XSS, blur.
+                                TIDAK PERNAH klik Save.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Expected format:
+                                admin@example.com" muncul (format email
+                                ditolak on-blur).
+
+ 4   TC-ADMIN-EMAILCONFIG-04   [DONE]   TC-ADMIN-EMAILCONFIG-04-Verify-Sending-Method-Switch.spec.ts
+                             (!) Verify Switch Sending Method (Sendmail<->SMTP)
+                             -> Pilih radio SMTP, lalu Sendmail, lalu SMTP
+                                lagi.
+                             [UI VERIFICATION]
+                             -> Verify field kondisional yang benar tampil
+                                tiap mode (SMTP Host/Port untuk SMTP, "Path to
+                                Sendmail" read-only untuk Sendmail).
+
+ 5   TC-ADMIN-EMAILCONFIG-05   [DONE]   TC-ADMIN-EMAILCONFIG-05-Verify-Mail-Sent-As-Very-Long-Text.spec.ts
+                             (B) [VALIDATE-ONLY] Verify Mail Sent As 300 Karakter
+                             -> Isi Mail Sent As 300 karakter, blur. TIDAK
+                                PERNAH klik Save.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Should not exceed 100
+                                characters" muncul on-blur.
 
 ================================================================================
   TEST CASES: CONFIGURATION - EMAIL SUBSCRIPTIONS (5 TC) [FULLY EXERCISED]
 ================================================================================
 
-  NO  ID                     KATEGORI  DESKRIPSI                                       STATUS
-  --  ---------------------  --------  ----------------------------------------------  -------
-  01  TC-ADMIN-EMAILSUB-01   (+)       List 5 notification type tampil                  [DONE]
-  02  TC-ADMIN-EMAILSUB-02   (+)       Add subscriber (Name+Email) ke Leave             [DONE]
-                                      Cancellations -> tersimpan, lalu di-restore
-  03  TC-ADMIN-EMAILSUB-03   (-)       Submit kosong (Leave Rejections) -> Required,     [DONE]
-                                      tidak ada POST
-  04  TC-ADMIN-EMAILSUB-04   (!)       Cancel (Leave Assignments) membatalkan             [DONE]
-                                      penambahan subscriber
-  05  TC-ADMIN-EMAILSUB-05   (S)       XSS/SQLi payload di Name (Leave Approvals) ->      [DONE]
-                                      tersimpan aman sebagai teks, dibersihkan
+ 1   TC-ADMIN-EMAILSUB-01   [DONE]   TC-ADMIN-EMAILSUB-01-Verify-Notification-Types-List.spec.ts
+                             (+) Verify List 5 Notification Type Tampil
+                             [UI VERIFICATION]
+                             -> Verify 5 baris: Leave Applications/Approvals/
+                                Assignments/Cancellations/Rejections, masing2
+                                punya icon person-plus + switch toggle.
+
+ 2   TC-ADMIN-EMAILSUB-02   [DONE]   TC-ADMIN-EMAILSUB-02-Verify-Add-Subscriber.spec.ts
+                             (+) Verify Add Subscriber (Name+Email) ke Leave Cancellations
+                             -> Buka sub-page Leave Cancellations, isi Name +
+                                Email (2 field teks bebas, BUKAN autocomplete),
+                                submit.
+                             [UI VERIFICATION]
+                             -> Verify subscriber tersimpan, lalu dihapus lagi
+                                di akhir test (restore).
+
+ 3   TC-ADMIN-EMAILSUB-03   [DONE]   TC-ADMIN-EMAILSUB-03-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong (Leave Rejections) -> Required
+                             -> Submit dialog Add Subscriber tanpa isi apa pun.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required", POST TIDAK terkirim.
+
+ 4   TC-ADMIN-EMAILSUB-04   [DONE]   TC-ADMIN-EMAILSUB-04-Verify-Cancel-Discards.spec.ts
+                             (!) Verify Cancel (Leave Assignments) Membatalkan Penambahan Subscriber
+                             -> Isi sebagian field, klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify subscriber baru TIDAK tersimpan.
+
+ 5   TC-ADMIN-EMAILSUB-05   [DONE]   TC-ADMIN-EMAILSUB-05-Verify-XSS-SQLi-In-Name.spec.ts
+                             (S) Verify XSS/SQLi Payload di Name (Leave Approvals)
+                             -> Isi Name dengan payload XSS/SQLi, submit.
+                             [UI VERIFICATION]
+                             -> Verify tersimpan aman sebagai teks (tidak ada
+                                dialog JS), dibersihkan di akhir test.
 
 ================================================================================
   TEST CASES: CONFIGURATION - LOCALIZATION (5 TC) [VALIDATE-ONLY]
 ================================================================================
 
-  NO  ID                       KATEGORI  DESKRIPSI                                     STATUS
-  --  -----------------------  --------  ---------------------------------------------  -------
-  01  TC-ADMIN-LOCALIZATION-01 (+)       Form termuat (Language, Date Format, Save,     [DONE]
-                                          TANPA Cancel)
-  02  TC-ADMIN-LOCALIZATION-02 (!)       Dropdown Language berisi > 1 opsi, TIDAK        [DONE]
-                                          pernah Save
-  03  TC-ADMIN-LOCALIZATION-03 (!)       Pilih Language lain TANPA Save -> tidak          [DONE]
-                                          ter-persist (reload membuktikan)
-  04  TC-ADMIN-LOCALIZATION-04 (!)       Pilih Date Format lain TANPA Save -> tidak       [DONE]
-                                          ter-persist (reload membuktikan)
-  05  TC-ADMIN-LOCALIZATION-05 (!)       Opsi dropdown Language konsisten dengan daftar   [DONE]
-                                          Language Packages (read-only cross-screen check)
+ 1   TC-ADMIN-LOCALIZATION-01   [DONE]   TC-ADMIN-LOCALIZATION-01-Verify-Form-Elements.spec.ts
+                             (+) [VALIDATE-ONLY] Verify Form Termuat (Language, Date Format, Save, TANPA Cancel)
+                             [UI VERIFICATION]
+                             -> Verify 2 dropdown (Language, Date Format),
+                                tombol Save, TIDAK ADA tombol Cancel.
+
+ 2   TC-ADMIN-LOCALIZATION-02   [DONE]   TC-ADMIN-LOCALIZATION-02-Verify-Language-Options.spec.ts
+                             (!) [VALIDATE-ONLY] Verify Dropdown Language Berisi > 1 Opsi
+                             -> Buka dropdown Language. TIDAK PERNAH klik Save.
+                             [UI VERIFICATION]
+                             -> Verify opsi > 1 tersedia.
+
+ 3   TC-ADMIN-LOCALIZATION-03   [DONE]   TC-ADMIN-LOCALIZATION-03-Verify-Language-Not-Persisted-Without-Save.spec.ts
+                             (!) [VALIDATE-ONLY] Verify Pilih Language Lain TANPA Save -> Tidak Ter-persist
+                             -> Pilih Language lain, reload TANPA Save.
+                             [UI VERIFICATION]
+                             -> Verify Language kembali ke nilai asli setelah
+                                reload.
+
+ 4   TC-ADMIN-LOCALIZATION-04   [DONE]   TC-ADMIN-LOCALIZATION-04-Verify-Date-Format-Not-Persisted-Without-Save.spec.ts
+                             (!) [VALIDATE-ONLY] Verify Pilih Date Format Lain TANPA Save -> Tidak Ter-persist
+                             -> Pilih Date Format lain, reload TANPA Save.
+                             [UI VERIFICATION]
+                             -> Verify Date Format kembali ke nilai asli
+                                setelah reload.
+
+ 5   TC-ADMIN-LOCALIZATION-05   [DONE]   TC-ADMIN-LOCALIZATION-05-Verify-Language-Options-Consistent-With-Packages.spec.ts
+                             (!) Verify Opsi Dropdown Language Konsisten dengan Language Packages
+                             [API VERIFICATION]
+                             -> Verify GET /api/v2/admin/i18n/languages?
+                                activeOnly=true konsisten dengan opsi dropdown
+                                Language (read-only cross-screen check).
 
 ================================================================================
   TEST CASES: CONFIGURATION - LANGUAGE PACKAGES (4 TC) [FULLY EXERCISED]
 ================================================================================
 
-  NO  ID                   KATEGORI  DESKRIPSI                                        STATUS
-  --  -------------------  --------  -----------------------------------------------  -------
-  01  TC-ADMIN-LANGPACK-01 (+)       List 9 package tampil, 4 icon aksi per baris,     [DONE]
-                                     tombol Add
-  02  TC-ADMIN-LANGPACK-02 (+)       Delete "Tamil (India)" lalu re-Add -> round-trip  [DONE]
-                                     bersih, diverifikasi via API (bukan scan UI)
-  03  TC-ADMIN-LANGPACK-03 (-)       Submit kosong -> Required, tidak ada POST          [DONE]
-  04  TC-ADMIN-LANGPACK-04 (!)       Cancel membatalkan, jumlah baris tidak berubah      [DONE]
+ 1   TC-ADMIN-LANGPACK-01   [DONE]   TC-ADMIN-LANGPACK-01-Verify-List-Elements.spec.ts
+                             (+) Verify List 9 Package Tampil, 4 Icon Aksi per Baris, Tombol Add
+                             [API VERIFICATION]
+                             -> Verify GET /api/v2/admin/i18n/languages?
+                                activeOnly=true -> 9 package.
+                             [UI VERIFICATION]
+                             -> Verify 4 icon per baris (upload, translate,
+                                download, trash), tombol Add visible.
+
+ 2   TC-ADMIN-LANGPACK-02   [DONE]   TC-ADMIN-LANGPACK-02-Verify-Delete-Re-Add-Round-Trip.spec.ts
+                             (+) Verify Delete "Tamil (India)" lalu Re-Add -> Round-trip Bersih
+                             -> Delete "Tamil (India)", lalu Add kembali
+                                (dropdown Add TIDAK bisa tambah locale baru --
+                                SEMUA 9 locale OrangeHRM sudah ter-enable,
+                                jadi re-Add locale yang sama).
+                             [API VERIFICATION]
+                             -> Verify via GET activeOnly=true (bukan scan UI)
+                                bahwa Tamil (India) kembali ke daftar aktif.
+                             NOTE: Dicatat via report.finding() (baseline
+                                   subscriber).
+
+ 3   TC-ADMIN-LANGPACK-03   [DONE]   TC-ADMIN-LANGPACK-03-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong -> Required
+                             -> Submit dialog Add tanpa pilih Name.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required", POST TIDAK terkirim.
+
+ 4   TC-ADMIN-LANGPACK-04   [DONE]   TC-ADMIN-LANGPACK-04-Verify-Cancel-Discards.spec.ts
+                             (!) Verify Cancel Membatalkan, Jumlah Baris Tidak Berubah
+                             -> Buka dialog Add, klik Cancel.
+                             [API VERIFICATION]
+                             -> Verify jumlah package aktif tidak berubah (via
+                                API).
 
 ================================================================================
   TEST CASES: CONFIGURATION - MODULES (5 TC) [VALIDATE-ONLY]
 ================================================================================
 
-  NO  ID                   KATEGORI  DESKRIPSI                                        STATUS
-  --  -------------------  --------  -----------------------------------------------  -------
-  01  TC-ADMIN-MODULES-01  (+)       Form termuat, ke-11 module tampil, tombol Save    [DONE]
-  02  TC-ADMIN-MODULES-02  (!)       Switch Admin Module ter-disable (self-lock)        [DONE]
-  03  TC-ADMIN-MODULES-03  (+)       Baseline: semua 11 module dalam state enabled      [DONE]
-  04  TC-ADMIN-MODULES-04  (!)       Toggle switch Buzz TANPA Save -> tidak ter-persist,[DONE]
-                                     tidak ada POST/PUT terkirim
-  05  TC-ADMIN-MODULES-05  (!)       Module enabled konsisten dengan link di sidebar    [DONE]
-                                     (read-only cross-check)
+ 1   TC-ADMIN-MODULES-01   [DONE]   TC-ADMIN-MODULES-01-Verify-Form-Elements.spec.ts
+                             (+) [VALIDATE-ONLY] Verify Form Termuat, Ke-11 Module Tampil, Tombol Save
+                             [UI VERIFICATION]
+                             -> Verify 11 module (Admin, Pim, Leave, Time,
+                                Recruitment, Performance, Directory,
+                                Maintenance, Mobile, Claim, Buzz) tampil
+                                dengan switch masing2, tombol Save (tanpa
+                                Reset/Cancel).
+
+ 2   TC-ADMIN-MODULES-02   [DONE]   TC-ADMIN-MODULES-02-Verify-Admin-Module-Disabled.spec.ts
+                             (!) Verify Switch Admin Module Ter-disable (Self-lock)
+                             [UI VERIFICATION]
+                             -> Verify switch Admin Module punya HTML
+                                attribute `disabled` (aplikasi mengunci
+                                dirinya sendiri).
+
+ 3   TC-ADMIN-MODULES-03   [DONE]   TC-ADMIN-MODULES-03-Verify-Baseline-All-Enabled.spec.ts
+                             (+) Verify Baseline: Semua 11 Module dalam State Enabled
+                             [API VERIFICATION]
+                             -> Verify GET /api/v2/admin/modules -> semua 11
+                                module enabled=true.
+
+ 4   TC-ADMIN-MODULES-04   [DONE]   TC-ADMIN-MODULES-04-Verify-Toggle-Without-Save.spec.ts
+                             (!) [VALIDATE-ONLY] Verify Toggle Switch Buzz TANPA Save -> Tidak Ter-persist
+                             -> Toggle switch Buzz, reload TANPA klik Save.
+                             [API VERIFICATION]
+                             -> Verify TIDAK ada POST/PUT terkirim, state
+                                kembali ke semula setelah reload.
+
+ 5   TC-ADMIN-MODULES-05   [DONE]   TC-ADMIN-MODULES-05-Verify-Consistent-With-Sidebar.spec.ts
+                             (!) Verify Module Enabled Konsisten dengan Link di Sidebar
+                             [UI VERIFICATION]
+                             -> Verify module yang enabled di screen ini
+                                konsisten dengan link yang muncul di sidebar
+                                (read-only cross-check).
 
 ================================================================================
   TEST CASES: CONFIGURATION - SOCIAL MEDIA AUTHENTICATION (5 TC) [VALIDATE-ONLY]
 ================================================================================
 
-  NO  ID                      KATEGORI  DESKRIPSI                                     STATUS
-  --  ----------------------  --------  --------------------------------------------  -------
-  01  TC-ADMIN-SOCIALAUTH-01  (+)       Provider List termuat, tombol Add              [DONE]
-  02  TC-ADMIN-SOCIALAUTH-02  (-)       Submit kosong -> 4 Required, tidak ada POST    [DONE]
-  03  TC-ADMIN-SOCIALAUTH-03  (S)       XSS payload di Name -> tidak ada alert,         [DONE]
-                                        TIDAK PERNAH klik Save
-  04  TC-ADMIN-SOCIALAUTH-04  (!)       Cancel membatalkan, jumlah provider tidak        [DONE]
-                                        berubah
-  05  TC-ADMIN-SOCIALAUTH-05  (B)       Name 300 char -> "Should not exceed 40          [DONE]
-                                        characters" on-blur, TIDAK PERNAH klik Save
+ 1   TC-ADMIN-SOCIALAUTH-01   [DONE]   TC-ADMIN-SOCIALAUTH-01-Verify-Provider-List.spec.ts
+                             (+) Verify Provider List Termuat, Tombol Add
+                             [UI VERIFICATION]
+                             -> Verify "No Records Found" (belum ada provider
+                                terdaftar di demo ini), tombol Add visible.
+
+ 2   TC-ADMIN-SOCIALAUTH-02   [DONE]   TC-ADMIN-SOCIALAUTH-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong -> 4 Required, Tidak Ada POST
+                             -> Submit form Add Provider tanpa isi apa pun.
+                             [UI VERIFICATION]
+                             -> Verify 4 pesan "Required" (Name, Provider URL,
+                                Client ID, Client Secret), POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-SOCIALAUTH-03   [DONE]   TC-ADMIN-SOCIALAUTH-03-Verify-XSS-In-Name.spec.ts
+                             (S) [VALIDATE-ONLY] Verify XSS Payload di Name -> Tidak Ada Alert
+                             -> Isi Name dengan payload XSS. TIDAK PERNAH klik
+                                Save (bisa mengubah halaman login bersama).
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 4   TC-ADMIN-SOCIALAUTH-04   [DONE]   TC-ADMIN-SOCIALAUTH-04-Verify-Cancel-Discards.spec.ts
+                             (!) Verify Cancel Membatalkan, Jumlah Provider Tidak Berubah
+                             -> Isi sebagian field, klik Cancel.
+                             [UI VERIFICATION]
+                             -> Verify jumlah provider tidak berubah.
+
+ 5   TC-ADMIN-SOCIALAUTH-05   [DONE]   TC-ADMIN-SOCIALAUTH-05-Verify-Name-Very-Long-Text.spec.ts
+                             (B) [VALIDATE-ONLY] Verify Name 300 Karakter
+                             -> Isi Name 300 karakter, blur. TIDAK PERNAH klik
+                                Save.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Should not exceed 40 characters"
+                                muncul on-blur.
 
 ================================================================================
   TEST CASES: CONFIGURATION - OAUTH CLIENT (5 TC) [FULLY EXERCISED]
 ================================================================================
 
-  NO  ID                  KATEGORI  DESKRIPSI                                        STATUS
-  --  ------------------  --------  -----------------------------------------------  -------
-  01  TC-ADMIN-OAUTH-01   (+)       Add OAuth Client valid -> tersimpan, Status       [DONE]
-                                    Enabled (koreksi: checkbox tidak mengontrol ini)
-  02  TC-ADMIN-OAUTH-02   (-)       Submit kosong -> 2 Required, tidak ada POST       [DONE]
-  03  TC-ADMIN-OAUTH-03   (S)       XSS payload di Name -> tersimpan aman sebagai     [DONE]
-                                    teks, tidak ada alert
-  04  TC-ADMIN-OAUTH-04   (!)       Cancel membatalkan, jumlah client tidak berubah   [DONE]
-  05  TC-ADMIN-OAUTH-05   (+)       Add lalu Delete client baru -> trash icon aktif    [DONE]
-                                    untuk client baru (beda dari seed row terkunci)
+ 1   TC-ADMIN-OAUTH-01   [DONE]   TC-ADMIN-OAUTH-01-Verify-Add-OAuth-Client-Valid.spec.ts
+                             (+) Verify Add OAuth Client Valid -> Tersimpan, Status Enabled
+                             -> Isi Name, Redirect URI, submit (checkbox
+                                "Enable Client" TIDAK dicentang).
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/admin/oauth-clients -> 200,
+                                response `enabled: true` walau checkbox tidak
+                                dicentang (koreksi asumsi awal).
+                             [UI VERIFICATION]
+                             -> Verify client baru muncul setelah reload
+                                manual (list TIDAK auto-refresh).
+
+ 2   TC-ADMIN-OAUTH-02   [DONE]   TC-ADMIN-OAUTH-02-Verify-Empty-Submit-Validation.spec.ts
+                             (-) Verify Submit Kosong -> 2 Required, Tidak Ada POST
+                             -> Submit form tanpa isi Name/Redirect URI.
+                             [UI VERIFICATION]
+                             -> Verify 2 pesan "Required", POST TIDAK
+                                terkirim.
+
+ 3   TC-ADMIN-OAUTH-03   [DONE]   TC-ADMIN-OAUTH-03-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name -> Tersimpan Aman sebagai Teks
+                             -> Isi Name dengan payload XSS, submit.
+                             [UI VERIFICATION]
+                             -> Verify tersimpan sebagai teks, TIDAK ada
+                                dialog JS ter-trigger.
+                             NOTE: Dicatat via report.finding() (rendering
+                                   payload).
+
+ 4   TC-ADMIN-OAUTH-04   [DONE]   TC-ADMIN-OAUTH-04-Verify-Cancel-Discards.spec.ts
+                             (!) Verify Cancel Membatalkan, Jumlah Client Tidak Berubah
+                             -> Catat jumlah client, buka Add, isi form, klik
+                                Cancel.
+                             [UI VERIFICATION]
+                             -> Verify jumlah client tidak berubah, client
+                                baru TIDAK muncul di list.
+
+ 5   TC-ADMIN-OAUTH-05   [DONE]   TC-ADMIN-OAUTH-05-Verify-Add-Delete-Client.spec.ts
+                             (+) Verify Add lalu Delete Client Baru
+                             -> Buat client baru, hapus via icon trash.
+                             [UI VERIFICATION]
+                             -> Verify trash icon AKTIF untuk client baru
+                                (beda dari seed row "OrangeHRM Mobile App"
+                                yang trash/pencil-nya `disabled`), client
+                                terhapus dari list setelah reload.
+                             NOTE: Dicatat via report.finding() (status trash
+                                   icon).
 
 ================================================================================
   TEST CASES: CONFIGURATION - LDAP CONFIGURATION (5 TC) [VALIDATE-ONLY]
 ================================================================================
 
-  NO  ID                KATEGORI  DESKRIPSI                                          STATUS
-  --  ----------------  --------  -------------------------------------------------  -------
-  01  TC-ADMIN-LDAP-01  (+)       Form termuat, teks peringatan backup sebelum        [DONE]
-                                  aktivasi LDAP terlihat (konfirmasi HIGH-RISK)
-  02  TC-ADMIN-LDAP-02  (-)       Host kosong via Test Connection -> Required,        [DONE]
-                                  TIDAK PERNAH klik Save
-  03  TC-ADMIN-LDAP-03  (S)       XSS/SQLi/LDAP-injection di Distinguished Name via    [DONE]
-                                  Test Connection -> tidak ada alert, TIDAK PERNAH Save
-  04  TC-ADMIN-LDAP-04  (B)       Host 300 char via Test Connection, TIDAK PERNAH      [DONE]
-                                  klik Save
-  05  TC-ADMIN-LDAP-05  (!)       Test Connection dengan default TIDAK mengubah apa    [DONE]
-                                  pun di server -- membuktikan probe ini aman
+ 1   TC-ADMIN-LDAP-01   [DONE]   TC-ADMIN-LDAP-01-Verify-Form-Elements.spec.ts
+                             (+) Verify Form Termuat, Teks Peringatan Backup Terlihat
+                             [UI VERIFICATION]
+                             -> Verify teks peringatan aplikasi sendiri soal
+                                backup database sebelum aktivasi LDAP
+                                terlihat (konfirmasi HIGH-RISK), tombol "Test
+                                Connection" dan Save visible.
+
+ 2   TC-ADMIN-LDAP-02   [DONE]   TC-ADMIN-LDAP-02-Verify-Empty-Host-Test-Connection.spec.ts
+                             (-) Verify Host Kosong via Test Connection -> Required
+                             -> Kosongkan Host, klik "Test Connection". TIDAK
+                                PERNAH klik Save.
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul.
+
+ 3   TC-ADMIN-LDAP-03   [DONE]   TC-ADMIN-LDAP-03-Verify-Injection-In-Distinguished-Name.spec.ts
+                             (S) Verify XSS/SQLi/LDAP-injection di Distinguished Name via Test Connection
+                             -> Isi Distinguished Name dengan payload
+                                XSS/SQLi/LDAP-injection, klik "Test
+                                Connection". TIDAK PERNAH klik Save.
+                             [UI VERIFICATION]
+                             -> Verify TIDAK ada dialog JS ter-trigger.
+
+ 4   TC-ADMIN-LDAP-04   [DONE]   TC-ADMIN-LDAP-04-Verify-Host-Very-Long-Text.spec.ts
+                             (B) Verify Host 300 Karakter via Test Connection
+                             -> Isi Host 300 karakter, klik "Test Connection".
+                                TIDAK PERNAH klik Save.
+                             [UI VERIFICATION]
+                             -> Verify app tidak crash.
+
+ 5   TC-ADMIN-LDAP-05   [DONE]   TC-ADMIN-LDAP-05-Verify-Test-Connection-Safe.spec.ts
+                             (!) Verify Test Connection dengan Default TIDAK Mengubah Apa Pun di Server
+                             -> Klik "Test Connection" dengan Host/Port default
+                                (localhost/389).
+                             [API VERIFICATION]
+                             -> Verify TIDAK ada POST/PUT Save-equivalent
+                                terkirim (dikonfirmasi via network listener +
+                                reload), membuktikan probe ini aman/terpisah
+                                dari Save.
+
+================================================================================
+  TEST CASES: ADMIN - SECURITY (2 TC) [DITAMBAHKAN 2026-11-11]
+  Folder: tests/admin/security/
+================================================================================
+
+  Ditambahkan karena audit cakupan security menemukan 0 TC untuk
+  clickjacking/CSRF di 136 TC existing -- pola sama persis yang
+  sebelumnya ditemukan & diperbaiki di Login/Recruitment/PIM.
+
+ 1   TC-ADMIN-SECURITY-01   [FAIL]   TC-ADMIN-SECURITY-01-Verify-Clickjacking-Protection-Header.spec.ts
+                             (S) Verify Clickjacking Protection Header on Admin Pages
+                             -> GET Admin Users page dan GET /api/v2/admin/users.
+                             [API VERIFICATION]
+                             -> Verify header X-Frame-Options ADA, ATAU
+                                Content-Security-Policy punya frame-ancestors.
+                             NOTE: [BUG TERKONFIRMASI -- BG-145 di
+                                   Bug-List.xlsx, Severity Medium] X-Frame-
+                                   Options TIDAK ADA sama sekali, CSP tidak
+                                   punya frame-ancestors. INI KONFIRMASI
+                                   KE-4 gap yang SAMA PERSIS ditemukan di
+                                   Login (BG-030), Recruitment (BG-066), dan
+                                   PIM (BG-096) -- kuat mengindikasikan gap
+                                   konfigurasi APP-WIDE level nginx/
+                                   web-server, bukan 4 kasus terisolasi.
+                                   Reproduce konsisten 2x run terpisah.
+
+ 2   TC-ADMIN-SECURITY-02   [DONE]   TC-ADMIN-SECURITY-02-Verify-Cross-Origin-Mutation-Blocked.spec.ts
+                             (S) Verify Cross-Origin Mutation Request (CSRF) Blocked
+                             -> Dari tab browser di origin eksternal
+                                (https://example.com), fetch() POST JSON
+                                langsung ke /api/v2/admin/pay-grades dengan
+                                credentials:'include' (membawa cookie sesi
+                                admin yang sedang login).
+                             [UI VERIFICATION]
+                             -> Verify request DIBLOKIR di level browser
+                                (CORS), bukan diproses server.
+                             NOTE: Fetch cross-origin dengan kredensial GAGAL
+                                   total (CORS memblokir sebelum request
+                                   sampai diproses server) -- proteksi CSRF
+                                   pada endpoint mutasi Admin EFEKTIF,
+                                   konsisten dengan TC-RECRUITMENT-SECURITY-05.
 
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total TC: 136 (97 dari pass pertama-ketiga + 39 dari pass keempat/
-  Configuration). Dengan ini, SEMUA ~16 sub-screen Admin (13 sub-screen
-  pass pertama-kedua + 3 sub-screen Organization pass ketiga + 8 sub-
-  screen Configuration pass keempat) SELESAI dicakup -- Admin module
+  Total TC: 138 (136 dari pass pertama-keempat + 2 TC security
+  ditambahkan 2026-11-11: clickjacking FAIL/BG-145, CSRF PASSED). Dengan
+  ini, SEMUA ~16 sub-screen Admin (13 sub-screen pass pertama-kedua + 3
+  sub-screen Organization pass ketiga + 8 sub-screen Configuration pass
+  keempat) + security lintas-screen SELESAI dicakup -- Admin module
   SEPENUHNYA LENGKAP.
 
   Pass pertama (39): Users 6, Job Titles 8, Pay Grades 5, Employment

@@ -45,10 +45,10 @@ test('TC-ADMIN-SKILL-01: adding a skill with valid Name + Description succeeds',
   const body = await resp.json().catch(() => null);
   report.check('[API] response menyertakan description yang diisi', body?.data?.description === 'Discovered via automated QA suite.', `body=${JSON.stringify(body)}`);
   await adminSkillsPage.goto();
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(3000);
   report.check(
     `Skill "${name}" muncul di list`,
-    await adminSkillsPage.rowByName(name).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await adminSkillsPage.rowByName(name).first().isVisible({ timeout: 10_000 }).catch(() => false),
   );
 
   report.print();

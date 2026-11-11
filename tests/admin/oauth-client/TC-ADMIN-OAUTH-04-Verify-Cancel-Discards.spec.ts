@@ -38,7 +38,7 @@ test('TC-ADMIN-OAUTH-04: Cancel on Add Client form discards without saving', asy
   await page.waitForTimeout(800);
   await oc.fillClient(clientName, 'com.example.qa://oauthredirect');
   await oc.cancelButton.click();
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(3000);
 
   report.step('Verify jumlah client tidak berubah dan client baru tidak muncul');
   const afterCancelCount = await oc.tableRows.count();

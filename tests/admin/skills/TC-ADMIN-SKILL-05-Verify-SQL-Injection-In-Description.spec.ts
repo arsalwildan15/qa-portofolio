@@ -46,8 +46,8 @@ test('TC-ADMIN-SKILL-05: a SQL injection payload in Skill Description does not b
 
   report.step('Verify: list masih berfungsi normal setelah payload (tidak ada server error)');
   await adminSkillsPage.goto();
-  await page.waitForTimeout(1200);
-  const listStillWorks = await adminSkillsPage.tableRows.first().isVisible({ timeout: 5_000 }).catch(() => false);
+  await page.waitForTimeout(3000);
+  const listStillWorks = await adminSkillsPage.tableRows.first().isVisible({ timeout: 10_000 }).catch(() => false);
   report.check('List Skills masih berfungsi normal setelah payload SQLi', listStillWorks, `postStatus=${resp?.status() ?? 'tidak ada'}`);
 
   report.print();

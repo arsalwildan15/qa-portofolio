@@ -38,13 +38,13 @@ test('TC-ADMIN-MEMBERSHIP-05: a newly created Membership can be deleted', async 
     adminMembershipsListPage.save(),
   ]);
   await adminMembershipsListPage.goto();
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(3000);
 
   report.step('Hapus Membership yang baru dibuat');
   const row = adminMembershipsListPage.rowByName(name).first();
-  report.check('Membership muncul sebelum dihapus', await row.isVisible({ timeout: 5_000 }).catch(() => false));
+  report.check('Membership muncul sebelum dihapus', await row.isVisible({ timeout: 10_000 }).catch(() => false));
   await adminMembershipsListPage.deleteRow(row);
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(3000);
 
   report.step('Verify: membership tidak lagi muncul di list');
   report.check(

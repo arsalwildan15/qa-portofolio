@@ -43,8 +43,8 @@ test('TC-ADMIN-EMPSTATUS-03: a SQL injection payload in Employment Status Name d
 
   report.step('Verify: list masih berfungsi normal setelah payload (tidak ada server error)');
   await adminEmploymentStatusPage.goto();
-  await page.waitForTimeout(1200);
-  const listStillWorks = await adminEmploymentStatusPage.tableRows.first().isVisible({ timeout: 5_000 }).catch(() => false);
+  await page.waitForTimeout(3000);
+  const listStillWorks = await adminEmploymentStatusPage.tableRows.first().isVisible({ timeout: 10_000 }).catch(() => false);
   report.check('List Employment Status masih berfungsi normal setelah payload SQLi', listStillWorks, `postStatus=${resp?.status() ?? 'tidak ada'}`);
 
   report.print();

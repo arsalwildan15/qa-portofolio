@@ -48,7 +48,7 @@ test('TC-ADMIN-EMPSTATUS-04: adding a duplicate Employment Status name is handle
 
   if (resp && resp.status() === 200) {
     await adminEmploymentStatusPage.goto();
-    await page.waitForTimeout(1200);
+    await page.waitForTimeout(3000);
     const rows = adminEmploymentStatusPage.rowByName('Full-Time');
     const count = await rows.count();
     if (count > 1) {

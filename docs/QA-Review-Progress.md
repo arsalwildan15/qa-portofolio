@@ -564,9 +564,70 @@ Server dicek 3x stabil (0.74-0.78s). Run diluncurkan (task id bb41gr8eh, --worke
 ## jelas (BG-007), bukan di-cover-up sebagai "semua hijau". Ini temuan paling signifikan di
 ## seluruh review hari ini: core status-transition recruitment benar-benar tidak berfungsi.
 
-**NEXT ACTION WAJIB:** Lanjut Batch 4 (Admin, 16 sub-screen, 136 TC) -- batch terakhir yang
-belum disentuh sama sekali. Mulai dari audit coverage (baca docs/TC-Admin.txt + kode) seperti
-batch-batch sebelumnya.
+---
+
+## BATCH 4 — ADMIN (dimulai setelah user minta lanjut, 16 sub-screen, 136 TC)
+
+### Audit coverage: SELESAI. docs/TC-Admin.txt sudah SANGAT matang (format masih tabel ringkas,
+belum di-reshape ke format detail seperti Login/PIM/Recruitment -- itu task terpisah di akhir).
+Semua 16 sub-screen sudah dikerjakan di sesi-sesi sebelumnya, termasuk IDOR dedicated (Skills,
+Locations), bug nyata sudah ditemukan (Job Title upload bypass, Structure rename 422,
+Corporate Branding upload issues).
+
+**GAP ditemukan (pola sama persis Login/PIM/Recruitment):** 0 TC untuk clickjacking/CSRF.
+TC baru ditambahkan di tests/admin/security/ (folder baru):
+- TC-ADMIN-SECURITY-01 (clickjacking): FAIL dengan benar -> BG-145 (dikoreksi Severity Medium).
+  **KONFIRMASI KE-4** gap app-wide yang sama (Login/Recruitment/PIM/Admin semua kena) --
+  makin kuat buktinya ini 1 gap konfigurasi web-server tunggal, bukan 4 kasus terpisah.
+- TC-ADMIN-SECURITY-02 (CSRF cross-origin mutation POST pay-grades): PASS, diblokir CORS
+  (konsisten dengan Recruitment SECURITY-05).
+
+Regresi penuh 136 TC existing SEDANG BERJALAN di background (task id b5rerx1xn, --workers=2,
+--timeout=90000, TANPA --reporter=list override).
+
+**UPDATE 2026-11-11: hasil b5rerx1xn -- 116 passed, 22 failed, 19.3 menit.**
+- Bug lama (JOBTITLE-07, STRUCTURE-07, CORPBRAND-02/03/04/05) dedup BENAR ke entry existing
+  (BG-014, BG-025, BG-010..013), TIDAK ada row baru -- confirmed masih reproduce, reporter
+  bekerja benar.
+- TC-ADMIN-SECURITY-01 (clickjacking) reproduce lagi -> BG-145 (sudah ada).
+- 15 SISANYA (BG-146..160) = pola infra klasik (timeout/ERR_ABORTED/postStatus tidak ada) ->
+  DIKOREKSI ke Bug-List jadi Closed/Environment Noise.
+- Server dicek ulang: 3x curl 1.5-2.2s -- stabil. Re-run TARGETED 16 TC (15 ambigu + security-01
+  utk re-konfirmasi) diluncurkan di background (task id bxvm11gf2, --workers=2).
+
+**UPDATE 2026-11-11: hasil bxvm11gf2 -- 4 passed, 12 failed. Root-cause BERHASIL dicari:**
+- EMPSTATUS-01 diisolasi solo: screenshot PNG saat gagal = HALAMAN BLANK TOTAL (bukan locator
+  mismatch seperti kasus PIM Report-to, murni margin waktu kurang untuk kondisi server hari ini
+  yang lebih lambat dari saat TC ditulis).
+- Pola sama di 11 TC lain (semua share pattern `waitForTimeout(1200)` + `isVisible({timeout:
+  5_000})` setelah goto() ke list screen) -> FIX MEKANIS: naikkan ke 3000ms/10_000ms di SEMUA
+  11 file sekaligus (sed, bukan satu-satu): EMPSTATUS-01/03/04, LICENSE-03, MEMBERSHIP-04/05,
+  PAYGRADE-01, SKILL-01/05/07.
+- OAUTH-04 beda pola (baseline=2 afterCancel=0, bukan "X muncul di list") tapi root cause SAMA
+  (list belum sempat reload setelah Cancel) -> wait 1000ms->3000ms.
+- TC-ADMIN-SECURITY-01 (clickjacking): TIDAK disentuh, sudah confirmed real 2x run terpisah,
+  final.
+- Verifikasi 12 TC yang di-fix SEDANG BERJALAN di background (task id bsfozz4o6, --workers=1).
+
+**UPDATE 2026-11-11: hasil bsfozz4o6 -- SEMUA 11 PASS.** Fix wait-time terkonfirmasi benar.
+BATCH 4 REGRESSION 100% TUNTAS: 136 TC existing (semua bug lama reproduce konsisten, 11
+flaky-timing sudah diperbaiki permanen) + 2 TC security baru (clickjacking FAIL/BG-145 by
+design, CSRF PASS).
+
+Reshape docs/TC-Admin.txt ke format detail SEDANG BERJALAN di background via fork agent
+(agentId internal, task akan muncul sbg notification terpisah). Modul besar (~138 TC),
+delegasi sama pola PIM/Recruitment sebelumnya.
+
+**NEXT ACTION WAJIB kalau lanjut sesi baru:** tunggu notifikasi fork selesai reshape
+TC-Admin.txt, lalu:
+  - Update README.md Test Coverage: tambah subsection Admin dgn bullet list (hapus baris
+    tabel lama "| Admin | 136 TCs, ..." yang masih ada dari sebelum restructure), update total
+    jadi 138 TC Admin / grand total project (395 lama + 2 baru = 397).
+  - Commit + push (HATI-HATI: jangan ada trailer Claude, author harus
+    Arsal <arsalwildann@gmail.com>, SELALU cek `git log -1 --format="%an <%ae>"` setelah
+    commit SEBELUM push -- ini sudah jadi recurring mistake risk, jangan sampai lengah).
+  - Baru tandai Batch 4 TUNTAS -- ini batch TERAKHIR, setelah ini seluruh review 4-modul
+    (Login+Recruitment+PIM+Admin) selesai 100%.
 
 ### UPDATE 2026-11-11: BATCH 1 (LOGIN) SEKARANG 100% TUNTAS.
 - TC-LOGIN-42: run bersih, PASS (session ID berubah, proteksi fixation bekerja). Sempat ada 1

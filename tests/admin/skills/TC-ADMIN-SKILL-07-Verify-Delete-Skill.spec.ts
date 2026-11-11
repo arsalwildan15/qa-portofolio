@@ -38,13 +38,13 @@ test('TC-ADMIN-SKILL-07: a newly created Skill can be deleted', async ({
     adminSkillsPage.save(),
   ]);
   await adminSkillsPage.goto();
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(3000);
 
   report.step('Hapus Skill yang baru dibuat');
   const row = adminSkillsPage.rowByName(name).first();
-  report.check('Skill muncul sebelum dihapus', await row.isVisible({ timeout: 5_000 }).catch(() => false));
+  report.check('Skill muncul sebelum dihapus', await row.isVisible({ timeout: 10_000 }).catch(() => false));
   await adminSkillsPage.deleteRow(row);
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(3000);
 
   report.step('Verify: skill tidak lagi muncul di list');
   report.check(

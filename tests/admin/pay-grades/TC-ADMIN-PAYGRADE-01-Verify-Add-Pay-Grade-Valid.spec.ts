@@ -42,10 +42,10 @@ test('TC-ADMIN-PAYGRADE-01: adding a pay grade with valid data succeeds', async 
   report.step('Verify response POST pay-grades, dan pay grade muncul di list');
   report.check('[API] status === 200', resp.status() === 200, `status=${resp.status()}`);
   await adminPayGradesPage.goto();
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(3000);
   report.check(
     `Pay grade "${name}" muncul di list`,
-    await adminPayGradesPage.rowByName(name).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await adminPayGradesPage.rowByName(name).first().isVisible({ timeout: 10_000 }).catch(() => false),
   );
 
   report.print();
