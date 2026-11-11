@@ -43,6 +43,10 @@ test('TC-PIM-SECURITY-01: cross-employee data access via empNumber manipulation 
   report.step('Buat 2 employee berbeda (A dan B) di sesi yang sama');
   const employeeA = await createTestEmployee(page, addEmployeePage, 'QaIdorA');
   const employeeB = await createTestEmployee(page, addEmployeePage, 'QaIdorB');
+  report.finding(
+    'Employee A dibuat sebagai baseline konteks sesi',
+    `empNumber=${employeeA.empNumber} (dibuat untuk membentuk konteks "punya data sendiri" sebelum mengakses data employee B)`,
+  );
 
   report.step('[API] GET personal-details employee B menggunakan sesi admin yang sama (bukan scoped ke A)');
   const personalDetailsResp = await page.request.get(

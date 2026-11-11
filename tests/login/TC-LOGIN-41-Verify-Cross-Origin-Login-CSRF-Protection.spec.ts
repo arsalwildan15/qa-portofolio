@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 /**
  * ================================================================================
  * TC-LOGIN-41 — Verify Cross-Origin Login CSRF Protection
