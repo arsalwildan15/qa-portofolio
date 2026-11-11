@@ -534,22 +534,54 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              Verify: URL ke "/auth/requestPasswordResetCode".
                              Verify: heading "Reset Password" visible.
 
+44   TC-LOGIN-44    [DONE]   TC-LOGIN-44-Verify-Refresh-During-Pending-Login-Request.spec.ts
+                             (!) Verify Refresh During Pending Login Request
+                             -> Intercept POST /auth/validate, tunda 4 detik,
+                                klik Login TANPA menunggu response, reload()
+                                SAAT request masih pending.
+                             Verify: setelah reload, kembali ke /auth/login
+                             (bukan state aneh), DAN akses /dashboard/index
+                             tanpa login ulang tetap redirect ke login (tidak
+                             ada sesi "setengah jadi" ter-terbentuk).
+
+45   TC-LOGIN-45    [DONE]   TC-LOGIN-45-Verify-Connection-Dropped-During-Login-Request.spec.ts
+                             (!) Verify Connection Dropped During Login Request
+                             -> Intercept POST /auth/validate dgn abort()
+                                (simulasi koneksi terputus), klik Login.
+                             Verify: TIDAK pindah ke dashboard (no false-
+                             success), lalu koneksi pulih + login ulang via
+                             loginPage.goto() (navigasi baru) berhasil normal.
+                             NOTE: form login pakai navigasi top-level ASLI
+                             (bukan XHR) -- abort() membuat browser mengganti
+                             SELURUH dokumen jadi halaman error native
+                             (chrome-error://), BUKAN pesan error inline SPA.
+                             User harus navigasi ulang ke halaman login,
+                             sekadar "coba lagi di tempat" tidak akan jalan.
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases : 43
+  Total Test Cases : 45
   Positive         : 6  (TC-01 s/d TC-06)
   Negative         : 9  (TC-07 s/d TC-12, TC-14 s/d TC-16)
   Boundary         : 4  (TC-17 s/d TC-20)
   Security         : 10 (TC-21 s/d TC-27, TC-41 s/d TC-43)
-  Unexpected/Edge  : 14 (TC-13, TC-28 s/d TC-40)
+  Unexpected/Edge  : 16 (TC-13, TC-28 s/d TC-40, TC-44, TC-45)
 
   STATUS PER 2026-11-11 (hasil regression audit penuh, SEMUA 43 TC SUDAH
   berhasil dijalankan sampai selesai — BATCH 1 TUNTAS 100%):
     [DONE] 41 | [FAIL by design, bug sistem terkonfirmasi] 2
       (TC-37 -> BG-026 rate limiting hilang, Severity Medium;
        TC-43 -> BG-030 clickjacking header hilang, Severity Medium)
+
+  UPDATE 2026-11-12 (penutupan gap coverage "refresh/koneksi terputus
+  mid-submit", TC-44 & TC-45 ditambahkan): KEDUANYA PASSED bersih. Login
+  secara arsitektur BERBEDA dari modul SPA lain (Admin/PIM/Recruitment/
+  Buzz) -- form POST-nya navigasi top-level asli, BUKAN fetch/XHR -- jadi
+  Login TIDAK terpengaruh oleh bug app-wide "Uncaught exception: fe" yang
+  dikonfirmasi di 4 modul lain (lihat BG-199/200/201/202 dan
+  docs/TC-Admin.txt / TC-PIM.txt / TC-Recruitment.txt / TC-Buzz.txt).
 
 ================================================================================
   TEMUAN SELAMA EKSPLORASI (bukan bug, tapi worth dicatat)

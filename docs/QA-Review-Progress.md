@@ -1065,3 +1065,71 @@ ubah status [TODO]->[DONE]/[FAIL] di TC-Login.txt sesuai hasil real, lalu lanjut
 
 **Next action kalau lanjut sesi baru:** jalankan `npx playwright test tests/login --project=chromium`
 dari folder `qa-portofolio`, kumpulkan hasil run real, lalu lanjut Langkah C.
+
+### UPDATE 2026-11-12: GAP COVERAGE LINTAS-MODUL -- "refresh mid-submit" & "koneksi terputus
+mid-submit" (TAHAP 1 dari rencana perluasan coverage, atas permintaan user setelah diskusi
+tentang skenario test case yang sering terlewat).
+
+User minta review ulang apakah semua modul sudah 100% tercover. Jawaban jujur: belum, banyak
+gap didokumentasikan per modul (lihat percakapan). Dua skenario spesifik yang disebut user
+(dari diskusi komunitas QA): double-click submit berulang, refresh di tengah proses, dan
+koneksi terputus saat submit -- dicek, ternyata 0 TC di seluruh project utk 2 skenario
+terakhir. Disepakati rencana 4 tahap, TAHAP 1 dikerjakan: 1 TC refresh-mid-submit + 1 TC
+connection-drop-mid-submit di titik create/submit utama tiap modul (Login, Admin Users, PIM
+Add Employee, Recruitment Candidates, Buzz Create Post) = 10 TC baru.
+
+**Teknik yang dipakai:** `page.route()` utk intercept POST endpoint masing-masing --
+refresh-mid-submit pakai delay 4 detik sebelum `route.continue()` (supaya window reload()
+pasti kena saat request masih pending, tidak bergantung timing jaringan asli); connection-drop
+pakai `route.abort('failed')` (simulasi network failure asli).
+
+**Bug SCRIPT ditemukan & diperbaiki selama investigasi (bukan bug aplikasi):**
+  1. Login: form submit adalah navigasi top-level ASLI (bukan XHR) -- `page.reload()` yang
+     dipanggil saat navigasi itu masih pending melempar "net::ERR_ABORTED", ditangkap sbg hasil
+     yang diharapkan (justru bukti reload benar2 menyela). `route.abort()` pada request login
+     mengganti SELURUH dokumen jadi halaman error native browser (chrome-error://), bukan pesan
+     error inline SPA -- test diperbaiki utk recover via `loginPage.goto()` (navigasi baru),
+     bukan coba isi field di dokumen yang sudah hilang.
+  2. Semua modul SPA: klik submit yang fire-and-forget (`void ....save()`) tanpa `.catch()`
+     menyebabkan unhandled promise rejection saat di-interrupt oleh `reload()` -- diperbaiki
+     dengan `.catch(() => {})` di semua titik serupa (Login, Admin, PIM, Recruitment, Buzz).
+  3. PIM: verifikasi awal salah asumsi `autocomplete option count() > 0` berarti "ada
+     suggestion asli" -- ternyata autocomplete SELALU menampilkan tepat 1 option bahkan saat
+     tidak ada hasil (isinya placeholder teks "No Records Found"). Diperbaiki dgn cek TEKS
+     option-nya, bukan count-nya. Bug ini muncul identik di 2 TC (TC-PIM-ADD-32 dan 33),
+     keduanya diperbaiki.
+  4. PIM: direct `page.request.get()` ke endpoint search employee TERBUKTI tidak reliable
+     (return kosong walau via sesi browser yang sama) -- harus lewat interaksi UI asli
+     (isi autocomplete, klik suggestion, klik Search), konsisten dgn temuan serupa di modul
+     lain sepanjang sesi ini.
+
+**Bug APLIKASI BARU dikonfirmasi -- APP-WIDE, bukan isolated ke 1 modul:** saat request
+POST create/save gagal krn koneksi jaringan terputus, SPA (Admin, PIM, Recruitment, Buzz)
+melempar "Uncaught exception: fe" yang TIDAK tertangani (nama exception persis sama di
+keempat modul -- indikasi satu shared HTTP-client wrapper, bukan 4 bug terpisah), alih-alih
+menampilkan pesan error yang graceful ke user. Dikonfirmasi deterministik 3x reproduce di
+SETIAP modul yang diuji. Screenshot Admin bahkan menunjukkan tabel list gagal render (stuck
+loading spinner) setelah insiden ini, indikasi state SPA ikut rusak lebih luas dari sekadar
+pesan error yang hilang. Login TIDAK terpengaruh krn arsitekturnya berbeda (form POST
+navigasi top-level asli, bukan fetch/XHR) -- dikonfirmasi terpisah, bukan diasumsikan.
+
+Masuk Bug-List sbg BG-199 (Admin, konfirmasi ke-1), BG-201 (PIM, ke-2), BG-202 (Recruitment,
+ke-3), BG-200 (Buzz, ke-4), semua Severity dikoreksi Low -> Medium, saling di-cross-reference
+di Notes masing-masing.
+
+**Hasil regresi final 10 TC baru:** 6 passed (semua refresh-mid-submit + Login connection-drop)
+/ 4 failed (SEMUA correctly-failing, bug app-wide di atas, 0 false positive/false passed).
+
+**Dokumentasi diupdate:** docs/TC-Login.txt (+2 TC, Total 43->45), docs/TC-Admin.txt (+2 TC,
+Total 138->140), docs/TC-PIM.txt (+2 TC, Total 161->163), docs/TC-Recruitment.txt (+2 TC,
+Total 54->56), docs/TC-Buzz.txt (+2 TC, Total 27->29). README.md diupdate (tabel Test
+Coverage, Total project 424->434, confirmed-bugs list tiap modul + 1 paragraf cross-cutting
+baru). docs/Bug-List.xlsx dicek ulang, tidak ada duplikat baru.
+
+**SISA TAHAP 2-4 (belum dikerjakan, menunggu arahan user):**
+  - Tahap 2: ratakan coverage double-click ke Admin (create Users, Job Title) dan Recruitment
+    (create Candidate, create Vacancy) -- Login/Buzz/PIM sudah ada.
+  - Tahap 3: tutup gap spesifik per modul (investigasi ulang bug Shortlist 500 Recruitment,
+    Buzz Edit Post/Delete Comment/pagination, PIM Terminate Employee, Admin filter kombinasi/
+    bulk action, Login reset password flow sesungguhnya).
+  - Tahap 4: regresi penuh semua modul + dokumentasi final.

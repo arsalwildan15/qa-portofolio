@@ -1200,6 +1200,29 @@ LEGEND SIMBOL SKENARIO
                                    seperti sempat terlihat sebelum wait
                                    cukup lama.
 
+19   TC-RECRUITMENT-CANDIDATE-19   [DONE]   TC-RECRUITMENT-CANDIDATE-19-Verify-Refresh-During-Pending-Save-Request.spec.ts
+                             (!) Verify Refresh During Pending Save Request
+                             -> Isi form candidate valid, intercept+tunda
+                                POST /api/v2/recruitment/candidates 4 detik,
+                                klik Save TANPA menunggu response, reload()
+                                SAAT request masih pending.
+                             Verify: candidate TIDAK muncul lebih dari 1
+                             kali di list (0 atau 1 keduanya wajar, >1 akan
+                             jadi bug duplikat).
+
+20   TC-RECRUITMENT-CANDIDATE-20   [DONE]   TC-RECRUITMENT-CANDIDATE-20-Verify-Connection-Dropped-During-Save-Request.spec.ts
+                             (!) Verify Connection Dropped During Save Request
+                             -> Intercept POST /api/v2/recruitment/candidates
+                                dgn abort() (simulasi koneksi terputus),
+                                klik Save.
+                             Verify: candidate TIDAK ter-create di server.
+                             STATUS AKTUAL: Console-error check GAGAL (BUG
+                             APLIKASI, konfirmasi ke-3 app-wide, lihat
+                             Bug-List BG-202) -> SPA melempar "Uncaught
+                             exception: fe" identik dgn Admin
+                             (TC-ADMIN-USER-08) dan PIM (TC-PIM-ADD-33).
+                             Deterministik reproduce 3x.
+
 12   TC-RECRUITMENT-STATUS-12   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-12-Verify-Offer-Job-To-Hired.spec.ts
                              (+) Verify Offer Job to Hired, Full State Machine Chain
                              -> Buat candidate, Shortlist, Schedule
@@ -1371,6 +1394,13 @@ LEGEND SIMBOL SKENARIO
   (termasuk CANDIDATE-18 yang awalnya sempat terlihat N/A tapi ternyata
   fitur-nya ADA setelah wait render yang cukup, lihat koreksi di TC
   tersebut).
+
+  [UPDATE 2026-11-12] +2 TC baru (CANDIDATE-19 refresh mid-submit PASSED,
+  CANDIDATE-20 connection-drop mid-submit) -> total 56 TC. CANDIDATE-20
+  mengonfirmasi bug APP-WIDE yang sama dgn TC-ADMIN-USER-08/TC-PIM-ADD-33
+  -- "Uncaught exception: fe" tidak tertangani saat POST create-candidate
+  gagal krn koneksi terputus (konfirmasi ke-3 dari 4 modul, lihat
+  docs/TC-Admin.txt, TC-PIM.txt, TC-Buzz.txt).
 
   [UPDATE 2026-11-11, review penuh] +1 TC baru (SECURITY-05, CSRF cross-
   origin mutation) -> total 54 TC. SECURITY-02 dan SECURITY-03 di-escalate

@@ -181,15 +181,17 @@ If targeting a different environment for a local run, set these in `.env` (copie
 
 | Module | TCs | Docs |
 |--------|----:|------|
-| Login | 43 | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| Admin | 138 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
-| PIM | 161 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
-| Recruitment | 54 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
-| Buzz | 27 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
+| Login | 45 | [docs/TC-Login.txt](docs/TC-Login.txt) |
+| Admin | 140 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
+| PIM | 163 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| Recruitment | 56 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
+| Buzz | 29 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Leave | 1 | N/A |
-| **Total** | **424** | |
+| **Total** | **434** | |
 
-### Login (43 TCs)
+**Cross-cutting edge cases (2026-11-12):** two scenarios flagged as commonly-forgotten in test design — refreshing mid-submit and a dropped connection mid-submit — were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails due to a dropped network connection, the SPA throws an unhandled JS exception instead of showing a graceful error, identically reproduced (same exception name) in Admin, PIM, Recruitment, and Buzz. Login is unaffected — its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
+
+### Login (45 TCs)
 
 Organized into `tests/login/positive/`, `negative/`, `boundary/`, `security/`, and `edge/` — one subfolder per scenario group, the same per-category structure used by the other modules.
 
@@ -199,7 +201,7 @@ Organized into `tests/login/positive/`, `negative/`, `boundary/`, `security/`, a
 
 CSRF and session-fixation checks confirmed **effective** (no bug). Re-verifying the full suite after reorganizing these files into subfolders also surfaced and fixed 2 script bugs unrelated to the reorganization itself: a race condition reading the post-login URL before the redirect completed (`TC-LOGIN-29`), and a cross-origin CSRF check whose UI assertion expected the browser to stay on the attacker's origin, when a real form POST always follows its redirect as normal top-level navigation (`TC-LOGIN-41`) — neither affected the tests' underlying security conclusions.
 
-### Admin (138 TCs)
+### Admin (140 TCs)
 
 Full coverage across all ~16 Admin sub-screens:
 
@@ -218,26 +220,30 @@ Full coverage across all ~16 Admin sub-screens:
 - Job Title's "Job Specification" file upload accepts an executable renamed to `.jpg` (same extension-only validation pattern as PIM/Recruitment) — `TC-ADMIN-JOBTITLE-07`
 - A freshly-added Organization Structure unit can't be renamed afterward — editing resends its untouched optional `unitId`/`description` as `null`, server rejects with HTTP 422 — `TC-ADMIN-STRUCTURE-07`
 - Missing `X-Frame-Options` / CSP `frame-ancestors` — the **4th app-wide confirmation** of the same clickjacking gap also found in Login, Recruitment, and PIM
+- When a create-user request fails due to a dropped network connection, the SPA throws an unhandled JS exception instead of showing a graceful error (the **1st of 4 identical confirmations** of this app-wide gap — see also PIM, Recruitment, and Buzz)
 
 Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-executable payload by decoding it as a real image client-side. IDOR TCs (Skills, Nationalities, Locations) found no multi-tenant boundary to breach — consistent with this demo's single-admin-role architecture, documented as N/A rather than a false-positive vulnerability. Cross-origin mutation (CSRF) on pay-grade creation confirmed **blocked by CORS** (no bug).
 
-### PIM (161 TCs)
+### PIM (163 TCs)
 
 Full module coverage, no open functional gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs and 2 IDOR/clickjacking security TCs.
 
 **Confirmed bugs:**
 - Extension-only validation lets an executable disguised as a photo through on both profile-photo upload points
 - Missing `X-Frame-Options` / CSP `frame-ancestors` on Employee List — the **3rd app-wide confirmation** of the same clickjacking gap also found in Login and Recruitment
+- The same unhandled-exception-on-dropped-connection bug as Admin (**2nd of 4 confirmations**), reproduced identically on create-employee
 
 IDOR on personal-details/salary access confirmed N/A (single-role architecture, same as other modules). Report-to's "Add Supervisor/Subordinate" TCs (3) have a known intermittent UI-verification issue — the underlying save is confirmed working via its own API-level TC, only the text-match assertion is unreliable.
 
-### Recruitment (54 TCs)
+### Recruitment (56 TCs)
 
 Vacancies incl. edit/deactivate/pagination/sorting (17), Candidates incl. resume upload/download and list filters (18), candidate status workflow state machine through to terminal "Hired" (14), cross-cutting security: IDOR, response headers, rate limiting, concurrent-write race condition, cross-origin mutation/CSRF (5).
 
 **Critical confirmed bug:** the candidate Shortlist endpoint (`PUT .../candidates/<id>/shortlist`) returns a 500 Internal Server Error for every candidate — confirmed reproducible in isolation across 3 separate candidates, with the server independently verified healthy each time. Since Shortlist is the earliest status transition and a prerequisite for almost every other status-workflow TC, this one bug cascades into failures across most of that suite.
 
-### Buzz (27 TCs)
+Also confirmed: the same unhandled-exception-on-dropped-connection bug as Admin and PIM (**3rd of 4 confirmations**), reproduced identically on create-candidate.
+
+### Buzz (29 TCs)
 
 OrangeHRM's internal social feed, broadcasting posts to every logged-in employee company-wide rather than a scoped role — the widest blast radius of any module tested, so validation gaps here were treated as higher-impact. Organized into `tests/buzz/posts/` (post lifecycle: create/cancel/delete/boundary), `tests/buzz/engagement/` (like/unlike/comment/share/interacting with another employee's post), `tests/buzz/feed-filters/` (the Most Liked / Most Commented tabs), and `tests/buzz/security/` — the same per-category subfolder structure used by Recruitment. Covers: text posts incl. empty/very-long boundary and photo-only boundary (4), valid photo upload, like/unlike, delete own post, comment incl. empty-comment rejection, share-post counter, viewing another employee's post (7), feed filter tabs (2), composer cancel/discard and rapid double-click-submit edge cases (2), plus 11 security TCs — XSS and SQL injection on both post text and comment text, extension-only file-upload bypass via "Share Photo" with a rejected-`.exe` baseline control, a malicious-URL check on the text-only "Share Video" field, cross-origin mutation (CSRF), clickjacking headers, rate limiting on post creation, and a read-only IDOR baseline.
 
@@ -246,6 +252,7 @@ OrangeHRM's internal social feed, broadcasting posts to every logged-in employee
 - Rapid double-click on the composer's "Post" button is not debounced, sending 2 identical POST requests and creating 2 duplicate posts broadcast to the whole company — the same race-condition pattern as Recruitment's candidate-creation bug.
 - No rate limiting on post creation — 8 rapid POST requests all succeeded with no throttling, the same gap already confirmed on Login and Recruitment, but higher-impact here since the result is broadcast company-wide rather than written to one record.
 - Missing `X-Frame-Options` / CSP `frame-ancestors` — the **5th app-wide confirmation** of the same clickjacking gap also found in Login, Recruitment, PIM, and Admin.
+- The same unhandled-exception-on-dropped-connection bug as Admin, PIM, and Recruitment (**4th and final confirmation**), reproduced identically on create-post.
 
 "Share Video" turned out to be a paste-a-URL field, not a file upload — an initial TC assumed otherwise and was rewritten after live discovery corrected it. IDOR on post/comment access confirmed N/A (same single-role architecture as other modules). A new post does not appear in the feed via client-side state update — a page reload is required to see your own post — documented as an app UX characteristic, not a bug. Two TCs (valid photo upload, SQL injection in comment text) pass reliably in isolation but are flaky when run as part of the full sequential suite, a timing characteristic of the shared public demo under load rather than a product defect.
 

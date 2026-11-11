@@ -821,6 +821,34 @@ LEGEND SIMBOL SKENARIO
                              -> Verify kembali ke list Users, user baru TIDAK
                                 tersimpan.
 
+ 7   TC-ADMIN-USER-07   [DONE]   TC-ADMIN-USER-07-Verify-Refresh-During-Pending-Save-Request.spec.ts
+                             (!) Verify Refresh During Pending Save Request
+                             -> Isi form user valid, intercept+tunda POST
+                                /api/v2/admin/users 4 detik, klik Save TANPA
+                                menunggu response, reload() SAAT request
+                                masih pending.
+                             Verify: user TIDAK muncul lebih dari 1 kali di
+                             list setelah refresh (0 atau 1 kali keduanya
+                             wajar, >1 akan jadi bug duplikat).
+
+ 8   TC-ADMIN-USER-08   [DONE]   TC-ADMIN-USER-08-Verify-Connection-Dropped-During-Save-Request.spec.ts
+                             (!) Verify Connection Dropped During Save Request
+                             -> Intercept POST /api/v2/admin/users dgn
+                                abort() (simulasi koneksi terputus), klik
+                                Save.
+                             Verify: user TIDAK ter-create di server.
+                             STATUS AKTUAL: Console-error check GAGAL (BUG
+                             APLIKASI TERKONFIRMASI, lihat Bug-List BG-199)
+                             -> SPA melempar "Uncaught exception: fe" yang
+                             tidak tertangani saat network request gagal,
+                             alih-alih menampilkan pesan error yang
+                             graceful. Deterministik reproduce 3x. Tabel
+                             list Users bahkan terbukti gagal render (stuck
+                             loading spinner) setelah insiden ini pada 1
+                             screenshot verifikasi -- indikasi state SPA
+                             ikut rusak. KONFIRMASI KE-1 dari bug app-wide
+                             yang sama (lihat juga PIM, Recruitment, Buzz).
+
 ================================================================================
   TEST CASES: JOB TITLES (8 TC)
 ================================================================================
@@ -1960,12 +1988,24 @@ LEGEND SIMBOL SKENARIO
   SUMMARY
 ================================================================================
 
-  Total TC: 138 (136 dari pass pertama-keempat + 2 TC security
-  ditambahkan 2026-11-11: clickjacking FAIL/BG-145, CSRF PASSED). Dengan
-  ini, SEMUA ~16 sub-screen Admin (13 sub-screen pass pertama-kedua + 3
-  sub-screen Organization pass ketiga + 8 sub-screen Configuration pass
-  keempat) + security lintas-screen SELESAI dicakup -- Admin module
+  Total TC: 140 (138 dari pass pertama-keempat+security + 2 TC edge case
+  ditambahkan 2026-11-12: TC-ADMIN-USER-07 refresh mid-submit PASSED,
+  TC-ADMIN-USER-08 connection-drop mid-submit FAILED -- BUG APLIKASI
+  TERKONFIRMASI, lihat BG-199). Dengan ini, SEMUA ~16 sub-screen Admin
+  (13 sub-screen pass pertama-kedua + 3 sub-screen Organization pass
+  ketiga + 8 sub-screen Configuration pass keempat) + security
+  lintas-screen + edge-case koneksi SELESAI dicakup -- Admin module
   SEPENUHNYA LENGKAP.
+
+  UPDATE 2026-11-12: TC-ADMIN-USER-08 mengonfirmasi bug APP-WIDE (bukan
+  isolated ke Admin) -- saat request POST create/save gagal krn koneksi
+  terputus, SPA melempar "Uncaught exception: fe" yang tidak tertangani,
+  alih-alih pesan error graceful. Direproduksi IDENTIK di PIM Add
+  Employee, Recruitment Candidates, dan Buzz Create Post (lihat
+  docs/TC-PIM.txt, TC-Recruitment.txt, TC-Buzz.txt) -- nama exception yang
+  sama persis di semua modul mengindikasikan satu shared HTTP-client
+  wrapper yang jadi akar masalah, bukan 4 bug terpisah. Login TIDAK
+  terpengaruh (arsitektur beda, form POST navigasi asli bukan XHR).
 
   Pass pertama (39): Users 6, Job Titles 8, Pay Grades 5, Employment
   Status 5, Job Categories 5, Work Shifts 5, Corporate Branding 5.

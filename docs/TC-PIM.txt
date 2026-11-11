@@ -963,6 +963,30 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    file tanpa trik, cuma bisa di-bypass dengan
                                    rename ekstensi.
 
+45   TC-PIM-ADD-32     [DONE]   TC-PIM-ADD-32-Verify-Refresh-During-Pending-Save-Request.spec.ts
+                             (!) Verify Refresh During Pending Save Request
+                             -> Isi nama employee, intercept+tunda POST
+                                /api/v2/pim/employees 4 detik, klik Save
+                                TANPA menunggu response, reload() SAAT
+                                request masih pending.
+                             Verify: employee TIDAK muncul lebih dari 1 kali
+                             di Employee List (0 atau 1 keduanya wajar, >1
+                             akan jadi bug duplikat).
+
+46   TC-PIM-ADD-33     [DONE]   TC-PIM-ADD-33-Verify-Connection-Dropped-During-Save-Request.spec.ts
+                             (!) Verify Connection Dropped During Save Request
+                             -> Intercept POST /api/v2/pim/employees dgn
+                                abort() (simulasi koneksi terputus), klik
+                                Save.
+                             Verify: employee TIDAK ter-create (dikonfirmasi
+                             via autocomplete Employee Name filter = "No
+                             Records Found").
+                             STATUS AKTUAL: Console-error check GAGAL (BUG
+                             APLIKASI, konfirmasi ke-2 app-wide, lihat
+                             Bug-List BG-201) -> SPA melempar "Uncaught
+                             exception: fe" identik dgn Admin
+                             (TC-ADMIN-USER-08). Deterministik reproduce 3x.
+
 ================================================================================
   FASE 1 - GROUP 3: PERSONAL DETAILS (13 TC)
   Folder: tests/pim/personal-details/
@@ -2297,7 +2321,13 @@ No.  Test Case ID      Status   Kategori           Skenario
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 161 (159 fungsional + 2 security)
+  Total Test Cases (semua fase + security) : 163 (159 fungsional + 2 security
+  + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12)
+
+  UPDATE 2026-11-12: TC-PIM-ADD-33 mengonfirmasi bug APP-WIDE yang sama
+  dgn TC-ADMIN-USER-08 -- "Uncaught exception: fe" tidak tertangani saat
+  POST create-employee gagal krn koneksi terputus. Konfirmasi ke-2 dari
+  4 modul (lihat docs/TC-Admin.txt, TC-Recruitment.txt, TC-Buzz.txt).
 
   Fase 1 : 57
     Employee List    : 14
