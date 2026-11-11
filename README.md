@@ -27,111 +27,35 @@ The suite follows a layered **Page Object Model**: tests never touch locators di
 qa-portofolio/
 ├── src/
 │   ├── config/         # Environment resolution (env.ts): single source of truth for BASE_URL/credentials
-│   ├── types/           # Shared domain types (e.g. NewEmployee)
-│   ├── data/            # Test data factories: unique names, collision-free dates
-│   ├── pages/            # Page Object Model: one class per screen, barrel-exported via index.ts
-│   │   ├── BasePage.ts       # Shared behaviour all page objects inherit
-│   │   ├── LoginPage.ts
-│   │   ├── DashboardPage.ts
-│   │   ├── PimPage.ts
-│   │   ├── EmployeeListPage.ts
-│   │   ├── AddEmployeePage.ts
-│   │   ├── PersonalDetailsPage.ts
-│   │   ├── ContactDetailsPage.ts
-│   │   ├── JobPage.ts
-│   │   ├── EmergencyContactsPage.ts
-│   │   ├── DependentsPage.ts
-│   │   ├── ImmigrationPage.ts
-│   │   ├── SalaryPage.ts
-│   │   ├── ReportToPage.ts
-│   │   ├── QualificationsPage.ts
-│   │   ├── MembershipsPage.ts
-│   │   ├── OptionalFieldsPage.ts
-│   │   ├── CustomFieldsPage.ts
-│   │   ├── DataImportPage.ts
-│   │   ├── ReportingMethodsPage.ts
-│   │   ├── TerminationReasonsPage.ts
-│   │   ├── PimReportsPage.ts
-│   │   ├── LeavePage.ts
-│   │   ├── VacanciesPage.ts
-│   │   └── CandidatesPage.ts
-│   ├── fixtures/         # Custom Playwright fixtures: inject page objects, provide authenticatedTest
-│   ├── utils/
-│   │   ├── testReport.ts # Step logging + end-of-test summary report + auto console-error check
-│   │   ├── createTestEmployee.ts # Shared Add Employee helper, retries on Employee Id collision
-│   │   ├── createTestCandidate.ts # Shared Add Candidate helper, extracts id from the POST response body
-│   │   └── advanceCandidateStatus.ts # Shared status-transition helpers (shortlist, schedule interview)
+│   ├── types/          # Shared domain types (e.g. NewEmployee)
+│   ├── data/           # Test data factories: unique names, collision-free dates
+│   ├── pages/          # Page Object Model: one class per screen, barrel-exported via index.ts
+│   ├── fixtures/       # Custom Playwright fixtures: inject page objects, provide authenticatedTest
+│   ├── utils/          # testReport.ts, createTestEmployee.ts, createTestCandidate.ts, advanceCandidateStatus.ts
 │   └── reporters/
-│       └── bugListReporter.ts # Custom Playwright reporter: appends failed TCs to docs/Bug-List.xlsx
+│       └── bugListReporter.ts   # Custom Playwright reporter: appends failed TCs to docs/Bug-List.xlsx
 ├── tests/
-│   ├── login/            # One module = one folder. Specs are named by test case ID.
-│   ├── admin/            # One subfolder per Admin sub-screen (all ~16 sub-screens, incl. Configuration's 8)
-│   │   ├── users/                # User Management > Users
-│   │   ├── job-titles/           # Admin > Job > Job Titles (incl. file-upload security)
-│   │   ├── pay-grades/           # Admin > Job > Pay Grades
-│   │   ├── employment-status/    # Admin > Job > Employment Status
-│   │   ├── job-categories/       # Admin > Job > Job Categories
-│   │   ├── work-shifts/          # Admin > Job > Work Shifts
-│   │   ├── corporate-branding/   # Logo/banner upload security (validate-only, no Publish)
-│   │   ├── skills/                # Admin > Qualifications > Skills (Name + Description, IDOR)
-│   │   ├── education/             # Admin > Qualifications > Education ("Level" field label)
-│   │   ├── licenses/              # Admin > Qualifications > Licenses
-│   │   ├── languages/             # Admin > Qualifications > Languages
-│   │   ├── memberships/           # Admin > Qualifications > Memberships (admin-level master data)
-│   │   ├── nationalities/         # Admin > Nationalities (~196 seed records, IDOR)
-│   │   ├── general-information/   # Admin > Organization > General Information (single global record, Edit switch)
-│   │   ├── locations/             # Admin > Organization > Locations (server-backed Name uniqueness, IDOR)
-│   │   ├── structure/             # Admin > Organization > Structure (org chart tree, not a flat list)
-│   │   ├── email-configuration/          # Admin > Configuration > Email Configuration (validate-only, global SMTP)
-│   │   ├── email-subscriptions/          # Admin > Configuration > Email Subscriptions (fully exercised, restore)
-│   │   ├── localization/                 # Admin > Configuration > Localization (validate-only, global UI language)
-│   │   ├── language-packages/            # Admin > Configuration > Language Packages (fully exercised, API-verified)
-│   │   ├── modules/                       # Admin > Configuration > Modules (validate-only, never clicks Save)
-│   │   ├── social-media-authentication/  # Admin > Configuration > Social Media Authentication (validate-only)
-│   │   ├── oauth-client/                 # Admin > Configuration > OAuth Client (fully exercised, API-token scope only)
-│   │   └── ldap-configuration/           # Admin > Configuration > LDAP Configuration (validate-only, highest risk)
-│   ├── pim/              # One subfolder per PIM screen (not flat: each screen has its own specs)
-│   │   ├── employee-list/
-│   │   ├── add-employee/
-│   │   ├── personal-details/
-│   │   ├── contact-details/
-│   │   ├── job/
-│   │   ├── emergency-contacts/
-│   │   ├── dependents/
-│   │   ├── immigration/
-│   │   ├── salary/
-│   │   ├── report-to/
-│   │   ├── qualifications/
-│   │   ├── memberships/
-│   │   ├── configuration/        # Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons
-│   │   ├── reports/
-│   │   └── security/             # IDOR, clickjacking header
-│   ├── recruitment/      # One subfolder per Recruitment screen
-│   │   ├── vacancies/
-│   │   ├── candidates/
-│   │   ├── status-workflow/      # Candidate status state-machine transitions
-│   │   └── security/             # IDOR, response headers, rate limiting
-│   └── e2e/              # Cross-cutting / not-yet-split specs (PIM smoke test, Leave)
-├── docs/                 # Human-readable test case documentation, one file per module
-│   ├── TC-Login.txt
-│   ├── TC-Admin.txt      # 136 Admin TCs (all ~16 sub-screens): Users, Job Titles, Pay Grades, Employment Status, Job Categories, Work Shifts, Corporate Branding, Skills, Education, Licenses, Languages, Memberships, Nationalities, General Information, Locations, Structure, plus Configuration's 8 (Email Configuration, Email Subscriptions, Localization, Language Packages, Modules, Social Media Authentication, OAuth Client, LDAP Configuration)
-│   ├── TC-PIM.txt        # All 161 PIM TCs, full module coverage plus file-upload/IDOR/clickjacking security
-│   ├── TC-Recruitment.txt # All 54 Recruitment TCs: Vacancies, Candidates, status workflow, security
-│   ├── PIM-Findings-Summary.txt  # Digest of exploration findings across the whole PIM suite
-│   ├── TC-Regression-Allure-Guide.txt # How to run a full regression and view the Allure HTML report
-│   └── Bug-List.xlsx     # Auto-generated draft bug tracker (created on first test failure)
-├── security/              # Source-code-level security scanning of OrangeHRM's own open-source repo
-│   ├── scripts/
-│   │   ├── scan_orangehrm.py       # SCA/SAST (Snyk), Gitleaks, Trivy -> JSON evidence
-│   │   ├── generate_report.py      # JSON -> PDF evidence
-│   │   └── requirements.txt
-│   ├── evidence/                   # JSON + PDF evidence, one numbered folder per run
-│   └── README.md                   # Setup, scope, latest results, ethics note
-├── .github/workflows/     # CI pipeline definition
+│   ├── login/          # One module = one folder. Specs are named by test case ID.
+│   ├── admin/          # One subfolder per Admin sub-screen (~16 total, incl. Configuration's 8)
+│   ├── pim/             # One subfolder per PIM screen (incl. configuration/ and security/)
+│   ├── recruitment/     # One subfolder per Recruitment screen (incl. security/)
+│   └── e2e/             # Cross-cutting / not-yet-split specs (PIM smoke test, Leave)
+├── docs/                # Human-readable test case documentation, one file per module
+│   ├── TC-Login.txt / TC-Admin.txt / TC-PIM.txt / TC-Recruitment.txt
+│   ├── PIM-Findings-Summary.txt         # Digest of exploration findings across the whole PIM suite
+│   ├── TC-Regression-Allure-Guide.txt   # How to run a full regression and view the Allure HTML report
+│   └── Bug-List.xlsx                    # Auto-generated draft bug tracker (created on first test failure)
+├── security/            # Source-code-level security scanning of OrangeHRM's own open-source repo
+│   ├── scripts/         # scan_orangehrm.py (SCA/SAST/Gitleaks/Trivy -> JSON), generate_report.py (JSON -> PDF)
+│   ├── evidence/        # JSON + PDF evidence, one numbered folder per run
+│   └── README.md        # Setup, scope, latest results, ethics note
+├── .github/workflows/   # CI pipeline definition
 ├── playwright.config.ts
 ├── tsconfig.json
 └── eslint.config.js
 ```
+
+See the **Test Coverage** section below for exactly which screens each module's sub-folders cover.
 
 **Why this shape:**
 - **`pages/`**: every selector lives behind a typed class, so a DOM change means editing one file, not every spec that touches that screen.
