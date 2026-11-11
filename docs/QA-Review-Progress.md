@@ -618,16 +618,30 @@ Reshape docs/TC-Admin.txt ke format detail SEDANG BERJALAN di background via for
 (agentId internal, task akan muncul sbg notification terpisah). Modul besar (~138 TC),
 delegasi sama pola PIM/Recruitment sebelumnya.
 
-**NEXT ACTION WAJIB kalau lanjut sesi baru:** tunggu notifikasi fork selesai reshape
-TC-Admin.txt, lalu:
-  - Update README.md Test Coverage: tambah subsection Admin dgn bullet list (hapus baris
-    tabel lama "| Admin | 136 TCs, ..." yang masih ada dari sebelum restructure), update total
-    jadi 138 TC Admin / grand total project (395 lama + 2 baru = 397).
-  - Commit + push (HATI-HATI: jangan ada trailer Claude, author harus
-    Arsal <arsalwildann@gmail.com>, SELALU cek `git log -1 --format="%an <%ae>"` setelah
-    commit SEBELUM push -- ini sudah jadi recurring mistake risk, jangan sampai lengah).
-  - Baru tandai Batch 4 TUNTAS -- ini batch TERAKHIR, setelah ini seluruh review 4-modul
-    (Login+Recruitment+PIM+Admin) selesai 100%.
+**UPDATE 2026-11-11: fork selesai reshape TC-Admin.txt (138 TC), spot-check 3 sample akurat.**
+README diupdate (Admin 138 TC, grand total 397, clickjacking 4th confirmation, CSRF no-bug).
+Typecheck+lint bersih. Commit (0350298) + push SUKSES, author terverifikasi bersih
+(Arsal <arsalwildann@gmail.com>, tanpa trailer Claude).
+
+## STATUS BATCH 4 (ADMIN): TUNTAS 100%.
+
+## =============================================================
+## SELURUH REVIEW 4 BATCH (LOGIN + RECRUITMENT + PIM + ADMIN) SELESAI 100%.
+## =============================================================
+
+Total TC project: 397 (Login 43, Admin 138, PIM 161, Recruitment 54, Leave 1).
+Semua dokumentasi TC-*.txt sudah format detail konsisten. Bug-List.xlsx bersih dari duplikat.
+README reflects kondisi akurat terkini. Repo sudah di-push, tidak ada yang tertinggal.
+
+**Item yang masih "pending" tapi BUKAN berarti belum selesai dikerjakan (di luar kendali QA
+ini, bukan karena pekerjaan belum tuntas):**
+- BG-007 (Recruitment Shortlist 500) -- bug aplikasi nyata, perlu di-retest kalau OrangeHRM
+  sudah memperbaikinya di masa depan.
+- 3 TC PIM Report-to (REPORTTO-01/03/06) -- known issue verifikasi UI, fitur sudah confirmed
+  bekerja via TC API terpisah.
+
+Kalau ada sesi baru yang melanjutkan task ini: TIDAK ADA next action wajib tersisa. Baca
+bagian ini dulu untuk konfirmasi semua 4 batch benar2 tuntas sebelum mulai kerjaan baru.
 
 ### UPDATE 2026-11-11: BATCH 1 (LOGIN) SEKARANG 100% TUNTAS.
 - TC-LOGIN-42: run bersih, PASS (session ID berubah, proteksi fixation bekerja). Sempat ada 1
