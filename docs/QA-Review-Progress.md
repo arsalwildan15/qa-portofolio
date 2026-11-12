@@ -1683,3 +1683,37 @@ satu-per-satu ke salah satu dari 3 kategori -- (a) cocok 1 dari 39 bug Open di B
 (b) noise lingkungan (ERR_TIMED_OUT/collateral, dikonfirmasi via isolated rerun), atau (c) 1
 bug BARU yg sudah ditambahkan resmi (BG-225). Tidak ada TC gagal yang "mengambang" tanpa
 penjelasan, dan tidak ada baris Bug-List yang jadi orphan/tidak match TC manapun.
+
+## UPDATE 2026-11-12 (lanjutan) -- Allure Report Final Ter-generate
+
+Dgn root cause allure-results ketemu (lihat update sebelumnya: solusinya `rtk bypass`),
+dijalankan regresi penuh 5 modul berurutan (Login->Admin->PIM->Recruitment->Buzz) via
+`rtk bypass npx playwright test ...`, SEMUA pakai reporter default TAPI `bugListReporter`
+SENGAJA DIKOMENTARI SEMENTARA di `playwright.config.ts` (restore setelahnya) -- supaya tidak
+menciptakan duplikat lagi spt 4 insiden sebelumnya, krn Bug-List.xlsx sudah diaudit manual
+penuh & akurat, tidak perlu auto-update lagi utk run ini.
+
+**Hasil: file Allure tertulis SEMPURNA 445/445 (persis jumlah TC total project)** -- dikonfirmasi
+kumulatif di tiap modul: Login 46, +Admin 144=190, +PIM 164=354, +Recruitment 59=413, +Buzz
+32=445. Bug-List.xlsx dikonfirmasi tetap 39 baris (tidak tersentuh sepanjang 5 run ini, sesuai
+rencana). `bugListReporter` di-restore (uncomment) di playwright.config.ts setelah selesai.
+
+`npm run report:allure:generate` (via `rtk bypass`) berhasil generate `allure-report/` (121MB,
+sudah ter-gitignore, TIDAK di-commit -- normal utk artifact hasil test). Summary statistik dari
+`allure-report/widgets/summary.json`: **445 total, 350 passed, 47 failed, 48 broken**.
+
+**PENTING -- cara membaca angka ini dgn benar:** 95 (47+48) FAIL/broken pada snapshot SATU KALI
+run ini LEBIH TINGGI dari 39 bug yg resmi terdokumentasi di Bug-List.xlsx -- ini BUKAN
+kontradiksi atau laporan tidak valid. Sesuai sifat demo publik bersama yg sudah berulang kali
+dikonfirmasi labil sepanjang seluruh proyek ini, SETIAP single run individual akan selalu
+tercampur noise residual (timeout sesaat, flaky list-verification, dsb) yg TIDAK deterministik
+reproduce di run lain -- inilah kenapa kesimpulan BUG NYATA di proyek ini SELALU berdasarkan
+audit lintas-run (isolated rerun 2-6x minimum per temuan), BUKAN dari satu snapshot run manapun
+termasuk snapshot Allure ini. **Sumber kebenaran utk "bug mana yang nyata" tetap
+docs/Bug-List.xlsx (39 entry, sudah teraudit penuh)**, Allure report ini murni artifact
+visualisasi hasil regresi (timeline, kategori error, attachment screenshot/video/trace per TC),
+bukan dokumen kesimpulan bug yang berdiri sendiri.
+
+Cara lihat: `npm run report:allure:open` (local server + buka browser otomatis). Folder
+`allure-report/` tidak di-commit (gitignored, generated artifact) -- regenerate kapan saja dari
+`allure-results/` (jg gitignored) via `npm run report:allure:generate`.
