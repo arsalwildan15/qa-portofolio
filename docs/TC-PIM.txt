@@ -1343,6 +1343,43 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    dugaan awal) — beda dari Contact Details/Add
                                    Employee yang cuma 1 endpoint per Save.
 
+75   TC-PIM-JOB-09       [DONE]  TC-PIM-JOB-09-Verify-Terminate-Employment.spec.ts
+                             (+) Verify Terminate Employment
+                             -> Klik "Terminate Employment" di section
+                                "Employee Termination / Activiation", isi
+                                Termination Date/Reason/Note, Save.
+                             [API VERIFICATION]
+                             -> Verify PUT .../terminations status === 200.
+                             -> Verify response body berisi note &
+                                terminationReason sesuai input.
+                             -> Verify tombol berubah jadi "Activate
+                                Employment" (setelah reload).
+                             NOTE 1 [TEMUAN SKRIP]: Modal render DI ATAS form
+                                   Job Details di background; background itu
+                                   punya input "Joined Date" dgn placeholder
+                                   SAMA ("yyyy-dd-mm") + dropdown/Save sendiri
+                                   — locator tanpa scope ke
+                                   page.getByRole('dialog') resolve ke 2+
+                                   elemen (strict-mode violation). Pola root
+                                   cause IDENTIK dgn bug skrip Buzz "Edit
+                                   Post" (2 <textarea>). Diperbaiki via
+                                   JobPage.terminateEmployment() yang scope
+                                   semua locator modal ke dialog.
+                             NOTE 2 [TEMUAN APLIKASI]: Tombol TIDAK update
+                                   client-side tanpa reload setelah API
+                                   sukses — pola SAMA dgn Buzz (post baru
+                                   tidak muncul tanpa reload). Bukan bug,
+                                   tapi karakteristik app ini scr konsisten:
+                                   TC sengaja reload + waitForLoadState
+                                   ('networkidle') sblm verify tombol
+                                   (goto() resolve on commit, bukan on data
+                                   fetch section ini — fixed timeout saja
+                                   flaky ~2/3 run, dikonfirmasi via rerun).
+                             NOTE 3 [TEMUAN MINOR]: Typo "Activiation" di
+                                   judul section — ada di aplikasi sendiri,
+                                   bukan di dokumentasi/skrip.
+                             Diverifikasi stabil 3x run terisolasi.
+
 ================================================================================
   FASE 2 - GROUP 3: EMERGENCY CONTACTS (8 TC)
   Folder: tests/pim/emergency-contacts/
@@ -2325,8 +2362,14 @@ No.  Test Case ID      Status   Kategori           Skenario
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 163 (159 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 164 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12)
+
+  UPDATE 2026-11-12 (tambahan): TC-PIM-JOB-09 (Verify Terminate Employment)
+  ditambahkan -- fitur yang sebelumnya belum pernah diuji sama sekali.
+  Ditemukan 1 bug skrip (locator strict-mode violation, pola sama dgn Buzz
+  Edit Post) dan 1 temuan app (tombol tidak update client-side tanpa reload,
+  pola sama dgn Buzz feed), keduanya didokumentasikan di JSDoc TC & di sini.
 
   UPDATE 2026-11-12: TC-PIM-ADD-33 mengonfirmasi bug APP-WIDE yang sama
   dgn TC-ADMIN-USER-08 -- "Uncaught exception: fe" lolos ke console saat
@@ -2340,9 +2383,9 @@ No.  Test Case ID      Status   Kategori           Skenario
     Add Employee     : 30 (termasuk 4 TC security file upload)
     Personal Details : 13 (termasuk 1 TC security file upload)
 
-  Fase 2 : 71
+  Fase 2 : 72
     Contact Details   : 9 (termasuk 1 TC security file upload)  Salary          : 7
-    Job               : 8        Report-to       : 7
+    Job               : 9        Report-to       : 7
     Emergency Contacts: 8        Qualifications  : 10 (semua 5 sub-section)
     Dependents        : 7        Memberships     : 7
     Immigration       : 8

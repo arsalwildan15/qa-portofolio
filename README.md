@@ -183,11 +183,11 @@ If targeting a different environment for a local run, set these in `.env` (copie
 |--------|----:|------|
 | Login | 45 | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | Admin | 142 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
-| PIM | 163 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| PIM | 164 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 59 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Leave | 1 | N/A |
-| **Total** | **442** | |
+| **Total** | **443** | |
 
 **Cross-cutting edge cases (2026-11-12):** two scenarios flagged as commonly-forgotten in test design — refreshing mid-submit and a dropped connection mid-submit — were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails due to a dropped network connection, the SPA throws an unhandled JS exception that reaches the console/global error handler instead of being caught at its source, identically reproduced (same exception name) in Admin, PIM, Recruitment, and Buzz. The app does still show the user a generic "Unexpected Error!" toast in all four cases — this is a code-level error-handling defect, not a silent failure the user would never notice. Login is unaffected — its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
 
@@ -227,9 +227,11 @@ Full coverage across all ~16 Admin sub-screens:
 
 Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-executable payload by decoding it as a real image client-side. IDOR TCs (Skills, Nationalities, Locations) found no multi-tenant boundary to breach — consistent with this demo's single-admin-role architecture, documented as N/A rather than a false-positive vulnerability. Cross-origin mutation (CSRF) on pay-grade creation confirmed **blocked by CORS** (no bug).
 
-### PIM (163 TCs)
+### PIM (164 TCs)
 
-Full module coverage, no open functional gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs and 2 IDOR/clickjacking security TCs.
+Full module coverage, no open functional gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job incl. Terminate Employment, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs and 2 IDOR/clickjacking security TCs.
+
+**Terminate Employment** (`TC-PIM-JOB-09`, added 2026-11-12) was previously untested. Confirmed working end-to-end (`PUT .../terminations` returns 200, response carries the submitted date/reason/note). Caught two findings along the way: a script-side locator collision (the modal renders on top of the still-present Job Details form, which has its own "Joined Date" input sharing the exact same placeholder — same root-cause pattern as the Buzz Edit Post bug below, fixed by scoping every modal interaction to `page.getByRole('dialog')`), and an app-side one — the button doesn't flip from "Terminate Employment" to "Activate Employment" without a page reload, the same no-client-side-refresh pattern already documented for Buzz's own feed. Also noted: the section header itself reads "Employee Termination / Activiation" — a typo in the app, not in this documentation.
 
 **Confirmed bugs:**
 - Extension-only validation lets an executable disguised as a photo through on both profile-photo upload points

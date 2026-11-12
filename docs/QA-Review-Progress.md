@@ -1280,3 +1280,41 @@ count, grand Total project +3 jadi 442).
 
 **SISA TAHAP 3:** PIM (Terminate Employee), Admin (filter kombinasi/bulk action), Login (reset
 password flow). Tahap 4: regresi penuh final + dokumentasi.
+
+## UPDATE 2026-11-12 (lanjutan) -- PIM Terminate Employment (TC-PIM-JOB-09)
+
+Investigasi live via Playwright: fitur ada di Personal Details -> tab Job -> section
+"Employee Termination / Activiation" (typo "Activiation" ADA DI APLIKASI SENDIRI, dikonfirmasi
+via screenshot langsung -- dicatat sebagai temuan minor, bukan kesalahan dokumentasi). Modal
+"Terminate Employment" berisi Termination Date* (date picker), Termination Reason* (dropdown
+dari master data Termination Reasons yang sudah diuji sebelumnya via TerminationReasonsPage.ts),
+Note (optional).
+
+**Bug skrip ditemukan & diperbaiki (pola sama persis dgn Buzz Edit Post):** locator
+`input[placeholder="yyyy-dd-mm"]` tanpa scope resolve ke 2 elemen -- satu di form Job Details
+yang masih ada di background ("Joined Date"), satu di modal ("Termination Date"). Playwright
+strict mode langsung menolak (`locator.fill: strict mode violation ... resolved to 2 elements`).
+Diperbaiki dgn scope semua interaksi modal (date input, dropdown, textarea, Save button) ke
+`page.getByRole('dialog')` -- diimplementasikan di `JobPage.terminateEmployment()` (helper baru,
+bukan logic ad-hoc di TC).
+
+**Temuan app (bukan bug skrip):** setelah PUT `.../terminations` sukses (200, dikonfirmasi
+response body berisi date/note/terminationReason yang sesuai), tombol TIDAK otomatis berubah
+dari "Terminate Employment" jadi "Activate Employment" tanpa reload -- pola IDENTIK dgn temuan
+Buzz sebelumnya (post baru tidak muncul tanpa reload). Dikonfirmasi via discovery script
+terpisah yg membandingkan state sebelum/sesudah reload. TC resmi SENGAJA reload +
+`waitForLoadState('networkidle')` sblm verifikasi tombol, bukan untuk menyembunyikan temuan
+(tetap dicatat via `report.finding()`) tapi krn fixed timeout saja terbukti flaky ~2/3 run saat
+verifikasi (goto() resolve on commit, bukan on data-fetch section ini) -- networkidle
+menghilangkan race tersebut, dikonfirmasi 3/3 run stabil setelahnya.
+
+File baru: `tests/pim/job/TC-PIM-JOB-09-Verify-Terminate-Employment.spec.ts`. Helper baru:
+`JobPage.terminateEmployment()`, `JobPage.terminateButton`, `JobPage.activateButton`. Script
+discovery (`tests/_discovery/inspect_terminate*.spec.ts`) sudah dihapus setelah TC resmi selesai.
+Diverifikasi stabil 3x run terisolasi sblm dianggap selesai.
+
+docs/TC-PIM.txt diupdate (+1 TC, Total 163->164, Fase 2 71->72, Job 8->9). README.md diupdate
+(PIM TC count, narasi Terminate Employment, grand Total project +1 jadi 443).
+
+**SISA TAHAP 3 (update):** Admin (filter kombinasi/bulk action), Login (reset password flow).
+Tahap 4: regresi penuh final + dokumentasi.
