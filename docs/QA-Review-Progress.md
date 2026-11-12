@@ -1426,7 +1426,14 @@ Sblm hapus, dicek dulu apakah ada ID yg akan dihapus dirujuk sbg "baris kanonik"
 notes-nya menyebut range ID yg dihapus (mis. "batch BG-031 s/d BG-063"), tapi semuanya cuma
 konteks historis (bukan link fungsional), aman dihapus.
 
-**Hasil:** 100 baris dihapus (semua Closed, Actual Result = timeout/koneksi noise). Sebelum:
-224 baris (38 Open + 186 Closed). Sesudah: 124 baris (38 Open UTUH tidak tersentuh + 86 Closed
-yang closed krn alasan lain spt fixed/duplikat-dari-bug-nyata, bukan noise). 0 duplikat Bug ID
-sesudahnya.
+**Hasil tahap 1:** 100 baris dihapus (semua Closed, Actual Result = timeout/koneksi noise).
+Sebelum: 224 baris (38 Open + 186 Closed). Sesudah: 124 baris (38 Open UTUH tidak tersentuh +
+86 Closed yang closed krn alasan lain spt fixed/duplikat-dari-bug-nyata, bukan noise). 0
+duplikat Bug ID sesudahnya.
+
+**Hasil tahap 2 (atas permintaan lanjutan user):** sisa 86 baris Closed JUGA dihapus seluruhnya
+(bukan hanya yg timeout noise). Bug-List.xlsx SEKARANG HANYA BERISI bug yang masih berstatus
+Open -- 38 baris, 0 Closed, 0 duplikat Bug ID. Histori audit-trail bug yang sudah closed/fixed/
+duplikat (termasuk root-cause-analysis batch outage, auto-closed retest-pass, dsb) TIDAK lagi
+tersimpan di file ini -- kalau dibutuhkan lagi, bisa direkonstruksi dari git history
+(`git show <commit-sebelum-f78ad97>:docs/Bug-List.xlsx` dst).
