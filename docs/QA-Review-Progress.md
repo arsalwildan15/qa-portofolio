@@ -1528,3 +1528,50 @@ dibutuhkan, Login perlu di-rerun sekali lagi sbg bagian dari full regression fin
 
 **SISA TAHAP 4:** PIM, Recruitment, Buzz (lanjut sekarang) -> kembali ke Admin -> generate
 Allure report akhir -> dokumentasi penutup.
+
+## UPDATE 2026-11-12 (lanjutan) -- Tahap 4 DIHENTIKAN SEMENTARA (gangguan lingkungan berlanjut)
+
+**PIM (164 TC) dicoba setelah Admin:** 97 PASS, 67 FAIL. Pola identik dgn Admin: 44/67
+(66%) adalah `ERR_TIMED_OUT`, 23/67 sisanya tersebar di modul yg TIDAK saling terkait (Add
+Employee, Dependents, Emergency Contacts, Employee List, Immigration, Job, Personal Details x7,
+Qualifications x2, Report-to x3, Salary, Security) -- termasuk operasi CRUD dasar yg SUDAH lama
+terbukti PASS (mis. "add license record succeeds", "01 add supervisor succeeds"), indikasi kuat
+ini collateral noise dari gangguan jaringan yg sama, BUKAN regresi bug aplikasi nyata. **BELUM
+dikonfirmasi via isolated rerun satu-per-satu** -- jangan percaya angka 67 FAIL ini sbg bug baru
+tanpa verifikasi ulang nanti saat lingkungan sudah stabil.
+
+**TEMUAN BARU YG PERLU DIINVESTIGASI TERPISAH:** `allure-results/` GAGAL ditulis isi apa pun
+(0 file) utk Admin attempt 1, attempt 2, DAN PIM -- 3x berturut-turut. Bug-List.xlsx TETAP AMAN
+tidak tersentuh/rusak di ketiganya (bugListReporter juga tampaknya tidak sempat flush, bukan
+krn tidak ada kegagalan baru). Dugaan: proses Playwright kemungkinan crash/mati paksa sebelum
+semua reporter sempat menyelesaikan onEnd() dengan normal akibat volume ERR_TIMED_OUT yg masif
+(ratusan timeout 30-90 detik bertumpuk di banyak worker paralel bisa memicu resource
+exhaustion/OOM, bukan cuma masalah jaringan semata) -- BELUM DIKONFIRMASI, ini cuma hipotesis
+kerja, perlu diselidiki terpisah dari masalah outage server itu sendiri.
+
+**KEPUTUSAN (atas pilihan user dari 3 opsi yg ditawarkan):** TAHAP 4 DIHENTIKAN SEMENTARA.
+Jangan lanjut Recruitment/Buzz dulu, jangan buang run lagi selagi gangguan masih berlangsung
+konsisten (3 dari 4 modul yg dicoba terdampak parah, hanya Login yg bersih). test-results/,
+allure-results/, playwright-report/ dari attempt2 yg gagal SUDAH DIBERSIHKAN
+(`rm -rf test-results allure-results playwright-report`) spy tidak tercampur saat regresi
+dilanjutkan nanti.
+
+**CHECKLIST RESUME SESI BERIKUTNYA (urutan disarankan):**
+  1. Cek kesehatan server/jaringan dulu sblm mulai apa pun: curl 3x ke
+     /web/index.php/auth/login (cepat <2s = sehat), DAN jalankan 1 TC kecil via Playwright
+     (mis. tests/login/positive) utk pastikan traffic BROWSER (bukan cuma curl) juga lancar --
+     jangan asumsikan curl sehat = Playwright pasti ikut sehat, sudah terbukti TIDAK selalu
+     berkorelasi di sesi ini.
+  2. Kalau sehat: lanjut regresi Recruitment (59 TC) dan Buzz (32 TC) dulu (belum dicoba sama
+     sekali di Tahap 4 ini), baru retry Admin (144 TC) dan PIM (164 TC) yg kemarin gagal.
+  3. SETIAP kali 1 modul selesai: WAJIB audit manual Bug-List.xlsx (bandingkan entry baru vs
+     FAIL list asli -- cek duplikat krn redaksi, cek auto-close keliru utk bug intermiten
+     spt BG-009/BG-224) SEBELUM lanjut ke modul berikutnya -- JANGAN tunggu sampai semua modul
+     selesai baru diaudit sekaligus, krn data bisa saling tertimpa/tercampur.
+  4. Kalau `allure-results/` lagi-lagi 0 file setelah 1 modul selesai: STOP, investigasi dulu
+     masalah reporter-nya secara terpisah (mungkin perlu --workers=1 utk tes apakah penyebabnya
+     memang resource exhaustion di paralelisme tinggi) sblm lanjut modul lain -- jangan terus
+     numpuk modul lain di atas masalah infrastruktur yg belum dipahami akar masalahnya.
+  5. Setelah SEMUA 5 modul (Login sudah OK, 4 sisanya) beres & Bug-List teraudit bersih: baru
+     generate Allure report akhir (`npm run report:allure:generate` + `report:allure:open`),
+     lalu dokumentasi penutup (README ringkasan akhir, dsb).
