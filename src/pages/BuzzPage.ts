@@ -131,6 +131,23 @@ export class BuzzPage extends BasePage {
     return card.getByPlaceholder(/write your comment/i);
   }
 
+  /**
+   * "Like" / "Edit" / "Delete" plain-text action links rendered under each individual comment
+   * (NOT the post's own kebab menu) -- confirmed via live DOM inspection 2026-11-12.
+   */
+  commentDeleteLink(card: Locator): Locator {
+    return card.getByText('Delete', { exact: true });
+  }
+
+  /**
+   * Clicks a comment's "Delete" link and confirms the "Are you Sure?" dialog ("Yes, Delete" /
+   * "No, Cancel" -- same confirm-dialog pattern used everywhere else in this app).
+   */
+  async confirmDeleteComment(card: Locator) {
+    await this.commentDeleteLink(card).click();
+    await this.page.getByRole('button', { name: /Yes, Delete/i }).click();
+  }
+
   kebabMenuButton(card: Locator): Locator {
     return card.locator('button:has(i.bi-three-dots)');
   }
@@ -138,6 +155,30 @@ export class BuzzPage extends BasePage {
   /** Menu items ("Delete Post" / "Edit Post") revealed after clicking the kebab menu -- confirmed via live DOM inspection 2026-11-11. */
   kebabMenuItem(label: 'Delete Post' | 'Edit Post'): Locator {
     return this.page.locator('.orangehrm-buzz-post-header-config-item', { hasText: label });
+  }
+
+  /**
+   * Submits an edit to an existing post via the kebab menu's "Edit Post" modal. Caller must
+   * have already clicked kebabMenuButton(card) + kebabMenuItem('Edit Post') to open it.
+   *
+   * [TEMUAN] Saat modal "Edit Post" terbuka, ADA 2 <textarea> di halaman: index 0 adalah
+   * composer utama yang masih ada di belakang modal (kosong), index 1 (this.page.locator
+   * ('textarea').last()) adalah textarea modal yang BENAR, pre-filled dengan teks post asli --
+   * dikonfirmasi live 2026-11-12. Mengisi textarea pertama (bukan last()) adalah bug skrip
+   * yang sempat terjadi -- PUT request tetap mengirim teks ASLI tak berubah krn textarea yang
+   * di-edit sama sekali tidak terhubung ke form modal.
+   */
+  async submitEditPost(newText: string) {
+    const modalTextarea = this.page.locator('textarea').last();
+    await modalTextarea.fill(newText);
+    const [resp] = await Promise.all([
+      this.page.waitForResponse(
+        (r) => /\/api\/v2\/buzz\/posts\/\d+/.test(r.url()) && r.request().method() === 'PUT',
+        { timeout: 15_000 },
+      ),
+      this.page.getByRole('button', { name: /^post$/i }).last().click(),
+    ]);
+    return resp;
   }
 
   shareButton(card: Locator): Locator {

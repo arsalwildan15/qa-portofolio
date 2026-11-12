@@ -1240,3 +1240,43 @@ docs/TC-Recruitment.txt, README.md diupdate (Total TC Recruitment 58->59, Total 
 **SISA TAHAP 3 (belum dikerjakan):** Buzz (Edit Post, Delete Comment, pagination), PIM
 (Terminate Employee), Admin (filter kombinasi/bulk action), Login (reset password flow
 sesungguhnya). Tahap 4: regresi penuh semua modul + dokumentasi final.
+
+### UPDATE 2026-11-12: TAHAP 3 (bagian 2) -- Buzz: Edit Post, Delete Comment, Infinite Scroll.
+
+3 TC baru ditambahkan (TC-BUZZ-19 Edit Own Post, TC-BUZZ-20 Delete Comment, TC-BUZZ-21 Infinite
+Scroll) -- semua fitur yang SUDAH ADA di aplikasi sejak awal (opsi "Edit Post"/"Delete" sudah
+terlihat di kebab menu/comment sejak eksplorasi awal Buzz, infinite scroll adalah perilaku feed
+bawaan) tapi belum pernah diuji sama sekali sebelumnya.
+
+**Hasil: SEMUA 3 TC PASSED, tidak ada bug aplikasi baru ditemukan di area ini.** Edit Post benar2
+mengubah teks via PUT /api/v2/buzz/posts/<id>; Delete Comment benar2 menghapus via DELETE
+/api/v2/buzz/shares/<postId>/comments/<commentId> (prefix endpoint "shares", bukan "posts" --
+nama internal); Infinite scroll benar2 memuat halaman berikutnya (GET .../feed?offset=10 saat
+di-scroll, 10->16 post).
+
+**Bug SCRIPT ditemukan & diperbaiki (self-caught) saat investigasi Edit Post:** saat modal "Edit
+Post" terbuka, ADA 2 <textarea> di DOM -- composer utama yang masih ada di belakang modal
+(kosong) dan textarea modal yang benar (pre-filled teks asli). Locator pertama (`.first()`
+implisit via selector gabungan) salah ambil textarea composer yang kosong, sehingga mengisi
+field yang TIDAK terhubung ke form submit -- PUT request tetap mengirim teks LAMA tak berubah
+meski response 200 (tampak sukses tapi sebenarnya tidak melakukan apa-apa). Diperbaiki pakai
+`page.locator('textarea').last()`, dikonfirmasi 3x PASS bersih setelah fix.
+
+**Server demo publik SANGAT LABIL hari ini** -- terjadi 2x outage besar berturut-turut selama
+regresi penuh Buzz (16+ TC gagal seragam ~32s per outage, termasuk TC yang sudah lama stabil).
+Investigasi mendalam dilakukan (bukan asumsi langsung): curl selalu sukses <1s bahkan saat
+Playwright timeout, example.com berhasil normal di Chromium yang sama (menyingkirkan masalah
+jaringan lokal/Chromium secara umum), tapi page.goto() ke domain demo OrangeHRM timeout bahkan
+dgn batas waktu 60 detik dan opsi waitUntil 'domcontentloaded' sekalipun -- mengindikasikan
+kemungkinan WAF/anti-bot/rate-limiting di sisi server yang mendeteksi traffic browser otomatis
+secara spesifik (curl tidak terkena krn fingerprint request yang berbeda), bukan sekadar
+server lambat biasa. Root cause pastinya TIDAK BISA dipastikan dari sisi kita (di luar kendali),
+tapi TC-TC yang terdampak (SECURITY-02 s/d 11) sudah terverifikasi PASS/FAIL sesuai ekspektasi
+SEBELUM outage ini terjadi (lihat update Tahap 1/2 sebelumnya) -- jadi TIDAK mengubah kesimpulan
+bug yang sudah terkonfirmasi, hanya menunda verifikasi ulang rutin kali ini.
+
+docs/TC-Buzz.txt diupdate (+3 TC, Total 29->32, PASSED 22->25). README.md diupdate (Buzz TC
+count, grand Total project +3 jadi 442).
+
+**SISA TAHAP 3:** PIM (Terminate Employee), Admin (filter kombinasi/bulk action), Login (reset
+password flow). Tahap 4: regresi penuh final + dokumentasi.

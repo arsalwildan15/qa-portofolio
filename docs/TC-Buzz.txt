@@ -305,6 +305,53 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              ini app-wide di semua modul SPA (Login tidak
                              terpengaruh krn arsitektur form-nya berbeda).
 
+19   TC-BUZZ-19     [DONE]   TC-BUZZ-19-Verify-Edit-Own-Post.spec.ts
+                             (+) Verify Edit Own Post
+                             -> Buat post baru, buka kebab menu, klik
+                                "Edit Post", ubah teks, klik Post (submit
+                                edit) via PUT /api/v2/buzz/posts/<id>.
+                             Verify: response berisi teks baru, teks baru
+                             muncul di feed setelah reload, teks lama hilang.
+                             NOTE [BUG SCRIPT ditemukan & diperbaiki]: saat
+                             modal "Edit Post" terbuka, ADA 2 <textarea> di
+                             halaman (composer utama yg masih ada di
+                             belakang modal, kosong, DAN textarea modal yg
+                             benar berisi teks asli). Locator pertama kali
+                             salah ambil textarea[0] (composer kosong),
+                             menyebabkan PUT tetap mengirim teks lama tak
+                             berubah walau response 200 -- diperbaiki pakai
+                             `textarea().last()`, dikonfirmasi 3x PASS
+                             setelah fix. Fitur Edit Post sendiri BERFUNGSI
+                             NORMAL, bukan bug aplikasi.
+
+20   TC-BUZZ-20     [DONE]   TC-BUZZ-20-Verify-Delete-Comment.spec.ts
+                             (+) Verify Delete Comment
+                             -> Buat post baru, tambah comment, klik link
+                                "Delete" pada comment (TERPISAH dari kebab
+                                menu post -- comment punya link aksi
+                                Like/Edit/Delete sendiri), konfirmasi dialog
+                                "Yes, Delete".
+                             [API VERIFICATION]
+                             -> Verify DELETE /api/v2/buzz/shares/<postId>/
+                                comments/<commentId> status === 200.
+                             [UI VERIFICATION]
+                             -> Verify comment hilang dari tampilan, counter
+                                "N Comments" berkurang.
+                             NOTE: endpoint delete comment pakai prefix
+                             "shares" (bukan "posts") -- nama internal
+                             endpoint utk post, dikonfirmasi live. Fitur
+                             berfungsi normal, tidak ada bug ditemukan.
+
+21   TC-BUZZ-21     [DONE]   TC-BUZZ-21-Verify-Infinite-Scroll-Loads-More-Posts.spec.ts
+                             (+) Verify Infinite Scroll Loads More Posts
+                             -> Buka Buzz, catat jumlah post awal (10,
+                                limit=10&offset=0). Scroll ke bawah feed.
+                             Verify: scroll memicu GET /api/v2/buzz/feed
+                             dgn offset > 0 (bukan "Load More" button --
+                             dikonfirmasi TIDAK ADA tombol seperti itu di
+                             UI ini), jumlah post card bertambah (10 -> 16
+                             pada percobaan live). Fitur berfungsi normal.
+
 ================================================================================
   GROUP 3 — SECURITY
 ================================================================================
@@ -446,9 +493,12 @@ No.  Test Case ID   Status   Skenario / Deskripsi
   RINGKASAN HASIL REGRESI TERAKHIR (12 Nov 2026)
 ================================================================================
 
-  Total TC         : 29 (27 + 2 edge-case refresh/connection-drop
-                     ditambahkan 2026-11-12)
-  PASSED           : 22
+  Total TC         : 32 (27 + 2 edge-case refresh/connection-drop + 3 TC
+                     Tahap 3 ditambahkan 2026-11-12: Edit Post/Delete
+                     Comment/Infinite Scroll -- semua PASS, tidak ada bug
+                     aplikasi baru ditemukan di 3 fitur ini, hanya 1 bug
+                     script [lihat NOTE TC-BUZZ-19])
+  PASSED           : 25 (22 + 3 TC baru)
   FAILED (BUG, dikonfirmasi) : 5
     -> TC-BUZZ-05 (BG-178, double-click race condition, High)
     -> TC-BUZZ-SECURITY-03 (BG-173, upload bypass, High, flaky repro)

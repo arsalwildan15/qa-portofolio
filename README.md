@@ -185,9 +185,9 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Admin | 142 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 163 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 59 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
-| Buzz | 29 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
+| Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Leave | 1 | N/A |
-| **Total** | **439** | |
+| **Total** | **442** | |
 
 **Cross-cutting edge cases (2026-11-12):** two scenarios flagged as commonly-forgotten in test design — refreshing mid-submit and a dropped connection mid-submit — were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails due to a dropped network connection, the SPA throws an unhandled JS exception that reaches the console/global error handler instead of being caught at its source, identically reproduced (same exception name) in Admin, PIM, Recruitment, and Buzz. The app does still show the user a generic "Unexpected Error!" toast in all four cases — this is a code-level error-handling defect, not a silent failure the user would never notice. Login is unaffected — its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
 
@@ -248,7 +248,7 @@ Also confirmed: the same unhandled-exception-on-dropped-connection bug as Admin 
 
 Two more distinct bugs confirmed on double-click: rapid double-clicking Save on Add Candidate creates two genuinely duplicate candidate records — this form neither debounces the button nor enforces a unique-email constraint server-side (candidates allow duplicate emails by design, per `TC-RECRUITMENT-CANDIDATE-14`), confirmed via the raw API response bodies returning two distinct candidate IDs, not just a UI-list count. The same scenario on Add Vacancy instead crashes the app's own save handler (`Cannot read properties of undefined (reading 'id')`) without creating a duplicate — a client-side defect, not a data-integrity one.
 
-### Buzz (29 TCs)
+### Buzz (32 TCs)
 
 OrangeHRM's internal social feed, broadcasting posts to every logged-in employee company-wide rather than a scoped role — the widest blast radius of any module tested, so validation gaps here were treated as higher-impact. Organized into `tests/buzz/posts/` (post lifecycle: create/cancel/delete/boundary), `tests/buzz/engagement/` (like/unlike/comment/share/interacting with another employee's post), `tests/buzz/feed-filters/` (the Most Liked / Most Commented tabs), and `tests/buzz/security/` — the same per-category subfolder structure used by Recruitment. Covers: text posts incl. empty/very-long boundary and photo-only boundary (4), valid photo upload, like/unlike, delete own post, comment incl. empty-comment rejection, share-post counter, viewing another employee's post (7), feed filter tabs (2), composer cancel/discard and rapid double-click-submit edge cases (2), plus 11 security TCs — XSS and SQL injection on both post text and comment text, extension-only file-upload bypass via "Share Photo" with a rejected-`.exe` baseline control, a malicious-URL check on the text-only "Share Video" field, cross-origin mutation (CSRF), clickjacking headers, rate limiting on post creation, and a read-only IDOR baseline.
 
@@ -260,6 +260,8 @@ OrangeHRM's internal social feed, broadcasting posts to every logged-in employee
 - The same unhandled-exception-on-dropped-connection bug as Admin, PIM, and Recruitment (**4th and final confirmation**), reproduced identically on create-post.
 
 "Share Video" turned out to be a paste-a-URL field, not a file upload — an initial TC assumed otherwise and was rewritten after live discovery corrected it. IDOR on post/comment access confirmed N/A (same single-role architecture as other modules). A new post does not appear in the feed via client-side state update — a page reload is required to see your own post — documented as an app UX characteristic, not a bug. Two TCs (valid photo upload, SQL injection in comment text) pass reliably in isolation but are flaky when run as part of the full sequential suite, a timing characteristic of the shared public demo under load rather than a product defect.
+
+Three more TCs close out previously-untested features: editing an own post, deleting a comment, and infinite-scroll pagination on the feed. All three work correctly — no new application bugs found. Writing the edit-post test did catch a script bug, though: the "Edit Post" modal renders on top of the still-present main composer, so the page briefly has two `<textarea>` elements (an empty one behind the modal, and the real pre-filled one inside it) — an early version of the test filled the wrong one, silently leaving the post unchanged despite a 200 response.
 
 **Other confirmed bugs:**
 - Resume upload accepts an executable disguised as a `.pdf` — same extension-only validation pattern as PIM
