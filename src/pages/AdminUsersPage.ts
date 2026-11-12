@@ -89,4 +89,37 @@ export class AdminUsersPage extends BasePage {
     await row.locator('.oxd-table-cell-actions button').first().click();
     await this.confirmDeleteButton.click();
   }
+
+  /**
+   * [TEMUAN] Field "Username" di form filter TERLIHAT seperti search box bebas (contoh:
+   * ketik substring untuk narrow-down), tapi API-nya EXACT MATCH case-insensitive --
+   * dikonfirmasi live 2026-11-12: username="ess_han" (lengkap) -> 1 hasil, "ess_ha" (substring)
+   * -> 0 hasil, "Ess_han" (beda kapital, lengkap) -> tetap 1 hasil. Sama kelasnya dgn temuan
+   * lama soal jangan asumsikan perilaku field dari label UI-nya saja (lihat TC-PIM.txt poin 11).
+   */
+  async checkRow(username: string): Promise<void> {
+    await this.rowByUsername(username).locator('input[type="checkbox"]').check({ force: true });
+  }
+
+  /** "Delete Selected" bulk-action button, appears only once >=1 row checkbox is checked. */
+  get deleteSelectedButton(): Locator {
+    return this.page.getByRole('button', { name: /Delete Selected/i });
+  }
+
+  /**
+   * Clicks "Delete Selected" then confirms the "Yes, Delete" dialog, returning the single
+   * bulk DELETE /api/v2/admin/users response. Confirmed live: 1 DELETE request handles every
+   * checked row at once, body shaped {"ids":[<id1>,<id2>,...]} -- NOT one DELETE per row.
+   */
+  async bulkDeleteSelected() {
+    await this.deleteSelectedButton.click();
+    const [resp] = await Promise.all([
+      this.page.waitForResponse(
+        (r) => r.url().endsWith('/api/v2/admin/users') && r.request().method() === 'DELETE',
+        { timeout: 10_000 },
+      ),
+      this.confirmDeleteButton.click(),
+    ]);
+    return resp;
+  }
 }

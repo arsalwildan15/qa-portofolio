@@ -768,7 +768,7 @@ LEGEND SIMBOL SKENARIO
   terhadap backend demo publik yang sama.
 
 ================================================================================
-  TEST CASES: USER MANAGEMENT - USERS (6 TC)
+  TEST CASES: USER MANAGEMENT - USERS (11 TC)
 ================================================================================
 
  1   TC-ADMIN-USER-01   [DONE]   TC-ADMIN-USER-01-Verify-Add-User-Valid.spec.ts
@@ -872,6 +872,46 @@ LEGEND SIMBOL SKENARIO
                              jalur validasi error asli (bukan simulasi
                              network-drop) -- memperkuat bukti trigger-nya
                              ANY non-2xx response.
+
+10   TC-ADMIN-USER-10   [DONE]   TC-ADMIN-USER-10-Verify-Combined-Filter.spec.ts
+                             (+) [API] Verify Combined Filter
+                             -> Filter kombinasi User Role=ESS + Status=
+                                Enabled; filter Username dgn substring vs
+                                full (exact).
+                             [API VERIFICATION]
+                             -> Verify query API berisi userRoleId DAN
+                                status sekaligus (AND).
+                             -> Verify Username substring TIDAK match,
+                                Username lengkap (exact) match.
+                             NOTE [TEMUAN]: Field "Username" di filter
+                                   TAMPAK sbg search box bebas tapi
+                                   sebenarnya EXACT MATCH case-insensitive,
+                                   BUKAN substring/partial search --
+                                   dikonfirmasi live. Bukan bug, tapi UX yg
+                                   berpotensi menyesatkan krn tidak ada
+                                   indikasi visual. Script sempat false-fail
+                                   akibat race condition (response GET dari
+                                   klik Reset tertangkap predicate
+                                   waitForResponse() yg sama dgn filter
+                                   berikutnya) -- diperbaiki dgn menunggu
+                                   response Reset secara eksplisit sblm
+                                   filter selanjutnya.
+
+11   TC-ADMIN-USER-11   [DONE]   TC-ADMIN-USER-11-Verify-Bulk-Delete.spec.ts
+                             (+) [API] Verify Bulk Delete
+                             -> Centang 2 user baru (dibuat khusus utk TC
+                                ini), klik "Delete Selected", confirm "Yes,
+                                Delete".
+                             [API VERIFICATION]
+                             -> Verify SATU DELETE /api/v2/admin/users
+                                membawa KEDUA id sekaligus (body
+                                {"ids":[id1,id2]}), bukan 1 DELETE per row.
+                             -> Verify status 200 dan kedua user hilang dari
+                                list.
+                             NOTE: Pola sama persis dgn bulk delete di
+                                   Languages/Nationalities/Qualifications --
+                                   konfirmasi konsisten app-wide utk pola
+                                   bulk-action generik OrangeHRM.
 
 ================================================================================
   TEST CASES: JOB TITLES (8 TC)
@@ -2023,12 +2063,14 @@ LEGEND SIMBOL SKENARIO
   SUMMARY
 ================================================================================
 
-  Total TC: 142 (138 dari pass pertama-keempat+security + 4 TC edge case
+  Total TC: 144 (138 dari pass pertama-keempat+security + 4 TC edge case
   ditambahkan 2026-11-12: TC-ADMIN-USER-07 refresh mid-submit PASSED,
   TC-ADMIN-USER-08 connection-drop mid-submit FAILED -- BUG APLIKASI
   TERKONFIRMASI, lihat BG-199; TC-ADMIN-USER-09 & TC-ADMIN-JOBTITLE-09
   double-click FAILED -- konfirmasi lagi bug yang sama via jalur 422
-  validasi, lihat BG-203/204). Dengan ini, SEMUA ~16 sub-screen Admin
+  validasi, lihat BG-203/204 + 2 TC tambahan 2026-11-12: TC-ADMIN-USER-10
+  filter kombinasi/exact-match, TC-ADMIN-USER-11 bulk delete). Dengan ini,
+  SEMUA ~16 sub-screen Admin
   (13 sub-screen pass pertama-kedua + 3 sub-screen Organization pass
   ketiga + 8 sub-screen Configuration pass keempat) + security
   lintas-screen + edge-case koneksi SELESAI dicakup -- Admin module

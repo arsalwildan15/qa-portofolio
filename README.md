@@ -182,12 +182,12 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Module | TCs | Docs |
 |--------|----:|------|
 | Login | 45 | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| Admin | 142 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
+| Admin | 144 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 164 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 59 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Leave | 1 | N/A |
-| **Total** | **443** | |
+| **Total** | **445** | |
 
 **Cross-cutting edge cases (2026-11-12):** two scenarios flagged as commonly-forgotten in test design — refreshing mid-submit and a dropped connection mid-submit — were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails due to a dropped network connection, the SPA throws an unhandled JS exception that reaches the console/global error handler instead of being caught at its source, identically reproduced (same exception name) in Admin, PIM, Recruitment, and Buzz. The app does still show the user a generic "Unexpected Error!" toast in all four cases — this is a code-level error-handling defect, not a silent failure the user would never notice. Login is unaffected — its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
 
@@ -203,11 +203,11 @@ Organized into `tests/login/positive/`, `negative/`, `boundary/`, `security/`, a
 
 CSRF and session-fixation checks confirmed **effective** (no bug). Re-verifying the full suite after reorganizing these files into subfolders also surfaced and fixed 2 script bugs unrelated to the reorganization itself: a race condition reading the post-login URL before the redirect completed (`TC-LOGIN-29`), and a cross-origin CSRF check whose UI assertion expected the browser to stay on the attacker's origin, when a real form POST always follows its redirect as normal top-level navigation (`TC-LOGIN-41`) — neither affected the tests' underlying security conclusions.
 
-### Admin (142 TCs)
+### Admin (144 TCs)
 
 Full coverage across all ~16 Admin sub-screens:
 
-- User Management > Users (6)
+- User Management > Users (11, incl. combined filter and bulk delete added 2026-11-12)
 - Job: Job Titles incl. file-upload security (8), Pay Grades (5), Employment Status (5), Job Categories (5), Work Shifts (5)
 - Corporate Branding: logo/banner upload security — validate-only, never clicks "Publish" since it would change the shared demo's global theme (5)
 - Qualifications: Skills incl. a second Description field + IDOR (8), Education — confirmed to use a "Level" field label rather than "Name" (5), Licenses (5), Languages (5), Memberships — admin-level master data, distinct from PIM's employee-level tabs (5)
@@ -226,6 +226,8 @@ Full coverage across all ~16 Admin sub-screens:
 - The same unhandled-exception bug reproduces again on double-click (Users and Job Titles), this time triggered by a real HTTP 422 validation conflict rather than a simulated dropped connection — good independent evidence the defect reacts to any non-2xx response. No duplicate data is created in either case; the server's own unique-name validation rejects the second request.
 
 Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-executable payload by decoding it as a real image client-side. IDOR TCs (Skills, Nationalities, Locations) found no multi-tenant boundary to breach — consistent with this demo's single-admin-role architecture, documented as N/A rather than a false-positive vulnerability. Cross-origin mutation (CSRF) on pay-grade creation confirmed **blocked by CORS** (no bug).
+
+**Users list filter + bulk delete** (`TC-ADMIN-USER-10`/`11`, added 2026-11-12) were previously untested. Combined Role+Status filtering confirmed to AND together server-side as expected. The Username filter field turned out to be **exact-match (case-insensitive), not a substring search** — it looks like a plain free-text search box with no visual hint that it needs the full username, which is a UX gap worth flagging even though the server behavior itself isn't wrong. Bulk delete (checkbox-select 2+ rows → "Delete Selected") confirmed to send a single `DELETE` with `{"ids":[...]}` for every selected row at once, the same pattern already seen on Languages/Nationalities/Qualifications.
 
 ### PIM (164 TCs)
 

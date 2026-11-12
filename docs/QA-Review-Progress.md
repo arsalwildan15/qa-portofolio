@@ -1318,3 +1318,40 @@ docs/TC-PIM.txt diupdate (+1 TC, Total 163->164, Fase 2 71->72, Job 8->9). READM
 
 **SISA TAHAP 3 (update):** Admin (filter kombinasi/bulk action), Login (reset password flow).
 Tahap 4: regresi penuh final + dokumentasi.
+
+## UPDATE 2026-11-12 (lanjutan) -- Admin Users: Filter Kombinasi & Bulk Delete
+
+Investigasi live di Admin > User Management > Users. Modul ini hanya punya 9 TC sebelumnya
+(validasi form Add + edge case refresh/connection-drop/double-click), BELUM PERNAH diuji utk
+filter list maupun bulk delete sama sekali.
+
+**TC-ADMIN-USER-10 (Filter Kombinasi):** Role+Status dikonfirmasi AND di query API
+(`userRoleId=<id>&status=<0|1>` sekaligus). **Temuan:** field "Username" TAMPAK sbg search box
+bebas tapi API-nya EXACT MATCH case-insensitive, BUKAN substring -- dikonfirmasi live:
+username lengkap match, substring dari username yg sama TIDAK match, beda kapital (lengkap)
+tetap match. Bukan bug, tapi UX yg berpotensi menyesatkan (pola sama dgn pelajaran lama di
+TC-PIM.txt poin 11 -- jangan asumsikan perilaku field dari tampilan UI). **Bug skrip ditemukan
+& diperbaiki:** race condition -- response GET dari klik "Reset" (unfiltered, total ~19-22)
+tertangkap SALAH oleh `waitForResponse()` predicate filter berikutnya krn masih in-flight saat
+step selanjutnya dimulai, menyebabkan false-fail berulang (3x run awal semua gagal dgn total
+yg mencurigakan cocok persis jumlah unfiltered). Diperbaiki dgn menunggu response Reset secara
+eksplisit sblm lanjut ke filter berikutnya. Setelah fix: 3/3 run stabil.
+
+**TC-ADMIN-USER-11 (Bulk Delete):** checkbox-select 2 user baru (dibuat khusus utk TC ini via
+helper baru `createTestUser()`, TIDAK menyentuh user lain yg sudah ada di demo publik) ->
+tombol "Delete Selected" muncul -> confirm "Yes, Delete" -> SATU DELETE
+`/api/v2/admin/users` membawa KEDUA id sekaligus (`{"ids":[id1,id2]}`), bukan 1 DELETE per
+row -- pola sama persis dgn bulk delete di Languages/Nationalities/Qualifications (konfirmasi
+konsisten app-wide). 3/3 run stabil tanpa perlu perbaikan tambahan.
+
+File baru: `src/utils/createTestUser.ts` (pola retry sama dgn `createTestEmployee.ts`, beda
+trigger: username collision bukan Employee Id collision), `tests/admin/users/TC-ADMIN-USER-10-*`,
+`tests/admin/users/TC-ADMIN-USER-11-*`. Helper baru di `AdminUsersPage.ts`: `checkRow()`,
+`deleteSelectedButton`, `bulkDeleteSelected()`.
+
+docs/TC-Admin.txt diupdate (+2 TC, Total 142->144, header Users 6 TC -> 11 TC -- header lama
+tidak pernah diupdate sejak TC-07/08/09 ditambahkan sebelumnya, dikoreksi sekalian).
+README.md diupdate (Admin TC count, narasi filter+bulk delete, grand Total project +2 jadi 445).
+
+**SISA TAHAP 3 (update):** Login (reset password flow sesungguhnya). Tahap 4: regresi penuh
+final + dokumentasi.
