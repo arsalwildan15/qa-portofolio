@@ -1151,9 +1151,17 @@ LEGEND SIMBOL SKENARIO
                              properties of undefined (reading 'id')" di
                              handler Proxy.onSave milik app -- indikasi
                              onSave tidak guard terhadap dipanggil ganda/
-                             state yang belum siap. Deterministik reproduce
-                             3x. Severity Medium: code-quality defect
-                             nyata, dampak ke user minim krn tidak ada
+                             state yang belum siap. VERIFIKASI ULANG 12 Nov
+                             2026 (atas permintaan user): deterministik
+                             reproduce 9 dari 9 run saat kondisi test
+                             representatif thd TC asli ini (listener
+                             console/pageerror terpasang SEBELUM navigasi,
+                             via TestReport constructor) -- sempat 0/8 di
+                             script verifikasi ad-hoc terpisah krn artefak
+                             metodologi (listener dipasang TERLAMBAT,
+                             setelah form diisi), sudah diklarifikasi.
+                             Severity Medium: code-quality defect nyata,
+                             dampak ke user minim krn tidak ada
                              kehilangan/korup data.
 
 17   TC-RECRUITMENT-CANDIDATE-17   [DONE]   TC-RECRUITMENT-CANDIDATE-17-Verify-List-Filters-Combination.spec.ts
@@ -1261,11 +1269,16 @@ LEGEND SIMBOL SKENARIO
                              "duplicate email diizinkan") -- double-click
                              membuat 2 candidate record BERBEDA ID yang
                              SUNGGUHAN tersimpan (dikonfirmasi via response
-                             body: id=107 dan id=108 pada 1 run). Intermiten:
-                             2 dari 3 run isolasi mereproduce duplikat
-                             nyata, 1 run hanya 1 request sempat terkirim
-                             (window race sempit). Severity High -- data
-                             integrity nyata terdampak, bukan cosmetic.
+                             body, bukan UI list/pagination). RATE
+                             REPRODUKSI DIVERIFIKASI ULANG 12 Nov 2026 (atas
+                             permintaan user, 6 run bersih terpisah): 2 dari
+                             6 run (~33%) menghasilkan 2 id berbeda (contoh:
+                             82+83, 84+85), 4 dari 6 run hanya 1 request
+                             sempat terkirim (window race sempit). Race
+                             condition probabilistik murni berbasis timing,
+                             BUKAN deterministik. Severity High tetap
+                             berlaku krn saat reproduce, data integrity
+                             nyata terdampak, bukan cosmetic.
 
 12   TC-RECRUITMENT-STATUS-12   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-12-Verify-Offer-Job-To-Hired.spec.ts
                              (+) Verify Offer Job to Hired, Full State Machine Chain
