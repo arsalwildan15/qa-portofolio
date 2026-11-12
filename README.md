@@ -181,25 +181,26 @@ If targeting a different environment for a local run, set these in `.env` (copie
 
 | Module | TCs | Docs |
 |--------|----:|------|
-| Login | 45 | [docs/TC-Login.txt](docs/TC-Login.txt) |
+| Login | 46 | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | Admin | 144 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 164 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 59 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Leave | 1 | N/A |
-| **Total** | **445** | |
+| **Total** | **446** | |
 
 **Cross-cutting edge cases (2026-11-12):** two scenarios flagged as commonly-forgotten in test design — refreshing mid-submit and a dropped connection mid-submit — were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails due to a dropped network connection, the SPA throws an unhandled JS exception that reaches the console/global error handler instead of being caught at its source, identically reproduced (same exception name) in Admin, PIM, Recruitment, and Buzz. The app does still show the user a generic "Unexpected Error!" toast in all four cases — this is a code-level error-handling defect, not a silent failure the user would never notice. Login is unaffected — its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
 
 A third scenario — rapid double-click on Save — was then extended to the two modules that didn't have it yet (Admin Users/Job Titles, Recruitment Candidates/Vacancies; Login, PIM, and Buzz already covered it). This surfaced two more distinct confirmed bugs: a genuine data-integrity issue on Recruitment Candidates (double-click creates two real duplicate records, since this form neither debounces the button nor enforces a unique-email constraint server-side) and a client-side crash on Recruitment Vacancies (`Cannot read properties of undefined (reading 'id')` in the app's own save handler). On Admin, double-click reproduced the same app-wide unhandled-exception bug again — this time triggered by a real 422 validation conflict rather than a simulated network drop, which is good independent evidence the underlying defect reacts to any non-2xx response, not just network failures.
 
-### Login (45 TCs)
+### Login (46 TCs)
 
 Organized into `tests/login/positive/`, `negative/`, `boundary/`, `security/`, and `edge/` — one subfolder per scenario group, the same per-category structure used by the other modules.
 
 **Confirmed bugs:**
 - No rate limiting/lockout after repeated failed logins
 - Missing `X-Frame-Options` / CSP `frame-ancestors` (clickjacking)
+- Submitting Reset Password with a valid username **intermittently hangs with no response** (`TC-LOGIN-46`, added 2026-11-12) — not deterministic, but reproducible well above noise level: 4/4 when run back-to-back in quick succession, ~29% (2/7) when run as isolated, separately-launched runs. An invalid username always completes quickly (~3-6s) by contrast, so this is specific to whatever the valid-username path triggers — most likely an attempt to send a real reset email through SMTP that isn't reachable from this public demo. The exact server-side cause can't be confirmed from the client side, but the practical effect is real: a genuine user on this demo can't reliably reset their password.
 
 CSRF and session-fixation checks confirmed **effective** (no bug). Re-verifying the full suite after reorganizing these files into subfolders also surfaced and fixed 2 script bugs unrelated to the reorganization itself: a race condition reading the post-login URL before the redirect completed (`TC-LOGIN-29`), and a cross-origin CSRF check whose UI assertion expected the browser to stay on the attacker's origin, when a real form POST always follows its redirect as normal top-level navigation (`TC-LOGIN-41`) — neither affected the tests' underlying security conclusions.
 

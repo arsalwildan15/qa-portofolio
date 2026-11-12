@@ -37,4 +37,16 @@ export class LoginPage extends BasePage {
     await this.passwordInput.fill(password);
     await this.passwordInput.press('Enter');
   }
+
+  async gotoResetPassword(): Promise<void> {
+    await this.page.goto('/web/index.php/auth/requestPasswordResetCode');
+  }
+
+  get resetPasswordUsernameInput(): Locator {
+    return this.page.locator('input[name="username"]');
+  }
+
+  get resetPasswordSubmitButton(): Locator {
+    return this.page.getByRole('button', { name: /reset password/i });
+  }
 }

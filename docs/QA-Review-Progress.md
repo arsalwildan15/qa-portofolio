@@ -1355,3 +1355,52 @@ README.md diupdate (Admin TC count, narasi filter+bulk delete, grand Total proje
 
 **SISA TAHAP 3 (update):** Login (reset password flow sesungguhnya). Tahap 4: regresi penuh
 final + dokumentasi.
+
+## UPDATE 2026-11-12 (lanjutan) -- Login: Reset Password Flow Sesungguhnya (TC-LOGIN-46)
+
+Gap: TC-LOGIN-40 (sudah ada) cuma verifikasi link "Forgot your password?" MENAVIGASI ke halaman
+Reset Password -- belum pernah ada TC yang benar-benar MENGISI username lalu SUBMIT form reset
+password itu sendiri. Atas saran user (jangan pakai akun "Admin" bersama yang tertera di
+halaman login publik, bikin user baru saja dulu -- lebih aman, tidak berisiko mengganggu akun
+shared demo), ditambahkan `createTestUser()` dari TC Admin sebelumnya dipakai utk membuat user
+baru khusus investigasi ini.
+
+**Investigasi penuh drama false-start sebelum dapat kesimpulan benar:**
+1. Percobaan pertama pakai akun "Admin" -> request MENGGANTUNG >114 detik tanpa selesai.
+2. Dicoba lagi dgn user baru -> awalnya tampak CAMPUR ACAK (kadang `click()` resolve nyaris
+   instan tanpa navigasi, kadang hang) -- ternyata itu BUG METODOLOGI SENDIRI: `click()`
+   Playwright tidak menunggu hasil navigasi selesai, cuma menunggu aksi klik ter-dispatch, jadi
+   cek `page.url()` segera setelah `click()` resolve itu PREMATUR dan menyesatkan.
+3. Diperbaiki pakai `page.waitForURL()` yang BENAR-BENAR menunggu navigasi selesai -> 4 trial
+   BERURUTAN cepat (1 proses, workers=1) -> HASIL BERSIH 4/4 menggantung (53-68 detik, tdk
+   pernah selesai).
+4. TC resmi (`TC-LOGIN-46`) ditulis dan dijalankan 7x sbg proses TERPISAH (bukan berurutan
+   cepat dlm 1 file) -> hasil BERBEDA: 5 PASS (selesai cepat, 20-40 detik) + 2 FAIL
+   (menggantung) = ~29%. Pola ini mengindikasikan endpoint reset-password kemungkinan sensitif
+   terhadap beban/request berurutan, BUKAN bug 100% deterministik per klik, tapi JELAS BUKAN
+   noise acak biasa (pola konsisten direplikasi lintas sesi investigasi terpisah, dan SELALU
+   spesifik ke username VALID -- username tidak valid SELALU selesai cepat).
+
+**Kesimpulan:** BG-224 (Medium severity) -- bug intermiten dicatat APA ADANYA (tidak
+disederhanakan jadi "selalu gagal" atau "flaky noise, abaikan"), dengan data reproduksi
+kuantitatif lengkap di JSDoc TC dan Bug-List. Root cause diduga SMTP server-side yang tidak
+terkonfigurasi di demo publik ini, tapi TIDAK BISA dipastikan dari sisi kita.
+
+**[CATATAN PENTING -- ditemukan saat investigasi ini]** Seluruh verifikasi TC di sesi ini
+(TC-PIM-JOB-09, TC-ADMIN-USER-10/11, TC-LOGIN-46) dijalankan dgn flag `--reporter=list`, yang
+TERNYATA meng-OVERRIDE array reporters di playwright.config.ts -- termasuk `bugListReporter.ts`
+yang seharusnya auto-mencatat kegagalan ke Bug-List.xlsx. Akibatnya BG-224 TIDAK ter-auto-catat
+meski TC-LOGIN-46 gagal 2x -- ditambahkan MANUAL via openpyxl. Perlu diingat utk run verifikasi
+berikutnya: pakai reporter default config (TANPA override `--reporter=list`) kalau ingin
+Bug-List auto-update, atau tetap tambahkan manual spt yang dilakukan di sini.
+
+File baru: `tests/login/edge/TC-LOGIN-46-Verify-Reset-Password-Request-Completes.spec.ts`.
+Helper baru di `LoginPage.ts`: `gotoResetPassword()`, `resetPasswordUsernameInput`,
+`resetPasswordSubmitButton`. Bug-List.xlsx: BG-224 ditambahkan manual.
+
+docs/TC-Login.txt diupdate (+1 TC, Total 45->46, Unexpected/Edge 16->17). README.md diupdate
+(Login TC count, narasi BG-224, grand Total project +1 jadi 446).
+
+**TAHAP 3 SELESAI SEPENUHNYA.** Semua item (PIM Terminate Employee, Admin filter+bulk action,
+Login reset password) sudah diinvestigasi, diuji, dan didokumentasikan. **LANJUT TAHAP 4:**
+regresi penuh final seluruh modul + dokumentasi penutup.

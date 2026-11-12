@@ -558,16 +558,50 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              User harus navigasi ulang ke halaman login,
                              sekadar "coba lagi di tempat" tidak akan jalan.
 
+46   TC-LOGIN-46    [DONE]   TC-LOGIN-46-Verify-Reset-Password-Request-Completes.spec.ts
+                             (!) [BUG] Verify Reset Password Request Completes
+                             -> Buat user baru khusus (bukan akun Admin
+                                bersama), logout, buka halaman Reset
+                                Password, isi username valid, submit.
+                             Verify: request selesai (redirect ke
+                             /auth/sendPasswordReset) dlm 20 detik.
+                             NOTE: [BUG TERKONFIRMASI -- BG-224, INTERMITEN
+                                   bukan deterministik] Submit dgn username
+                                   VALID apapun (Admin maupun user baru)
+                                   KADANG menggantung tanpa pernah selesai
+                                   (ditunggu 53-68 detik, tdk selesai).
+                                   Data reproduksi: 4 trial berurutan cepat
+                                   -> 4/4 menggantung; 7 run TC resmi
+                                   terpisah -> 5 PASS + 2 FAIL (~29%).
+                                   Username TIDAK VALID selalu selesai
+                                   cepat (~3-6 detik) -- masalah spesifik ke
+                                   proses kirim email reset utk username
+                                   valid. Dugaan kuat: SMTP server-side yg
+                                   tidak terkonfigurasi/tidak bisa diakses
+                                   di demo publik ini; root cause pasti
+                                   tidak bisa dipastikan (infrastruktur, di
+                                   luar kendali kita). TC INI PASS/FAIL
+                                   mengikuti perilaku intermiten tsb secara
+                                   jujur, bukan di-mask -- itu karakteristik
+                                   bug ini, bukan TC yang salah.
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases : 45
+  Total Test Cases : 46
   Positive         : 6  (TC-01 s/d TC-06)
   Negative         : 9  (TC-07 s/d TC-12, TC-14 s/d TC-16)
   Boundary         : 4  (TC-17 s/d TC-20)
   Security         : 10 (TC-21 s/d TC-27, TC-41 s/d TC-43)
-  Unexpected/Edge  : 16 (TC-13, TC-28 s/d TC-40, TC-44, TC-45)
+  Unexpected/Edge  : 17 (TC-13, TC-28 s/d TC-40, TC-44 s/d TC-46)
+
+  UPDATE 2026-11-12 (tambahan): TC-LOGIN-46 (Reset Password Request
+  Completes) ditambahkan -- gap sebelumnya: TC-LOGIN-40 cuma verifikasi
+  LINK-nya menavigasi, belum pernah ada TC yang benar-benar SUBMIT form
+  reset password. Ditemukan bug intermiten BG-224 (request kadang
+  menggantung utk username valid, lihat detail di entry TC-LOGIN-46 di
+  atas).
 
   STATUS PER 2026-11-11 (hasil regression audit penuh, SEMUA 43 TC SUDAH
   berhasil dijalankan sampai selesai — BATCH 1 TUNTAS 100%):
