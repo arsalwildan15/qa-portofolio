@@ -496,7 +496,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify response.status() === 200.
                              -> Verify URL query param mengandung "empStatusId"
                                 (BUKAN "employmentStatus" seperti dugaan awal
-                                dari label UI — lihat CATATAN TEKNIS).
+                                dari label UI, lihat CATATAN TEKNIS).
 
  4   TC-PIM-LIST-04    [DONE]   TC-PIM-LIST-04-Verify-Filter-By-Sub-Unit.spec.ts
                              (+) Verify Filter By Sub Unit
@@ -519,7 +519,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              NOTE: [BUG SCRIPT, DIPERBAIKI] Predicate
                                    waitForResponse generik (cuma cek endpoint+
                                    method) sempat menangkap GET yang salah akibat
-                                   race condition — ada GET interim yang terpicu
+                                   race condition, ada GET interim yang terpicu
                                    sebelum state dropdown ter-commit penuh.
                                    Diperbaiki dengan memperketat predicate supaya
                                    WAJIB mengandung "includeEmployees=
@@ -553,7 +553,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    melainkan klik ikon kecil
                                    .oxd-table-header-sort-icon yang membuka
                                    dropdown opsi "Ascending"/"Descending"
-                                   eksplisit — sudah jadi hard-check penuh,
+                                   eksplisit, sudah jadi hard-check penuh,
                                    bukan finding lagi.
 
  8   TC-PIM-LIST-08    [DONE]   TC-PIM-LIST-08-Verify-Pagination-Next-Page.spec.ts
@@ -579,7 +579,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify "No Records Found" visible.
                              NOTE: Employee Id search field TIDAK membatasi
                                    panjang input di client (beda dari form Add
-                                   Employee) — ID >10 karakter dikirim ke
+                                   Employee), ID >10 karakter dikirim ke
                                    server, server balas 422, dan UI diam-diam
                                    fallback menampilkan SEMUA data tanpa filter
                                    alih-alih "No Records Found" (temuan
@@ -628,7 +628,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 sesudah Cancel (TIDAK ada yang terhapus).
                              NOTE: teks ringkasan "(N) Records Found" TIDAK
                                    muncul kembali setelah modal ditutup via
-                                   Cancel (dikonfirmasi langsung) — dicatat
+                                   Cancel (dikonfirmasi langsung), dicatat
                                    via report.finding() terpisah, bukan jadi
                                    verifikasi utama (yang dipakai: jumlah
                                    baris tabel, lebih reliable).
@@ -720,7 +720,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify pesan "Employee Id already exists" visible.
                              -> Verify POST TIDAK pernah terkirim ke server.
                              NOTE: dikonfirmasi langsung via live discovery
-                                   session — auto-generated ID sempat collide
+                                   session, auto-generated ID sempat collide
                                    dan perilaku ini terekam nyata, bukan asumsi.
 
 23   TC-PIM-ADD-09     [DONE]   TC-PIM-ADD-09-Verify-Create-Login-Username-Already-Taken.spec.ts
@@ -808,7 +808,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 crash).
                              NOTE: teks "Recommended dimensions" di UI
                                    ternyata hanya rekomendasi, bukan hard
-                                   validation — foto 2000x2000 DITERIMA tanpa
+                                   validation, foto 2000x2000 DITERIMA tanpa
                                    penolakan (dicatat via report.finding()).
 
 32   TC-PIM-ADD-18     [DONE]   TC-PIM-ADD-18-Verify-XSS-In-First-Name.spec.ts
@@ -841,7 +841,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify pesan "Should not exceed 10 characters"
                                 muncul.
                              NOTE: payload ini diblokir oleh validasi PANJANG
-                                   generik, BUKAN sanitasi/filter XSS khusus —
+                                   generik, BUKAN sanitasi/filter XSS khusus,
                                    payload XSS yang muat di bawah 10 karakter
                                    belum tentu tertangkap. Dokumentasi
                                    observasi, bukan klaim field ini anti-XSS.
@@ -887,7 +887,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify URL berhasil berpindah ke Employee List.
                              NOTE: TIDAK ADA warning dialog (browser-native
                                    maupun modal aplikasi) saat ada perubahan
-                                   belum tersimpan — data yang sudah diketik
+                                   belum tersimpan, data yang sudah diketik
                                    hilang diam-diam tanpa pemberitahuan
                                    (dikonfirmasi langsung, dicatat sebagai
                                    finding UX, bukan hard-fail karena tidak
@@ -902,7 +902,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              [UI VERIFICATION]
                              -> Verify salah satu terjadi: validasi "Required"
                                 muncul, ATAU redirect ke Personal Details
-                                (server generate ID baru) — dicatat outcome
+                                (server generate ID baru), dicatat outcome
                                 aktualnya via report.finding().
 
 40   TC-PIM-ADD-27     [DONE]   TC-PIM-ADD-27-Verify-Cancel-Button-Discards-Form.spec.ts
@@ -924,10 +924,10 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 ditolak (hard-fail kalau malah diterima 200).
                              NOTE: [BUG DIKONFIRMASI] File executable LOLOS
                                    validasi dan tersimpan sebagai foto profil
-                                   (status 200) — validasi upload cuma cek
+                                   (status 200), validasi upload cuma cek
                                    EKSTENSI nama file, bukan konten/magic
                                    bytes. Bandingkan dengan TC-PIM-ADD-31
-                                   (ekstensi asli .exe memang ditolak) — jadi
+                                   (ekstensi asli .exe memang ditolak), jadi
                                    validasinya ADA tapi bisa di-bypass dengan
                                    rename ekstensi sederhana.
 
@@ -940,7 +940,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify POST SEHARUSNYA ditolak (hard-fail kalau
                                 diterima 200).
                              NOTE: [BUG DIKONFIRMASI] Pola sama persis dengan
-                                   TC-PIM-ADD-28 — APK juga lolos dan tersimpan
+                                   TC-PIM-ADD-28, APK juga lolos dan tersimpan
                                    sebagai foto profil, membuktikan bug ini
                                    bukan kasus khusus .exe saja.
 
@@ -953,7 +953,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify validator menolak berdasarkan ekstensi
                                 TERAKHIR (pesan "not allowed"/"invalid" muncul).
                              NOTE: [TEMUAN POSITIF] Trik double-extension TIDAK
-                                   bisa bypass validasi — validator memang cek
+                                   bisa bypass validasi, validator memang cek
                                    ekstensi terakhir yang sebenarnya, bukan
                                    tertipu substring ".jpg" di tengah nama file.
 
@@ -965,7 +965,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify pesan "File type not allowed" muncul.
                              -> Verify belum ada POST employees terkirim dari
                                 aksi ini.
-                             NOTE: baseline pembanding utk ADD-28/29/30 —
+                             NOTE: baseline pembanding utk ADD-28/29/30,
                                    membuktikan validasi ADA dan berfungsi untuk
                                    file tanpa trik, cuma bisa di-bypass dengan
                                    rename ekstensi.
@@ -1065,7 +1065,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 employee baru (dicatat via report.finding()).
                              NOTE: section "Custom Fields" TIDAK muncul pada
                                    employee yang baru dibuat di environment
-                                   ini (dikonfirmasi langsung) — kemungkinan
+                                   ini (dikonfirmasi langsung), kemungkinan
                                    bergantung konfigurasi Admin, bukan
                                    tersedia default. TC ini mendokumentasikan
                                    temuan tsb, bukan hard-fail.
@@ -1130,7 +1130,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 begitu saja).
                              NOTE: [BUG DIKONFIRMASI, SAMA PERSIS DENGAN
                                    TC-PIM-ADD-28] exe-renamed-.jpg JUGA
-                                   diterima tanpa error di titik upload ini —
+                                   diterima tanpa error di titik upload ini,
                                    membuktikan bug validasi-cuma-ekstensi
                                    BUKAN kasus khusus Add Employee, tapi
                                    berlaku juga di re-upload foto dari
@@ -1157,7 +1157,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              NOTE: PUT contact-details mengembalikan KEY yang
                                    benar tapi SEMUA value-nya null, bukan echo
                                    data yang baru disimpan (beda dari POST Add
-                                   Employee yang echo input) — verifikasi
+                                   Employee yang echo input), verifikasi
                                    persistensi sesungguhnya butuh GET terpisah.
 
 59   TC-PIM-CONTACT-02  [DONE]  TC-PIM-CONTACT-02-Verify-Save-With-All-Fields-Empty-Succeeds.spec.ts
@@ -1221,7 +1221,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify TIDAK ada dialog warning terpicu.
                              -> Verify URL berpindah ke Job (navigasi berhasil).
                              NOTE: sama seperti TC-PIM-ADD-25, pindah tab tanpa
-                                   Save tidak memicu konfirmasi apapun — data
+                                   Save tidak memicu konfirmasi apapun, data
                                    yang diisi hilang diam-diam.
 
 65   TC-PIM-CONTACT-08  [DONE]  TC-PIM-CONTACT-08-Verify-Attachment-Upload.spec.ts
@@ -1234,7 +1234,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              [UI VERIFICATION]
                              -> Verify nama file muncul di tabel Attachments.
                              NOTE: TC representatif untuk pola "Attachments"
-                                   yang muncul di 7 dari 9 tab Fase 2 — tidak
+                                   yang muncul di 7 dari 9 tab Fase 2, tidak
                                    diulang per tab karena polanya identik.
 
 66   TC-PIM-CONTACT-09  [DONE]  TC-PIM-CONTACT-09-Verify-Exe-Attachment-Upload-Security.spec.ts
@@ -1245,7 +1245,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify file DITOLAK (pesan error ATAU tidak
                                 ada POST attachment terkirim).
                              NOTE: [TEMUAN POSITIF] Attachments menolak exe
-                                   dengan benar — BEDA dari upload foto profil
+                                   dengan benar, BEDA dari upload foto profil
                                    (TC-PIM-ADD-28/TC-PIM-PD-13) yang justru
                                    lolos. Bug validasi-ekstensi-saja SPESIFIK
                                    ke komponen upload foto, tidak meluas ke
@@ -1268,7 +1268,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    Title tertentu memicu GET
                                    .../job-titles/<id>/specification yang 404
                                    kalau Job Title tsb belum punya dokumen
-                                   spesifikasi — console error 404 REAL, tapi
+                                   spesifikasi, console error 404 REAL, tapi
                                    tidak 100% deterministik (bergantung Job
                                    Title mana yang kebetulan terpilih di
                                    posisi nth(1)). Diobservasi FAILED di
@@ -1276,7 +1276,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    yang kepilih sudah punya dokumen. TC ini
                                    SENGAJA dibiarkan FAILED saat reproduce
                                    (bukan test.fail()) supaya tercatat di
-                                   Bug-List — auto-close saat PASSED TIDAK
+                                   Bug-List, auto-close saat PASSED TIDAK
                                    berarti bug fix permanen, cuma kebetulan
                                    Job Title yang kepilih aman.
 
@@ -1316,7 +1316,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify server tidak crash (status < 500 atau
                                 PUT tidak terkirim).
                              NOTE: tahun 2099 DITERIMA tanpa validasi logis
-                                   apapun — tidak ada pengecekan "tanggal
+                                   apapun, tidak ada pengecekan "tanggal
                                    bergabung tidak boleh di masa depan"
                                    (dicatat via report.finding()).
 
@@ -1327,7 +1327,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Buka Employee List, search employee ini.
                              [UI VERIFICATION]
                              -> Verify kolom Employment Status di Employee
-                                List menampilkan "Full-Time Permanent" —
+                                List menampilkan "Full-Time Permanent",
                                 cross-screen check data konsisten.
 
 73   TC-PIM-JOB-07       [DONE]  TC-PIM-JOB-07-Verify-Save-Without-Changes-Is-Idempotent.spec.ts
@@ -1347,7 +1347,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify PUT /employment-contract status === 200.
                              NOTE: 1 klik Save di tab Job memicu DUA endpoint
                                    sekaligus (bukan 1 endpoint gabungan seperti
-                                   dugaan awal) — beda dari Contact Details/Add
+                                   dugaan awal), beda dari Contact Details/Add
                                    Employee yang cuma 1 endpoint per Save.
 
 75   TC-PIM-JOB-09       [DONE]  TC-PIM-JOB-09-Verify-Terminate-Employment.spec.ts
@@ -1365,7 +1365,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    Job Details di background; background itu
                                    punya input "Joined Date" dgn placeholder
                                    SAMA ("yyyy-dd-mm") + dropdown/Save sendiri
-                                   — locator tanpa scope ke
+                                  , locator tanpa scope ke
                                    page.getByRole('dialog') resolve ke 2+
                                    elemen (strict-mode violation). Pola root
                                    cause IDENTIK dgn bug skrip Buzz "Edit
@@ -1374,16 +1374,16 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    semua locator modal ke dialog.
                              NOTE 2 [TEMUAN APLIKASI]: Tombol TIDAK update
                                    client-side tanpa reload setelah API
-                                   sukses — pola SAMA dgn Buzz (post baru
+                                   sukses, pola SAMA dgn Buzz (post baru
                                    tidak muncul tanpa reload). Bukan bug,
                                    tapi karakteristik app ini scr konsisten:
                                    TC sengaja reload + waitForLoadState
                                    ('networkidle') sblm verify tombol
                                    (goto() resolve on commit, bukan on data
-                                   fetch section ini — fixed timeout saja
+                                   fetch section ini, fixed timeout saja
                                    flaky ~2/3 run, dikonfirmasi via rerun).
                              NOTE 3 [TEMUAN MINOR]: Typo "Activiation" di
-                                   judul section — ada di aplikasi sendiri,
+                                   judul section, ada di aplikasi sendiri,
                                    bukan di dokumentasi/skrip.
                              Diverifikasi stabil 3x run terisolasi.
 
@@ -1417,7 +1417,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify "At least one phone number is
                                 required" muncul.
                              -> Verify TEPAT 1 error (Name/Relationship TIDAK
-                                ikut error) — membuktikan validasi phone
+                                ikut error), membuktikan validasi phone
                                 cross-field (OR 3 kolom), bukan optional biasa.
 
 78   TC-PIM-EMERGENCY-04  [DONE]  TC-PIM-EMERGENCY-04-Verify-Name-Very-Long-Text.spec.ts
@@ -1517,7 +1517,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              [API VERIFICATION]
                              -> Verify tidak ada response 5xx.
                              NOTE: tahun 2099 DITERIMA sebagai Date of Birth
-                                   tanpa validasi logis — tidak ada
+                                   tanpa validasi logis, tidak ada
                                    pengecekan "tidak boleh di masa depan"
                                    (dicatat via report.finding()).
 
@@ -1563,7 +1563,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify TIDAK ada dialog alert() terpicu.
                              NOTE: payload semula ditarget ke "Issued By",
                                    tapi dikonfirmasi live field itu DROPDOWN
-                                   bukan text input — dipindah ke Comments
+                                   bukan text input, dipindah ke Comments
                                    (textarea, benar-benar free text).
 
 94   TC-PIM-IMMIGRATION-05  [DONE]  TC-PIM-IMMIGRATION-05-Verify-SQL-Injection-In-Comments.spec.ts
@@ -1630,7 +1630,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              [API VERIFICATION]
                              -> Verify tidak ada response 5xx.
                              NOTE: Amount "-5000" DITERIMA tanpa validasi
-                                   logis — tidak ada pengecekan "gaji tidak
+                                   logis, tidak ada pengecekan "gaji tidak
                                    boleh negatif" (dicatat via
                                    report.finding()).
 
@@ -1740,7 +1740,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 /employees/<empNumber>/, klik Save.
                              [API VERIFICATION]
                              -> Verify POST .../supervisors terpanggil dengan
-                                status 200 — MEMBUKTIKAN save selalu berhasil
+                                status 200, MEMBUKTIKAN save selalu berhasil
                                 di sisi server, independen dari masalah
                                 verifikasi UI di TC-01/03/06.
 
@@ -1756,7 +1756,7 @@ No.  Test Case ID      Status   Kategori           Skenario
   lain yang tadinya PASS, sehingga DIKEMBALIKAN ke pendekatan text-match
   original atas keputusan user. Perlu investigasi lebih lanjut di sesi lain
   kalau ingin dituntaskan (lihat riwayat lengkap di
-  docs/QA-Review-Progress.md, bagian BATCH 3 — PIM).
+  docs/QA-Review-Progress.md, bagian BATCH 3, PIM).
 
 ================================================================================
   FASE 2 - GROUP 8: QUALIFICATIONS (10 TC)
@@ -1773,7 +1773,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 Experience.
                              NOTE: Qualifications punya 5 sub-section (Work
                                    Experience, Education, Skills, Languages,
-                                   License) — TC 01-06 fokus mendalam di Work
+                                   License), TC 01-06 fokus mendalam di Work
                                    Experience, TC 07-10 representatif utk
                                    4 sub-section lain.
 
@@ -1860,7 +1860,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify License Type yang dipilih muncul di
                                 tabel License.
                              NOTE: sub-section terakhir dari 5 sub-section
-                                   Qualifications — sekarang semuanya
+                                   Qualifications, sekarang semuanya
                                    tercakup minimal 1 TC.
 
 ================================================================================
@@ -1947,7 +1947,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 semula di akhir test (site-wide config,
                                 wajib restore).
                              NOTE: [TEMUAN] persistensi state setelah reload
-                                   TIDAK konsisten di demo publik ini —
+                                   TIDAK konsisten di demo publik ini,
                                    kadang persist, kadang tidak, meski
                                    langkah toggle dan PUT 200 selalu sama.
                                    Kemungkinan eventual-consistency di sisi
@@ -1980,7 +1980,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 (tetap sukses meski tidak ada perubahan net).
                              [UI VERIFICATION]
                              -> Verify state kembali ke kondisi awal setelah
-                                toggle 2x (net no-op) — TC ini secara desain
+                                toggle 2x (net no-op), TC ini secara desain
                                 self-restoring, tidak butuh langkah restore
                                 terpisah.
 
@@ -2043,7 +2043,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    exception saat TC ini dijalankan
                                    BERBARENGAN dengan TC lain yang juga
                                    menulis ke custom-fields (parallel run),
-                                   tapi saat diisolasi selalu bersih —
+                                   tapi saat diisolasi selalu bersih,
                                    kemungkinan race condition concurrent
                                    write di server demo, BUKAN defect terkait
                                    panjang Field Name itu sendiri.
@@ -2110,7 +2110,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 (ditolak, bukan diproses).
                              NOTE: beda dari upload foto profil, endpoint ini
                                    memproses ISI file sebagai data (bukan
-                                   cuma simpan file mentah) — exe-as-csv yang
+                                   cuma simpan file mentah), exe-as-csv yang
                                    "lolos" bisa berarti server mencoba parse
                                    konten biner sebagai CSV (potensi
                                    hang/DoS), bukan cuma tersimpan diam-diam.
@@ -2218,7 +2218,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              NOTE: dikonfirmasi live hasilnya SILENTLY
                                    BLOCKED (TIDAK ada error UI yang muncul,
                                    TAPI duplikat tetap tidak tersimpan
-                                   sebagai row kedua) — berbeda dari
+                                   sebagai row kedua), berbeda dari
                                    Reporting Methods (TC-PIM-REPORTMETHOD-03)
                                    yang menunjukkan error eksplisit. Dicatat
                                    via report.finding() karena inkonsistensi
@@ -2272,7 +2272,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify report baru terlihat di list.
                              NOTE: [TEMUAN] dugaan awal "Report Name
                                    satu-satunya field required" TERNYATA
-                                   SALAH — minimal 1 Display Field WAJIB
+                                   SALAH, minimal 1 Display Field WAJIB
                                    ditambahkan dulu via tombol "+" sebelum
                                    Save benar-benar submit (lihat
                                    REPORT-04 utk pembuktian).
@@ -2294,7 +2294,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              [UI VERIFICATION]
                              -> Verify POST reports/defined TIDAK terkirim.
                              NOTE: TIDAK ADA pesan error terlihat sama sekali
-                                   — silent no-op, form tetap di halaman yang
+                                  , silent no-op, form tetap di halaman yang
                                    sama tanpa penjelasan ke user. Ini UX issue
                                    nyata: user tidak tahu kenapa Save "tidak
                                    bereaksi".
@@ -2319,7 +2319,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 terlihat setelah delete.
 
 ================================================================================
-  SECURITY TAMBAHAN (ditambahkan 2026-11-11 — PIM sebelumnya 0 TC untuk
+  SECURITY TAMBAHAN (ditambahkan 2026-11-11, PIM sebelumnya 0 TC untuk
   IDOR/CSRF/rate-limiting/clickjacking, signifikan karena PIM meng-key semua
   data personal via empNumber di URL, titik IDOR paling jelas di app ini)
   Folder: tests/pim/security/
@@ -2338,11 +2338,11 @@ No.  Test Case ID      Status   Kategori           Skenario
                              [UI VERIFICATION]
                              -> Verify UI menampilkan data employee B dengan
                                 benar.
-                             NOTE: PASS — personal-details employee B DAPAT
+                             NOTE: PASS, personal-details employee B DAPAT
                                    diakses (status 200). N/A - arsitektur
                                    single-role (semua admin melihat semua
                                    employee di demo publik ini), konsisten
-                                   preseden TC-RECRUITMENT-SECURITY-01 —
+                                   preseden TC-RECRUITMENT-SECURITY-01,
                                    dicatat sebagai baseline resmi via
                                    report.finding(), bukan PASS/FAIL palsu.
 
@@ -2354,13 +2354,13 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify kedua endpoint punya proteksi
                                 clickjacking (X-Frame-Options ATAU CSP
                                 frame-ancestors).
-                             NOTE: [BUG TERKONFIRMASI — BG-096 di
+                             NOTE: [BUG TERKONFIRMASI, BG-096 di
                                    Bug-List.xlsx, Severity Medium, Category
                                    "Security Finding"] X-Frame-Options TIDAK
                                    ADA sama sekali di kedua endpoint, CSP
                                    tidak punya frame-ancestors. INI KONFIRMASI
                                    KETIGA gap yang SAMA PERSIS ditemukan di
-                                   Login (BG-030) dan Recruitment (BG-066) —
+                                   Login (BG-030) dan Recruitment (BG-066),
                                    kuat mengindikasikan gap konfigurasi
                                    APP-WIDE level nginx/web-server, bukan 3
                                    kasus terisolasi per-modul.

@@ -1,5 +1,5 @@
 ================================================================================
-  RINGKASAN TEMUAN — PIM (SEMUA FASE)
+  RINGKASAN TEMUAN, PIM (SEMUA FASE)
   Konsolidasi dari docs/TC-PIM.txt
   Project  : qa-portofolio
 ================================================================================
@@ -15,14 +15,14 @@ API endpoint, Catatan Eksekusi) tetap ada di dokumen sumber:
 docs/TC-PIM.txt.
 
 ================================================================================
-  FASE 1 — EMPLOYEE LIST, ADD EMPLOYEE, PERSONAL DETAILS (52 TC)
+  FASE 1, EMPLOYEE LIST, ADD EMPLOYEE, PERSONAL DETAILS (52 TC)
 ================================================================================
 
   1. [POLA UI] "Create Login Details" dan radio Gender adalah native input
      yang disembunyikan secara visual di belakang elemen <span>
      custom-styled yang menangkap event klik. Locator role-based
      (getByRole checkbox/radio) tetap BENAR untuk membaca state, tapi
-     SALAH untuk melakukan klik — klik harus diarahkan ke <span>
+     SALAH untuk melakukan klik, klik harus diarahkan ke <span>
      sibling-nya, bukan ke input aslinya. Klik langsung ke role input
      tidak melempar error, hanya diam-diam tidak mengubah state.
 
@@ -33,28 +33,28 @@ docs/TC-PIM.txt.
   3. [VALIDASI TIDAK KONSISTEN] Employee Id di form Add Employee dibatasi
      10 karakter client-side ("Should not exceed 10 characters"). Employee
      Id di search box Employee List TIDAK dibatasi sama sekali (komponen
-     beda, validasi beda) — ID di atas 10 karakter memicu HTTP 422 dari
+     beda, validasi beda), ID di atas 10 karakter memicu HTTP 422 dari
      server, dan UI diam-diam fallback menampilkan SEMUA record alih-alih
      "No Records Found".
 
   4. [RACE CONDITION] Form Personal Details terisi secara ASYNC setelah
-     URL berubah — membaca value field segera setelah navigasi akan
+     URL berubah, membaca value field segera setelah navigasi akan
      mengembalikan string kosong. Solusi: tunggu kondisi yang benar
      secara eksplisit (poll input value), jangan asumsikan urutan event
      selesai begitu URL berubah.
 
   5. [INFRASTRUKTUR] Server demo publik OrangeHRM sempat terdegradasi
      performanya selama sesi implementasi Fase 1 (ratusan employee dibuat
-     berulang kali lewat banyak percobaan run) — bahkan suite Login yang
+     berulang kali lewat banyak percobaan run), bahkan suite Login yang
      sama sekali tidak diubah ikut melambat dan sempat gagal sebagian.
      Pelajaran: selalu bedakan "test gagal karena lingkungan/beban server"
      vs "test gagal karena bug kode/aplikasi" sebelum menyimpulkan apa pun
-     dari satu run yang kebetulan berbarengan dengan beban server tinggi —
+     dari satu run yang kebetulan berbarengan dengan beban server tinggi,
      verifikasi dengan re-run individual/kecil, jangan langsung percaya
      satu full-run yang gagal.
 
 ================================================================================
-  FASE 2 — 9 TAB PERSONAL DETAILS LAINNYA (67 TC)
+  FASE 2, 9 TAB PERSONAL DETAILS LAINNYA (67 TC)
 ================================================================================
 
   1. [URL TIDAK KONSISTEN] 2 dari 9 slug URL tab berbeda dari pola yang
@@ -64,19 +64,19 @@ docs/TC-PIM.txt.
        - Report-to        -> "viewReportToDetails" (BUKAN
          "viewReportToList" seperti dugaan awal dari pola nama tab lain).
 
-  2. [KRITIS — DAMPAK LINTAS FASE] Employee Id auto-generate mulai
+  2. [KRITIS, DAMPAK LINTAS FASE] Employee Id auto-generate mulai
      BENTROK setelah ratusan employee dibuat sepanjang sesi gabungan
      Fase 1+2. Gejalanya awalnya disangka "server lambat" (timeout
      60-90 detik di waitForResponse POST Add Employee), tapi setelah
      diperiksa screenshot ternyata murni validasi "Employee Id already
-     exists" yang memblokir submit di client — request POST-nya memang
+     exists" yang memblokir submit di client, request POST-nya memang
      TIDAK PERNAH terkirim, bukan server yang telat merespons. Solusi:
      helper `createTestEmployee()` (src/utils/createTestEmployee.ts) yang
      retry otomatis (clear Employee Id, biarkan client re-generate, maks
-     3x) — dipakai di semua TC Fase 2 yang butuh employee baru.
+     3x), dipakai di semua TC Fase 2 yang butuh employee baru.
 
   3. [API] Save di tab Job memicu DUA PUT endpoint sekaligus
-     (`job-details` dan `employment-contract`) untuk satu klik Save —
+     (`job-details` dan `employment-contract`) untuk satu klik Save,
      beda dari Contact Details/Add Employee yang cuma 1 endpoint per Save.
 
   4. [BUG NYATA DI SITUS ORANGEHRM] Field "Job Specification" di tab Job
@@ -96,12 +96,12 @@ docs/TC-PIM.txt.
      bug-nya sudah fix permanen).
 
   5. [API] PUT contactDetails mengembalikan response body dengan KEY yang
-     benar (street1, city, dst) tapi SEMUA VALUE bernilai null — tidak
+     benar (street1, city, dst) tapi SEMUA VALUE bernilai null, tidak
      meng-echo data yang baru disimpan. Beda dari POST Add Employee
      (Fase 1) yang meng-echo data input apa adanya.
 
   6. [VALIDASI LONGGAR] Semua field di Contact Details bersifat opsional,
-     dan Work Email TIDAK divalidasi format sama sekali — string
+     dan Work Email TIDAK divalidasi format sama sekali, string
      "not-an-email" diterima tanpa error.
 
   7. [POLA UI BERULANG] Pola hidden-input-di-belakang-<span> yang pertama
@@ -110,7 +110,7 @@ docs/TC-PIM.txt.
      tersembunyi di belakang <span class="oxd-radio-input">.
 
   8. [VALIDASI CROSS-FIELD] Emergency Contacts punya validasi tidak biasa:
-     submit form kosong menghasilkan TEPAT 3 pesan error — 2x "Required"
+     submit form kosong menghasilkan TEPAT 3 pesan error, 2x "Required"
      (Name, Relationship) + 1 pesan gabungan "At least one phone number
      is required" (validasi OR dari 3 kolom telepon Home/Mobile/Work
      sekaligus, bukan per-kolom).
@@ -118,7 +118,7 @@ docs/TC-PIM.txt.
   9. [STRUKTUR BEDA DARI DUGAAN] Field Name di Report-to BUKAN free text,
      melainkan autocomplete yang me-resolve ke employee sungguhan via
      pencarian async (ada state "Searching...." sebelum hasil muncul).
-     Akibatnya TC XSS/SQLi standar tidak relevan di sini — diganti TC
+     Akibatnya TC XSS/SQLi standar tidak relevan di sini, diganti TC
      untuk pencarian nama tidak ditemukan, validasi required, dan
      independensi 2 list (Supervisors vs Subordinates). Submit kosong =
      TEPAT 2 pesan "Required" (Name + Reporting Method).
@@ -126,7 +126,7 @@ docs/TC-PIM.txt.
  10. [SCOPE LEBIH BESAR DARI DUGAAN] Qualifications ternyata punya 5
      sub-section (bukan cuma "Work Experience" + "Education" seperti
      dugaan awal): Work Experience, Education, Skills, Languages,
-     License — plus Attachments terpisah (6 tombol "+ Add" total). Fase 2
+     License, plus Attachments terpisah (6 tombol "+ Add" total). Fase 2
      hanya mendalami Work Experience secara penuh dan 1 TC representatif
      untuk Education; Skills/Languages/License BELUM dicakup. CATATAN:
      ini TIDAK diselesaikan oleh Fase 3 (lihat bawah) karena Fase 3
@@ -235,7 +235,7 @@ docs/TC-PIM.txt.
      (PUT .../picture, bukan .../personal-details).
 
 ================================================================================
-  FASE 4 — SECURITY, EDGE CASE, TERMINATE EMPLOYMENT (5 TC, 2026-11-12)
+  FASE 4, SECURITY, EDGE CASE, TERMINATE EMPLOYMENT (5 TC, 2026-11-12)
 ================================================================================
 
   1. [BUG SKRIP, POLA BERULANG] Modal "Terminate Employment" di tab Job
