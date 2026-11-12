@@ -184,10 +184,10 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Login | 45 | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | Admin | 142 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 163 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
-| Recruitment | 58 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
+| Recruitment | 59 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 29 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Leave | 1 | N/A |
-| **Total** | **438** | |
+| **Total** | **439** | |
 
 **Cross-cutting edge cases (2026-11-12):** two scenarios flagged as commonly-forgotten in test design — refreshing mid-submit and a dropped connection mid-submit — were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails due to a dropped network connection, the SPA throws an unhandled JS exception that reaches the console/global error handler instead of being caught at its source, identically reproduced (same exception name) in Admin, PIM, Recruitment, and Buzz. The app does still show the user a generic "Unexpected Error!" toast in all four cases — this is a code-level error-handling defect, not a silent failure the user would never notice. Login is unaffected — its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
 
@@ -238,11 +238,11 @@ Full module coverage, no open functional gaps: Employee List (14), Add Employee 
 
 IDOR on personal-details/salary access confirmed N/A (single-role architecture, same as other modules). Report-to's "Add Supervisor/Subordinate" TCs (3) have a known intermittent UI-verification issue — the underlying save is confirmed working via its own API-level TC, only the text-match assertion is unreliable.
 
-### Recruitment (58 TCs)
+### Recruitment (59 TCs)
 
 Vacancies incl. edit/deactivate/pagination/sorting (17), Candidates incl. resume upload/download and list filters (18), candidate status workflow state machine through to terminal "Hired" (14), cross-cutting security: IDOR, response headers, rate limiting, concurrent-write race condition, cross-origin mutation/CSRF (5).
 
-**Critical confirmed bug:** the candidate Shortlist endpoint (`PUT .../candidates/<id>/shortlist`) returns a 500 Internal Server Error — confirmed reproducible with the server independently verified healthy each time. **Root cause pinpointed (2026-11-12):** the 500 occurs specifically when the candidate's vacancy has no hiring manager assigned (`hiringManager: null`), not for every candidate as first assumed — verified with a clean 8/8 correlation across 8 independent trials (vacancies with a hiring manager always returned 200; vacancies without one always returned 500). Every existing test happened to hit this because the shared `createTestCandidate()` helper always picks the first vacancy in the dropdown, which has no hiring manager. Since Shortlist is the earliest status transition and a prerequisite for almost every other status-workflow TC, this one bug cascades into failures across most of that suite.
+**Critical confirmed bug:** the candidate Shortlist endpoint (`PUT .../candidates/<id>/shortlist`) returns a 500 Internal Server Error — confirmed reproducible with the server independently verified healthy each time. **Root cause pinpointed (2026-11-12):** the 500 occurs specifically when the candidate's vacancy has no hiring manager assigned (`hiringManager: null`), not for every candidate as first assumed — verified with a clean 8/8 correlation across 8 independent trials (vacancies with a hiring manager always returned 200; vacancies without one always returned 500). Every existing test happened to hit this because the shared `createTestCandidate()` helper always picked the first vacancy in the dropdown, which has no hiring manager, cascading into failures across almost every other status-workflow test. The helper has since been fixed to pick a vacancy with a hiring manager instead (querying the vacancies API dynamically rather than hardcoding a name), which unblocked all 12 previously-blocked status-workflow tests — but that's a test-data workaround, not an application fix. The underlying bug is still very much present, so a dedicated regression test (`TC-RECRUITMENT-STATUS-15`) deliberately keeps exercising the no-hiring-manager case so it stays tracked.
 
 Also confirmed: the same unhandled-exception-on-dropped-connection bug as Admin and PIM (**3rd of 4 confirmations**), reproduced identically on create-candidate.
 

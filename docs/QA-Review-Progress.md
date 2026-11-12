@@ -1191,3 +1191,52 @@ diperbaiki). docs/TC-Admin.txt (+2 TC, Total 140->142), docs/TC-Recruitment.txt 
     pagination, PIM Terminate Employee, Admin filter kombinasi/bulk action, Login reset
     password flow sesungguhnya.
   - Tahap 4: regresi penuh semua modul + dokumentasi final.
+
+### UPDATE 2026-11-12: TAHAP 3 (bagian 1) -- Root cause BG-007 (Shortlist 500) dipersempit &
+helper diperbaiki, UNBLOCK 12 TC status-workflow.
+
+Atas permintaan user (dicek "sangat sangat teliti", pakai skill debugging-wizard): investigasi
+ulang bug Shortlist 500 yang selama ini dianggap "gagal untuk SEMUA candidate".
+
+**Root cause presisi ditemukan:** endpoint PUT .../candidates/<id>/shortlist mengembalikan 500
+KHUSUS saat candidate.vacancy.hiringManager === null, BUKAN utk semua candidate. Dibuktikan via
+8 percobaan silang independen (korelasi 8/8 sempurna: vacancy dgn hiring manager -> selalu 200,
+vacancy tanpa hiring manager -> selalu 500). Ternyata helper src/utils/createTestCandidate.ts
+SELALU memilih vacancy PERTAMA di dropdown ("Junior Account Assistant", hiringManager null),
+sehingga HAMPIR SEMUA TC status-workflow ikut cascading failure -- menciptakan ilusi "gagal
+total", padahal root cause-nya spesifik pada 1 vacancy tertentu.
+
+**Fix diterapkan:** CandidatesPage.selectVacancyWithHiringManager() (method baru) query API
+vacancies secara DINAMIS (bukan hardcode nama) utk cari vacancy ber-hiring-manager, lalu
+createTestCandidate() diubah memakainya.
+
+**Bug script ditemukan & diperbaiki SAAT MENULIS FIX INI SENDIRI** (self-caught, pakai skill
+debugging-wizard): implementasi pertama method baru masih salah -- check `if (hiringManager)`
+gagal krn endpoint GET /api/v2/recruitment/vacancies/:id menyerialisasi "tanpa hiring manager"
+sbg OBJECT berisi semua field null ({id:null,firstName:null,...}), BUKAN literal `null` seperti
+endpoint candidates/:id -- inkonsistensi serialisasi API yang nyata. Object apa pun selalu
+truthy, jadi check lama selalu memilih vacancy PERTAMA (termasuk yg hiringManager kosong).
+Diperbaiki jadi cek `hiringManager?.id != null` secara spesifik. Diverifikasi ulang 3x bersih
+setelah fix.
+
+**Hasil:** SEMUA 12 TC status-workflow yg sebelumnya [BLOCKED]/[FAIL] (STATUS-02 s/d STATUS-08,
+STATUS-10 s/d STATUS-14) sekarang PASSED bersih, dikonfirmasi via regresi penuh 2x (14 passed,
+0 failed tiap kali, zero hidden check failures).
+
+**PENTING -- bug aplikasi TIDAK di-fix, cuma di-workaround di data test:** TC-RECRUITMENT-STATUS-15
+(baru) dibuat khusus menguji skenario vacancy-tanpa-hiring-manager, TERPISAH dari helper bersama,
+supaya BG-007 tetap termonitor regresinya. Assertion sengaja dibuat konsisten dgn konvensi
+project (assert perilaku BENAR/200, FAIL selama bug ada) -- draft awal TC ini SEMPAT salah
+desain (assert status===500 PASS saat bug ada), yg akan bikin bugListReporter auto-close BG-007
+tiap kali bug dikonfirmasi (logika terbalik) -- ditemukan & dikoreksi sebelum commit.
+
+**Bug-List dikoreksi:** BG-007 sempat 2x ter-AUTO-CLOSE KELIRU oleh bugListReporter (krn masih
+terikat script TC-RECRUITMENT-STATUS-02 yang sekarang legitimate PASS). Di-reopen, Script Test
+Case dialihkan permanen ke TC-RECRUITMENT-STATUS-15. 1 duplikat baru (BG-207, auto-created saat
+TC-15 pertama kali gagal dgn desain assertion yang salah) ditutup sbg duplikat BG-007.
+
+docs/TC-Recruitment.txt, README.md diupdate (Total TC Recruitment 58->59, Total project 438->439).
+
+**SISA TAHAP 3 (belum dikerjakan):** Buzz (Edit Post, Delete Comment, pagination), PIM
+(Terminate Employee), Admin (filter kombinasi/bulk action), Login (reset password flow
+sesungguhnya). Tahap 4: regresi penuh semua modul + dokumentasi final.

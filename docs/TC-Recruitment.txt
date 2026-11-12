@@ -510,6 +510,20 @@ LEGEND SIMBOL SKENARIO
   CASCADING FAILURE di seluruh suite (akibat 1 root cause, bukan 12 bug terpisah). TC-STATUS-01
   dan STATUS-09 tidak terdampak karena tidak bergantung pada Shortlist berhasil.
 
+  [UPDATE 2026-11-12 -- CASCADE DI-UNBLOCK]: src/pages/CandidatesPage.ts ditambah method baru
+  selectVacancyWithHiringManager() (query API vacancies secara dinamis, cari yang hiringManager
+  ter-assign, bukan hardcode nama vacancy) dan src/utils/createTestCandidate.ts diubah memakainya
+  menggantikan selectFirstVacancy(). SEMUA 12 TC yang sebelumnya [BLOCKED oleh BG-007]/[FAIL -
+  BG-007] (STATUS-02 s/d STATUS-08, STATUS-10 s/d STATUS-14) SEKARANG [DONE] dan PASSED BERSIH --
+  dikonfirmasi via regresi penuh 2x berturut (14 passed, 0 failed tiap kali). PENTING: ini
+  WORKAROUND DI SISI TEST (memilih data yang menghindari kondisi bug), BUKAN perbaikan di
+  aplikasi -- bug BG-007 aslinya (endpoint shortlist crash 500 saat vacancy.hiringManager null)
+  TETAP ADA dan TIDAK disentuh. TC-RECRUITMENT-STATUS-15 (baru) dibuat khusus menguji skenario
+  itu secara terpisah dari helper bersama, supaya bug tetap termonitor regresinya dan tidak
+  hilang dari radar hanya krn TC lain sekarang menghindarinya. BG-007 di Bug-List dialihkan
+  (Script Test Case) ke TC-RECRUITMENT-STATUS-15 krn STATUS-02 sudah tidak lagi relevan sbg
+  penanda bug ini (sempat 2x ter-auto-close keliru oleh bugListReporter sebelum dikoreksi).
+
  1   TC-RECRUITMENT-STATUS-01   [DONE]   TC-RECRUITMENT-STATUS-01-Verify-Application-Initiated-Actions.spec.ts
                              (+) Verify a New Candidate Starts at Application Initiated With Reject/Shortlist Actions
                              -> Buat candidate baru (createTestCandidate).
@@ -521,7 +535,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify tombol "Reject" tersedia.
                              -> Verify tombol "Shortlist" tersedia.
 
- 2   TC-RECRUITMENT-STATUS-02   [FAIL - BG-007]   TC-RECRUITMENT-STATUS-02-Verify-Shortlist-Transition.spec.ts
+ 2   TC-RECRUITMENT-STATUS-02   [DONE]   TC-RECRUITMENT-STATUS-02-Verify-Shortlist-Transition.spec.ts
                              (+) Verify Clicking Shortlist and Saving Transitions Status to Shortlisted
                              -> Buat candidate baru, buka detail, tunggu
                                 render tombol aksi (~3 detik).
@@ -550,7 +564,7 @@ LEGEND SIMBOL SKENARIO
                                    untuk detail
                                    lengkap.
 
- 3   TC-RECRUITMENT-STATUS-03   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-03-Verify-Shortlisted-Reject-Terminal.spec.ts
+ 3   TC-RECRUITMENT-STATUS-03   [DONE]   TC-RECRUITMENT-STATUS-03-Verify-Shortlisted-Reject-Terminal.spec.ts
                              (+) Verify Rejecting a Shortlisted Candidate Moves It to a Terminal Rejected State
                              -> Buat candidate baru, Shortlist (via
                                 shortlistCandidate helper).
@@ -565,11 +579,11 @@ LEGEND SIMBOL SKENARIO
                              -> Verify status = "Rejected".
                              -> Verify TIDAK ADA tombol aksi status lain
                                 (terminal).
-                             NOTE: BLOCKED oleh BG-007 -- precondition
+                             NOTE: dulu BLOCKED oleh BG-007 (sekarang di-unblock 2026-11-12, lihat blok "CASCADE DI-UNBLOCK") -- precondition
                                    shortlistCandidate() gagal duluan karena
                                    endpoint Shortlist rusak (lihat STATUS-02).
 
- 4   TC-RECRUITMENT-STATUS-04   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-04-Verify-Schedule-Interview-Valid.spec.ts
+ 4   TC-RECRUITMENT-STATUS-04   [DONE]   TC-RECRUITMENT-STATUS-04-Verify-Schedule-Interview-Valid.spec.ts
                              (+) Verify Scheduling an Interview for a Shortlisted Candidate Succeeds
                              -> Buat candidate baru, Shortlist, klik tombol
                                 "Schedule Interview".
@@ -585,10 +599,10 @@ LEGEND SIMBOL SKENARIO
                              [UI VERIFICATION]
                              -> Verify status berubah jadi "Interview
                                 Scheduled".
-                             NOTE: BLOCKED oleh BG-007 (precondition
+                             NOTE: dulu BLOCKED oleh BG-007 (sekarang di-unblock 2026-11-12, lihat blok "CASCADE DI-UNBLOCK") (precondition
                                    Shortlist gagal duluan).
 
- 5   TC-RECRUITMENT-STATUS-05   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-05-Verify-Schedule-Interview-Empty-Validation.spec.ts
+ 5   TC-RECRUITMENT-STATUS-05   [DONE]   TC-RECRUITMENT-STATUS-05-Verify-Schedule-Interview-Empty-Validation.spec.ts
                              (-) Verify Submitting Schedule Interview Empty Shows Required Validation
                              -> Buat candidate baru, Shortlist, buka form
                                 Schedule Interview, langsung klik Save tanpa
@@ -596,10 +610,10 @@ LEGEND SIMBOL SKENARIO
                              Verify: minimal 1 pesan error "Required" muncul.
                                      POST .../shedule-interview TIDAK PERNAH
                                      terkirim.
-                             NOTE: BLOCKED oleh BG-007 (precondition
+                             NOTE: dulu BLOCKED oleh BG-007 (sekarang di-unblock 2026-11-12, lihat blok "CASCADE DI-UNBLOCK") (precondition
                                    Shortlist gagal duluan).
 
- 6   TC-RECRUITMENT-STATUS-06   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-06-Verify-Interview-Scheduled-Reject.spec.ts
+ 6   TC-RECRUITMENT-STATUS-06   [DONE]   TC-RECRUITMENT-STATUS-06-Verify-Interview-Scheduled-Reject.spec.ts
                              (+) Verify Rejecting an Interview Scheduled Candidate Moves It to Rejected
                              -> Buat candidate baru, Shortlist, Schedule
                                 Interview, lalu klik "Reject".
@@ -610,10 +624,10 @@ LEGEND SIMBOL SKENARIO
                              -> Verify response.status() === 200.
                              [UI VERIFICATION]
                              -> Verify status berubah jadi "Rejected".
-                             NOTE: BLOCKED oleh BG-007 (precondition
+                             NOTE: dulu BLOCKED oleh BG-007 (sekarang di-unblock 2026-11-12, lihat blok "CASCADE DI-UNBLOCK") (precondition
                                    Shortlist gagal duluan).
 
- 7   TC-RECRUITMENT-STATUS-07   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-07-Verify-Mark-Interview-Failed-Fresh-Candidate.spec.ts
+ 7   TC-RECRUITMENT-STATUS-07   [DONE]   TC-RECRUITMENT-STATUS-07-Verify-Mark-Interview-Failed-Fresh-Candidate.spec.ts
                              (+) Verify Marking a Fresh Interview Scheduled Candidate as Interview Failed Works Cleanly
                              -> Buat candidate BARU (bukan data seed lama),
                                 Shortlist, Schedule Interview, klik "Mark
@@ -629,10 +643,10 @@ LEGEND SIMBOL SKENARIO
                              NOTE: Sengaja pakai candidate FRESH (bukan data
                                    seed) untuk membuktikan alur ini bekerja
                                    bersih tanpa terkena bug stuck-loading di
-                                   STATUS-09. BLOCKED oleh BG-007
+                                   STATUS-09. dulu BLOCKED oleh BG-007 (sekarang di-unblock 2026-11-12, lihat blok "CASCADE DI-UNBLOCK")
                                    (precondition Shortlist gagal duluan).
 
- 8   TC-RECRUITMENT-STATUS-08   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-08-Verify-Candidate-History-Logs-Transitions.spec.ts
+ 8   TC-RECRUITMENT-STATUS-08   [DONE]   TC-RECRUITMENT-STATUS-08-Verify-Candidate-History-Logs-Transitions.spec.ts
                              (+) Verify Candidate History Records a Shortlist Transition
                              -> Buat candidate baru, buka detail, catat
                                 jumlah baris Candidate History SEBELUM.
@@ -643,7 +657,7 @@ LEGEND SIMBOL SKENARIO
                                 BERTAMBAH setelah shortlist.
                              -> Verify ada entri histori yang menyebut
                                 "Shortlist".
-                             NOTE: BLOCKED oleh BG-007 (precondition
+                             NOTE: dulu BLOCKED oleh BG-007 (sekarang di-unblock 2026-11-12, lihat blok "CASCADE DI-UNBLOCK") (precondition
                                    Shortlist gagal duluan).
 
  9   TC-RECRUITMENT-STATUS-09   [DONE]   TC-RECRUITMENT-STATUS-09-Verify-Application-Stage-Loads-Without-Hanging.spec.ts
@@ -968,7 +982,7 @@ LEGEND SIMBOL SKENARIO
   STATUS WORKFLOW - GAP TAMBAHAN
 --------------------------------------------------------------------------------
 
-10   TC-RECRUITMENT-STATUS-10   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-10-Verify-Mark-Interview-Passed.spec.ts
+10   TC-RECRUITMENT-STATUS-10   [DONE]   TC-RECRUITMENT-STATUS-10-Verify-Mark-Interview-Passed.spec.ts
                              (+) Verify Marking an Interview Scheduled Candidate as Passed Succeeds
                              -> Buat candidate baru, Shortlist, Schedule
                                 Interview (sampai status Interview
@@ -992,10 +1006,10 @@ LEGEND SIMBOL SKENARIO
                                    Manager/Current Status) + Notes, tidak
                                    ada field tambahan. Body request
                                    {"note": null} kalau Notes dikosongkan.
-                                   BLOCKED oleh BG-007 (precondition
+                                   dulu BLOCKED oleh BG-007 (sekarang di-unblock 2026-11-12, lihat blok "CASCADE DI-UNBLOCK") (precondition
                                    Shortlist gagal duluan).
 
-11   TC-RECRUITMENT-STATUS-11   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-11-Verify-Post-Passed-Available-Actions.spec.ts
+11   TC-RECRUITMENT-STATUS-11   [DONE]   TC-RECRUITMENT-STATUS-11-Verify-Post-Passed-Available-Actions.spec.ts
                              (!) [TEMUAN] Verify Available Actions After Interview Passed
                              -> Buat candidate, Shortlist, Schedule
                                 Interview, Mark Interview Passed.
@@ -1015,7 +1029,7 @@ LEGEND SIMBOL SKENARIO
                                    dari "Rejected"/"Interview Failed" yang
                                    memang terminal. Diagram STATE MACHINE di
                                    bagian CATATAN TEKNIS sudah diupdate.
-                                   BLOCKED oleh BG-007 (precondition
+                                   dulu BLOCKED oleh BG-007 (sekarang di-unblock 2026-11-12, lihat blok "CASCADE DI-UNBLOCK") (precondition
                                    Shortlist gagal duluan).
 
 --------------------------------------------------------------------------------
@@ -1298,7 +1312,7 @@ LEGEND SIMBOL SKENARIO
                              berlaku krn saat reproduce, data integrity
                              nyata terdampak, bukan cosmetic.
 
-12   TC-RECRUITMENT-STATUS-12   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-12-Verify-Offer-Job-To-Hired.spec.ts
+12   TC-RECRUITMENT-STATUS-12   [DONE]   TC-RECRUITMENT-STATUS-12-Verify-Offer-Job-To-Hired.spec.ts
                              (+) Verify Offer Job to Hired, Full State Machine Chain
                              -> Buat candidate, Shortlist, Schedule
                                 Interview, Mark Interview Passed.
@@ -1323,10 +1337,10 @@ LEGEND SIMBOL SKENARIO
                                    "Job Offered" tombol aksi yang tersedia:
                                    "Reject", "Offer Declined", "Hire"
                                    (BUKAN "Mark as Hired" seperti diduga).
-                                   BLOCKED oleh BG-007 (precondition
+                                   dulu BLOCKED oleh BG-007 (sekarang di-unblock 2026-11-12, lihat blok "CASCADE DI-UNBLOCK") (precondition
                                    Shortlist gagal duluan).
 
-13   TC-RECRUITMENT-STATUS-13   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-13-Verify-Schedule-Interview-Multiple-Interviewers.spec.ts
+13   TC-RECRUITMENT-STATUS-13   [DONE]   TC-RECRUITMENT-STATUS-13-Verify-Schedule-Interview-Multiple-Interviewers.spec.ts
                              (+) Verify Schedule Interview With Multiple Interviewers via "+ Add Another"
                              -> Buat candidate, Shortlist.
                              -> Buka form Schedule Interview, isi Interview
@@ -1345,10 +1359,10 @@ LEGEND SIMBOL SKENARIO
                                    'button' bukan getByText karena bukan
                                    exact-text node). Request Schedule
                                    Interview sebenarnya POST (bukan PUT).
-                                   BLOCKED oleh BG-007 (precondition
+                                   dulu BLOCKED oleh BG-007 (sekarang di-unblock 2026-11-12, lihat blok "CASCADE DI-UNBLOCK") (precondition
                                    Shortlist gagal duluan).
 
-14   TC-RECRUITMENT-STATUS-14   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-14-Verify-Reject-Notes-Field-Validation.spec.ts
+14   TC-RECRUITMENT-STATUS-14   [DONE]   TC-RECRUITMENT-STATUS-14-Verify-Reject-Notes-Field-Validation.spec.ts
                              (-) Verify Reject Form Notes Field -- Optional, Boundary Long Text
                              -> Buat candidate A (Application Initiated),
                                 buka form Reject, cek field Notes ada.
@@ -1371,14 +1385,29 @@ LEGEND SIMBOL SKENARIO
                                    mengindikasikan validasi client-side
                                    (kemungkinan maxlength) -- dicatat
                                    sebagai temuan, bukan dipaksakan
-                                   pass/fail. BLOCKED oleh BG-007
-                                   (precondition candidate A tidak
-                                   terdampak langsung karena Reject dari
-                                   Application Initiated tidak butuh
-                                   Shortlist, TAPI status [BLOCKED] mengikuti
-                                   keputusan konsolidasi "STATUS-03 s/d
-                                   STATUS-14 terdampak cascading" di blok
-                                   BUG KRITIS TERKONFIRMASI di atas).
+                                   pass/fail. [UPDATE 2026-11-12]: sudah
+                                   [DONE] & PASSED bersih setelah helper
+                                   createTestCandidate.ts di-unblock (lihat
+                                   blok "CASCADE DI-UNBLOCK" di atas).
+
+15   TC-RECRUITMENT-STATUS-15   [DONE -- BUG DIKONFIRMASI]   TC-RECRUITMENT-STATUS-15-Verify-Shortlist-Fails-Without-Hiring-Manager.spec.ts
+                             (!) Verify Shortlist Fails Without Hiring Manager (Regresi BG-007)
+                             -> Buat candidate pada vacancy "Junior Account
+                                Assistant" (dikonfirmasi hiringManager=null),
+                                sengaja TIDAK pakai createTestCandidate()
+                                (yang sekarang menghindari vacancy ini).
+                             -> Klik Shortlist, klik Save.
+                             [API VERIFICATION]
+                             -> Verify response.status() === 200 (perilaku
+                                yang BENAR/diharapkan).
+                             STATUS AKTUAL: GAGAL (BUG BG-007 MASIH ADA,
+                             status=500) -- TC ini sengaja dibuat TERPISAH
+                             dari createTestCandidate.ts supaya bug asli di
+                             aplikasi (bukan di-fix, cuma di-workaround di
+                             data test) tetap termonitor regresinya.
+                             Deterministik reproduce 3x. BG-007 di Bug-List
+                             dialihkan Script Test Case ke TC ini (bukan lagi
+                             STATUS-02) krn STATUS-02 sekarang PASS legitimate.
 
 55   TC-RECRUITMENT-SECURITY-04   [DONE -- BUG DIKONFIRMASI]   TC-RECRUITMENT-SECURITY-04-Verify-Concurrent-Status-Transition-Race-Condition.spec.ts
                              (S) Verify 2 Concurrent Status-Transition Requests for the Same Candidate
@@ -1482,6 +1511,16 @@ LEGEND SIMBOL SKENARIO
   duplikat SUNGGUHAN tersimpan (data integrity nyata, bukan cosmetic).
   VACANCY-18 mengonfirmasi BUG BARU LAIN (BG-206, Severity Medium): double-
   click memicu TypeError di handler onSave app.
+
+  [UPDATE 2026-11-12, TAHAP 3] +1 TC baru (STATUS-15, regresi khusus BG-007) -> total 59 TC.
+  Root cause BG-007 (Shortlist 500) dipersempit jadi presisi: terjadi KHUSUS saat
+  vacancy.hiringManager null (korelasi 8/8 percobaan independen), bukan utk semua candidate.
+  Helper src/utils/createTestCandidate.ts diperbaiki (CandidatesPage.selectVacancyWithHiringManager())
+  utk menghindari vacancy tanpa hiring manager -- ini meng-UNBLOCK SEMUA 12 TC status-workflow yang
+  sebelumnya [BLOCKED]/[FAIL] (STATUS-02 s/d STATUS-08, STATUS-10 s/d STATUS-14), dikonfirmasi
+  PASSED bersih via regresi penuh 2x (14 passed, 0 failed tiap kali). Bug BG-007 aslinya TETAP ADA
+  di aplikasi (ini workaround data test, bukan fix aplikasi) -- TC-STATUS-15 dibuat khusus
+  menjaga regresinya tetap termonitor.
 
   [UPDATE 2026-11-11, review penuh] +1 TC baru (SECURITY-05, CSRF cross-
   origin mutation) -> total 54 TC. SECURITY-02 dan SECURITY-03 di-escalate

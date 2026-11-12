@@ -143,6 +143,41 @@ export class CandidatesPage extends BasePage {
     return name;
   }
 
+  /**
+   * Picks a vacancy that has a hiring manager assigned, instead of blindly picking the first
+   * dropdown option like selectFirstVacancy(). Root-caused 2026-11-12 (BG-007): the Shortlist
+   * endpoint (PUT .../candidates/<id>/shortlist) returns 500 specifically when the candidate's
+   * vacancy has hiringManager === null -- confirmed via an 8/8 correlation across independent
+   * trials -- and the dropdown's first option ("Junior Account Assistant") happens to be exactly
+   * such a vacancy, which is why every status-workflow TC using selectFirstVacancy() hit this
+   * bug. Queries the vacancies API directly (dynamic, not a hardcoded vacancy name) to find one
+   * with a hiring manager, then selects it by name in the UI dropdown. Falls back to
+   * selectFirstVacancy() if no such vacancy is found (keeps tests runnable, though they'll still
+   * hit BG-007 in that case).
+   */
+  async selectVacancyWithHiringManager(): Promise<string> {
+    const listResp = await this.page.request.get('/web/index.php/api/v2/recruitment/vacancies?limit=50&offset=0&status=true');
+    const list = await listResp.json().catch(() => null);
+    for (const v of list?.data ?? []) {
+      const detailResp = await this.page.request.get(`/web/index.php/api/v2/recruitment/vacancies/${v.id}`);
+      const detail = await detailResp.json().catch(() => null);
+      // NOTE 2026-11-12: GET /api/v2/recruitment/vacancies/:id serializes "no hiring manager" as
+      // an OBJECT with every field null ({id:null,firstName:null,...}), NOT a literal `null` --
+      // different from how GET /api/v2/recruitment/candidates/:id nests the same relationship
+      // (literal `null`). A plain truthy check on the object itself is always true and silently
+      // picks a no-hiring-manager vacancy every time. Must check the `id` field specifically
+      // (!= null, not truthy, in case an id of 0 is ever valid).
+      if (detail?.data?.hiringManager?.id != null) {
+        await this.vacancySelect.click();
+        const option = this.page.getByRole('option').filter({ hasText: v.name }).first();
+        await option.waitFor({ state: 'visible' });
+        await option.click();
+        return v.name;
+      }
+    }
+    return this.selectFirstVacancy();
+  }
+
   async save(): Promise<void> {
     await this.saveButton.click();
   }

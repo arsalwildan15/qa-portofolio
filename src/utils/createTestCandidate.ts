@@ -20,7 +20,10 @@ export async function createTestCandidate(
   const { firstName, lastName } = uniqueEmployeeName(namePrefix);
   await candidatesPage.gotoAddForm();
   await candidatesPage.fillName(firstName, lastName);
-  const vacancyName = await candidatesPage.selectFirstVacancy();
+  // Uses a vacancy WITH a hiring manager assigned, not just the first dropdown option --
+  // see BG-007: the first option ("Junior Account Assistant") has no hiring manager, which
+  // makes the Shortlist endpoint crash with a 500 for every candidate created against it.
+  const vacancyName = await candidatesPage.selectVacancyWithHiringManager();
   await candidatesPage.emailInput.fill(uniqueEmail(namePrefix));
   await candidatesPage.fileInput.setInputFiles({
     name: 'resume.pdf',
