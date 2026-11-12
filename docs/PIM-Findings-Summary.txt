@@ -5,12 +5,14 @@
 ================================================================================
 
 Dokumen ini adalah ringkasan cepat semua temuan eksplorasi dari seluruh
-suite PIM yang sudah diimplementasikan (159 TC total, PIM 100% tercakup
-tanpa gap/finding terbuka: Employee List, Add Employee, Personal Details
-+ 9 sub-tab termasuk semua 5 sub-section Qualifications, Configuration,
-Reports, plus 8 TC security file upload lintas fitur). Detail teknis
-lengkap (locator, API endpoint, Catatan Eksekusi) tetap ada di dokumen
-sumber: docs/TC-PIM.txt.
+suite PIM yang sudah diimplementasikan (164 TC total per 2026-11-12, PIM
+100% tercakup tanpa gap/finding terbuka: Employee List, Add Employee,
+Personal Details + 9 sub-tab termasuk semua 5 sub-section Qualifications
+dan Terminate Employment di tab Job, Configuration, Reports, plus 8 TC
+security file upload lintas fitur, 2 TC security IDOR/clickjacking, dan
+2 TC edge-case refresh/connection-drop). Detail teknis lengkap (locator,
+API endpoint, Catatan Eksekusi) tetap ada di dokumen sumber:
+docs/TC-PIM.txt.
 
 ================================================================================
   FASE 1 — EMPLOYEE LIST, ADD EMPLOYEE, PERSONAL DETAILS (52 TC)
@@ -231,6 +233,49 @@ sumber: docs/TC-PIM.txt.
      sebelum ditemukan pola klik-dulu-nya, dan juga membuat TC-PIM-PD-10
      (reupload foto) lama memakai endpoint yang salah untuk verifikasi
      (PUT .../picture, bukan .../personal-details).
+
+================================================================================
+  FASE 4 — SECURITY, EDGE CASE, TERMINATE EMPLOYMENT (5 TC, 2026-11-12)
+================================================================================
+
+  1. [BUG SKRIP, POLA BERULANG] Modal "Terminate Employment" di tab Job
+     render DI ATAS form Job Details yang masih ada di background --
+     background itu punya input "Joined Date" dengan placeholder SAMA
+     ("yyyy-dd-mm") plus dropdown/Save button sendiri. Locator tanpa
+     scope ke dialog resolve ke 2+ elemen (strict-mode violation).
+     Diperbaiki dgn scope semua interaksi modal ke
+     `page.getByRole('dialog')`. Root-cause PATTERN-nya identik dgn bug
+     skrip Buzz "Edit Post" (2 `<textarea>` di halaman sekaligus) --
+     pola umum: modal yang render di atas form background dgn field
+     ber-placeholder sama butuh locator yang di-scope ke dialog, jangan
+     pernah asumsikan locator global cukup unik.
+
+  2. [TEMUAN APLIKASI] Tombol "Terminate Employment" TIDAK berubah jadi
+     "Activate Employment" secara client-side setelah API sukses (200)
+     -- butuh reload manual utk melihat state yang benar. Pola SAMA
+     dengan temuan Buzz (post baru tidak muncul di feed tanpa reload) --
+     app ini secara konsisten tidak melakukan client-side state refresh
+     setelah mutasi API sukses.
+
+  3. [TEMUAN MINOR] Section judul di tab Job tertulis "Employee
+     Termination / Activiation" -- typo "Activiation" ADA DI APLIKASI
+     SENDIRI (dikonfirmasi via screenshot live), bukan kesalahan
+     dokumentasi/skrip.
+
+  4. [KONFIRMASI APP-WIDE] Clickjacking header (X-Frame-Options/CSP
+     frame-ancestors) hilang di Employee List -- konfirmasi KE-3 dari
+     gap yang sama persis juga ditemukan di Login dan Recruitment,
+     memperkuat dugaan ini gap konfigurasi level server, bukan kasus
+     terisolasi per-modul.
+
+  5. [KONFIRMASI APP-WIDE] Saat koneksi terputus di tengah proses Save
+     create-employee, muncul "Uncaught exception: fe" yang identik
+     dengan bug yang sama di Admin/Recruitment/Buzz -- dikonfirmasi lbh
+     lanjut constructor-nya adalah AxiosError asli (nama ter-minify di
+     bundle production), app tetap menampilkan toast error ke user
+     (bukan silent failure total), tapi exception tetap bocor ke
+     console krn tidak ada `.catch()` lengkap di semua jalur request
+     axios. Lihat Bug-List.xlsx BG-201 utk detail lengkap.
 
 ================================================================================
   PENUTUPAN GAP/FINDING LAMA (3 ITEM)
