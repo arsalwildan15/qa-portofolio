@@ -1455,3 +1455,31 @@ dihapus, Total 445), section narasi "### Leave (1 TC)" dihapus.
 `src/pages/LeavePage.ts` dihapus, beserta export-nya di `src/pages/index.ts` dan fixture
 `pimPage`/`leavePage` (interface + implementasi) di `src/fixtures/pages.fixture.ts`. Dikonfirmasi
 `grep -rln "PimPage\|LeavePage" src/ tests/` -> 0 hasil setelahnya. `npx tsc --noEmit` bersih.
+
+## UPDATE 2026-11-12 (lanjutan) -- Standar Redaksi Bug-List.xlsx Baru (PENDING, belum dikerjakan)
+
+User review redaksi Bug-List.xlsx saat ini (hasil auto-extract `bugListReporter.ts` dari log
+`[STEP n]`/`[CHECK_FAIL]`) dan menilai terlalu kaku/jargon teknis internal, bukan langkah yang
+bisa diikuti manual oleh tester/non-teknis. User share screenshot bug tracker proyek lain (PT
+PDN/pakailink.id) sbg REFERENSI GAYA PENULISAN SAJA (bukan isi -- proyek beda perusahaan, tidak
+boleh dicontek kontennya).
+
+**Standar baru (sudah di-approve user via 3 contoh before/after: BG-001, BG-026, BG-224) --
+disimpan permanen sbg memory: `feedback_bug_report_redaksi.md`:**
+- Summary: 1 kalimat manusiawi, tanpa prefix jargon "[BUG]"/kode status mentah.
+- Steps to Reproduce: numbered, langkah MANUAL literal yg bisa diikuti tangan (buka halaman X,
+  klik Y, buka DevTools > Network, copy as cURL, jalankan di terminal, dst) -- BUKAN rujukan ke
+  helper function internal/Playwright API/baris `[STEP]` mentah.
+- Expected Result: 1 kalimat polos.
+- Actual Result: naratif, SEMUA detail teknis & bukti kuantitatif (repro rate, status code,
+  timing) tetap dipertahankan penuh, DITUTUP dgn kalimat "Dampak ke pengguna: ..." dlm bahasa
+  awam.
+- Skema kolom file TIDAK diubah (cuma isi prosa per sel yang diperbaiki).
+
+**STATUS: baru 3 contoh (BG-001, BG-026, BG-224) yang di-draft dan di-approve user secara
+konsep. BELUM ditulis ke file Bug-List.xlsx yang sesungguhnya, dan 35 bug Open lainnya BELUM
+di-rewrite sama sekali.** User menginterupsi sebelum eksekusi utk minta: (1) standar ini
+disimpan sbg memory permanen [SUDAH, lihat `feedback_bug_report_redaksi.md`] dan (2) progress
+diupdate [sedang dikerjakan, entry ini]. **NEXT STEP saat resume:** tulis ulang ke-3 contoh yg
+sudah di-draft itu ke Bug-List.xlsx sungguhan, lalu lanjut rewrite 35 bug Open sisanya satu per
+satu dgn standar yg sama, baru lanjut ke Tahap 4 (regresi penuh).
