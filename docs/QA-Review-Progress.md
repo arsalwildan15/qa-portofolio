@@ -1476,10 +1476,12 @@ disimpan permanen sbg memory: `feedback_bug_report_redaksi.md`:**
   awam.
 - Skema kolom file TIDAK diubah (cuma isi prosa per sel yang diperbaiki).
 
-**STATUS: baru 3 contoh (BG-001, BG-026, BG-224) yang di-draft dan di-approve user secara
-konsep. BELUM ditulis ke file Bug-List.xlsx yang sesungguhnya, dan 35 bug Open lainnya BELUM
-di-rewrite sama sekali.** User menginterupsi sebelum eksekusi utk minta: (1) standar ini
-disimpan sbg memory permanen [SUDAH, lihat `feedback_bug_report_redaksi.md`] dan (2) progress
-diupdate [sedang dikerjakan, entry ini]. **NEXT STEP saat resume:** tulis ulang ke-3 contoh yg
-sudah di-draft itu ke Bug-List.xlsx sungguhan, lalu lanjut rewrite 35 bug Open sisanya satu per
-satu dgn standar yg sama, baru lanjut ke Tahap 4 (regresi penuh).
+**STATUS: SELESAI 2026-11-12.** Seluruh 38 bug Open di Bug-List.xlsx sudah ditulis ulang
+(Summary/Steps to Reproduce/Expected Result/Actual Result) sesuai standar baru -- dikerjakan via
+script Python sekali-pakai (`scripts/rewrite_bug_list.py`, SUDAH DIHAPUS setelah selesai, bukan
+bagian permanen codebase) supaya konsisten & cepat utk 38 entry sekaligus, isi tiap bug tetap
+ditulis manual satu-per-satu berdasarkan konteks investigasi aslinya (bukan template generik).
+Kolom lain (Category/Scope/Environment/Modul/Severity/Priority/Attachment/Detected On/Detected
+By/Status/Assigned To/Notes/Script Test Case) TIDAK diubah -- skema file tetap sama, hanya 4
+kolom prosa yang diperbaiki. Dikonfirmasi 38/38 baris terupdate (tidak ada yang IDnya tidak
+ketemu). **LANJUT TAHAP 4** (regresi penuh final + dokumentasi penutup).
