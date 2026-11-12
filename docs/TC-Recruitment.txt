@@ -485,17 +485,30 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: STATUS WORKFLOW (9 TC)
 ================================================================================
 
-  [BUG KRITIS TERKONFIRMASI, 2026-11-11 -- BG-007, Severity High, Category "Bug (Confirmed)"]
+  [BUG KRITIS TERKONFIRMASI, BG-007, Severity High, Category "Bug (Confirmed)"]
   Endpoint PUT .../api/v2/recruitment/candidates/<id>/shortlist mengembalikan 500 Internal
-  Server Error untuk SEMUA candidate saat ini -- dikonfirmasi REPRODUCIBLE SECARA DETERMINISTIK
-  3x berturut, TERISOLASI (1 TC saja per run, bukan batch), dengan 3 candidate BERBEDA (id
-  106/107/108), server independen dikonfirmasi sehat via curl sebelum tiap percobaan (bukan
-  outage/flakiness). Ini BUKAN environment noise (sempat salah diklasifikasi begitu di 2
-  percobaan awal hari ini sebelum diisolasi dan diverifikasi ulang). Shortlist adalah transisi
-  status PALING AWAL dan jadi prasyarat (via shortlistCandidate() helper) untuk hampir semua
-  TC status-workflow lain (STATUS-03 s/d STATUS-14) -- bug ini menyebabkan CASCADING FAILURE
-  di seluruh suite, bukan 12 bug terpisah. TC-RECRUITMENT-STATUS-01 dan STATUS-09 tidak
-  terdampak karena tidak bergantung pada Shortlist berhasil.
+  Server Error -- dikonfirmasi REPRODUCIBLE SECARA DETERMINISTIK, server independen dikonfirmasi
+  sehat via curl sebelum tiap percobaan (bukan outage/flakiness). Ini BUKAN environment noise.
+
+  ROOT CAUSE PRESISI DITEMUKAN (2026-11-12, investigasi lanjut atas permintaan user -- KOREKSI
+  dari pemahaman 2026-11-11 yang menyimpulkan "gagal untuk SEMUA candidate"): 500 terjadi KHUSUS
+  saat candidate.vacancy.hiringManager === null, BUKAN utk semua candidate tanpa terkecuali.
+  Dibuktikan via 8 percobaan silang independen: vacancy TANPA hiring manager ("Junior Account
+  Assistant", "Sales Representative") -> shortlist SELALU 500 (4/4); vacancy DENGAN hiring
+  manager ("Payroll Administrator" + 3 vacancy custom) -> shortlist SELALU 200 (4/4). Korelasi
+  8/8 sempurna. Response body backend generic ({"error":{"message":"Unexpected Error Occurred"}},
+  production error handling menyembunyikan stack trace), tapi pola korelasi membuktikan server
+  kemungkinan besar crash saat memproses/mengakses data hiring manager yang null (kemungkinan
+  besar notifikasi email ke hiring manager saat shortlist, gagal total kalau hiring manager-nya
+  tidak ada).
+
+  DAMPAK KE TEST SUITE INI: helper src/utils/createTestCandidate.ts memakai selectFirstVacancy()
+  yang SELALU memilih vacancy PERTAMA di dropdown -- yang kebetulan adalah "Junior Account
+  Assistant" (hiringManager null) -- sehingga HAMPIR SEMUA TC status-workflow yang memakai
+  helper ini (STATUS-02 s/d STATUS-14, via shortlistCandidate()) ikut terkena cascading failure.
+  Shortlist adalah transisi status PALING AWAL dan prasyarat utk hampir semua TC lain -- ini
+  CASCADING FAILURE di seluruh suite (akibat 1 root cause, bukan 12 bug terpisah). TC-STATUS-01
+  dan STATUS-09 tidak terdampak karena tidak bergantung pada Shortlist berhasil.
 
  1   TC-RECRUITMENT-STATUS-01   [DONE]   TC-RECRUITMENT-STATUS-01-Verify-Application-Initiated-Actions.spec.ts
                              (+) Verify a New Candidate Starts at Application Initiated With Reject/Shortlist Actions
@@ -524,12 +537,17 @@ LEGEND SIMBOL SKENARIO
                                 halaman detail.
                              NOTE: [BUG KRITIS TERKONFIRMASI -- BG-007]
                                    Endpoint PUT .../candidates/<id>/shortlist
-                                   mengembalikan 500 Internal Server Error
-                                   untuk SEMUA candidate, dikonfirmasi
-                                   reproducible 3x terisolasi dengan 3
-                                   candidate berbeda, server independen
-                                   sehat setiap kali. Lihat blok "BUG KRITIS
-                                   TERKONFIRMASI" di atas untuk detail
+                                   mengembalikan 500 KHUSUS saat vacancy
+                                   candidate ini punya hiringManager=null
+                                   (root cause presisi, dikonfirmasi 8/8
+                                   percobaan silang 2026-11-12) -- bukan utk
+                                   semua candidate tanpa terkecuali. Candidate
+                                   buatan createTestCandidate() SELALU kena
+                                   krn helper itu selalu pilih vacancy
+                                   pertama di dropdown ("Junior Account
+                                   Assistant", hiringManager null). Lihat
+                                   blok "BUG KRITIS TERKONFIRMASI" di atas
+                                   untuk detail
                                    lengkap.
 
  3   TC-RECRUITMENT-STATUS-03   [BLOCKED oleh BG-007]   TC-RECRUITMENT-STATUS-03-Verify-Shortlisted-Reject-Terminal.spec.ts
