@@ -1640,3 +1640,46 @@ cek apakah 1 file minimal muncul utk isolasi variabel paralelisme), BARU generat
 akhir kalau sudah teratasi. Kalau tetap gagal stlh investigasi wajar, laporan akhir bisa
 memakai Playwright's own HTML report (`npm run report:html`) sbg pengganti, didokumentasikan
 sbg keterbatasan yg diketahui.
+
+## UPDATE 2026-11-12 (lanjutan) -- ROOT CAUSE allure-results KETEMU + Audit Akhir vs Bug-List
+
+**Investigasi allure-results kosong (bisection bertahap):** workers=1 vs 3 TIDAK berpengaruh
+(sama2 bisa gagal/berhasil). Skala jumlah TC TIDAK berpengaruh (56 TC campuran berhasil 135
+file, tapi 2 TC super simple di folder lain gagal 0 file). Dipersempit folder demi folder:
+tests/admin (144, gagal) -> {corpbrand+security+structure+locations+nationalities+users} (gagal)
+-> {security+structure+locations+nationalities+users} (gagal) -> {locations+nationalities+users}
+(gagal) -> tests/admin/users SENDIRIAN (11 TC, masih gagal) -> bahkan 6 TC paling simple di
+folder users SAJA (semua PASS bersih, 0 FAIL) MASIH gagal 0 file.
+
+**ROOT CAUSE SEBENARNYA:** BUKAN soal test/kode aplikasi/Playwright sama sekali -- ternyata
+wrapper kondensasi output (`rtk`) yang membungkus command shell di lingkungan sesi ini KADANG
+memutus proses child SEBELUM reporter file-based (allure-playwright, Playwright's own html
+reporter) sempat selesai flush ke disk di `onEnd()`, sementara reporter `list` (print sinkron
+per baris ke stdout) tetap terlihat lengkap krn tidak butuh flush file terpisah di akhir.
+DIKONFIRMASI DEFINITIF: command identik (`tests/admin/users --grep "USER-0[1-2]"`) GAGAL
+(0 file) lewat command biasa, tapi BERHASIL (2 file allure + playwright-report/index.html)
+begitu di-prefix `rtk bypass`. Kenapa command lain (batch 56 TC, login/positive, corpbrand)
+bisa berhasil TANPA bypass pada kesempatan sebelumnya tidak sepenuhnya jelas (kemungkinan
+soal timing/panjang output yg memicu kondensasi rtk secara tidak konsisten), tapi SOLUSI-nya
+sudah pasti: **pakai `rtk bypass <command>` utk run resmi final yg butuh Allure/HTML report
+tersimpan dgn andal.**
+
+**[PELAJARAN PENTING, BERULANG]:** investigasi debugging di atas sendiri TANPA sadar memakai
+reporter DEFAULT (bukan --reporter=list) di beberapa percobaan bisection, sehingga
+bugListReporter ikut aktif dan membuat 8 baris SAMPAH baru lagi (BG-226 s/d BG-233) -- 3
+duplikat bug existing (BG-014/203/199), 5 sisanya persis pola "collateral noise" yg sudah
+diklasifikasi sblmnya. SEMUA 8 dihapus, catatan re-konfirmasi ditambahkan ke 3 bug existing yg
+relevan. **Bug-List kembali ke 39 baris bersih, 0 duplikat, 39 Open, 0 Closed.** Ini kejadian
+KE-4 kalinya pola ini terjadi di sesi ini (Login run, corpbrand Allure test, batch 56 TC Admin,
+dan sekarang) -- aturan "SELALU --reporter=list utk run eksploratif/investigasi, reporter
+default HANYA utk run resmi yg sengaja direncanakan + diaudit langsung sesudahnya" harus benar2
+dipatuhi ketat mulai sekarang, bukan cuma diingat sesekali.
+
+**JAWABAN UTK PERTANYAAN USER "apakah hasil regresi sesuai dgn Bug-List excel":** TIDAK bisa
+100% otomatis selaras (sudah dijelaskan sblm Tahap 4 dimulai), TAPI setelah diaudit MANUAL
+penuh sepanjang seluruh Tahap 4 (bukan percaya mentah ke reporter), hasilnya SEKARANG selaras:
+setiap TC yang gagal di regresi final (Login, Admin, PIM, Recruitment, Buzz) sudah dipetakan
+satu-per-satu ke salah satu dari 3 kategori -- (a) cocok 1 dari 39 bug Open di Bug-List.xlsx,
+(b) noise lingkungan (ERR_TIMED_OUT/collateral, dikonfirmasi via isolated rerun), atau (c) 1
+bug BARU yg sudah ditambahkan resmi (BG-225). Tidak ada TC gagal yang "mengambang" tanpa
+penjelasan, dan tidak ada baris Bug-List yang jadi orphan/tidak match TC manapun.
