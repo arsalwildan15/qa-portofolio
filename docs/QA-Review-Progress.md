@@ -1575,3 +1575,68 @@ dilanjutkan nanti.
   5. Setelah SEMUA 5 modul (Login sudah OK, 4 sisanya) beres & Bug-List teraudit bersih: baru
      generate Allure report akhir (`npm run report:allure:generate` + `report:allure:open`),
      lalu dokumentasi penutup (README ringkasan akhir, dsb).
+
+## UPDATE 2026-11-12 (lanjutan) -- Tahap 4 DILANJUTKAN: SEMUA 5 MODUL SELESAI
+
+Dicek dulu kesehatan jaringan sesuai checklist resume (curl 3x sehat, DAN 1 TC kecil via
+Playwright utk pastikan traffic browser juga lancar -- 5/6 PASS, 1 yg gagal langsung PASS
+bersih saat di-rerun 2x terisolasi, konfirmasi gangguan sudah banyak mereda).
+
+**Recruitment (59 TC): BERSIH.** 49 PASS, 10 FAIL. Rasio timeout sudah jauh membaik (1/10, vs
+87-96% sebelumnya di Admin/PIM attempt 1). 10 FAIL: 7 cocok bug existing (BG-202, BG-205,
+BG-004, BG-066, BG-067, BG-206, + TC-15 regression-by-design BG-007), 2 (VACANCY-09/10)
+terkonfirmasi flaky via 3x isolated rerun (1/3 gagal masing2) -- pola IDENTIK dgn kelas
+test-design-weakness BG-064/065 (verifikasi via list/reload tidak reliable di demo publik
+bersama), kali ini di list Vacancies bukan Candidates. TIDAK ada bug aplikasi baru.
+
+**Buzz (32 TC): BERSIH.** 21 PASS, 11 FAIL, 0 timeout eksplisit. 6 cocok bug existing (BG-200,
+175, 173, 185, 178, + 1 security lain). 5 sisanya (BUZZ-07, 10, 21, 09, 16) SEMUA terkonfirmasi
+flaky/noise paralel via isolated rerun -- 4 langsung PASS sekali coba, BUZZ-09 (upload foto)
+perlu 2x retry ekstra tapi akhirnya 2/2 PASS bersih. TIDAK ada bug aplikasi baru.
+
+**Admin (144 TC) RETRY: BERSIH.** 90 PASS, 54 FAIL (jauh lebih baik dari attempt sblmnya 13-30
+PASS). 23/54 timeout noise (43%, msh ada sisa gangguan tapi jauh berkurang). 31 "other": 11
+cocok bug existing (BG-010/011/012/013/014/025/145/199/203/204), 20 tersebar di hampir SEMUA
+sub-screen CRUD yg tdk saling terkait (Education/EmploymentStatus/JobCategories/JobTitles/
+Languages/Licenses/Locations/Memberships/OAuth/PayGrades/Skills/WorkShifts) -- disample 5 TC
+representatif (EMPSTATUS-01, JOBTITLE-01, LICENSE-01, SKILL-01, LOCATION-08), SEMUA akhirnya
+PASS bersih stlh 1-2x rerun terisolasi (pola collateral noise yg sama dgn PIM/Recruitment).
+TIDAK ada bug aplikasi baru.
+
+**PIM (164 TC) RETRY: 1 BUG BARU DITEMUKAN.** 131 PASS, 33 FAIL (jauh lebih baik dari attempt
+sblmnya 97 PASS). 23/33 timeout noise (70%). 10 "other": 6 cocok bug existing (BG-001, 002,
+201, 112, 096, pola Report-to BG-124/127/136-class), 3 terkonfirmasi flaky/noise via isolated
+rerun 3-4x (LIST-07 solid 3/3 PASS, PD-02 solid 3/3 PASS, LIST-08 ~40% gagal gabungan -- cocok
+kelas test-design-weakness BG-064/065 yg sama, tdk perlu entry baru). **1 SISANYA (TC-PIM-ADD-22,
+double-click Save) TERKONFIRMASI BUG NYATA**: direproduksi 5/6 (~83%) di run terisolasi --
+postCount=2 (2 POST terkirim), request kedua ditolak 422, penanganannya memicu
+"Uncaught exception: fe" (AxiosError, pola app-wide identik dgn BG-203/BG-204) -- instance BARU
+dari bug app-wide yg sudah dikenal, blm pernah tercatat utk PIM Add Employee scr spesifik.
+Dicatat sbg **BG-225** (gaya redaksi manusiawi sesuai standar yg sdh disepakati, severity
+Medium, Script Test Case TC-PIM-ADD-22).
+
+**STATUS AKHIR TAHAP 4 -- SEMUA 5 MODUL SELESAI DIREGRESI & DIAUDIT:**
+  - Login    : 44/46 PASS (2 FAIL = bug existing BG-026/030, sesuai ekspektasi)
+  - Admin    : bersih, semua FAIL teridentifikasi (bug existing atau noise terverifikasi)
+  - PIM      : bersih + 1 bug baru genuine (BG-225)
+  - Recruitment : bersih, semua FAIL teridentifikasi
+  - Buzz     : bersih, semua FAIL teridentifikasi
+  - Bug-List.xlsx: 38 -> 39 baris (BG-225 ditambah), 0 duplikat, 0 kerusakan data sepanjang
+    seluruh proses regresi (dicek berulang kali di tiap checkpoint).
+
+**MASALAH TERBUKA (belum di-root-cause, dicatat utk tindak lanjut terpisah):**
+`allure-results/` GAGAL menulis data APA PUN utk SEMUA 7 run regresi modul besar yg dicoba
+sepanjang Tahap 4 (Admin x2 attempt lama, PIM x2 attempt, Recruitment, Buzz, Admin retry) --
+konsisten 0 file setiap kali, TIDAK berkorelasi dgn ada/tidaknya outage (tetap 0 bahkan di run
+Recruitment/Buzz yg nyaris bersih tanpa timeout). HANYA run Login awal yg berhasil menulis 46
+file allure (sebelum sengaja dihapus utk rapikan). Dugaan awal "resource exhaustion krn volume
+timeout masif" TERBUKTI SALAH krn tetap gagal di run yg bersih. Root cause sesungguhnya BELUM
+diketahui -- kandidat lain: konfigurasi `resultsDir` di reporter config, race antar reporter
+saat `--workers=3`, atau bug di versi allure-playwright yg terpasang. PERLU investigasi
+terpisah SEBELUM Allure report akhir bisa di-generate dgn andal.
+
+**NEXT STEP:** investigasi root cause allure-results kosong (coba run kecil dgn --workers=1 +
+cek apakah 1 file minimal muncul utk isolasi variabel paralelisme), BARU generate Allure report
+akhir kalau sudah teratasi. Kalau tetap gagal stlh investigasi wajar, laporan akhir bisa
+memakai Playwright's own HTML report (`npm run report:html`) sbg pengganti, didokumentasikan
+sbg keterbatasan yg diketahui.

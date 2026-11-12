@@ -238,6 +238,7 @@ Full module coverage, no open functional gaps: Employee List (14), Add Employee 
 - Extension-only validation lets an executable disguised as a photo through on both profile-photo upload points
 - Missing `X-Frame-Options` / CSP `frame-ancestors` on Employee List — the **3rd app-wide confirmation** of the same clickjacking gap also found in Login and Recruitment
 - The same unhandled-exception-on-dropped-connection bug as Admin (**2nd of 4 confirmations**), reproduced identically on create-employee
+- Rapid double-click on Save in Add Employee intermittently sends 2 requests (~83% reproduction over 6 isolated runs); the second is correctly rejected by the server (no duplicate data), but handling that rejection triggers the same unhandled-exception pattern already confirmed on Admin's own double-click case — a new instance of an already-known app-wide defect, found during full-suite regression (2026-11-12)
 
 IDOR on personal-details/salary access confirmed N/A (single-role architecture, same as other modules). Report-to's "Add Supervisor/Subordinate" TCs (3) have a known intermittent UI-verification issue — the underlying save is confirmed working via its own API-level TC, only the text-match assertion is unreliable.
 
