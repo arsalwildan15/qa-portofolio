@@ -1485,3 +1485,46 @@ Kolom lain (Category/Scope/Environment/Modul/Severity/Priority/Attachment/Detect
 By/Status/Assigned To/Notes/Script Test Case) TIDAK diubah -- skema file tetap sama, hanya 4
 kolom prosa yang diperbaiki. Dikonfirmasi 38/38 baris terupdate (tidak ada yang IDnya tidak
 ketemu). **LANJUT TAHAP 4** (regresi penuh final + dokumentasi penutup).
+
+## UPDATE 2026-11-12 (lanjutan) -- Tahap 4: Regresi Penuh Dimulai
+
+Dijalankan TANPA override `--reporter=list` (default config: list + html + allure-playwright +
+bugListReporter aktif semua), sesuai rencana supaya Allure report & Bug-List auto-update bisa
+dipercaya utk regresi resmi ini.
+
+**Login (46 TC):** 44 PASS, 2 FAIL -- PERSIS sesuai ekspektasi (BG-026 rate limiting, BG-030
+clickjacking, keduanya sudah tercatat Open). TAPI ditemukan 2 masalah dari auto-reporter:
+1. bugListReporter membuat 2 entry BARU (BG-225/226) yang sebenarnya DUPLIKAT BG-026/030--
+   penyebabnya: redaksi BG-026/030 baru saja ditulis ulang (gaya manusiawi), jadi dedup
+   berbasis "teks summary persis" milik reporter GAGAL mencocokkan dgn versi lama. DIPERBAIKI:
+   BG-225/226 dihapus, catatan re-konfirmasi + screenshot terbaru ditambahkan ke BG-026/030.
+2. TC-LOGIN-46 (BG-224, bug INTERMITEN reset password) kebetulan PASS di run ini, dan
+   bugListReporter AUTO-CLOSE BG-224 -- PERSIS risiko yg sudah diperingatkan sblm Tahap 4
+   dimulai (auto-close tdk valid utk bug intermiten tanpa judgement manual, sama kelas dgn
+   BG-009). DIPERBAIKI: BG-224 dibuka lagi (Open) dgn catatan penjelasan.
+
+**PELAJARAN UTK SISA REGRESI:** jangan percaya mentah hasil bugListReporter -- WAJIB audit
+manual Bug-List.xlsx setelah TIAP modul selesai (cek entry baru = duplikat redaksi lama?, cek
+entry yg auto-closed = bug intermiten yg di-close keliru?), sebelum lanjut ke modul berikutnya.
+
+**Admin (144 TC): GAGAL DIREGRESI 2x BERTURUT-TURUT, BELUM VALID.** Attempt 1 (default
+workers): 13 PASS, 131 FAIL. Attempt 2 (--workers=3, setelah curl dicek sehat lagi): 30 PASS,
+114 FAIL. Investigasi mendalam (BUKAN asumsi langsung): 87-96% dari kegagalan di KEDUA attempt
+adalah `page.goto() net::ERR_TIMED_OUT`, curl ke server TETAP cepat & sehat (<1.5s) sepanjang
+kedua attempt, dan Allure writer di KEDUA attempt GAGAL menulis sama sekali (allure-results
+tetap stuck di 46 file, semuanya sisa dari run Login) -- indikasi proses Playwright crash
+sebelum reporter sempat flush output dgn normal, bukan exit yang bersih. Sisa 12-15 kegagalan
+non-timeout per attempt tersebar di modul yg TIDAK saling terkait (Education, Employment
+Status, Job Categories, Pay Grades, dll) -- pola ini KONSISTEN dgn "collateral noise" yg sudah
+pernah dikonfirmasi sblmnya utk Buzz (BG-208-223, root cause sama: traffic browser otomatis
+diblokir spesifik, curl tidak terpengaruh krn fingerprint request beda -- kemungkinan
+WAF/anti-bot/rate-limiting di sisi server). Bug-List.xlsx TIDAK tersentuh/rusak dari kedua
+attempt gagal ini (tetap 38 baris, dikonfirmasi). **User diberi 3 opsi, memilih: lanjut modul
+lain dulu, kembali ke Admin nanti.** test-results & allure-results Admin yg gagal sudah
+dibersihkan (`rm -rf test-results allure-results`) spy tidak tercampur dgn data regresi modul
+lain. Login (44 pass/2 fail, sudah tervalidasi & terdokumentasi di atas) blm sempat
+di-reproduce ulang ke allure-results baru stlh pembersihan ini -- kalau Allure report akhir
+dibutuhkan, Login perlu di-rerun sekali lagi sbg bagian dari full regression final.
+
+**SISA TAHAP 4:** PIM, Recruitment, Buzz (lanjut sekarang) -> kembali ke Admin -> generate
+Allure report akhir -> dokumentasi penutup.
