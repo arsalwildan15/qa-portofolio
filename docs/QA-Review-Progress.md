@@ -1404,3 +1404,29 @@ docs/TC-Login.txt diupdate (+1 TC, Total 45->46, Unexpected/Edge 16->17). README
 **TAHAP 3 SELESAI SEPENUHNYA.** Semua item (PIM Terminate Employee, Admin filter+bulk action,
 Login reset password) sudah diinvestigasi, diuji, dan didokumentasikan. **LANJUT TAHAP 4:**
 regresi penuh final seluruh modul + dokumentasi penutup.
+
+## UPDATE 2026-11-12 (lanjutan) -- Pembersihan Bug-List.xlsx (Noise Timeout/Koneksi)
+
+Atas permintaan user, dilakukan audit menyeluruh Bug-List.xlsx utk cek duplikat sebelum lanjut
+Tahap 4. Ditemukan: 0 Bug ID duplikat, 0 bug OPEN yang duplikat (satu-satunya pasangan terkait
+script yang sama, BG-009/BG-068, sudah terdokumentasi eksplisit sbg 2 temuan berbeda bukan
+duplikat). User lalu minta: baris Closed yang disebabkan timeout/noise koneksi dihapus saja
+(bukan cuma ditandai Closed).
+
+**Kriteria penghapusan (ketat, HANYA Actual Result kolom itu sendiri yang timeout/koneksi,
+BUKAN sekadar baris yg kebagian catatan "batch" penjelasan bareng baris timeout lain):**
+keyword dicari di kolom Actual Result (bukan Notes, utk menghindari salah hapus baris yg Actual
+Result-nya assertion data/bug nyata tapi notes-nya cuma ikut nyambung ke penjelasan batch
+outage) -- "test timeout", "err_timed_out", "err_aborted", "worker process exited",
+"err_connection", "timeout of", "waitforurl: timeout". Status WAJIB Closed (tdk pernah
+menyentuh baris Open).
+
+Sblm hapus, dicek dulu apakah ada ID yg akan dihapus dirujuk sbg "baris kanonik" oleh baris lain
+(yg kalau dihapus bakal memutus referensi fungsional) -- ditemukan beberapa baris KEPT yg
+notes-nya menyebut range ID yg dihapus (mis. "batch BG-031 s/d BG-063"), tapi semuanya cuma
+konteks historis (bukan link fungsional), aman dihapus.
+
+**Hasil:** 100 baris dihapus (semua Closed, Actual Result = timeout/koneksi noise). Sebelum:
+224 baris (38 Open + 186 Closed). Sesudah: 124 baris (38 Open UTUH tidak tersentuh + 86 Closed
+yang closed krn alasan lain spt fixed/duplikat-dari-bug-nyata, bukan noise). 0 duplikat Bug ID
+sesudahnya.
