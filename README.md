@@ -38,8 +38,7 @@ qa-portofolio/
 │   ├── login/          # One module = one folder. Specs are named by test case ID.
 │   ├── admin/          # One subfolder per Admin sub-screen (~16 total, incl. Configuration's 8)
 │   ├── pim/             # One subfolder per PIM screen (incl. configuration/ and security/)
-│   ├── recruitment/     # One subfolder per Recruitment screen (incl. security/)
-│   └── e2e/             # Cross-cutting / not-yet-split specs (PIM smoke test, Leave)
+│   └── recruitment/     # One subfolder per Recruitment screen (incl. security/)
 ├── docs/                # Human-readable test case documentation, one file per module
 │   ├── TC-Login.txt / TC-Admin.txt / TC-PIM.txt / TC-Recruitment.txt
 │   ├── PIM-Findings-Summary.txt         # Digest of exploration findings across the whole PIM suite
@@ -186,8 +185,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | PIM | 164 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 59 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
-| Leave | 1 | N/A |
-| **Total** | **446** | |
+| **Total** | **445** | |
 
 **Cross-cutting edge cases (2026-11-12):** two scenarios flagged as commonly-forgotten in test design — refreshing mid-submit and a dropped connection mid-submit — were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails due to a dropped network connection, the SPA throws an unhandled JS exception that reaches the console/global error handler instead of being caught at its source, identically reproduced (same exception name) in Admin, PIM, Recruitment, and Buzz. The app does still show the user a generic "Unexpected Error!" toast in all four cases — this is a code-level error-handling defect, not a silent failure the user would never notice. Login is unaffected — its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
 
@@ -275,10 +273,6 @@ Three more TCs close out previously-untested features: editing an own post, dele
 - No rate limiting on candidate creation
 
 Cross-origin mutation (CSRF) on vacancy creation confirmed **blocked by CORS** (no bug). Plus a documented intermittent client-side rendering bug (Application Stage/Candidate History cards occasionally stuck loading forever with no underlying API error).
-
-### Leave (1 TC)
-
-> The public demo account has no assigned leave entitlement, so a successful application can't be exercised. Instead the test verifies the deterministic behavior that's actually there: an insufficient-balance message once a date range is selected.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

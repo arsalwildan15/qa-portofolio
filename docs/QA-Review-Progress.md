@@ -1437,3 +1437,21 @@ Open -- 38 baris, 0 Closed, 0 duplikat Bug ID. Histori audit-trail bug yang suda
 duplikat (termasuk root-cause-analysis batch outage, auto-closed retest-pass, dsb) TIDAK lagi
 tersimpan di file ini -- kalau dibutuhkan lagi, bisa direkonstruksi dari git history
 (`git show <commit-sebelum-f78ad97>:docs/Bug-List.xlsx` dst).
+
+## UPDATE 2026-11-12 (lanjutan) -- Hapus tests/e2e/ (legacy, tidak terdokumentasi)
+
+Atas permintaan user, folder `tests/e2e/` (`leave.spec.ts`, `pim.spec.ts`) dihapus. Ini legacy/
+prototype files dari sebelum struktur per-modul (`tests/login/`, `tests/pim/`, dst) dibuat --
+dikonfirmasi tidak direferensikan sama sekali di `docs/TC-*.txt` manapun, jadi menghapusnya
+TIDAK mengubah angka TC resmi modul PIM (164 tetap, krn `pim.spec.ts` memang tidak pernah
+dihitung di sana). `leave.spec.ts` adalah SATU-SATUNYA cakupan modul Leave di seluruh proyek
+(baris "Leave | 1 | N/A" di README) -- dgn dihapus, modul Leave sekarang 0 TC, baris itu
+dihapus dari tabel README, grand Total project 446 -> 445.
+
+README.md diupdate: baris `e2e/` di struktur folder dihapus, tabel Test Coverage (Leave row
+dihapus, Total 445), section narasi "### Leave (1 TC)" dihapus.
+
+**[CATATAN -- belum ditindak, nunggu arahan]** `PimPage` dan `LeavePage` (page object classes
+di `src/pages/`) beserta fixture `pimPage`/`leavePage` di `pages.fixture.ts` sekarang jadi DEAD
+CODE -- tidak dipakai TC manapun lagi setelah `tests/e2e/` dihapus (dikonfirmasi via grep).
+Belum dihapus krn di luar scope permintaan eksplisit user kali ini.
