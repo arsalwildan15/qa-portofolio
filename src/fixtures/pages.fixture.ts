@@ -3,8 +3,6 @@ import { env } from '../config/env';
 import {
   LoginPage,
   DashboardPage,
-  PimPage,
-  LeavePage,
   EmployeeListPage,
   AddEmployeePage,
   PersonalDetailsPage,
@@ -47,8 +45,6 @@ import {
 interface Pages {
   loginPage: LoginPage;
   dashboardPage: DashboardPage;
-  pimPage: PimPage;
-  leavePage: LeavePage;
   employeeListPage: EmployeeListPage;
   addEmployeePage: AddEmployeePage;
   personalDetailsPage: PersonalDetailsPage;
@@ -102,12 +98,6 @@ export const test = base.extend<Pages>({
   },
   dashboardPage: async ({ page }, use) => {
     await use(new DashboardPage(page));
-  },
-  pimPage: async ({ page }, use) => {
-    await use(new PimPage(page));
-  },
-  leavePage: async ({ page }, use) => {
-    await use(new LeavePage(page));
   },
   employeeListPage: async ({ page }, use) => {
     await use(new EmployeeListPage(page));

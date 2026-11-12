@@ -1451,7 +1451,7 @@ dihapus dari tabel README, grand Total project 446 -> 445.
 README.md diupdate: baris `e2e/` di struktur folder dihapus, tabel Test Coverage (Leave row
 dihapus, Total 445), section narasi "### Leave (1 TC)" dihapus.
 
-**[CATATAN -- belum ditindak, nunggu arahan]** `PimPage` dan `LeavePage` (page object classes
-di `src/pages/`) beserta fixture `pimPage`/`leavePage` di `pages.fixture.ts` sekarang jadi DEAD
-CODE -- tidak dipakai TC manapun lagi setelah `tests/e2e/` dihapus (dikonfirmasi via grep).
-Belum dihapus krn di luar scope permintaan eksplisit user kali ini.
+**UPDATE lanjutan:** user konfirmasi hapus juga. `src/pages/PimPage.ts` dan
+`src/pages/LeavePage.ts` dihapus, beserta export-nya di `src/pages/index.ts` dan fixture
+`pimPage`/`leavePage` (interface + implementasi) di `src/fixtures/pages.fixture.ts`. Dikonfirmasi
+`grep -rln "PimPage\|LeavePage" src/ tests/` -> 0 hasil setelahnya. `npx tsc --noEmit` bersih.
