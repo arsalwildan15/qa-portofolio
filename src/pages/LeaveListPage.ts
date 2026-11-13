@@ -55,9 +55,14 @@ export class LeaveListPage extends BasePage {
 
   /** Removes the sticky default "Pending Approval" status chip so other statuses can be searched. */
   async clearStatusChip(): Promise<void> {
-    const chip = this.page.locator('.oxd-tag');
+    // [BUG SCRIPT, diperbaiki] Class chip multiselect yg BENAR adalah ".oxd-chip" (dgn child
+    // icon "i.bi-x" sbg tombol hapus, bukan elemen <button>) -- dikonfirmasi live via dump
+    // HTML form. Versi awal memakai ".oxd-tag" + getByRole('button'), yg tidak pernah match
+    // apapun di DOM form ini, sehingga clear silently no-op dan chip "Pending Approval" tetap
+    // melekat meski Status sudah diganti di dropdown.
+    const chip = this.page.locator('.oxd-chip');
     if ((await chip.count()) > 0) {
-      await chip.getByRole('button').first().click().catch(() => {});
+      await chip.locator('i.bi-x').first().click().catch(() => {});
       await this.page.waitForTimeout(300);
     }
   }
@@ -93,17 +98,30 @@ export class LeaveListPage extends BasePage {
     await this.page.getByText('View Leave Details').click();
   }
 
-  /** Opens the row's kebab menu and clicks "Cancel Leave". Confirms the resulting dialog. */
+  /**
+   * Opens the row's kebab menu and clicks "Cancel Leave".
+   *
+   * [BUG SCRIPT, diperbaiki] Versi awal mengasumsikan SELALU ada dialog konfirmasi "Yes" yg
+   * harus diklik -- dikonfirmasi live via dump body text: membatalkan request berstatus
+   * "Pending Approval" TIDAK menampilkan dialog konfirmasi apapun, cukup langsung
+   * menampilkan toast "Successfully Updated" seketika setelah klik "Cancel Leave". Versi ini
+   * memasang listener response SEBELUM klik "Cancel Leave" (krn requestnya bisa langsung
+   * terkirim tanpa dialog), lalu secara defensif tetap menangani dialog "Yes" JIKA ternyata
+   * muncul (mis. utk status lain spt Scheduled yg belum pernah dicek).
+   */
   async cancelLeave(row: Locator) {
     await row.locator('.oxd-table-cell-actions button, button:has(i.bi-three-dots-vertical)').first().click();
-    await this.page.getByText('Cancel Leave').click();
     const responsePromise = this.page
       .waitForResponse(
         (r) => r.url().includes('/leave-requests') && r.request().method() !== 'GET',
         { timeout: 10_000 },
       )
       .catch(() => null);
-    await this.page.getByRole('button', { name: /Yes/i }).click();
+    await this.page.getByText('Cancel Leave').click();
+    const yesButton = this.page.getByRole('button', { name: /Yes/i });
+    if (await yesButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      await yesButton.click();
+    }
     return responsePromise;
   }
 }
