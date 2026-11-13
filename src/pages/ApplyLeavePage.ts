@@ -112,6 +112,32 @@ export class ApplyLeavePage extends BasePage {
     return { balance, isWeekend };
   }
 
+  /**
+   * Queries the SAME overlap-check endpoint the app itself calls on Apply (GET
+   * /api/v2/leave/overlap-leaves?fromDate=...&toDate=...). Returns true if the range
+   * overlaps an existing leave request for the logged-in employee.
+   *
+   * [TEMUAN APLIKASI] Confirmed live: when the chosen range genuinely overlaps an existing
+   * request, the app shows NO dialog and NO error message at all for a MULTI-day range --
+   * the client silently runs its pre-flight overlap/balance checks and then simply never
+   * sends the POST, leaving the user looking at an unchanged form with zero feedback about
+   * why nothing happened. This is a real UX gap (documented as a finding, not treated as a
+   * script bug), and the reason this helper exists: a TC must pre-check for overlap itself
+   * rather than assume a random/sequential date is free of it, since this suite's own
+   * earlier Apply Leave runs leave behind real Pending Approval records that can collide.
+   */
+  async hasOverlap(fromDate: string, toDate: string): Promise<boolean> {
+    const toIso = (d: string) => {
+      const [yyyy, dd, mm] = d.split('-');
+      return `${yyyy}-${mm}-${dd}`;
+    };
+    const resp = await this.page.request.get(
+      `/web/index.php/api/v2/leave/overlap-leaves?fromDate=${toIso(fromDate)}&toDate=${toIso(toDate)}`,
+    );
+    const body = await resp.json().catch(() => null);
+    return Array.isArray(body?.data) && body.data.length > 0;
+  }
+
   async submit(): Promise<{ response: import('@playwright/test').Response | null; errorToastText: string | null }> {
     const responsePromise = this.page
       .waitForResponse(

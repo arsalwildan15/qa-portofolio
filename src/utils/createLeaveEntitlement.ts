@@ -18,5 +18,12 @@ export async function createLeaveEntitlement(
   await leaveEntitlementPage.selectLeaveType(leaveTypeName);
   await leaveEntitlementPage.fillEntitlement(days);
   const resp = await leaveEntitlementPage.save();
+  // After a successful save, the app shows a success toast and then redirects itself (a
+  // client-side JS timer, not a network event networkidle can see) a moment later. Calling
+  // page.goto() elsewhere right in that window races the app's own pending redirect and
+  // throws net::ERR_ABORTED -- confirmed live, reproduced 3x identically. No DOM/network
+  // signal marks when that timer fires, so this fixed wait is a deliberate exception to the
+  // "no arbitrary waits" rule, not a flakiness band-aid.
+  await leaveEntitlementPage.settleAfterSave();
   return { employeeName, status: resp?.status() };
 }

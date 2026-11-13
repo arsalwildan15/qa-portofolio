@@ -92,4 +92,14 @@ export class LeaveEntitlementPage extends BasePage {
     }
     return responsePromise;
   }
+
+  /**
+   * Call after save() resolves. The app redirects itself away from this page a moment after
+   * showing its success toast -- a client-side JS timer, not something networkidle can see.
+   * A page.goto() elsewhere right after save() races that pending redirect and throws
+   * net::ERR_ABORTED (confirmed live, reproduced 3x identically).
+   */
+  async settleAfterSave(): Promise<void> {
+    await this.page.waitForTimeout(2_000);
+  }
 }

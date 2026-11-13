@@ -79,13 +79,13 @@ test('TC-LEAVE-APPLY-01: applying leave with valid data succeeds and deducts bal
   // the SAME real-time per-date endpoint the app itself checks on Apply, retrying with a
   // different date up to 5 times until one comes back both available and non-weekend.
   let applyDate = '';
-  for (let attempt = 0; attempt < 5; attempt += 1) {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
     const candidate = uniqueLeaveWeekday(5);
     const { balance, isWeekend } = await applyLeavePage.getRealTimeBalanceFor(1, candidate);
-    if (!isWeekend && balance >= 8) {
-      applyDate = candidate;
-      break;
-    }
+    if (isWeekend || balance < 8) continue;
+    if (await applyLeavePage.hasOverlap(candidate, candidate)) continue;
+    applyDate = candidate;
+    break;
   }
   report.check('Berhasil menemukan tanggal weekday dgn balance cukup (real-time check)', applyDate !== '', `applyDate="${applyDate}"`);
   await applyLeavePage.fillDateRange(applyDate, applyDate);
