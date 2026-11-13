@@ -82,16 +82,25 @@ export class TestReport {
    * `page` is optional only for call sites that predate this parameter;
    * pass it to automatically fail the TC on any unexpected browser
    * console error (no need to wire this up per test).
+   *
+   * `expectedConsoleErrorPatterns`: for a negative-path TC that deliberately drives the
+   * APP'S OWN in-page fetch into a 4xx (e.g. submitting an invalid date range so the app's
+   * real-time balance-check call itself gets rejected), Chromium logs that failed fetch as
+   * a "Failed to load resource" console error -- this is unavoidable browser-level noise
+   * from a request Playwright did not make (unlike `page.request.post(...)`, which never
+   * touches the page's console), not evidence of an app bug. A message matching one of
+   * these patterns is excluded from the automatic console-error check.
    */
   constructor(
     private readonly tcId: string,
     private readonly title: string,
     private readonly env: string,
     page?: Page,
+    private readonly expectedConsoleErrorPatterns: RegExp[] = [],
   ) {
     if (page) {
       page.on('console', (msg) => {
-        if (msg.type() === 'error') {
+        if (msg.type() === 'error' && !this.expectedConsoleErrorPatterns.some((p) => p.test(msg.text()))) {
           this.consoleErrors.push({ text: msg.text() });
         }
       });

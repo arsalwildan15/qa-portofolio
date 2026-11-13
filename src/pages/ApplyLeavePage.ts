@@ -34,8 +34,23 @@ export class ApplyLeavePage extends BasePage {
     this.noLeaveTypesMessage = page.getByText('No Leave Types with Leave Balance');
   }
 
+  /**
+   * Retries once on net::ERR_ABORTED -- confirmed live, calling goto() right after a prior
+   * page's own save() can race that page's delayed self-redirect (a client-side JS timer,
+   * not something networkidle/a fixed wait reliably outlasts) and get aborted. A single
+   * retry after a short pause is enough once that redirect has actually finished firing.
+   */
   async goto(): Promise<void> {
-    await this.page.goto('/web/index.php/leave/applyLeave');
+    try {
+      await this.page.goto('/web/index.php/leave/applyLeave');
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('ERR_ABORTED')) {
+        await this.page.waitForTimeout(1_500);
+        await this.page.goto('/web/index.php/leave/applyLeave');
+      } else {
+        throw error;
+      }
+    }
   }
 
   /**
