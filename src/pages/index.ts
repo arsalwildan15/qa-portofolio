@@ -38,3 +38,7 @@ export { AdminSocialMediaAuthPage } from './AdminSocialMediaAuthPage';
 export { AdminOAuthClientPage } from './AdminOAuthClientPage';
 export { AdminLdapConfigurationPage } from './AdminLdapConfigurationPage';
 export { BuzzPage } from './BuzzPage';
+export { LeaveEntitlementPage } from './LeaveEntitlementPage';
+export { ApplyLeavePage } from './ApplyLeavePage';
+export { LeaveListPage } from './LeaveListPage';
+export { AssignLeavePage } from './AssignLeavePage';

@@ -40,6 +40,10 @@ import {
   AdminOAuthClientPage,
   AdminLdapConfigurationPage,
   BuzzPage,
+  LeaveEntitlementPage,
+  ApplyLeavePage,
+  LeaveListPage,
+  AssignLeavePage,
 } from '../pages';
 
 interface Pages {
@@ -90,6 +94,10 @@ interface Pages {
   adminOAuthClientPage: AdminOAuthClientPage;
   adminLdapConfigurationPage: AdminLdapConfigurationPage;
   buzzPage: BuzzPage;
+  leaveEntitlementPage: LeaveEntitlementPage;
+  applyLeavePage: ApplyLeavePage;
+  leaveListPage: LeaveListPage;
+  assignLeavePage: AssignLeavePage;
 }
 
 export const test = base.extend<Pages>({
@@ -233,6 +241,18 @@ export const test = base.extend<Pages>({
   },
   buzzPage: async ({ page }, use) => {
     await use(new BuzzPage(page));
+  },
+  leaveEntitlementPage: async ({ page }, use) => {
+    await use(new LeaveEntitlementPage(page));
+  },
+  applyLeavePage: async ({ page }, use) => {
+    await use(new ApplyLeavePage(page));
+  },
+  leaveListPage: async ({ page }, use) => {
+    await use(new LeaveListPage(page));
+  },
+  assignLeavePage: async ({ page }, use) => {
+    await use(new AssignLeavePage(page));
   },
 });
 
