@@ -1,26 +1,23 @@
 /**
  * ================================================================================
- * TC-CLAIM-ASSIGN-04 — Verify Approve/Reject Actions Are N/A For This Single-Admin-Account Setup
+ * TC-CLAIM-ASSIGN-04 — Verify Owner Cannot Approve/Reject Their Own Claim (Segregation of Duties)
  * Modul    : Claim - Employee Claims (Approve/Reject)
- * Kategori : Scope Confirmation (bukti negatif, sama pola dgn Leave Approve/Reject)
+ * Kategori : Security (S) 5.9 Business Logic / Negative (-) 2.4 Aksi tanpa permission
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-ASSIGN-04-Verify-Approve-Reject-NA-For-Single-Account.spec.ts
  * Path     : tests/claim/assign/
  * ================================================================================
  *
  * TUJUAN:
- *   Membuktikan scope decision: Approve/Reject claim TIDAK bisa diuji end-to-end di suite ini,
- *   krn hanya ada SATU akun (Admin, employee "manda akhil user") yg dipakai di seluruh sesi
- *   testing -- sama persis dgn temuan Leave Approve/Reject sebelumnya (dibuktikan via field
- *   `allowedActions` di response API, bukan ditebak/diasumsikan).
+ *   Memverifikasi prinsip segregation of duties: pemilik klaim (akun yg login, walaupun ber-role
+ *   Admin) TIDAK PERNAH ditawari aksi APPROVE/REJECT/PAY atas klaimnya sendiri, di status apa pun.
+ *   Server menentukan aksi yg sah lewat `meta.allowedActions` di GET /api/v2/claim/requests/<id>.
  *
- *   Server menentukan aksi apa yg boleh dilakukan pada sebuah claim request lewat
- *   `meta.allowedActions` di response GET /api/v2/claim/requests/<id>. Utk klaim milik
- *   employee SENDIRI (akun login ini, empNumber=7) yg berstatus SUBMITTED, satu2nya aksi yg
- *   diizinkan adalah CANCEL -- APPROVE dan REJECT tidak pernah muncul di allowedActions sama
- *   sekali, krn aksi tsb scope-nya supervisor/approver thd BAWAHAN, bukan thd diri sendiri, dan
- *   org chart di seed data demo ini tidak punya hubungan supervisor->subordinate yg
- *   menghasilkan approval queue utk akun tunggal ini.
+ * [KOREKSI 2026-11-15] Versi sebelumnya menyimpulkan "Approve/Reject N/A utk suite single-account".
+ * Kesimpulan itu terlalu luas: yg dibuktikan hanyalah pemilik tidak bisa meng-approve klaim
+ * SENDIRI. Alur approval utk klaim yg diajukan employee lain (ESS) tetap ada dan diuji terpisah
+ * di CLAIM-APPROVAL-* (Fase 2, butuh fixture akun ESS). Nama file dipertahankan agar riwayat
+ * Bug-List/commit tetap terhubung.
  *
  * RUN COMMAND:
  *   npx playwright test tests/claim/assign/TC-CLAIM-ASSIGN-04-Verify-Approve-Reject-NA-For-Single-Account.spec.ts --project=chromium --headed
@@ -30,45 +27,42 @@
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
+import { getLoggedInEmployeeName } from '../../../src/utils/getLoggedInEmployeeName';
 
-test('TC-CLAIM-ASSIGN-04: Approve/Reject are not available in allowedActions for a SUBMITTED claim on this single admin account', async ({
+const APPROVER_ACTIONS = ['APPROVE', 'REJECT', 'PAY'];
+
+test('TC-CLAIM-ASSIGN-04: the claim owner is never offered APPROVE/REJECT/PAY on their own claims', async ({
   page,
 }, testInfo) => {
-  testInfo.setTimeout(60_000);
-  const report = new TestReport('TC-CLAIM-ASSIGN-04', 'Approve/Reject N/A For Single Account', env.baseURL, page);
+  testInfo.setTimeout(90_000);
+  const report = new TestReport('TC-CLAIM-ASSIGN-04', 'Owner Cannot Approve Own Claim', env.baseURL, page);
 
-  report.step('Cari claim berstatus SUBMITTED milik akun login ini via API, lalu baca allowedActions-nya');
+  report.step('Ambil semua klaim milik akun yg login (status apa pun) via API');
+  const self = await getLoggedInEmployeeName(page);
   const listResp = await page.request.get(
     '/web/index.php/api/v2/claim/employees/requests?limit=50&offset=0&includeEmployees=onlyCurrent&sortField=claimRequest.referenceId&sortOrder=DESC',
   );
   const listBody = await listResp.json().catch(() => null);
-  const submittedClaim = (listBody?.data ?? []).find((c: { status?: string }) => c.status === 'SUBMITTED');
-  report.check('[API] Ditemukan minimal 1 claim berstatus SUBMITTED utk diperiksa', !!submittedClaim, `found=${!!submittedClaim}, id=${submittedClaim?.id}`);
+  const ownClaims: Array<{ id: number; status: string }> = (listBody?.data ?? []).filter(
+    (c: { employee?: { empNumber?: number } }) => c.employee?.empNumber === self.empNumber,
+  );
+  report.check('[API] Ditemukan minimal 1 klaim milik akun login', ownClaims.length > 0, `count=${ownClaims.length}, empNumber=${self.empNumber}`);
 
-  const detailResp = await page.request.get(`/web/index.php/api/v2/claim/requests/${submittedClaim?.id}`);
-  const detailBody = await detailResp.json().catch(() => null);
-  const allowedActions: Array<{ action: string }> = detailBody?.meta?.allowedActions ?? [];
-  const actionNames = allowedActions.map((a) => a.action);
+  report.step('Untuk setiap klaim milik sendiri: allowedActions tidak boleh berisi APPROVE/REJECT/PAY');
+  const offending: string[] = [];
+  const seenStatuses = new Set<string>();
+  for (const claim of ownClaims) {
+    const detail = await page.request.get(`/web/index.php/api/v2/claim/requests/${claim.id}`);
+    const body = await detail.json().catch(() => null);
+    const actions: string[] = (body?.meta?.allowedActions ?? []).map((a: { action: string }) => a.action);
+    seenStatuses.add(claim.status);
+    const bad = actions.filter((a) => APPROVER_ACTIONS.includes(a));
+    if (bad.length > 0) offending.push(`#${claim.id}(${claim.status}): ${bad.join(',')}`);
+  }
   report.check(
-    '[API] allowedActions TIDAK berisi APPROVE',
-    !actionNames.includes('APPROVE'),
-    `allowedActions=${JSON.stringify(actionNames)}`,
-  );
-  report.check(
-    '[API] allowedActions TIDAK berisi REJECT',
-    !actionNames.includes('REJECT'),
-    `allowedActions=${JSON.stringify(actionNames)}`,
-  );
-  report.check(
-    '[API] allowedActions HANYA berisi CANCEL (bukti ini memang claim milik-sendiri, bukan approval queue)',
-    actionNames.length === 1 && actionNames[0] === 'CANCEL',
-    `allowedActions=${JSON.stringify(actionNames)}`,
-  );
-
-  report.step('Kesimpulan: Approve/Reject claim adalah item N/A utk suite ini (konsisten dgn temuan Leave Approve/Reject)');
-  report.finding(
-    'Approve/Reject claim: N/A utk suite single-account ini',
-    'Server tidak pernah menawarkan aksi APPROVE/REJECT krn tidak ada relasi supervisor->subordinate yg menghasilkan approval queue utk akun ini. Scope limitation yg dibuktikan via API (allowedActions), bukan bug ataupun kekurangan coverage.',
+    'Tidak ada klaim milik sendiri yg menawarkan APPROVE/REJECT/PAY ke pemiliknya',
+    offending.length === 0,
+    `offending=${JSON.stringify(offending)}, statusesChecked=${JSON.stringify([...seenStatuses])}`,
   );
 
   report.print();
