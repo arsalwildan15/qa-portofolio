@@ -122,8 +122,16 @@ export class AssignLeavePage extends BasePage {
       )
       .catch(() => null);
     await this.assignButton.click();
-    await this.page.waitForTimeout(600);
-    const overrideVisible = await this.confirmOverrideButton.isVisible({ timeout: 2_000 }).catch(() => false);
+    // [BUG SCRIPT, diperbaiki] Locator.isVisible() TIDAK menunggu elemen muncul -- ia cuma
+    // cek status SAAT ITU JUGA dan langsung return false kalau dialog belum sempat render,
+    // walau diberi opsi `timeout` (opsi itu hanya utk aksi internal, bukan utk polling
+    // kemunculan). Confirmed live: dialog override butuh >600ms utk render (dua GET
+    // leave-balance berjalan dulu), jadi versi lama ini SELALU false. Diperbaiki pakai
+    // waitFor({state:'visible'}), yg benar2 polling sampai timeout habis.
+    const overrideVisible = await this.confirmOverrideButton
+      .waitFor({ state: 'visible', timeout: 8_000 })
+      .then(() => true)
+      .catch(() => false);
     if (overrideVisible && onOverride === 'confirm') {
       await this.confirmOverrideButton.click();
     } else if (overrideVisible && onOverride === 'cancel') {
