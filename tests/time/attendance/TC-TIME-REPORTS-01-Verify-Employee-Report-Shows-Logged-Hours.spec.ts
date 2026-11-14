@@ -79,7 +79,7 @@ test('TC-TIME-REPORTS-01: hours logged via My Timesheet are queryable through Em
   report.step(`Verify: baris "${project}" / "${activity}" muncul di laporan dgn total >= 3 jam`);
   await page.waitForTimeout(1_500);
   const bodyText = await page.locator('body').innerText();
-  const projectShortName = project.split(' - ')[0];
+  const projectShortName = project.split(' - ')[0] ?? project;
   report.check(`Project "${projectShortName}" muncul di laporan`, bodyText.includes(projectShortName));
   report.check(`Activity "${activity}" muncul di laporan`, bodyText.includes(activity));
   const totalRow = (viewBody?.data ?? []).find(

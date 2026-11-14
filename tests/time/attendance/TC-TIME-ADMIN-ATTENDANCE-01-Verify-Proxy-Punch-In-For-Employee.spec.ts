@@ -45,7 +45,7 @@ test('TC-TIME-ADMIN-ATTENDANCE-01: admin proxy-punches In for a target employee 
 
   report.step('Cari employee target via Employee Records, buka Attendance Record-nya');
   const target = await pickLightlyUsedEmployee(page);
-  const [firstName, ...lastNameParts] = target.fullName.split(' ');
+  const [firstName = '', ...lastNameParts] = target.fullName.split(' ');
   await adminAttendanceRecordsPage.goto();
   const openedEmpNumber = await adminAttendanceRecordsPage.searchAndView(firstName, lastNameParts.join(' '));
 

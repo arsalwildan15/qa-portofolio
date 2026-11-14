@@ -67,11 +67,11 @@ export class MyTimesheetPage extends BasePage {
       // (fillFirstRow "berhasil" tapi dropdown tetap kosong), menyebabkan Save gagal diam2 dgn
       // error client-side "Select an Activity" yg baru terlihat stlh submit.
       const realOptions = texts.filter((t) => t !== '-- Select --' && t !== 'No Records Found');
-      if (realOptions.length === 0) {
+      const activityName = realOptions[0];
+      if (activityName === undefined) {
         await this.page.keyboard.press('Escape');
         continue;
       }
-      const activityName = realOptions[0];
       await activityOptions.filter({ hasText: activityName }).first().click();
       return { project: projectName, activity: activityName };
     }

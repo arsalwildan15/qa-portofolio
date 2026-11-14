@@ -82,7 +82,7 @@ test('TC-TIME-TIMESHEET-01: logging hours against a Project/Activity on My Times
   const afterReloadText = await page.locator('body').innerText();
   report.check(
     `Project "${project}" muncul di My Timesheet setelah reload`,
-    afterReloadText.includes(project.split(' - ')[0]),
+    afterReloadText.includes(project.split(' - ')[0] ?? project),
     `project=${project}`,
   );
   report.check('Total jam (02:00) muncul di tabel setelah reload', afterReloadText.includes('02:00'));
