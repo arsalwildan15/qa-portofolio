@@ -44,6 +44,7 @@ import {
   ApplyLeavePage,
   LeaveListPage,
   AssignLeavePage,
+  TimeAttendancePage,
 } from '../pages';
 
 interface Pages {
@@ -98,6 +99,7 @@ interface Pages {
   applyLeavePage: ApplyLeavePage;
   leaveListPage: LeaveListPage;
   assignLeavePage: AssignLeavePage;
+  timeAttendancePage: TimeAttendancePage;
 }
 
 export const test = base.extend<Pages>({
@@ -253,6 +255,9 @@ export const test = base.extend<Pages>({
   },
   assignLeavePage: async ({ page }, use) => {
     await use(new AssignLeavePage(page));
+  },
+  timeAttendancePage: async ({ page }, use) => {
+    await use(new TimeAttendancePage(page));
   },
 });
 
