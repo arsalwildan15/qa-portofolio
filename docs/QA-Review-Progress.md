@@ -1717,3 +1717,38 @@ bukan dokumen kesimpulan bug yang berdiri sendiri.
 Cara lihat: `npm run report:allure:open` (local server + buka browser otomatis). Folder
 `allure-report/` tidak di-commit (gitignored, generated artifact) -- regenerate kapan saja dari
 `allure-results/` (jg gitignored) via `npm run report:allure:generate`.
+
+## UPDATE 2026-11-14 -- Modul Leave Tuntas, 3 Modul Baru Dibuka (Time, Performance, Claim)
+
+**Leave module** kini punya 17 TC taxonomy-driven (Positive/Negative/Boundary/Security/API/Console)
+di 3 sub-area: Apply Leave (6 TC), Leave List (3 TC), Assign Leave (4 TC, 1 inti bug-fix-heavy +
+3 TC di batch sebelumnya). Semua sudah di-commit terpisah per batch. Catatan jujur: TC-LEAVE-
+ASSIGN-02 (override balance dialog) belum lolos verifikasi 3x bersih krn asumsi "leave type
+selalu 0 balance" yg dipakainya terbukti rapuh di shared demo ini seiring waktu (balance
+employee/leave-type apapun bisa berubah krn aktivitas eksternal) -- logic TC dan temuan app-nya
+sendiri (Confirm override tetap membuat record walau balance kurang) sudah pernah terbukti benar,
+tinggal perlu fixture yg lebih robust di sesi berikutnya.
+
+Selama proses ini ditemukan & diperbaiki banyak bug script nyata (bukan bug app): race balance-
+refresh di beberapa page object, retry-on-ERR_ABORTED yg belum konsisten, dialog override yg
+nyangkut krn locator ambigu, `hasOverlap()` yg hang total utk employee yg sudah terlalu banyak
+riwayat leave-nya (solusi: `pickLightlyUsedEmployee()` -- util baru yg memilih employee segar
+dinamis via API, dipakai mulai sekarang utk TC apapun yg butuh employee "bersih").
+
+**3 modul besar yg sebelumnya 0% coverage kini punya first-pass core coverage:**
+- **Time**: Attendance Punch In/Out (2 TC: siklus In->Out, XSS di Note). Ditemukan: halaman ini
+  tidak re-render reaktif setelah POST/PUT sendiri (perlu re-navigasi), dan Punch In pakai POST
+  sementara Punch Out pakai PUT ke endpoint yg sama.
+- **Performance**: KPI management/Configure (2 TC: add KPI valid, XSS/SQLi di nama KPI).
+- **Claim**: Assign Claim/create claim request (2 TC: create valid, XSS di Remarks). Ditemukan:
+  endpoint create adalah `/api/v2/claim/employees/<empNumber>/requests`, bukan collection flat.
+
+Total TC project sekarang: 464 file spec.
+
+**Yang masih terbuka utk sesi berikutnya** (scope sengaja dipersempit di 3 modul baru ini --
+bukan taxonomy lengkap spt Leave, demi menyelesaikan sesuatu yg nyata dlm waktu terbatas):
+- Time: Timesheets (submit timesheet dgn project/activity -- butuh project assignment dulu),
+  Employee Attendance Records (admin view), Reports.
+- Performance: alur utama Manage Reviews/Trackers (assign review ke employee, evaluasi KPI).
+- Claim: approve/reject claim, detail expense line item per claim.
+- Leave: TC-LEAVE-ASSIGN-02 perlu direverifikasi dgn fixture balance yg lebih tahan lama.
