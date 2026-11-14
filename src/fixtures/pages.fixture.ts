@@ -45,6 +45,7 @@ import {
   LeaveListPage,
   AssignLeavePage,
   TimeAttendancePage,
+  PerformanceKpiPage,
 } from '../pages';
 
 interface Pages {
@@ -100,6 +101,7 @@ interface Pages {
   leaveListPage: LeaveListPage;
   assignLeavePage: AssignLeavePage;
   timeAttendancePage: TimeAttendancePage;
+  performanceKpiPage: PerformanceKpiPage;
 }
 
 export const test = base.extend<Pages>({
@@ -258,6 +260,9 @@ export const test = base.extend<Pages>({
   },
   timeAttendancePage: async ({ page }, use) => {
     await use(new TimeAttendancePage(page));
+  },
+  performanceKpiPage: async ({ page }, use) => {
+    await use(new PerformanceKpiPage(page));
   },
 });
 

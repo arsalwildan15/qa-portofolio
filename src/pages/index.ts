@@ -43,3 +43,4 @@ export { ApplyLeavePage } from './ApplyLeavePage';
 export { LeaveListPage } from './LeaveListPage';
 export { AssignLeavePage } from './AssignLeavePage';
 export { TimeAttendancePage } from './TimeAttendancePage';
+export { PerformanceKpiPage } from './PerformanceKpiPage';
