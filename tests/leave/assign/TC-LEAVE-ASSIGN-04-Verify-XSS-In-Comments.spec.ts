@@ -22,8 +22,8 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { createLeaveEntitlement } from '../../../src/utils/createLeaveEntitlement';
-import { getLoggedInEmployeeName } from '../../../src/utils/getLoggedInEmployeeName';
 import { uniqueLeaveWeekday } from '../../../src/data/testData';
+import { pickLightlyUsedEmployee } from '../../../src/utils/pickLightlyUsedEmployee';
 
 test('TC-LEAVE-ASSIGN-04: an XSS payload in Assign Leave Comments does not execute', async ({
   page,
@@ -38,19 +38,14 @@ test('TC-LEAVE-ASSIGN-04: an XSS payload in Assign Leave Comments does not execu
   ]);
   const payload = `<script>window.__xssAssignComment=true</script>`;
 
-  report.step('Assign entitlement, isi Comments dgn payload XSS di Assign Leave, coba beberapa tanggal jika server menolak');
-  const me = await getLoggedInEmployeeName(page);
-  await createLeaveEntitlement(leaveEntitlementPage, me.employeeId, 'US - Vacation', '500');
+  report.step('Pilih employee yg jarang dipakai TC lain (lihat TC-LEAVE-ASSIGN-01), assign entitlement, isi Comments dgn payload XSS');
+  const target = await pickLightlyUsedEmployee(page);
+  await createLeaveEntitlement(leaveEntitlementPage, target.employeeId, 'US - Vacation', '500');
 
   await assignLeavePage.goto();
-  await assignLeavePage.selectEmployee(me.employeeId);
+  await assignLeavePage.selectEmployee(target.employeeId);
   await assignLeavePage.selectLeaveType('US - Vacation');
   await assignLeavePage.commentsInput.fill(payload);
-
-  // [TEMUAN] hasOverlap() kadang HANG total utk employee shared demo ini (lihat
-  // TC-LEAVE-ASSIGN-01) -- tidak dipakai di sini. Server kadang menolak tanggal weekday yg
-  // sebenarnya valid dgn 400 "No Working Days Selected" (gejala instabilitas shared demo,
-  // bukan bug skrip), jadi retry dgn tanggal lain dilakukan sebelum TC ini dianggap gagal.
   let response: Awaited<ReturnType<typeof assignLeavePage.submit>>['response'] = null;
   let assignDate = '';
   for (let attempt = 0; attempt < 3; attempt += 1) {

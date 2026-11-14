@@ -62,9 +62,10 @@ export class LeaveListPage extends BasePage {
 
   async selectEmployee(searchTerm: string): Promise<void> {
     await this.employeeNameInput.fill(searchTerm);
-    await this.page.getByText('Searching....').waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
-    await this.page.waitForTimeout(500);
-    await this.page.locator('.oxd-autocomplete-option').first().click();
+    await this.page.getByText('Searching....').waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => {});
+    const option = this.page.locator('.oxd-autocomplete-option').first();
+    await option.waitFor({ state: 'visible', timeout: 15_000 });
+    await option.click();
   }
 
   /** Removes the sticky default "Pending Approval" status chip so other statuses can be searched. */

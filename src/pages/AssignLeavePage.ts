@@ -33,8 +33,13 @@ export class AssignLeavePage extends BasePage {
     this.toDateInput = page.locator('input[placeholder="yyyy-dd-mm"]').last();
     this.commentsInput = page.locator('textarea');
     this.assignButton = page.getByRole('button', { name: 'Assign' });
-    this.confirmOverrideButton = page.getByRole('button', { name: 'Ok' });
-    this.cancelOverrideButton = page.getByRole('button', { name: 'Cancel' });
+    // [BUG SCRIPT, diperbaiki] Tanpa .first(), locator ini ambigu kalau ada LEBIH dari satu
+    // elemen "Cancel"/"Ok" di halaman -- Playwright strict mode melempar error di klik, yg
+    // dulu diam2 ditelan oleh .catch(()=>{}) di submit(), membuat dialog override TETAP
+    // terbuka dan memblokir klik assignButton pada attempt berikutnya di retry loop manapun
+    // ("intercepts pointer events"). Confirmed live via reproduksi berulang.
+    this.confirmOverrideButton = page.locator('.oxd-dialog-container, [role="dialog"]').getByRole('button', { name: 'Ok' }).first();
+    this.cancelOverrideButton = page.locator('.oxd-dialog-container, [role="dialog"]').getByRole('button', { name: 'Cancel' }).first();
     this.fieldErrors = page.locator('.oxd-input-group .oxd-text--span');
   }
 
@@ -56,11 +61,18 @@ export class AssignLeavePage extends BasePage {
     }
   }
 
+  /**
+   * [BUG SCRIPT, diperbaiki] Waktu tunggu lama sebelum ini tidak cukup saat server sedang
+   * lambat (confirmed live: round-trip autocomplete bisa >5s) -- "Searching...." belum
+   * hilang saat option.textContent() dibaca, jadi nama yg ditangkap adalah teks loading itu
+   * sendiri, bukan nama employee. Diperbaiki dgn menunggu opsi autocomplete BENAR-BENAR
+   * visible (bukan cuma delay tetap) sebelum membaca teksnya.
+   */
   async selectEmployee(searchTerm: string): Promise<string> {
     await this.employeeNameInput.fill(searchTerm);
-    await this.page.getByText('Searching....').waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
-    await this.page.waitForTimeout(500);
+    await this.page.getByText('Searching....').waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => {});
     const option = this.page.locator('.oxd-autocomplete-option').first();
+    await option.waitFor({ state: 'visible', timeout: 15_000 });
     const name = (await option.textContent()) ?? '';
     await option.click();
     return name;

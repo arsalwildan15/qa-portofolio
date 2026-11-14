@@ -15,12 +15,13 @@
  *   self-service -- krn ini adalah aksi administratif yg melewati
  *   approval step. Dikonfirmasi live sblm TC ini ditulis.
  *
- * [TEMUAN] Dikonfirmasi live: server kadang menolak tanggal weekday yg SUDAH lolos cek
- * real-time balance Apply Leave (bukan weekend, balance cukup) dgn 400 "Failed to Submit:
- * No Working Days Selected" saat di-assign lewat Assign Leave, utk employee shared demo ini
- * secara spesifik -- tidak konsisten antar tanggal/run. Diperlakukan sbg gejala
- * instabilitas/konfigurasi work-week employee shared demo (bukan bug skrip ini), sehingga
- * retry dgn tanggal lain dilakukan sebelum TC ini dianggap gagal.
+ * [TEMUAN] Dikonfirmasi live: men-target "diri sendiri" (employee admin yg dipakai login,
+ * sama dgn employee yg dipakai SEMUA TC Apply Leave lain di suite ini) menyebabkan banyak
+ * timeout/hang tidak konsisten di endpoint Leave -- kemungkinan krn employee ini sudah
+ * menumpuk SANGAT banyak leave request dari seluruh rangkaian TC lain yg berjalan hari ini.
+ * Fix: Assign Leave di sini di-target ke employee LAIN yg jarang dipakai TC manapun (dicari
+ * via API employee list secara dinamis, bukan hardcode), menghindari beban data employee
+ * admin yg sudah menumpuk.
  *
  * RUN COMMAND:
  *   npx playwright test tests/leave/assign/TC-LEAVE-ASSIGN-01-Verify-Valid-Assign-Lands-Scheduled.spec.ts --project=chromium --headed
@@ -31,8 +32,8 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { createLeaveEntitlement } from '../../../src/utils/createLeaveEntitlement';
-import { getLoggedInEmployeeName } from '../../../src/utils/getLoggedInEmployeeName';
 import { uniqueLeaveWeekday } from '../../../src/data/testData';
+import { pickLightlyUsedEmployee } from '../../../src/utils/pickLightlyUsedEmployee';
 
 test('TC-LEAVE-ASSIGN-01: assigning leave to an employee with sufficient balance lands as Scheduled immediately', async ({
   page,
@@ -48,26 +49,19 @@ test('TC-LEAVE-ASSIGN-01: assigning leave to an employee with sufficient balance
     /Failed to load resource.*4\d\d/,
   ]);
 
-  report.step('Assign entitlement ke diri sendiri (employee target), cari tanggal weekday aman');
-  const me = await getLoggedInEmployeeName(page);
-  await createLeaveEntitlement(leaveEntitlementPage, me.employeeId, 'US - Vacation', '500');
+  report.step('Pilih employee target yg jarang dipakai TC lain, assign entitlement');
+  const target = await pickLightlyUsedEmployee(page);
+  await createLeaveEntitlement(leaveEntitlementPage, target.employeeId, 'US - Vacation', '500');
 
   report.step('Buka Assign Leave, pilih employee, leave type; coba beberapa tanggal berbeda jika server menolak "No Working Days"');
   await assignLeavePage.goto();
-  const assignedEmployeeName = await assignLeavePage.selectEmployee(me.employeeId);
+  const assignedEmployeeName = await assignLeavePage.selectEmployee(target.employeeId);
   await assignLeavePage.selectLeaveType('US - Vacation');
 
   let response: Awaited<ReturnType<typeof assignLeavePage.submit>>['response'] = null;
   let overrideDialogShown = false;
   let usedDate = '';
   let lastErrorBody: unknown = null;
-  // [TEMUAN] hasOverlap() kadang HANG total (bukan cuma lambat) utk employee ini --
-  // dikonfirmasi live, kemungkinan krn employee shared demo ini sudah punya SANGAT banyak
-  // leave request dari seluruh rangkaian TC yg berjalan hari ini, membuat query overlap
-  // jadi berat. Tidak dipakai lagi di sini: jika tanggal kebetulan overlap, submit() akan
-  // gagal dan loop ini otomatis coba tanggal lain -- resiliensi yg sudah ada tanpa perlu
-  // pre-check tambahan yg justru jadi titik hang-nya sendiri. uniqueLeaveWeekday() sudah
-  // menghindari weekend secara internal.
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const candidate = uniqueLeaveWeekday(5 + attempt);
     await assignLeavePage.fillDateRange(candidate, candidate);
@@ -89,7 +83,7 @@ test('TC-LEAVE-ASSIGN-01: assigning leave to an employee with sufficient balance
 
   report.step('Verify via Leave List: status record baru adalah "Scheduled", BUKAN "Pending Approval"');
   await leaveListPage.goto();
-  await leaveListPage.selectEmployee(me.employeeId);
+  await leaveListPage.selectEmployee(target.employeeId);
   await leaveListPage.clearStatusChip();
   await leaveListPage.selectStatus('Scheduled');
   await leaveListPage.search();
