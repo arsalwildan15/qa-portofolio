@@ -77,6 +77,29 @@ export class AssignClaimPage extends BasePage {
     return responsePromise;
   }
 
+  /**
+   * Opens the "Add Attachment" dialog (the SECOND "Add" button on the page, after Expenses'),
+   * uploads the given local file with a comment, and saves. Confirmed live: client-side
+   * extension check blocks a bare .php upload outright (no request fires at all), but does
+   * NOT validate real file content/MIME against a renamed extension (a .php renamed to .jpg
+   * uploads successfully, see TC-CLAIM-ASSIGN-10's finding).
+   */
+  async addAttachment(filePath: string, comment: string): Promise<import('@playwright/test').Response | null> {
+    const addButtons = this.page.getByRole('button', { name: 'Add' });
+    await addButtons.nth(1).click();
+    await this.page.waitForTimeout(600);
+    const dialog = this.page.locator('.oxd-dialog-container, [role="dialog"]').last();
+    const fileInput = this.page.locator('input[type="file"]');
+    const responsePromise = this.page
+      .waitForResponse((r) => /\/api\/v2\/claim\/requests\/\d+\/attachments/.test(r.url()) && r.request().method() === 'POST', { timeout: 8_000 })
+      .catch(() => null);
+    await fileInput.setInputFiles(filePath);
+    await this.page.waitForTimeout(400);
+    await dialog.locator('textarea').fill(comment);
+    await dialog.getByRole('button', { name: 'Save' }).click();
+    return responsePromise;
+  }
+
   async selectEmployee(searchTerm: string): Promise<void> {
     await this.employeeNameInput.fill(searchTerm);
     await this.page.getByText('Searching....').waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => {});
