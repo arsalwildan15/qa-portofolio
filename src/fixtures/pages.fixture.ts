@@ -49,6 +49,7 @@ import {
   AssignClaimPage,
   MyTimesheetPage,
   AdminAttendanceRecordsPage,
+  TimeEmployeeReportPage,
 } from '../pages';
 
 interface Pages {
@@ -108,6 +109,7 @@ interface Pages {
   assignClaimPage: AssignClaimPage;
   myTimesheetPage: MyTimesheetPage;
   adminAttendanceRecordsPage: AdminAttendanceRecordsPage;
+  timeEmployeeReportPage: TimeEmployeeReportPage;
 }
 
 export const test = base.extend<Pages>({
@@ -278,6 +280,9 @@ export const test = base.extend<Pages>({
   },
   adminAttendanceRecordsPage: async ({ page }, use) => {
     await use(new AdminAttendanceRecordsPage(page));
+  },
+  timeEmployeeReportPage: async ({ page }, use) => {
+    await use(new TimeEmployeeReportPage(page));
   },
 });
 
