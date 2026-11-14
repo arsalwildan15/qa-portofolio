@@ -11,8 +11,8 @@
 
 ## STATUS
 - **Fase aktif:** 0
-- **Task terakhir selesai:** P0.5
-- **NEXT ACTION:** P0.6 (regresi baseline 43 TC Leave/Claim/Performance/Time)
+- **Task terakhir selesai:** P0.6 (+ perbaikan identitas empNumber=7 yg disetujui user)
+- **NEXT ACTION:** P0.7 -- tunggu hasil re-run 9 TC yg kena dampak, verifikasi 3x bersih, lapor checkpoint
 - **Blocker:** —
 - **Perlu persetujuan user (antrian):** —
 
@@ -61,8 +61,17 @@
 - [x] P0.5 Koreksi `QA-Review-Progress.md`: klaim N/A salah, angka (Leave 16, Time 7), tambah blok KOREKSI.
       (Keputusan: 6 TC lama Admin/PIM/Recruitment/Buzz dgn premis sama TIDAK diedit sekarang --
       dijadwalkan Fase 4.1, butuh re-verifikasi sungguhan dgn akun ESS, bukan cuma ganti teks.)
-- [ ] P0.6 Regresi baseline 43 TC (Leave 16/Claim 14/Performance 6/Time 7), `--workers=1`, root cause tiap fail.
-- [ ] P0.7 Laporan baseline ke user (checkpoint).
+- [x] P0.6 Regresi baseline 43 TC: 32 pass, 2 FAILED-by-design (BG-333/338, benar), **9 gagal krn SATU root
+      cause**: empNumber=7 (identitas akun login) terkorupsi di demo publik bersama ini --
+      firstName/lastName="EJBED"/"Apt 456", employeeId="CA" (2 char, ambigu, match acak ke "Charles
+      Carter" saat dicari). BUKAN kita yg merusak (grep suite: tidak ada TC yg menulis ke empNumber=7).
+      BUKAN bug app/script -- environment data corruption, polanya sama dgn cascading-failure BG-007
+      Recruitment (1 akar, bukan 9 bug). User diminta persetujuan (AskUserQuestion, krn mengubah
+      identitas akun bersama di demo publik) -> **disetujui**. Diperbaiki via PersonalDetailsPage
+      (PUT personal-details, 200) jadi firstName="QA" lastName="Admin" employeeId="QAADMIN07" (unik,
+      tdk ambigu). Tidak ada hardening kode tambahan dilakukan -- check assertion yg sudah ada di TC
+      TERBUKTI bekerja benar (menangkap mismatch ini), jadi root cause murni data, bukan logic.
+- [ ] P0.7 Re-run 9 TC yg kena dampak, verifikasi 3x bersih setelah data diperbaiki -> lapor checkpoint ke user.
 
 ## FASE 1 — Infrastruktur Multi-Role
 - [ ] P1.1 Probe: endpoint API create user (role ESS/Admin) + linking employee; Report-to API; login ESS.
@@ -179,3 +188,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P0.2 | Bug-List: 41 Open/117 Archive, BG-333/338 ditulis ulang, reporter dedup+ID fix; CI typecheck fix modul Time | 2 commit
 - 2026-11-15 | P0.3+P0.4 | hapus TC-PERF-REVIEW-01+CLAIM-ASSIGN-15, revisi CLAIM-ASSIGN-04(segregation of duties)+09(IDOR path-mismatch sungguhan), 3x stabil | 1 commit
 - 2026-11-15 | P0.5 | QA-Review-Progress.md blok KOREKSI ditambahkan; 6 TC lama N/A single-role dijadwalkan Fase 4.1 (tdk diedit sekarang) | 1 commit
+- 2026-11-15 | P0.6 | baseline 32/43 pass; 9 fail = 1 root cause (empNumber=7 identity corruption); user approved repair; PersonalDetailsPage PUT 200 -> QA Admin/QAADMIN07 | data repair, no code commit
