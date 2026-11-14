@@ -1722,12 +1722,19 @@ Cara lihat: `npm run report:allure:open` (local server + buka browser otomatis).
 
 **Leave module** kini punya 17 TC taxonomy-driven (Positive/Negative/Boundary/Security/API/Console)
 di 3 sub-area: Apply Leave (6 TC), Leave List (3 TC), Assign Leave (4 TC, 1 inti bug-fix-heavy +
-3 TC di batch sebelumnya). Semua sudah di-commit terpisah per batch. Catatan jujur: TC-LEAVE-
-ASSIGN-02 (override balance dialog) belum lolos verifikasi 3x bersih krn asumsi "leave type
-selalu 0 balance" yg dipakainya terbukti rapuh di shared demo ini seiring waktu (balance
-employee/leave-type apapun bisa berubah krn aktivitas eksternal) -- logic TC dan temuan app-nya
-sendiri (Confirm override tetap membuat record walau balance kurang) sudah pernah terbukti benar,
-tinggal perlu fixture yg lebih robust di sesi berikutnya.
+3 TC di batch sebelumnya). Semua sudah di-commit terpisah per batch.
+
+**[RESOLVED, update lanjutan 2026-11-14]** TC-LEAVE-ASSIGN-02 (override balance dialog) kini
+lolos verifikasi 3x bersih. Dua root cause ditemukan & diperbaiki: (1) TC lama bergantung pada
+balance employee admin yg SUDAH ADA di shared demo ini, yg nilainya ikut berubah krn aktivitas
+eksternal -- diperbaiki dgn secara eksplisit set entitlement = 0 via `createLeaveEntitlement()`
+utk employee segar (`pickLightlyUsedEmployee()`) sesaat sblm assign, menjamin balance = 0 TANPA
+bergantung pada state historis; (2) `AssignLeavePage.submit()` memeriksa kemunculan dialog
+override pakai `Locator.isVisible({timeout})` -- ternyata opsi `timeout` di `isVisible()` TIDAK
+membuatnya polling menunggu elemen muncul, ia cuma cek status SAAT ITU JUGA dan instan return
+false kalau dialog belum sempat render (dialog butuh >600ms krn dua GET leave-balance jalan
+dulu). Diperbaiki pakai `waitFor({state:'visible'})`, yg benar2 polling. Pola bug yg sama juga
+diperbaiki di pengecekan Leave List pada TC ini sendiri.
 
 Selama proses ini ditemukan & diperbaiki banyak bug script nyata (bukan bug app): race balance-
 refresh di beberapa page object, retry-on-ERR_ABORTED yg belum konsisten, dialog override yg
@@ -1751,4 +1758,4 @@ bukan taxonomy lengkap spt Leave, demi menyelesaikan sesuatu yg nyata dlm waktu 
   Employee Attendance Records (admin view), Reports.
 - Performance: alur utama Manage Reviews/Trackers (assign review ke employee, evaluasi KPI).
 - Claim: approve/reject claim, detail expense line item per claim.
-- Leave: TC-LEAVE-ASSIGN-02 perlu direverifikasi dgn fixture balance yg lebih tahan lama.
+- Leave: tidak ada lagi item terbuka -- TC-LEAVE-ASSIGN-02 sudah resolved (lihat atas).
