@@ -11,8 +11,8 @@
 
 ## STATUS
 - **Fase aktif:** 0
-- **Task terakhir selesai:** P0.2
-- **NEXT ACTION:** P0.3 (hapus false pass TC-PERF-REVIEW-01) lalu P0.4
+- **Task terakhir selesai:** P0.5
+- **NEXT ACTION:** P0.6 (regresi baseline 43 TC Leave/Claim/Performance/Time)
 - **Blocker:** —
 - **Perlu persetujuan user (antrian):** —
 
@@ -50,14 +50,18 @@
         manusia memicu duplikat), ID berikutnya memindai semua sheet (Archive) agar tidak reuse ID.
   - [x] TAMBAHAN: TC-CLAIM-ASSIGN-06 whitelist ulang log "Failed to load resource 422" (pageerror tetap terdeteksi).
   - [x] TAMBAHAN: 5 error TypeScript di modul Time (CI merah sejak commit sebelumnya) diperbaiki.
-- [ ] P0.3 TC-PERF-REVIEW-01 (false pass): hapus file; catat di LOG; diganti PERF-REVIEW-01..09 di P2.1.
-- [ ] P0.4 Revisi TC N/A yg overclaim:
-  - [ ] TC-CLAIM-ASSIGN-04 -> reframe "segregation of duties": klaim milik sendiri tidak punya APPROVE/REJECT.
-  - [ ] TC-CLAIM-ASSIGN-09 -> tambah cek endpoint ber-scope `/claim/employees/<emp>/requests/<id>` (200
-        utk admin) + `/claim/requests/<id>` 403 utk klaim orang lain (didokumentasikan sbg perilaku).
-  - [ ] TC-CLAIM-ASSIGN-15 -> hapus (diganti CLAIM-APPROVAL-06 cross-admin sungguhan di P2.2).
-- [ ] P0.5 Koreksi `QA-Review-Progress.md`: klaim N/A salah, angka (Leave 16, Time 7), tambah blok KOREKSI.
-- [ ] P0.6 Regresi baseline 45 TC (Leave/Claim/Performance/Time), `--workers=1`, root cause tiap fail.
+- [x] P0.3 TC-PERF-REVIEW-01 (false pass): dihapus; diganti PERF-REVIEW-01..09 di P2.1.
+- [x] P0.4 Revisi TC N/A yg overclaim (3x stabil):
+  - [x] TC-CLAIM-ASSIGN-04 -> reframe "segregation of duties": scan SEMUA klaim milik akun login,
+        allowedActions tidak boleh berisi APPROVE/REJECT/PAY.
+  - [x] TC-CLAIM-ASSIGN-09 -> buat klaim employee lain (A) sungguhan; buktikan /claim/requests/<id> 403
+        utk klaim A, /claim/employees/<A>/requests/<id> 200 (scoped, by design), DAN IDOR path-mismatch
+        (id klaim A di bawah path empNumber B) ditolak. Plus ID invalid + tanpa-auth.
+  - [x] TC-CLAIM-ASSIGN-15 -> dihapus (diganti CLAIM-APPROVAL-06 cross-admin sungguhan di P2.2).
+- [x] P0.5 Koreksi `QA-Review-Progress.md`: klaim N/A salah, angka (Leave 16, Time 7), tambah blok KOREKSI.
+      (Keputusan: 6 TC lama Admin/PIM/Recruitment/Buzz dgn premis sama TIDAK diedit sekarang --
+      dijadwalkan Fase 4.1, butuh re-verifikasi sungguhan dgn akun ESS, bukan cuma ganti teks.)
+- [ ] P0.6 Regresi baseline 43 TC (Leave 16/Claim 14/Performance 6/Time 7), `--workers=1`, root cause tiap fail.
 - [ ] P0.7 Laporan baseline ke user (checkpoint).
 
 ## FASE 1 — Infrastruktur Multi-Role
@@ -173,3 +177,5 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 ## LOG (append-only, 1 baris per task: tanggal | task | hasil | commit)
 - 2026-11-15 | P0.1 | taxonomy+plan di-commit, .gitignore +.vscode/ +__pycache__/, hook auto-resume dipasang | chore commit
 - 2026-11-15 | P0.2 | Bug-List: 41 Open/117 Archive, BG-333/338 ditulis ulang, reporter dedup+ID fix; CI typecheck fix modul Time | 2 commit
+- 2026-11-15 | P0.3+P0.4 | hapus TC-PERF-REVIEW-01+CLAIM-ASSIGN-15, revisi CLAIM-ASSIGN-04(segregation of duties)+09(IDOR path-mismatch sungguhan), 3x stabil | 1 commit
+- 2026-11-15 | P0.5 | QA-Review-Progress.md blok KOREKSI ditambahkan; 6 TC lama N/A single-role dijadwalkan Fase 4.1 (tdk diedit sekarang) | 1 commit
