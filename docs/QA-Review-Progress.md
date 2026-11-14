@@ -1841,15 +1841,26 @@ Security(IDOR)/API, dgn verifikasi live tiap TC (tidak ditebak). Total TC baru: 
   valid) diterima normal, 2027-29-02 (non-leap year, tanggal tdk eksis) ditolak dgn pesan
   format jelas.
 
-**Yang MASIH belum tercakup** (transparan, bukan diklaim 100%, sudah 2 putaran "LANJUTKAN"):
-- Edge case 4.3: browser back/forward setelah submit -- blm diuji.
-- Edge case 4.7: konkurensi EDIT (bukan cuma cancel) thd record yg sama oleh 2 user berbeda
-  (bukan sesi yg sama) -- butuh 2 akun user berbeda yg scope-nya tumpang tindih, yg tidak
-  tersedia di suite single-admin-account ini.
-- Boundary akhir/awal tahun fiskal (bukan leap year, tapi pergantian periode payroll/leave
-  year) -- blm diuji scr eksplisit krn OrangeHRM tidak punya konsep "fiscal year" terpisah
-  dari kalender yg jelas di modul2 ini.
-- Open Redirect, SSRF, Command/Path Injection -- tidak relevan utk modul2 ini (tidak ada
-  field URL/file-path/command yg diproses server).
-- File upload utk modul LAIN selain Claim (mis. Buzz post attachment, PIM foto profil) --
-  di luar 4 modul yg jadi scope sesi ini (Leave/Claim/Performance/Time).
+## UPDATE 2026-11-14 -- Lanjutan Ketiga: Back/Forward, Leave Period Boundary, Cross-User N/A
+
+User secara eksplisit minta "100% coverage semua menu"; scope dikonfirmasi via AskUserQuestion
+tetap di 4 modul (Leave/Claim/Performance/Time), tuntaskan sisa gap yg ada -- BUKAN meluas ke
+8 modul OrangeHRM lain (Admin/PIM/Recruitment/My Info/Dashboard/Directory/Maintenance/Buzz)
+yg di luar scope sesi2 sebelumnya. 3 item ditutup (Claim 13->15 TC, Leave 19->20 TC):
+
+- **TC-CLAIM-ASSIGN-14 [POSITIF]**: Browser Back setelah Create claim TIDAK resubmit (SPA
+  tidak push history state per-aksi), Forward kembali ke form BERSIH bukan data lama.
+- **TC-LEAVE-ASSIGN-06 [TEMUAN -- revisi dari sesi sebelumnya]**: OrangeHRM TERNYATA punya
+  konsep "Leave Period" (setara fiscal-year-boundary), dikonfirmasi via API: periode saat ini
+  2026-01-01 s/d 2027-01-30. Tanggal yg melintasi batas ini ditangani aman oleh Assign Leave
+  (tidak crash/NaN). Ini merevisi catatan sesi sebelumnya yg sempat bilang "tidak relevan".
+- **TC-CLAIM-ASSIGN-15 [N/A dibuktikan]**: Cross-user edit concurrency (2 akun MANUSIA
+  berbeda) dikonfirmasi N/A via API admin/users -- hanya ADA 1 akun ber-role Admin di shared
+  demo ini (14 lainnya ESS). Beda dgn race condition 2-SESI-akun-sama yg sudah teruji di
+  TC-CLAIM-ASSIGN-13.
+
+**Status akhir utk 4 modul scope sesi ini**: SEMUA item taksonomi yg applicable sudah
+dikerjakan ATAU dikonfirmasi N/A dgn bukti data (bukan diasumsikan/dilewati diam2). Sisa yg
+genuinely di luar jangkauan: Open Redirect/SSRF/Command Injection (tidak ada field
+URL/path/command di modul2 ini -- N/A by design, bukan gap) dan file upload utk modul LAIN
+di luar Claim (di luar scope 4 modul yg disepakati).
