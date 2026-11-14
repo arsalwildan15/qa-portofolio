@@ -1786,3 +1786,37 @@ ditutup/didokumentasikan secara eksplisit, dikerjakan full-autonomous sesuai ins
 **Tidak ada lagi item modul besar (Leave/Claim/Performance/Time) yg terbuka tanpa status
 jelas** -- setiap item yg tidak diimplementasikan penuh didokumentasikan sbg N/A dgn bukti,
 atau sbg scope-kecil yg sengaja disisakan utk sesi berikutnya (bukan silent gap).
+
+## UPDATE 2026-11-14 -- Perluasan Taksonomi (Negative/Boundary/Security/API) di 4 Modul
+
+Atas permintaan eksplisit user ("bangun taksonomi lengkap"), 4 modul (Leave/Claim/
+Performance/Time) diperluas cakupannya dari kategori Positive-dominan ke Negative/Boundary/
+Security(IDOR)/API, dgn verifikasi live tiap TC (tidak ditebak). Total TC baru: 13.
+
+- **Claim** (4 -> 9 TC): required field validation, expense amount boundary (negatif diblokir
+  client-side, nol ditolak server 422), SQLi di Remarks, state transition SUBMITTED->CANCELLED,
+  IDOR/malformed-ID + akses tanpa auth pada claim requests.
+  **[BUG APP ditemukan, TC sengaja FAILED]** TC-CLAIM-ASSIGN-06: menolak amount=0 melempar
+  unhandled JS exception minified ("fe") ke console browser, walau toast error & interaktivitas
+  halaman tetap benar ke user -- code-quality issue nyata, didokumentasikan apa adanya (tidak
+  di-whitelist spy hijau).
+- **Performance** (2 -> 6 TC): required field validation, rating boundary (min>max ditolak,
+  min=0 diterima, min=-1 diblokir), invalid ID pada GET/DELETE KPI.
+  **[TEMUAN DESAIN]** TC-PERF-KPI-05: KPI title+Job Title TIDAK punya unique constraint --
+  2 KPI nama identik berhasil tersimpan sbg record terpisah; didokumentasikan sbg temuan,
+  bukan bug (tidak semua field memang wajib unik).
+- **Time** (6 -> 8 TC): duration >24 jam & negatif ditolak client-side dgn pesan yg sama;
+  invalid empNumber/timesheetId ditolak aman (422/404) di Attendance & Timesheet API.
+- **Leave** (+1 TC): melengkapi IDOR utk Entitlements API (sebelumnya baru ada utk
+  leave-requests) -- empNumber/entitlementId invalid ditolak aman (404/405).
+
+**Yang masih belum tercakup scr eksplisit** (taksonomi belum benar2 100% di semua kategori,
+transparan ke user sesuai arahan):
+- File upload (Claim Attachments, KPI tidak relevan) -- blm diuji ekstensi berbahaya/rename.
+- Edge case (4.x): double-submit, browser back/forward setelah submit, race condition,
+  konkurensi multi-user -- blm diuji di modul manapun krn butuh setup multi-session/timing
+  presisi yg di luar scope batch ini.
+- Mass Assignment (kirim field tambahan tak terduga di body request) -- blm diuji.
+- Boundary tanggal ekstrem (leap year, awal/akhir tahun) -- blm diuji scr eksplisit.
+- Open Redirect, SSRF, Command/Path Injection -- tidak relevan utk modul2 ini (tidak ada field
+  URL/file-path/command yg diproses server).
