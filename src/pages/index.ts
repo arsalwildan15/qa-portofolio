@@ -46,3 +46,4 @@ export { TimeAttendancePage } from './TimeAttendancePage';
 export { PerformanceKpiPage } from './PerformanceKpiPage';
 export { AssignClaimPage } from './AssignClaimPage';
 export { MyTimesheetPage } from './MyTimesheetPage';
+export { AdminAttendanceRecordsPage } from './AdminAttendanceRecordsPage';
