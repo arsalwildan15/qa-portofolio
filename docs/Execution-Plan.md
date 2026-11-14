@@ -11,8 +11,8 @@
 
 ## STATUS
 - **Fase aktif:** 0
-- **Task terakhir selesai:** P0.1
-- **NEXT ACTION:** P0.2 (bersihkan Bug-List.xlsx)
+- **Task terakhir selesai:** P0.2
+- **NEXT ACTION:** P0.3 (hapus false pass TC-PERF-REVIEW-01) lalu P0.4
 - **Blocker:** —
 - **Perlu persetujuan user (antrian):** —
 
@@ -39,13 +39,17 @@
 ## FASE 0 — Integritas & Fondasi
 - [x] P0.1 Repo hygiene: commit `docs/Test-Case-Taxonomy.txt` + `docs/Execution-Plan.md`; tambah `.vscode/`,
       `__pycache__/` ke `.gitignore`. (+ SessionStart hook auto-resume di `../.claude/settings.local.json`)
-- [ ] P0.2 Bersihkan Bug-List.xlsx (skill xlsx):
-  - [ ] Tutup noise probe: BG-296,298,305,312,322,334,335,339,340,343 -> Closed, "Bukan Bug (Probe Sementara)".
-  - [ ] BG-332 -> Closed (422 adalah perilaku benar server menolak amount=0, bukan bug).
-  - [ ] BG-333 -> Medium, tulis ulang: konfirmasi app-wide BG-199 (unhandled exception non-2xx), modul Claim.
-  - [ ] BG-338 -> High, tulis ulang redaksi standar (bypass upload .php->.jpg Claim Attachments).
-  - [ ] Validasi: tiap baris Open menunjuk spec file yg masih ada.
-  - [ ] Pindahkan baris Closed berkategori noise/flaky/env ke sheet "Archive" (sheet utama = temuan bermakna).
+- [x] P0.2 Bersihkan Bug-List.xlsx (skill xlsx):
+  - [x] Tutup noise probe: BG-296,298,305,312,322,334,335,339,340,343 -> Closed, "Bukan Bug (Probe Sementara)".
+  - [x] BG-332 -> Closed (422 adalah perilaku benar server menolak amount=0, bukan bug).
+  - [x] BG-333 -> Medium, tulis ulang: konfirmasi app-wide BG-199 (unhandled exception non-2xx), modul Claim.
+  - [x] BG-338 -> High, tulis ulang redaksi standar (bypass upload .php->.jpg Claim Attachments).
+  - [x] Validasi: tiap baris Open menunjuk spec file yg masih ada (41 Open, 0 orphan).
+  - [x] Pindahkan baris Closed ke sheet "Archive" (117 baris; 106 di-relabel "Bukan Bug (Iterasi Pengembangan TC)").
+  - [x] TAMBAHAN: fix `bugListReporter` -- dedup per script (bukan script+summary, krn summary yg ditulis ulang
+        manusia memicu duplikat), ID berikutnya memindai semua sheet (Archive) agar tidak reuse ID.
+  - [x] TAMBAHAN: TC-CLAIM-ASSIGN-06 whitelist ulang log "Failed to load resource 422" (pageerror tetap terdeteksi).
+  - [x] TAMBAHAN: 5 error TypeScript di modul Time (CI merah sejak commit sebelumnya) diperbaiki.
 - [ ] P0.3 TC-PERF-REVIEW-01 (false pass): hapus file; catat di LOG; diganti PERF-REVIEW-01..09 di P2.1.
 - [ ] P0.4 Revisi TC N/A yg overclaim:
   - [ ] TC-CLAIM-ASSIGN-04 -> reframe "segregation of duties": klaim milik sendiri tidak punya APPROVE/REJECT.
@@ -167,4 +171,5 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 ---
 
 ## LOG (append-only, 1 baris per task: tanggal | task | hasil | commit)
-- 2026-11-15 | P0.1 | taxonomy+plan di-commit, .gitignore +.vscode/ +__pycache__/, hook auto-resume dipasang | (commit ini)
+- 2026-11-15 | P0.1 | taxonomy+plan di-commit, .gitignore +.vscode/ +__pycache__/, hook auto-resume dipasang | chore commit
+- 2026-11-15 | P0.2 | Bug-List: 41 Open/117 Archive, BG-333/338 ditulis ulang, reporter dedup+ID fix; CI typecheck fix modul Time | 2 commit

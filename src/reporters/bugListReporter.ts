@@ -141,12 +141,12 @@ export default class BugListReporter implements Reporter {
     const closedCount = this.closeResolvedBugs(sheet);
 
     const openStatusByKey = this.getOpenStatusByKey(sheet);
-    let nextBugNumber = this.getNextBugNumber(sheet);
+    let nextBugNumber = this.getNextBugNumber(workbook);
     for (const row of this.pendingRows) {
       const key = this.bugKey(row);
-      // Same bug (same script + summary) already logged and still open:
-      // skip, don't duplicate. Only log again if the prior entry was Closed
-      // (a regression), or if this bug was never logged before.
+      // Script already has an open entry: skip, don't duplicate. Only log
+      // again if the prior entry was Closed (a regression), or if this
+      // script was never logged before.
       if (openStatusByKey.get(key) === true) continue;
 
       row.bugId = `BG-${String(nextBugNumber).padStart(3, '0')}`;
@@ -198,29 +198,32 @@ export default class BugListReporter implements Reporter {
     return closedCount;
   }
 
-  /** Identifies "the same bug" as the same test script + same test title. */
-  private bugKey(row: Pick<BugRow, 'scriptTestCase' | 'summary'>): string {
-    return `${row.scriptTestCase}::${row.summary}`;
+  /**
+   * Identifies "the same bug" by test script alone. Summary is deliberately
+   * not part of the key: triaged rows get their Summary rewritten into a
+   * human-readable form, which would never match the auto-generated one again
+   * and would duplicate the row on the next failing run.
+   */
+  private bugKey(row: Pick<BugRow, 'scriptTestCase'>): string {
+    return row.scriptTestCase;
   }
 
   /**
-   * Maps each existing bug key to whether its most recent row is still open
-   * (any status other than "Closed" counts as open). Rows are scanned in
-   * sheet order, so a later row for the same key overrides an earlier one.
+   * Maps each script to whether its most recent row is still open (any status
+   * other than "Closed" counts as open). Rows are scanned in sheet order, so a
+   * later row for the same script overrides an earlier one.
    */
   private getOpenStatusByKey(sheet: ExcelJS.Worksheet): Map<string, boolean> {
     const scriptCol = HEADERS.indexOf('Script Test Case') + 1;
-    const summaryCol = HEADERS.indexOf('Summary') + 1;
     const statusCol = HEADERS.indexOf('Status') + 1;
     const result = new Map<string, boolean>();
 
     sheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return;
       const script = String(row.getCell(scriptCol).value ?? '');
-      const summary = String(row.getCell(summaryCol).value ?? '');
       const status = String(row.getCell(statusCol).value ?? '');
-      if (!script && !summary) return;
-      result.set(`${script}::${summary}`, status.trim().toLowerCase() !== 'closed');
+      if (!script) return;
+      result.set(script, status.trim().toLowerCase() !== 'closed');
     });
 
     return result;
@@ -260,13 +263,16 @@ export default class BugListReporter implements Reporter {
     sheet.views = [{ state: 'frozen', ySplit: 1 }];
   }
 
-  private getNextBugNumber(sheet: ExcelJS.Worksheet): number {
+  /** Scans every sheet (incl. "Archive") so an archived ID is never reused. */
+  private getNextBugNumber(workbook: ExcelJS.Workbook): number {
     let maxNumber = 0;
-    sheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return;
-      const bugId = String(row.getCell(1).value ?? '');
-      const match = /^BG-(\d+)$/.exec(bugId);
-      if (match) maxNumber = Math.max(maxNumber, Number(match[1]));
+    workbook.eachSheet((sheet) => {
+      sheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return;
+        const bugId = String(row.getCell(1).value ?? '');
+        const match = /^BG-(\d+)$/.exec(bugId);
+        if (match) maxNumber = Math.max(maxNumber, Number(match[1]));
+      });
     });
     return maxNumber + 1;
   }

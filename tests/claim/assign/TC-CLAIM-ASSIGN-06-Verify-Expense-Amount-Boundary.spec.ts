@@ -40,7 +40,12 @@ test('TC-CLAIM-ASSIGN-06: expense amount boundary -- negative blocked client-sid
   assignClaimPage,
 }, testInfo) => {
   testInfo.setTimeout(90_000);
-  const report = new TestReport('TC-CLAIM-ASSIGN-06', 'Expense Amount Boundary', env.baseURL, page);
+  // Only the browser's own "Failed to load resource ... 422" log is expected noise (the server
+  // correctly rejecting amount=0). The unhandled pageerror ("fe") is NOT filterable here and is
+  // exactly the real bug this TC documents (BG-333, app-wide BG-199).
+  const report = new TestReport('TC-CLAIM-ASSIGN-06', 'Expense Amount Boundary', env.baseURL, page, [
+    /Failed to load resource.*422/,
+  ]);
 
   report.step('Buat claim baru utk pengujian');
   const target = await pickLightlyUsedEmployee(page);
