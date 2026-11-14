@@ -42,8 +42,22 @@ export class LeaveListPage extends BasePage {
     this.noRecordsFound = page.getByText('No Records Found');
   }
 
+  /**
+   * Retries once on net::ERR_ABORTED -- same race documented on ApplyLeavePage.goto() and
+   * AssignLeavePage.goto(): calling this right after a prior page's own save()/submit() can
+   * collide with that page's delayed self-redirect.
+   */
   async goto(): Promise<void> {
-    await this.page.goto('/web/index.php/leave/viewLeaveList');
+    try {
+      await this.page.goto('/web/index.php/leave/viewLeaveList');
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('ERR_ABORTED')) {
+        await this.page.waitForTimeout(1_500);
+        await this.page.goto('/web/index.php/leave/viewLeaveList');
+      } else {
+        throw error;
+      }
+    }
   }
 
   async selectEmployee(searchTerm: string): Promise<void> {
