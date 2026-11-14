@@ -1864,3 +1864,54 @@ dikerjakan ATAU dikonfirmasi N/A dgn bukti data (bukan diasumsikan/dilewati diam
 genuinely di luar jangkauan: Open Redirect/SSRF/Command Injection (tidak ada field
 URL/path/command di modul2 ini -- N/A by design, bukan gap) dan file upload utk modul LAIN
 di luar Claim (di luar scope 4 modul yg disepakati).
+
+## KOREKSI 2026-11-15 -- Eksplorasi Ulang Menemukan Kesimpulan Di Atas Terlalu Jauh
+
+User minta laporan coverage lengkap lintas SEMUA modul (bukan cuma 4 modul ini), bukan cuma
+tambah TC baru. Eksplorasi live ulang (bukan baca dokumen lama) menemukan beberapa klaim di
+atas SALAH atau tidak akurat. Dikerjakan sbg Fase 0 dari `docs/Execution-Plan.md` (rencana
+kerja Fase 0-8 yg disetujui user utk menuntaskan ini + modul lama + modul baru).
+
+**Yg SUDAH diperbaiki (P0.1-P0.4, lihat Execution-Plan.md utk detail commit):**
+1. **TC-PERF-REVIEW-01 adalah FALSE PASS**, bukan N/A yg valid. Probe sebelumnya memeriksa
+   halaman "Employee Reviews", BUKAN "Manage Reviews" (keduanya ada di dropdown Performance
+   dgn label mirip). Halaman "Manage Reviews" yg benar (`/performance/searchPerformanceReview`)
+   PUNYA tombol Add -> form "Add Review" (Employee, Supervisor Reviewer, Review Period
+   Start/End, Due Date, Save/Activate). File dihapus, diganti TC sungguhan di Fase 2.
+2. **TC-CLAIM-ASSIGN-04** ("Approve/Reject N/A utk single-account") direvisi jadi
+   "segregation of duties": yg sebenarnya terbukti cuma pemilik klaim tidak bisa approve
+   klaimnya sendiri -- BUKAN "tidak ada approval flow sama sekali". Ditemukan: klaim yg
+   di-Assign+Submit oleh Admin lgsg berstatus PAID (skip approval), tapi alur approval utk
+   klaim yg diajukan ESS SENDIRI tetap ada & blm diuji (perlu fixture ESS, Fase 2).
+3. **TC-CLAIM-ASSIGN-09** (IDOR) sebelumnya salah melabeli klaim #1 sbg "milik employee
+   lain" padahal itu klaim milik akun login sendiri -- jalur klaim orang lain TIDAK PERNAH
+   teruji. Ditulis ulang: buat klaim employee lain sungguhan, buktikan endpoint datar
+   `/claim/requests/<id>` 403 utk klaim itu, endpoint scoped
+   `/claim/employees/<emp>/requests/<id>` 200 (by design), dan IDOR path-mismatch (id klaim A
+   di bawah path empNumber B) ditolak.
+4. **TC-CLAIM-ASSIGN-15** ("cross-user concurrency N/A") dihapus -- "N/A" yg diklaim cuma
+   dibuktikan dgn menghitung akun ber-role Admin (1 dari 15), TAPI suite ini sendiri punya
+   `createTestUser()` yg BISA membuat akun ESS/Admin baru kapan saja. Jadi bukan N/A
+   sungguhan, cuma belum dicoba. Perlu fixture Fase 1 lalu TC cross-admin sungguhan di Fase 2.
+5. **Klaim serupa di modul LAMA** ("IDOR N/A -- arsitektur single-role" di Admin Locations/
+   Skills/Nationalities, PIM Security, Buzz) PREMISNYA SAMA-SAMA KELIRU: ada 14 akun ESS di
+   demo ini, dan `createTestUser()` sudah terbukti bisa membuat akun baru. **Belum diperbaiki**
+   -- dijadwalkan Fase 4.1 (access-control ESS sungguhan menggantikan setiap klaim ini).
+6. **Angka TC yg dilaporkan sebelumnya kebesaran**: Leave sempat disebut 17->18->19->20,
+   **aktualnya 16** (TC-LEAVE-IDOR-01 sampai TC-LEAVE-ASSIGN-06 totalnya 16 file, bukan 20 --
+   salah hitung kumulatif di 3 update berturut-turut). Time sempat disebut 8, **aktualnya 7**.
+7. **Bug-List.xlsx tercemar 10 baris noise** dari file probe sementara (zz-probe-*.spec.ts)
+   yg sempat gagal sblm dihapus -- bugListReporter mencatatnya krn run tanpa `--reporter=list`.
+   Sudah dibersihkan di P0.2 (lihat Execution-Plan.md).
+
+**Yg BELUM diperbaiki, dijadwalkan di Execution-Plan.md fase selanjutnya:**
+- Approval flow Leave/Claim/Timesheet utk klaim/cuti milik ESS sungguhan (Fase 1 fixture + Fase 2).
+- Access control ESS di modul lama (Fase 4.1).
+- Cakupan fitur yg blm tersentuh sama sekali di 4 modul ini: Leave Entitlements/Configure/
+  Reports, Claim Configuration (Events/Expense Types) + My Claims (ESS), Performance Manage
+  Reviews/Trackers/My Reviews, Time Timesheet submit+multi-row, Project Info (Fase 2).
+- 8 modul OrangeHRM lain (Admin/PIM/Recruitment/Buzz sdh matang tapi msh ada gap; My Info/
+  Dashboard/Directory/Maintenance blm tersentuh sama sekali) -- Fase 4-6.
+
+**Jangan baca update2 2026-11-14 di atas sbg status final** -- baca `docs/Execution-Plan.md`
+utk status PALING AKTUAL (field STATUS di bagian atas file tsb).
