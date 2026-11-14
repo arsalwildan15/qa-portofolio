@@ -1828,11 +1828,27 @@ Security(IDOR)/API, dgn verifikasi live tiap TC (tidak ditebak). Total TC baru: 
   stlh klik Save pertama, scr fisik memblokir klik kedua yg cepat menjangkau tombol. Hanya
   1 POST & 1 record tersimpan, terverifikasi via network + API count, bukan diasumsikan.
 
-**Yang MASIH belum tercakup** (transparan, bukan diklaim 100%):
-- Edge case 4.3/4.4/4.7: browser back/forward setelah submit, race condition antar-request
-  paralel, konkurensi multi-user (dua sesi edit record yg sama bersamaan) -- butuh setup
-  multi-context/multi-session Playwright yg lebih kompleks, di luar scope batch ini.
-- Boundary tanggal ekstrem (leap year, awal/akhir tahun fiskal) -- blm diuji scr eksplisit.
+## UPDATE 2026-11-14 -- Lanjutan Kedua: Race Condition & Leap Year Boundary (atas instruksi "LANJUTKAN")
+
+2 item tersisa lagi dari list di atas ditutup (Claim 12 -> 13 TC, Leave 18 -> 19 TC):
+
+- **TC-CLAIM-ASSIGN-13 [TEMUAN POSITIF]**: Race condition -- 2 browser context terpisah
+  (cookie login sama) menembak klik Cancel thd claim SUBMITTED yg SAMA scr BENAR-BENAR
+  paralel (Promise.all). Hasil: TEPAT 1 request 200, yg lain 403 (server re-evaluasi
+  state/otorisasi saat diproses, bukan snapshot basi) -- tidak ada double-cancel, tidak ada
+  korupsi data. Server menangani concurrency dgn benar.
+- **TC-LEAVE-ASSIGN-05 [POSITIF]**: Boundary tanggal leap year -- 2028-29-02 (leap year
+  valid) diterima normal, 2027-29-02 (non-leap year, tanggal tdk eksis) ditolak dgn pesan
+  format jelas.
+
+**Yang MASIH belum tercakup** (transparan, bukan diklaim 100%, sudah 2 putaran "LANJUTKAN"):
+- Edge case 4.3: browser back/forward setelah submit -- blm diuji.
+- Edge case 4.7: konkurensi EDIT (bukan cuma cancel) thd record yg sama oleh 2 user berbeda
+  (bukan sesi yg sama) -- butuh 2 akun user berbeda yg scope-nya tumpang tindih, yg tidak
+  tersedia di suite single-admin-account ini.
+- Boundary akhir/awal tahun fiskal (bukan leap year, tapi pergantian periode payroll/leave
+  year) -- blm diuji scr eksplisit krn OrangeHRM tidak punya konsep "fiscal year" terpisah
+  dari kalender yg jelas di modul2 ini.
 - Open Redirect, SSRF, Command/Path Injection -- tidak relevan utk modul2 ini (tidak ada
   field URL/file-path/command yg diproses server).
 - File upload utk modul LAIN selain Claim (mis. Buzz post attachment, PIM foto profil) --
