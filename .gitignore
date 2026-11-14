@@ -7,3 +7,5 @@ allure-results/
 allure-report/
 .env
 docs/~$*.xlsx
+.vscode/
+__pycache__/

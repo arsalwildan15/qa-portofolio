@@ -1,0 +1,288 @@
+================================================================================
+  STANDAR TAKSONOMI TEST CASE (GENERIC)
+  Tujuan : Acuan umum kategori & jenis test case yang WAJIB dipertimbangkan
+           saat merancang test case untuk FITUR/MODUL APA PUN, di PROJECT
+           APA PUN (web app, API, mobile). Bukan dokumen spesifik satu
+           project — dipakai sebagai checklist standar tiap kali menulis
+           test case baru.
+================================================================================
+
+CARA PAKAI DOKUMEN INI
+  Ini bukan daftar test case aktual — ini checklist KATEGORI + JENIS yang
+  dicek ada/tidaknya setiap kali merancang test case untuk sebuah fitur.
+  Tidak semua kategori relevan untuk setiap fitur (contoh: fitur read-only
+  tanpa form tidak perlu TC injection), tapi setiap kategori harus di-REVIEW
+  secara sadar — "tidak relevan karena X" lebih baik daripada terlewat tanpa
+  disadari.
+
+  Simbol legend umum yang biasa dipakai untuk menandai skenario:
+    (+) Positive / Happy Path     (-) Negative
+    (B) Boundary                  (!) Unexpected / Edge Case
+    (S) Security                  (A) API
+
+================================================================================
+  1. POSITIVE / FUNCTIONAL (+)  — Happy Path
+================================================================================
+  1.1  CRUD dasar per entity    : Create valid, Read/List, Update valid,
+                                   Delete valid, Deactivate/Reactivate (kalau
+                                   ada konsep itu).
+  1.2  Variasi input valid      : kombinasi field optional diisi vs kosong
+                                   (yang memang boleh kosong), format tanggal
+                                   berbeda, kombinasi filter/sort/pagination
+                                   normal.
+  1.3  State transition valid   : setiap transisi status yang LEGAL dalam
+                                   workflow diuji satu per satu.
+  1.4  Relasi antar-entity      : assign/unassign, link record A ke B, cascade
+                                   read setelah create/update.
+  1.5  Permission/role positif  : aksi yang MEMANG diizinkan untuk role aktif
+                                   berhasil dilakukan (elemen muncul & berfungsi).
+  1.6  Search/filter/sort valid : hasil benar untuk kombinasi filter umum,
+                                   sort ascending/descending, multi-filter.
+  1.7  Upload file valid        : format & ukuran didukung berhasil ter-upload
+                                   & tampil/terbaca dengan benar.
+  1.8  Notifikasi/feedback UI   : toast/alert sukses muncul sesuai aksi yang
+                                   dilakukan.
+
+================================================================================
+  2. NEGATIVE (-)
+================================================================================
+  2.1  Required field kosong    : submit tanpa isi field wajib -> validation
+                                   error, tidak ada request terkirim/tersimpan.
+  2.2  Format salah             : email tanpa "@", tanggal format salah, angka
+                                   diisi huruf, nilai negatif untuk field yang
+                                   tidak valid secara bisnis.
+  2.3  Duplicate/unique conflict: nilai yang harus unik (email, username, kode)
+                                   diisi duplikat -> ditolak dengan pesan jelas.
+  2.4  Aksi tanpa permission    : role tanpa akses mencoba aksi terbatas (via
+                                   UI yang disembunyikan ATAU via API langsung)
+                                   -> harus ditolak (403/redirect), tidak boleh
+                                   silently allowed.
+  2.5  State transition invalid : loncat status yang tidak diizinkan workflow.
+  2.6  Operasi pada record yang : sudah dihapus, tidak eksis (ID invalid), atau
+       tidak valid                milik entity lain yang tidak relevan.
+  2.7  Kredensial/auth salah    : password salah, akun tidak aktif/dihapus,
+                                   token invalid (khusus modul auth).
+  2.8  Reject/cancel tanpa alasan: field "alasan" wajib diisi saat reject/
+                                   cancel tapi dikosongkan -> validasi harus
+                                   jalan.
+
+================================================================================
+  3. BOUNDARY (B)
+================================================================================
+  3.1  Panjang karakter field    : min length - 1 (reject), min length
+                                   (accept), max length (accept), max length +
+                                   1 (reject).
+  3.2  Nilai numerik             : 0, negatif, nilai minimum bisnis, nilai
+                                   maksimum bisnis, maksimum + 1.
+  3.3  Ukuran file upload        : tepat di limit (accept), limit - 1 byte
+                                   (accept), limit + 1 byte (reject).
+  3.4  Tanggal                   : tanggal hari ini, lampau/masa depan ekstrem,
+                                   awal/akhir bulan/tahun, leap year.
+  3.5  Pagination                : halaman pertama, halaman terakhir, page di
+                                   luar range, page size minimum/maksimum.
+  3.6  Jumlah hasil              : 0 hasil (empty state), 1 hasil, tepat di
+                                   limit per-page.
+
+================================================================================
+  4. EDGE CASE / UNEXPECTED (!)
+================================================================================
+  4.1  Karakter tidak biasa      : unicode, emoji, karakter RTL, whitespace-
+                                   only, multi-line text di single-line field.
+  4.2  Aksi ganda/cepat          : double-click submit (double submission),
+                                   klik berulang cepat pada aksi yang sama.
+  4.3  Navigasi tidak biasa      : browser back/forward setelah submit,
+                                   refresh saat proses submit berjalan, buka
+                                   tab baru dengan session sama.
+  4.4  Race condition            : dua aksi mutually-exclusive ditembak
+                                   paralel -> harus ada locking/versioning,
+                                   tidak boleh keduanya sukses.
+  4.5  Session/koneksi           : session timeout saat mengisi form panjang,
+                                   koneksi terputus saat submit, token expired
+                                   mid-flow.
+  4.6  Data kosong/null          : list kosong (empty state UI), field yang
+                                   biasanya terisi ternyata null/undefined
+                                   dari API.
+  4.7  Konkurensi multi-user     : dua user edit record yang sama bersamaan
+                                   (last-write-wins vs conflict detection).
+  4.8  Behavior non-obvious      : perilaku aplikasi yang tidak intuitif tapi
+                                   DISENGAJA (misal data baru butuh refresh
+                                   manual) — harus didokumentasikan sebagai
+                                   known behavior, bukan diasumsikan bug atau
+                                   diabaikan.
+
+================================================================================
+  5. SECURITY (S)  — review WAJIB untuk setiap fitur dengan form/API mutasi
+================================================================================
+  5.1  Injection
+       - SQL Injection (SQLi)       : payload di search box/filter/field teks
+                                       bebas -> tidak ada error DB leak, tidak
+                                       ada bypass logic.
+       - XSS Reflected              : payload <script>/<img onerror> di query
+                                       param/search -> tidak ter-eksekusi saat
+                                       di-render balik.
+       - XSS Stored                 : payload disimpan via form (nama,
+                                       komentar, post) -> saat ditampilkan
+                                       ulang (termasuk ke user LAIN) tidak
+                                       ter-eksekusi. Prioritas tinggi untuk
+                                       fitur yang kontennya terlihat oleh user
+                                       lain (broadcast/shared content).
+       - Command/Path Injection     : field yang bisa trigger command shell
+                                       atau path traversal (nama file upload,
+                                       path export/import).
+       - SSRF (Server-Side Request  : field yang menerima URL dan diproses di
+         Forgery)                     server (fetch preview, webhook callback,
+                                       import-by-URL) -> dicoba arahkan ke
+                                       internal network/metadata endpoint,
+                                       harus ditolak/divalidasi.
+  5.2  Access Control
+       - IDOR (Insecure Direct      : ganti ID di URL/API untuk akses/edit
+         Object Reference)            data entity lain yang seharusnya tidak
+                                       boleh diakses dari sesi aktif.
+       - Broken Function Level      : akses endpoint admin-only dari role
+         Access Control                non-admin langsung via API (skip UI).
+       - Privilege Escalation       : user non-admin mencoba ubah role/
+                                       permission dirinya sendiri.
+       - Mass Assignment            : kirim field tambahan di body request
+                                       (misal "role":"admin", "isVerified":
+                                       true) yang tidak disediakan form UI ->
+                                       server TIDAK BOLEH menerima/menyimpan
+                                       field tak terduga tersebut.
+       - Open Redirect              : parameter redirect/callback/returnUrl
+                                       diarahkan ke domain eksternal -> harus
+                                       divalidasi/whitelist, tidak boleh
+                                       redirect bebas.
+  5.3  File Upload
+       - Ekstensi tidak diizinkan   : upload .exe/.php/.sh langsung -> ditolak.
+       - File di-rename (bypass     : .exe/.php DI-RENAME jadi .jpg/.pdf lalu
+         ekstensi)                    upload -> HARUS ditolak (validasi MIME
+                                       real/magic byte, bukan cuma ekstensi
+                                       nama file).
+       - Content-Type spoofing      : header Content-Type saat upload
+                                       dipalsukan (misal file .exe dikirim
+                                       dengan header "image/jpeg") -> validasi
+                                       server tidak boleh percaya header
+                                       client mentah-mentah.
+       - Double extension           : "file.jpg.exe" -> harus ditolak.
+       - Oversized file              : lihat Boundary 3.3.
+       - Malicious filename         : path traversal di nama file
+                                       ("../../x"), karakter spesial di nama
+                                       file.
+  5.4  CSRF (Cross-Site Request Forgery)
+       - Mutasi state via request   : request POST/PUT/DELETE lintas-origin
+         cross-origin                  tanpa token/header CSRF valid harus
+                                       ditolak (CSRF token check atau CORS
+                                       block). Prioritas pada endpoint yang
+                                       MENGUBAH DATA, bukan sekadar GET.
+  5.5  Rate Limiting / Brute Force
+       - Login brute force           : percobaan login berulang cepat -> harus
+                                       ada lockout/429 setelah N kali gagal.
+       - Create/submit spam          : percobaan create record berulang cepat
+                                       -> idealnya ada rate limit; kalau tidak
+                                       ada, dokumentasikan sebagai finding,
+                                       jangan diskip.
+  5.6  Security Headers
+       - Clickjacking protection     : X-Frame-Options / frame-ancestors CSP
+                                       harus ada di response halaman sensitif.
+       - Lain-lain                   : X-Content-Type-Options, Strict-
+                                       Transport-Security, Content-Security-
+                                       Policy (cek ada/tidak, catat sebagai
+                                       finding kalau tidak ada).
+  5.7  Session Security
+       - Session fixation            : session ID harus berubah setelah login.
+       - Session tetap valid setelah : logout harus benar-benar invalidasi
+         logout                        token/cookie di server.
+       - Token/cookie exposure       : token sensitif tidak boleh ter-expose
+                                       di URL/log/response body yang tidak
+                                       perlu.
+  5.8  Sensitive Data Exposure
+       - Response API membawa field : password hash, token internal, data PII
+         yang tidak diperlukan         pihak lain yang tidak relevan dengan
+                                       request tersebut.
+       - Error message terlalu       : stack trace/detail server tidak boleh
+         detail                        ter-expose ke client saat error.
+  5.9  Business Logic Abuse
+       - Bypass urutan proses        : skip langkah wajib dalam flow (misal
+                                       checkout tanpa lewat validasi step
+                                       sebelumnya) dengan memanggil endpoint
+                                       langsung di luar urutan UI.
+       - Manipulasi nilai sensitif   : ubah harga/diskon/kuota via parameter
+                                       yang seharusnya dihitung server, bukan
+                                       dikirim dari client.
+
+================================================================================
+  6. API TESTING (A)
+================================================================================
+  6.1  Status code benar         : 200/201 sukses, 400 invalid input, 401/403
+                                   auth/permission, 404 resource tidak ada,
+                                   409 conflict, 429 rate limit. 500 TIDAK
+                                   BOLEH muncul untuk input yang seharusnya
+                                   valid/invalid terkontrol.
+  6.2  Response schema/contract  : field yang diharapkan ada, tipe data benar,
+                                   tidak ada field yang hilang/berubah diam-
+                                   diam.
+  6.3  Request method salah      : GET ke endpoint yang harusnya POST-only,
+                                   dll -> 405 Method Not Allowed.
+  6.4  Auth/token                : request tanpa token, token expired, token
+                                   milik user lain -> ditolak konsisten.
+  6.5  Parameter negative test    : query param/body field dengan tipe salah,
+                                   field ekstra tidak dikenal, array kosong vs
+                                   null.
+  6.6  Pagination & sorting param: offset/limit tidak valid (negatif, di luar
+                                   range), sortField tidak dikenal.
+  6.7  Idempotency                : request create yang sama dikirim 2x
+                                   (retry network) -> tidak membuat 2 record
+                                   duplikat (kalau bisnis mengharuskan
+                                   idempotent).
+
+================================================================================
+  7. CONSOLE / BROWSER-LEVEL CHECK
+================================================================================
+  7.1  JS console error           : tidak ada error JS yang muncul di console
+                                   saat flow normal dijalankan.
+  7.2  Network tab anomali        : request gagal (status 4xx/5xx) yang
+                                   seharusnya tidak terjadi di happy path,
+                                   request duplikat yang tidak perlu.
+  7.3  Resource 404                : asset (gambar, font, script) yang
+                                   di-load tapi 404.
+  7.4  Warning log                 : deprecation warning / framework warning
+                                   yang menumpuk di console (indikasi tech
+                                   debt, bukan hard-fail, tapi dicatat).
+  7.5  Performance dasar           : waktu load halaman/response API dalam
+                                   batas wajar (dicatat sebagai finding kalau
+                                   lambat, hard-fail hanya kalau ada SLA jelas).
+
+================================================================================
+  8. UI/UX & COMPATIBILITY (opsional, tergantung scope project)
+================================================================================
+  8.1  Responsive/layout break     : layout rusak di breakpoint tertentu.
+  8.2  Cross-browser                : perilaku konsisten di berbagai browser
+                                   (kalau scope mencakup multi-browser).
+  8.3  Accessibility dasar          : label/alt text/ARIA role ada untuk
+                                   elemen interaktif utama.
+  8.4  Konsistensi pesan error/UI  : bahasa & format pesan error konsisten
+                                   antar fitur/halaman.
+
+================================================================================
+  CHECKLIST RINGKAS SAAT MERANCANG TEST CASE FITUR BARU
+================================================================================
+  [ ] 1. Pahami fungsi & impact fitur (siapa yang terdampak kalau fitur ini
+         rusak/salah — 1 user, banyak user, atau data sensitif).
+  [ ] 2. List semua field/form/entity -> turunkan Positive + Negative +
+         Boundary.
+  [ ] 3. List semua state/workflow (kalau ada) -> turunkan transisi valid/
+         invalid.
+  [ ] 4. List semua field upload (kalau ada) -> cek seluruh sub-jenis di 5.3
+         (rename ekstensi, content-type spoofing, double extension, dll).
+  [ ] 5. List semua endpoint mutasi (POST/PUT/DELETE) -> TC CSRF + rate-limit.
+  [ ] 6. Cek security header (clickjacking, dll) di halaman/endpoint utama.
+  [ ] 7. Cek IDOR kalau fitur meng-key data sensitif via ID di URL/API.
+  [ ] 8. Cek field yang menerima URL -> SSRF; field redirect -> Open Redirect.
+  [ ] 9. Cek apakah API menerima field ekstra tak terduga -> Mass Assignment.
+  [ ] 10. List endpoint API utama -> turunkan API testing (6.1-6.7).
+  [ ] 11. Jalankan flow normal dengan console/network listener aktif ->
+          Console check (7.1-7.3).
+  [ ] 12. Review edge case spesifik fitur (concurrency, double-submit, race
+          condition kalau ada workflow status).
+  [ ] 13. Review business logic abuse: apakah ada urutan proses yang bisa
+          di-skip, atau nilai sensitif yang seharusnya dihitung server tapi
+          dikirim dari client.
