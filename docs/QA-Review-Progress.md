@@ -1810,13 +1810,30 @@ Security(IDOR)/API, dgn verifikasi live tiap TC (tidak ditebak). Total TC baru: 
 - **Leave** (+1 TC): melengkapi IDOR utk Entitlements API (sebelumnya baru ada utk
   leave-requests) -- empNumber/entitlementId invalid ditolak aman (404/405).
 
-**Yang masih belum tercakup scr eksplisit** (taksonomi belum benar2 100% di semua kategori,
-transparan ke user sesuai arahan):
-- File upload (Claim Attachments, KPI tidak relevan) -- blm diuji ekstensi berbahaya/rename.
-- Edge case (4.x): double-submit, browser back/forward setelah submit, race condition,
-  konkurensi multi-user -- blm diuji di modul manapun krn butuh setup multi-session/timing
-  presisi yg di luar scope batch ini.
-- Mass Assignment (kirim field tambahan tak terduga di body request) -- blm diuji.
-- Boundary tanggal ekstrem (leap year, awal/akhir tahun) -- blm diuji scr eksplisit.
-- Open Redirect, SSRF, Command/Path Injection -- tidak relevan utk modul2 ini (tidak ada field
-  URL/file-path/command yg diproses server).
+## UPDATE 2026-11-14 -- Lanjutan: File Upload, Mass Assignment, Double-Submit (atas instruksi "LANJUTKAN")
+
+3 item tersisa dari list di atas sudah ditutup (Claim 9 -> 12 TC):
+
+- **TC-CLAIM-ASSIGN-10 [BUG KEAMANAN NYATA, TC sengaja FAILED]**: File upload Attachments
+  pada Claim HANYA memvalidasi ekstensi file, BUKAN konten/magic-byte asli. Payload `.php`
+  langsung ditolak client-side, tapi `.php` yg DI-RENAME jadi `.jpg` (payload identik)
+  diterima PENUH oleh server (POST 200, fileType="image/jpeg" diambil dr ekstensi) dan bisa
+  di-download kembali via UI. Severity dibatasi krn disajikan sbg forced-download (bukan
+  inline-execute), tapi gap validasinya nyata sesuai taksonomi 5.3 -- file fixture
+  (`tests/fixtures/uploads/`) & `AssignClaimPage.addAttachment()` disiapkan utk reproduksi.
+- **TC-CLAIM-ASSIGN-11 [TEMUAN POSITIF]**: Mass Assignment -- endpoint create claim menolak
+  SELURUH request (422) saat ada field tak terduga ("status","id") dikirim bersama field
+  valid, bukan diam2 mengabaikannya. Validasi whitelist DTO yg ketat, tidak ada kerentanan.
+- **TC-CLAIM-ASSIGN-12 [TEMUAN POSITIF]**: Double-submit -- loading overlay muncul SEGERA
+  stlh klik Save pertama, scr fisik memblokir klik kedua yg cepat menjangkau tombol. Hanya
+  1 POST & 1 record tersimpan, terverifikasi via network + API count, bukan diasumsikan.
+
+**Yang MASIH belum tercakup** (transparan, bukan diklaim 100%):
+- Edge case 4.3/4.4/4.7: browser back/forward setelah submit, race condition antar-request
+  paralel, konkurensi multi-user (dua sesi edit record yg sama bersamaan) -- butuh setup
+  multi-context/multi-session Playwright yg lebih kompleks, di luar scope batch ini.
+- Boundary tanggal ekstrem (leap year, awal/akhir tahun fiskal) -- blm diuji scr eksplisit.
+- Open Redirect, SSRF, Command/Path Injection -- tidak relevan utk modul2 ini (tidak ada
+  field URL/file-path/command yg diproses server).
+- File upload utk modul LAIN selain Claim (mis. Buzz post attachment, PIM foto profil) --
+  di luar 4 modul yg jadi scope sesi ini (Leave/Claim/Performance/Time).
