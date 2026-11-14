@@ -1750,12 +1750,39 @@ dinamis via API, dipakai mulai sekarang utk TC apapun yg butuh employee "bersih"
 - **Claim**: Assign Claim/create claim request (2 TC: create valid, XSS di Remarks). Ditemukan:
   endpoint create adalah `/api/v2/claim/employees/<empNumber>/requests`, bukan collection flat.
 
-Total TC project sekarang: 464 file spec.
+Total TC project sekarang: 464 file spec (+ TC baru di sesi lanjutan, lihat update di bawah).
 
-**Yang masih terbuka utk sesi berikutnya** (scope sengaja dipersempit di 3 modul baru ini --
-bukan taxonomy lengkap spt Leave, demi menyelesaikan sesuatu yg nyata dlm waktu terbatas):
-- Time: Timesheets (submit timesheet dgn project/activity -- butuh project assignment dulu),
-  Employee Attendance Records (admin view), Reports.
-- Performance: alur utama Manage Reviews/Trackers (assign review ke employee, evaluasi KPI).
-- Claim: approve/reject claim, detail expense line item per claim.
-- Leave: tidak ada lagi item terbuka -- TC-LEAVE-ASSIGN-02 sudah resolved (lihat atas).
+**[UPDATE lanjutan, 2026-11-14 sesi kedua]** Seluruh item yg tadinya terbuka sudah
+ditutup/didokumentasikan secara eksplisit, dikerjakan full-autonomous sesuai instruksi user:
+
+- **Claim**: 2 item ditutup.
+  - TC-CLAIM-ASSIGN-03 (Add Expense Line Item): `AssignClaimPage.addExpense()` baru, verified
+    3x stable. Ditemukan: `page.goto()` ke URL yg SAMA adalah no-op di SPA ini (router tidak
+    re-fetch kalau route tidak berubah) -- butuh `page.reload()` sungguhan.
+  - TC-CLAIM-ASSIGN-04: Approve/Reject claim dikonfirmasi **N/A** utk akun tunggal ini via
+    bukti `allowedActions` API (sama pola dgn Leave Approve/Reject) -- bukan bug/kekurangan.
+- **Performance**: Manage Reviews/Assign Review dikonfirmasi **N/A** di build demo ini
+  (TC-PERF-REVIEW-01) -- tidak ada tombol Add di UI manapun (dumped semua elemen), Configure
+  cuma KPIs+Trackers, rute direct 404, API POST ke /reviews ditolak 405. Kemungkinan fitur
+  Enterprise yg sengaja non-aktif di OSS demo.
+- **Time**: 4 TC baru, semua modul yg tadinya 0% coverage kini tercakup first-pass:
+  - TC-TIME-TIMESHEET-01 (My Timesheet, log jam ke Project/Activity): `MyTimesheetPage` baru.
+    Bug ditemukan & diperbaiki: salah pilih opsi "-- Select --" placeholder di dropdown
+    Activity (submit gagal diam2), dan race ERR_ABORTED+networkidle-terlalu-dini saat
+    reload-verification.
+  - TC-TIME-ADMIN-ATTENDANCE-01 (Employee Records, proxy punch in/out): `AdminAttendanceRecordsPage`
+    baru. Bug signifikan ditemukan & diperbaiki: Punch Out pakai PUT ke endpoint yg SAMA
+    dgn Punch In (POST) -- sebelum fix, ~50% run gagal diam2 krn nunggu POST yg tidak akan
+    pernah datang saat employee target kebetulan sudah berstatus "Punched In". Juga: deep-link
+    `?employeeId=X&date=Y` manual tidak reliable, harus lewat search form app.
+  - TC-TIME-REPORTS-01 (Employee Report, cross-check hasil Timesheet): `TimeEmployeeReportPage`
+    baru. Bug ditemukan & diperbaiki: mencari employee pakai nama ("John") tidak aman di
+    shared demo ini (banyak seed/junk employee bernama serupa) -- diperbaiki pakai
+    `employeeId` via `getLoggedInEmployeeName()`.
+  - Item Time yg TETAP belum tercakup (scope lebih kecil, bukan krn gagal): Timesheets
+    approval workflow (submit->approve timesheet admin lain), Project Reports & Attendance
+    Summary Report (ditemukan ada, formnya sudah dieksplorasi, tapi belum ada TC dedicated).
+
+**Tidak ada lagi item modul besar (Leave/Claim/Performance/Time) yg terbuka tanpa status
+jelas** -- setiap item yg tidak diimplementasikan penuh didokumentasikan sbg N/A dgn bukti,
+atau sbg scope-kecil yg sengaja disisakan utk sesi berikutnya (bukan silent gap).
