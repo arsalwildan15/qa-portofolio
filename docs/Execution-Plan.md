@@ -10,15 +10,15 @@
 > Ditetapkan user 2026-11-15. Sumber rencana: laporan coverage gap (sesi 2026-11-15).
 
 ## STATUS
-- **Fase aktif:** 0 -> siap lanjut Fase 1 (menunggu laporan checkpoint diterima user)
-- **Task terakhir selesai:** P0.7 (FASE 0 TUNTAS)
-- **NEXT ACTION:** P1.1 (probe API create user ESS/Admin + Report-to + login ESS) -- lihat
-  "RISIKO UTK FASE SELANJUTNYA" di P0.7 SEBELUM mengerjakan TC apa pun di claim/assign,
-  leave/apply, leave/leave-list, time/attendance: cek `GET /api/v2/pim/employees/7` dulu kalau
-  ada kegagalan aneh terkait identitas/balance di area itu.
+- **Fase aktif:** 1 TUNTAS -> siap lanjut Fase 2 (Performance dulu, sesuai urutan di rencana)
+- **Task terakhir selesai:** P1.8 (FASE 1 TUNTAS, termasuk self-heal getLoggedInEmployeeName())
+- **NEXT ACTION:** P2.1 Eksplorasi Performance (siklus status review, KPI<->Job Title, Trackers
+  config, review utk employee tanpa KPI) -> page objects -> TC REVIEW-01..16, KPI-07..11,
+  TRACKER-01..08.
 - **Blocker:** —
-- **Perlu persetujuan user (antrian):** — (identity-repair sdh pre-approved utk kejadian berulang
-  yg identik; kalau polanya BEDA dari yg sudah terdokumentasi, tanya ulang)
+- **Perlu persetujuan user (antrian):** — (identity self-heal otomatis sejak Fase 1, TIDAK perlu
+  tanya ulang lagi kalau kambuh -- itulah tujuan fix-nya. Kalau POLA korupsinya beda dari yg
+  terdokumentasi (bukan employeeId pendek), baru perlu investigasi/tanya ulang.)
 
 ## ATURAN KERJA (berlaku semua fase)
 - R1 Probe-first: eksplor live dgn file `tests/zz-probe-*.spec.ts`, jalankan SELALU dgn `--reporter=list`
@@ -99,17 +99,29 @@
       employee salah", "balance 0 tak terduga"), CEK DULU `GET /api/v2/pim/employees/7` sblm
       berasumsi bug baru -- besar kemungkinan ini kambuh lagi, bukan regresi kode.
 
-## FASE 1 — Infrastruktur Multi-Role
-- [ ] P1.1 Probe: endpoint API create user (role ESS/Admin) + linking employee; Report-to API; login ESS.
-- [ ] P1.2 `src/utils/createEssAccount.ts`: employee baru + user ESS terhubung -> `{empNumber, employeeId,
-      fullName, username, password}`. Via API (cepat, stabil), fallback UI.
-- [ ] P1.3 `src/utils/assignSupervisor.ts` (API Report-to).
-- [ ] P1.4 `src/utils/createSecondAdmin.ts` (user role Admin baru).
-- [ ] P1.5 `src/utils/loginAs.ts`: context baru + login -> Page (untuk dua aktor dalam satu test).
-- [ ] P1.6 `src/utils/withConfigRestore.ts` (GET backup -> aksi -> PUT restore di finally).
-- [ ] P1.7 `src/utils/networkEdge.ts`: `refreshDuringPendingSave()`, `dropConnectionDuringSave()`.
-- [ ] P1.8 Smoke TC `tests/infra/`: INFRA-01 ESS login & menu berbeda dari Admin; INFRA-02 supervisor link;
-      INFRA-03 second admin login. 3x stabil.
+## FASE 1 — Infrastruktur Multi-Role [TUNTAS 2026-11-15]
+- [x] P1.1 Probe: Add Employee's "Create Login Details" toggle = jalur TERBAIK utk ESS (atomic,
+      linkage dijamin benar, TIDAK ada role selector -> SELALU ESS, dikonfirmasi live). Report-to
+      API `/employees/<id>/supervisors` (GET&POST) dikonfirmasi shape-nya via probe live.
+- [x] P1.2 `src/utils/createEssAccount.ts` -- via UI (Add Employee+toggle), bukan API langsung
+      (API create butuh form submission jg scr live, UI path lebih simpel & sudah teruji).
+- [x] P1.3 `src/utils/assignSupervisor.ts` -- verifikasi via status POST + GET follow-up, BUKAN
+      teks UI stlh save (known issue REPORTTO-01/03/06).
+- [x] P1.4 `src/utils/createSecondAdmin.ts` -- + method baru `AdminUsersPage.selectEmployee()`
+      (search employee SPESIFIK, bukan `fillFirstEmployeeName()` yg asal match "a").
+- [x] P1.5 `src/utils/loginAs.ts`.
+- [x] P1.6 `src/utils/withConfigRestore.ts`.
+- [x] P1.7 `src/utils/networkEdge.ts` (diekstrak dari pola inline yg sudah ada di 4 modul lama).
+- [x] P1.8 `tests/infra/` INFRA-01/02/03 -- 3x run, 9/9 check x 3 = lolos semua.
+- [x] TAMBAHAN BESAR (ditemukan saat kerjakan P1.1, tdk direncanakan tapi perlu): korupsi identitas
+      empNumber=7 TERNYATA kambuh JAUH lebih sering dari dugaan P0.7 (dlm hitungan MENIT, bukan
+      jam) -- dikonfirmasi berulang kali via API fresh selama sesi Fase 1 ini. Krn frekuensinya,
+      fix arsitektural yg tadinya "dijadwalkan nanti" dikerjakan SEKARANG (bukan ditunda lagi):
+      `getLoggedInEmployeeName()` (dipakai 11 file di 4 area) SEKARANG SELF-HEAL -- deteksi
+      employeeId mencurigakan pendek (<5 char) & otomatis perbaiki via Personal Details sblm
+      return. **Dibuktikan bekerja LIVE**: identitas kambuh korup lagi PAS di tengah2 verifikasi
+      3x run infra, TAPI INFRA-02 (yg pakai fungsi ini) tetap lolos 3/3 -- bukti nyata self-heal
+      beneran jalan, bukan cuma logic di atas kertas.
 
 ## FASE 2 — Melengkapi 4 Modul
 ### P2.1 Performance (~30) — eksplor dulu: siklus status review, KPI per Job Title -> form evaluasi,
@@ -216,3 +228,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P0.5 | QA-Review-Progress.md blok KOREKSI ditambahkan; 6 TC lama N/A single-role dijadwalkan Fase 4.1 (tdk diedit sekarang) | 1 commit
 - 2026-11-15 | P0.6 | baseline 32/43 pass; 9 fail = 1 root cause (empNumber=7 identity corruption); user approved repair; PersonalDetailsPage PUT 200 -> QA Admin/QAADMIN07 | data repair, no code commit
 - 2026-11-15 | P0.7 | 5/9 fixed by repair; 3/9 flaky-under-load (pass isolated); 1/9 real script bug (whitespace) fixed+3x stable; identity RE-corrupted identik -> repaired lagi, didokumentasikan sbg risiko berulang lintas 11 file/4 area | 1 commit
+- 2026-11-15 | P1.1-P1.8 | 7 util baru (createEssAccount/createSecondAdmin/assignSupervisor/loginAs/withConfigRestore/networkEdge + getLoggedInEmployeeName self-heal) + AdminUsersPage.selectEmployee() + createTestEmployee+employeeId + 3 TC infra, 9/9 check x3 run; self-heal TERBUKTI jalan live (korupsi kambuh di tengah run, INFRA-02 tetap lolos) | 1 commit
