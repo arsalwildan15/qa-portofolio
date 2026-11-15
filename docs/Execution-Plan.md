@@ -40,9 +40,20 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** FASE 4 berjalan. Selesai: date-drift, isVisible, VACANCY-19, P4.0 matrix (39.1%).
-  Lanjut P4.0 gelombang A-E (lihat checklist FASE 4) sampai semua sel GAP tertutup/N/A beralasan, lalu
-  P4.1-P4.7, Fase 5-8. Regenerasi matrix: tools/coverage/README.md.
+- **NEXT ACTION:** FASE 4 / P4.0 gelombang matrix (matrix 40.6%, 109 unit, 2765 GAP). Selesai: sweep PAGE-01
+  (1.5/7.x), HDR-01 (5.6), ROLE-01 (ESS: 1.5/2.4/5.2-BFLAC/IDOR). URUTAN BERIKUT:
+  (1) sweep halaman sisa di tests/_global/sweep/: VIEW-01 responsive 8.1 (viewport 375px: tanpa scroll
+      horizontal), A11Y-01 8.3 (input berlabel, tombol bernama, img alt), XBROWSER-01 8.2 (PAGE-01 versi
+      firefox+webkit via browserType.launch), LIST-01 4.6/3.6/3.5/1.6 (filter tanpa hasil -> "No Records
+      Found", pagination, sort) per unit ber-list.
+  (2) gelombang B sweep API per unit (registry endpoint list/detail): 6.2 schema, 6.3 405, 6.4 tanpa sesi
+      401, 6.6 paging, 5.8 field sensitif, 2.6 id tak eksis.
+  (3) gelombang C mutasi per unit CRUD (registry create body), (4) gelombang D sisa: My Info ESS (10 tab:
+      edit milik sendiri, Job/Salary/Report-to read-only -> 5.2-PrivEsc via API), IDOR API PIM.
+  (5) gelombang E spesifik unit + perkuat 23 TC lemah.
+  SETIAP gelombang: label check pakai kode taksonomi, docs TC-*.txt format simbol+kode, `python
+  tools/coverage/check_docs.py` = 0, rebuild matrix (tools/coverage/README.md), commit (author Arsal, tanpa
+  trailer) + PUSH (user minta commit & push).
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
