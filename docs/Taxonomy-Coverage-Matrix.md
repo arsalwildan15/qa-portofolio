@@ -4,20 +4,20 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 
 | Module | COVERED | GAP | N/A | Coverage of applicable |
 |---|---:|---:|---:|---:|
-| Admin | 502 | 594 | 608 | 45.8% |
-| Buzz | 33 | 25 | 13 | 56.9% |
-| Claim | 163 | 147 | 187 | 52.6% |
-| Dashboard | 11 | 25 | 106 | 30.6% |
-| Directory | 10 | 16 | 45 | 38.5% |
-| Leave | 216 | 283 | 424 | 43.3% |
-| Maintenance | 36 | 61 | 116 | 37.1% |
-| My Info | 14 | 448 | 319 | 3.0% |
-| PIM | 396 | 530 | 494 | 42.8% |
-| Performance | 186 | 235 | 289 | 44.2% |
-| Recruitment | 124 | 92 | 68 | 57.4% |
+| Admin | 663 | 433 | 608 | 60.5% |
+| Buzz | 40 | 18 | 13 | 69.0% |
+| Claim | 204 | 106 | 187 | 65.8% |
+| Dashboard | 14 | 22 | 106 | 38.9% |
+| Directory | 18 | 8 | 45 | 69.2% |
+| Leave | 286 | 213 | 424 | 57.3% |
+| Maintenance | 48 | 49 | 116 | 49.5% |
+| My Info | 18 | 444 | 319 | 3.9% |
+| PIM | 482 | 444 | 494 | 52.1% |
+| Performance | 243 | 178 | 289 | 57.7% |
+| Recruitment | 144 | 72 | 68 | 66.7% |
 | Sidebar | 0 | 24 | 47 | 0.0% |
-| Time | 197 | 285 | 370 | 40.9% |
-| **Total** | **1888** | **2765** | **3086** | **40.6%** |
+| Time | 264 | 218 | 370 | 54.8% |
+| **Total** | **2424** | **2229** | **3086** | **52.1%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -26,7 +26,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | Item | Taxonomy | Units with GAP |
 |---|---|---:|
 | 1.1-C | Create valid | 12 |
-| 1.1-R | Read / list | 56 |
+| 1.1-R | Read / list | 13 |
 | 1.1-U | Update valid | 61 |
 | 1.1-D | Delete valid | 28 |
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 81 |
@@ -41,7 +41,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 2.3 | Duplicate/unique conflict | 14 |
 | 2.4 | Aksi tanpa permission (UI/API) | 8 |
 | 2.5 | State transition invalid | 13 |
-| 2.6 | Operasi pada record invalid/tak eksis | 78 |
+| 2.6 | Operasi pada record invalid/tak eksis | 35 |
 | 2.8 | Reject/cancel tanpa alasan | 6 |
 | 3.1 | Panjang karakter field | 8 |
 | 3.2 | Nilai numerik | 1 |
@@ -77,18 +77,18 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.8 | Sensitive data exposure | 14 |
 | 5.9 | Business logic abuse | 20 |
 | 6.1 | Status code benar | 12 |
-| 6.2 | Response schema/contract | 94 |
-| 6.3 | Request method salah (405) | 105 |
-| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 107 |
+| 6.2 | Response schema/contract | 54 |
+| 6.3 | Request method salah (405) | 59 |
+| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 62 |
 | 6.5 | Parameter negatif (tipe salah/extra/null) | 102 |
-| 6.6 | Pagination & sorting param | 65 |
+| 6.6 | Pagination & sorting param | 25 |
 | 6.7 | Idempotency | 51 |
 | 7.1 | JS console error | 12 |
 | 7.2 | Network anomali | 12 |
 | 7.3 | Resource 404 | 12 |
 | 7.4 | Warning log | 14 |
 | 7.5 | Performance dasar | 14 |
-| 8.1 | Responsive/layout | 109 |
-| 8.2 | Cross-browser | 109 |
-| 8.3 | Accessibility dasar | 103 |
+| 8.1 | Responsive/layout | 14 |
+| 8.2 | Cross-browser | 14 |
+| 8.3 | Accessibility dasar | 14 |
 | 8.4 | Konsistensi pesan | 83 |

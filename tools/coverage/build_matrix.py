@@ -74,7 +74,9 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'cross-module/TC-XMOD-01', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Timesheets > Employee Timesheets', 'Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Time > Project Info > Projects']),
  (r'cross-module/TC-XMOD-0[24]', ['Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Performance > Configure > KPIs', 'Time > Project Info > Customers']),
  (r'cross-module/TC-XMOD-03', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Project Info > Projects']),
- (r'sweep/TC-SWEEP-(PAGE|HDR|ROLE)', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
+ (r'sweep/TC-SWEEP-API', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
+                         if u['id'] in set(json.load(open(S + '/api_units.json')))]),
+ (r'sweep/TC-SWEEP-(PAGE|HDR|ROLE|VIEW|A11Y|XBROWSER)', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
                                   if u['id'] in SWEEP_UNITS]),
  (r'cross-module/TC-XMOD-0[56]', ['Claim > Configuration > Events', 'Leave > Configure > Leave Types', 'Time > Project Info > Customers']),
 ]

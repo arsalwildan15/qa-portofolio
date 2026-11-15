@@ -1,0 +1,403 @@
+{
+ "U001": [
+  "200 admin/users?limit=50&offset=0&sortField=u.userName&sortOrder=ASC"
+ ],
+ "U002": [
+  "200 admin/employment-statuses?limit=0",
+  "200 admin/job-titles?limit=0",
+  "200 admin/subunits",
+  "200 pim/employees?limit=50&offset=0&model=detailed&includeEmployees=onlyCurrent&sortField=employee.firstName&sortOrder=ASC"
+ ],
+ "U003": [
+  "200 leave/leave-periods",
+  "200 leave/workweek?model=indexed",
+  "200 leave/leave-types?limit=0",
+  "200 leave/employees/leave-requests?limit=50&offset=0&includeEmployees=onlyCurrent",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31"
+ ],
+ "U004": [
+  "200 time/employees/timesheets/list?limit=50&offset=0"
+ ],
+ "U005": [
+  "200 recruitment/hiring-managers?limit=0",
+  "200 admin/job-titles?limit=0",
+  "200 recruitment/vacancies?model=summary&limit=0&excludeInterviewers=false",
+  "200 recruitment/candidates?limit=50&offset=0&model=list&sortField=candidate.dateOfApplication&sortOrder=DESC",
+  "200 leave/workweek?model=indexed",
+  "200 recruitment/candidates/statuses",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31"
+ ],
+ "U006": [
+  "200 leave/workweek?model=indexed",
+  "200 pim/employees/7/custom-fields?screen=personal",
+  "200 pim/employees/7/personal-details",
+  "200 pim/employees/7/screen/personal/attachments?limit=50&offset=0",
+  "200 pim/employees/7",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 pim/employees"
+ ],
+ "U007": [
+  "200 admin/job-titles?limit=0",
+  "200 performance/employees/reviews?limit=50&offset=0&sortField=performanceReview.statusId&sortOrder=ASC&fromDate=2026-01-01&toDate=2026-12-31&includeEmployees=onlyCurrent",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 admin/subunits",
+  "200 leave/workweek?model=indexed"
+ ],
+ "U008": [
+  "200 dashboard/employees/time-at-work?timezoneOffset=7&currentDate=2026-11-15&currentTime=22:12",
+  "200 dashboard/employees/leaves?date=2026-11-15",
+  "200 dashboard/employees/locations",
+  "200 buzz/feed?limit=5&offset=0&sortOrder=DESC&sortField=share.createdAtUtc",
+  "200 dashboard/employees/action-summary",
+  "200 dashboard/shortcuts",
+  "200 dashboard/employees/subunit"
+ ],
+ "U009": [
+  "200 directory/employees?limit=14&offset=0"
+ ],
+ "U010": [],
+ "U011": [
+  "200 claim/employees/requests?limit=50&offset=0&includeEmployees=onlyCurrent&sortField=claimRequest.referenceId&sortOrder=DESC",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 leave/workweek?model=indexed",
+  "200 claim/events?limit=0&status=true"
+ ],
+ "U012": [
+  "200 buzz/feed?limit=10&offset=0&sortOrder=DESC&sortField=share.createdAtUtc",
+  "200 buzz/anniversaries?limit=5"
+ ],
+ "U013": [
+  "200 admin/job-titles?limit=50&offset=0&sortField=jt.jobTitleName&sortOrder=ASC"
+ ],
+ "U014": [
+  "200 admin/pay-grades?limit=50&offset=0"
+ ],
+ "U015": [
+  "200 admin/employment-statuses?limit=50&offset=0"
+ ],
+ "U016": [
+  "200 admin/job-categories?limit=50&offset=0"
+ ],
+ "U017": [
+  "200 admin/work-shifts?limit=50&offset=0"
+ ],
+ "U018": [
+  "200 admin/organization"
+ ],
+ "U019": [
+  "200 admin/locations?limit=50&offset=0&sortField=location.name&sortOrder=ASC"
+ ],
+ "U020": [
+  "200 admin/subunits?mode=tree"
+ ],
+ "U021": [
+  "200 admin/skills?limit=50&offset=0"
+ ],
+ "U022": [
+  "200 admin/educations?limit=50&offset=0"
+ ],
+ "U023": [
+  "200 admin/licenses?limit=50&offset=0"
+ ],
+ "U024": [
+  "200 admin/languages?limit=50&offset=0"
+ ],
+ "U025": [
+  "200 admin/memberships?limit=50&offset=0"
+ ],
+ "U026": [
+  "200 admin/nationalities?limit=50&offset=0"
+ ],
+ "U027": [
+  "200 admin/theme"
+ ],
+ "U028": [
+  "200 admin/email-configuration"
+ ],
+ "U029": [
+  "200 admin/email-subscriptions?limit=50&offset=0"
+ ],
+ "U030": [
+  "200 admin/localization"
+ ],
+ "U031": [
+  "200 admin/i18n/languages?limit=50&offset=0&sortOrder=ASC&activeOnly=true"
+ ],
+ "U032": [
+  "200 admin/modules"
+ ],
+ "U033": [
+  "200 auth/openid-providers?limit=50&offset=0"
+ ],
+ "U034": [
+  "200 admin/oauth-clients?limit=50&offset=0"
+ ],
+ "U035": [
+  "200 admin/ldap-config"
+ ],
+ "U036": [
+  "200 pim/optional-field"
+ ],
+ "U037": [
+  "200 pim/custom-fields?limit=50&offset=0"
+ ],
+ "U038": [],
+ "U039": [
+  "200 pim/reporting-methods?limit=50&offset=0"
+ ],
+ "U040": [
+  "200 pim/termination-reasons?limit=50&offset=0"
+ ],
+ "U041": [
+  "200 pim/employees"
+ ],
+ "U042": [
+  "200 pim/reports/defined?limit=50&offset=0&sortField=report.name&sortOrder=ASC"
+ ],
+ "U043": [
+  "200 leave/leave-types/eligible",
+  "200 leave/workweek?model=indexed",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31"
+ ],
+ "U044": [
+  "200 leave/workweek?model=indexed",
+  "200 leave/leave-periods",
+  "200 leave/leave-requests?limit=50&offset=0&includeEmployees=onlyCurrent",
+  "200 leave/leave-types/eligible?includeAllocated=true",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31"
+ ],
+ "U045": [
+  "200 leave/leave-periods",
+  "200 pim/employees/count",
+  "200 leave/leave-types?limit=0"
+ ],
+ "U046": [
+  "200 leave/leave-types?limit=0",
+  "200 leave/leave-periods"
+ ],
+ "U047": [
+  "200 leave/leave-periods",
+  "200 leave/leave-entitlements?limit=50&offset=0&fromDate=2026-01-01&toDate=2026-12-31",
+  "200 leave/leave-types/eligible"
+ ],
+ "U048": [
+  "200 leave/leave-periods",
+  "200 admin/job-titles?limit=0",
+  "200 leave/leave-types?limit=0"
+ ],
+ "U049": [
+  "200 leave/leave-periods",
+  "200 leave/reports/data?limit=50&offset=0&fromDate=2026-01-01&toDate=2026-12-31&name=my_leave_entitlements_and_usage&_dateFormattingEnabled=true",
+  "200 leave/reports?name=my_leave_entitlements_and_usage"
+ ],
+ "U050": [
+  "200 leave/leave-period"
+ ],
+ "U051": [
+  "200 leave/leave-types?limit=50&offset=0"
+ ],
+ "U052": [
+  "200 leave/workweek"
+ ],
+ "U053": [
+  "200 leave/holidays?limit=50&offset=0&fromDate=2026-01-01&toDate=2026-12-31",
+  "200 leave/workweek?model=indexed",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31"
+ ],
+ "U054": [
+  "200 leave/leave-types?limit=0",
+  "200 leave/workweek?model=indexed",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31"
+ ],
+ "U055": [
+  "200 time/timesheets/default?date=2026-11-15",
+  "200 leave/workweek?model=indexed",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 time/timesheets/266/entries",
+  "200 time/timesheets/266/action-logs?limit=50&offset=0"
+ ],
+ "U056": [
+  "200 attendance/records?limit=50&offset=0&date=2026-11-15",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 leave/workweek?model=indexed"
+ ],
+ "U057": [
+  "200 attendance/current-datetime",
+  "200 leave/workweek?model=indexed",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 attendance/punch-in/overlaps?date=2026-11-15&time=22:14&timezoneOffset=7"
+ ],
+ "U058": [
+  "200 attendance/employees/summary?limit=50&offset=0&date=2026-11-15",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 leave/workweek?model=indexed"
+ ],
+ "U059": [
+  "200 attendance/configs"
+ ],
+ "U060": [
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 leave/workweek?model=indexed"
+ ],
+ "U061": [
+  "200 leave/workweek?model=indexed",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31"
+ ],
+ "U062": [
+  "200 leave/workweek?model=indexed",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 admin/job-titles?limit=0",
+  "200 admin/employment-statuses?limit=0"
+ ],
+ "U063": [
+  "200 time/customers?limit=50&offset=0&sortField=customer.name&sortOrder=ASC"
+ ],
+ "U064": [
+  "200 time/projects?limit=50&offset=0&sortField=project.name&sortOrder=ASC&model=detailed"
+ ],
+ "U065": [
+  "200 recruitment/vacancies?limit=50&offset=0&sortField=vacancy.name&sortOrder=ASC&model=detailed",
+  "200 recruitment/vacancies?model=summary&limit=0&excludeInterviewers=false",
+  "200 recruitment/hiring-managers?limit=0",
+  "200 admin/job-titles?limit=0"
+ ],
+ "U066": [
+  "200 performance/kpis?limit=50&offset=0&sortField=kpi.title&sortOrder=ASC",
+  "200 admin/job-titles?limit=0"
+ ],
+ "U067": [
+  "200 performance/config/trackers?limit=50&offset=0&sortField=performanceTracker.modifiedDate&sortOrder=DESC"
+ ],
+ "U068": [
+  "200 leave/workweek?model=indexed",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 admin/job-titles?limit=0",
+  "200 performance/manage/reviews?limit=50&offset=0&sortField=performanceReview.statusId&sortOrder=ASC&fromDate=2026-01-01&toDate=2026-12-31&includeEmployees=onlyCurrent"
+ ],
+ "U069": [
+  "200 performance/reviews?limit=50&offset=0&sortField=performanceReview.statusId&sortOrder=ASC"
+ ],
+ "U070": [
+  "200 performance/trackers?limit=50&offset=0&sortField=performanceTracker.modifiedDate&sortOrder=DESC"
+ ],
+ "U071": [
+  "200 performance/employees/trackers?limit=50&offset=0&sortField=tracker.modifiedDate&sortOrder=DESC&includeEmployees=onlyCurrent"
+ ],
+ "U072": [
+  "200 claim/events?limit=50&offset=0&sortField=claimEvent.name&sortOrder=ASC"
+ ],
+ "U073": [
+  "200 claim/expenses/types?limit=50&offset=0&sortField=expenseType.name&sortOrder=ASC"
+ ],
+ "U074": [
+  "200 claim/events?limit=0&status=true"
+ ],
+ "U075": [
+  "200 claim/events?limit=0&status=true",
+  "200 claim/requests?limit=50&offset=0&sortField=claimRequest.referenceId&sortOrder=DESC",
+  "200 leave/workweek?model=indexed",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31"
+ ],
+ "U076": [
+  "200 claim/events?limit=0&status=true"
+ ],
+ "U081": [],
+ "U082": [],
+ "U086": [],
+ "U087": [],
+ "U088": [
+  "200 pim/employees/7/screen/personal/attachments?limit=50&offset=0",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 pim/employees/7",
+  "200 pim/employees/7/personal-details",
+  "200 pim/employees/7/custom-fields?screen=personal",
+  "200 leave/workweek?model=indexed",
+  "200 pim/employees"
+ ],
+ "U089": [
+  "200 pim/employees/7/custom-fields?screen=contact",
+  "200 pim/employees/7/screen/contact/attachments?limit=50&offset=0",
+  "200 pim/employees/7",
+  "200 pim/employee/7/contact-details"
+ ],
+ "U090": [
+  "200 pim/employees/7/emergency-contacts?limit=50&offset=0",
+  "200 pim/employees/7/custom-fields?screen=emergency",
+  "200 pim/employees/7/screen/emergency/attachments?limit=50&offset=0",
+  "200 pim/employees/7"
+ ],
+ "U091": [
+  "200 pim/employees/7/dependents?limit=50&offset=0",
+  "200 pim/employees/7",
+  "200 pim/employees/7/custom-fields?screen=dependents",
+  "200 pim/employees/7/screen/dependents/attachments?limit=50&offset=0"
+ ],
+ "U092": [
+  "200 pim/employees/7/immigrations?limit=50&offset=0",
+  "200 pim/employees/7/screen/immigration/attachments?limit=50&offset=0",
+  "200 pim/employees/7/custom-fields?screen=immigration",
+  "200 pim/employees/7"
+ ],
+ "U093": [
+  "200 pim/employees/7/screen/job/attachments?limit=50&offset=0",
+  "200 pim/employees/7/custom-fields?screen=job",
+  "200 leave/workweek?model=indexed",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31",
+  "200 pim/employees/7",
+  "200 pim/employees/7/job-details",
+  "200 pim/employees/7/employment-contract",
+  "404 admin/job-titles/23/specification"
+ ],
+ "U094": [
+  "200 pim/employees/7/custom-fields?screen=salary",
+  "200 pim/employees/7/screen/salary/attachments?limit=50&offset=0",
+  "200 pim/employees/7/salary-components?limit=50&offset=0",
+  "200 pim/employees/7"
+ ],
+ "U095": [
+  "200 pim/employees/7",
+  "200 pim/employees/7/screen/report-to/attachments?limit=50&offset=0",
+  "200 pim/employees/7/custom-fields?screen=report-to",
+  "200 pim/employees/7/supervisors?limit=50&offset=0",
+  "200 pim/employees/7/subordinates?limit=50&offset=0"
+ ],
+ "U096": [
+  "200 pim/employees/7",
+  "200 pim/employees/7/languages?limit=50&offset=0",
+  "200 pim/employees/7/work-experiences?limit=50&offset=0",
+  "200 pim/employees/7/skills?limit=50&offset=0",
+  "200 pim/employees/7/educations?limit=50&offset=0",
+  "200 pim/employees/7/custom-fields?screen=qualifications",
+  "200 pim/employees/7/licenses?limit=50&offset=0",
+  "200 pim/employees/7/screen/qualifications/attachments?limit=50&offset=0"
+ ],
+ "U097": [
+  "200 pim/employees/7/memberships?limit=50&offset=0",
+  "200 pim/employees/7/screen/membership/attachments?limit=50&offset=0",
+  "200 pim/employees/7/custom-fields?screen=membership",
+  "200 pim/employees/7"
+ ],
+ "U099": [
+  "200 pim/employees/7"
+ ],
+ "U100": [
+  "200 recruitment/candidates/83",
+  "200 recruitment/candidates/83/actions/allowed",
+  "200 leave/workweek?model=indexed",
+  "200 recruitment/candidates/83/history?limit=50&offset=0",
+  "200 recruitment/vacancies?model=summary&limit=0&status=true&excludeInterviewers=true",
+  "200 leave/holidays?fromDate=2026-01-01&toDate=2026-12-31"
+ ],
+ "U104": [
+  "200 performance/employees/trackers/12",
+  "200 performance/trackers/12/logs?limit=10&offset=0"
+ ],
+ "U105": [
+  "200 claim/requests/3/expenses?limit=50&offset=0",
+  "200 claim/requests/3/attachments?limit=50&offset=0",
+  "200 claim/requests/3"
+ ],
+ "U106": [
+  "200 time/timesheets/266/entries"
+ ]
+}

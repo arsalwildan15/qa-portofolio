@@ -21,8 +21,13 @@ export interface PageUnit {
   url: string | ((page: Page) => Promise<string | null>);
 }
 
-const api = async (page: Page, path: string): Promise<any> =>
-  (await page.request.get(`/web/index.php/api/v2/${path}`)).json().catch(() => null);
+type ApiRow = { id: number; overallStatus?: { statusId?: number } };
+/** Rows of a list endpoint (read-only), [] when the call fails. */
+const apiList = async (page: Page, path: string): Promise<ApiRow[]> =>
+  ((await (await page.request.get(`/web/index.php/api/v2/${path}`)).json().catch(() => null)) as { data?: ApiRow[] } | null)?.data ?? [];
+/** `data.id` of a single-object endpoint (read-only), null when absent. */
+const apiObjectId = async (page: Page, path: string): Promise<number | null> =>
+  ((await (await page.request.get(`/web/index.php/api/v2/${path}`)).json().catch(() => null)) as { data?: { id?: number } } | null)?.data?.id ?? null;
 
 /** empNumber of the logged-in user: pim/viewMyDetails redirects to .../empNumber/<n> (read-only). */
 const me = async (page: Page): Promise<number | null> => {
@@ -125,20 +130,20 @@ export const PAGE_UNITS: PageUnit[] = [
   { id: 'U097', path: 'PIM > Employee > Memberships', access: 'admin', url: async (p) => `pim/viewMemberships/empNumber/${await me(p)}` },
   { id: 'U099', path: 'PIM > Employee > Profile Picture', access: 'admin', url: async (p) => `pim/viewPhotograph/empNumber/${await me(p)}` },
   { id: 'U100', path: 'Recruitment > Candidate Detail & Status Workflow', access: 'admin', url: async (p) => {
-    const id = (await api(p, 'recruitment/candidates?limit=1&offset=0'))?.data?.[0]?.id; return id ? `recruitment/addCandidate/${id}` : null; } },
+    const id = (await apiList(p, 'recruitment/candidates?limit=1&offset=0'))[0]?.id; return id ? `recruitment/addCandidate/${id}` : null; } },
   { id: 'U101', path: 'Recruitment > Vacancy Detail & Attachments', access: 'admin', url: async (p) => {
-    const id = (await api(p, 'recruitment/vacancies?limit=1&offset=0'))?.data?.[0]?.id; return id ? `recruitment/addJobVacancy/${id}` : null; } },
+    const id = (await apiList(p, 'recruitment/vacancies?limit=1&offset=0'))[0]?.id; return id ? `recruitment/addJobVacancy/${id}` : null; } },
   { id: 'U102', path: 'Performance > Review Evaluation (Admin/Supervisor)', access: 'admin', url: async (p) => {
-    const rows = (await api(p, 'performance/manage/reviews?limit=50&offset=0'))?.data ?? [];
-    const r = rows.find((x: { overallStatus?: { statusId?: number } }) => [2, 3, 4].includes(x.overallStatus?.statusId ?? 0));
+    const rows = await apiList(p, 'performance/manage/reviews?limit=50&offset=0');
+    const r = rows.find((x) => [2, 3, 4].includes(x.overallStatus?.statusId ?? 0));
     return r ? `performance/reviewEvaluateByAdmin/${r.id}` : null; } },
   { id: 'U104', path: 'Performance > Tracker Logs', access: 'admin', url: async (p) => {
-    const id = (await api(p, 'performance/config/trackers?limit=1&offset=0'))?.data?.[0]?.id; return id ? `performance/addPerformanceTrackerLog/trackId/${id}` : null; } },
+    const id = (await apiList(p, 'performance/config/trackers?limit=1&offset=0'))[0]?.id; return id ? `performance/addPerformanceTrackerLog/trackId/${id}` : null; } },
   { id: 'U105', path: 'Claim > Claim Detail (expenses, attachments, actions)', access: 'admin', url: async (p) => {
-    const id = (await api(p, 'claim/employees/requests?limit=1&offset=0'))?.data?.[0]?.id; return id ? `claim/assignClaim/id/${id}` : null; } },
+    const id = (await apiList(p, 'claim/employees/requests?limit=1&offset=0'))[0]?.id; return id ? `claim/assignClaim/id/${id}` : null; } },
   { id: 'U106', path: 'Time > Timesheet Edit & Approval', access: 'all', url: async (p) => {
     await p.goto('/web/index.php/time/viewMyTimesheet'); // the visit creates the timesheet for a new user
-    const id = (await api(p, 'time/timesheets/default'))?.data?.id; return id ? `time/editTimesheet/${id}` : null; } },
+    const id = await apiObjectId(p, 'time/timesheets/default'); return id ? `time/editTimesheet/${id}` : null; } },
 ];
 
 export async function resolveUnitUrl(page: Page, unit: PageUnit): Promise<string | null> {

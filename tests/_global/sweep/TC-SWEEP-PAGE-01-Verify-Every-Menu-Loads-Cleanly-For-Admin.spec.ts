@@ -27,23 +27,14 @@
  * ================================================================================
  */
 
-import { type Page, type Request, type Response } from '@playwright/test';
+import { type Request, type Response } from '@playwright/test';
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { PAGE_UNITS, resolveUnitUrl } from '../../../src/data/unitRegistry';
+import { passAdminAccessGate } from '../../../src/utils/adminAccessGate';
 
 const LOAD_SANITY_MS = 20_000;
-
-/** Confirms the "Administrator Access" password prompt that guards Maintenance pages. */
-async function passAdminAccessGate(page: Page): Promise<void> {
-  const prompt = page.getByText('Administrator Access');
-  if (await prompt.isVisible().catch(() => false)) {
-    await page.locator('input[type="password"]').fill(env.password);
-    await page.getByRole('button', { name: 'Confirm' }).click();
-    await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {});
-  }
-}
 
 test('TC-SWEEP-PAGE-01: every menu page loads cleanly for the Admin role', async ({ page }, testInfo) => {
   testInfo.setTimeout(PAGE_UNITS.length * 30_000);
@@ -75,6 +66,9 @@ test('TC-SWEEP-PAGE-01: every menu page loads cleanly for the Admin role', async
       continue;
     }
     report.step(`${tag} ${url}`);
+    // A resolver may have opened a helper page; let it settle so its requests are not cancelled
+    // mid-flight and blamed on this unit (see TC-SWEEP-XBROWSER-01 root cause).
+    await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {});
     consoleErrors = []; warnings = []; failedXhr = []; missingAssets = [];
     const started = Date.now();
     await page.goto(url).catch(() => {});

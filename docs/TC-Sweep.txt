@@ -100,12 +100,117 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              lain -> kerangka halaman kosong "No Records Found"
                              tanpa data. ROOT CAUSE run pertama (11 gagal):
                              kriteria TC terlalu sempit (menganggap "tidak
-                             dialihkan" = bocor). Dibuktikan via API sbg ESS:
-                             pim/employees/<orang lain>/* -> 422 "Invalid
-                             Parameter", PUT -> 404, data sendiri -> 200.
+                             dialihkan" = bocor). Dibuktikan via API sbg ESS
+                             (path endpoint diambil dari inventaris API live;
+                             catatan: Contact Details memakai path TUNGGAL
+                             pim/employee/<id>/contact-details): baca data
+                             karyawan lain (personal, contact, emergency,
+                             dependents, immigration, job, salary, report-to,
+                             qualifications, memberships, custom fields,
+                             attachments) -> 422 "Invalid Parameter"; PUT
+                             contact-details karyawan lain -> 422 & data korban
+                             TETAP; data sendiri -> 200.
                              [TEMUAN] penolakan PIM memakai 422, bukan 403 spt
                              modul lain (taksonomi 6.1) & tanpa pesan "akses
                              ditolak" di UI -> dicatat finding, bukan bug.
+
+ 4   TC-SWEEP-VIEW-01  [DONE]  TC-SWEEP-VIEW-01-Verify-Every-Menu-Fits-Mobile-And-Tablet-Width.spec.ts
+                             (+) 8.1
+                             Verify Every Menu Page Fits Phone And Tablet Widths
+                             Without Horizontal Scrolling
+                             -> Context baru dgn sesi Admin di 2 lebar: ponsel
+                                375x812 (isMobile + touch) & tablet 768x1024.
+                             -> Per unit: buka URL (gerbang password
+                                Maintenance dilewati via util adminAccessGate).
+                             [VERIFICATION per unit x lebar]
+                             -> 8.1 scrollWidth <= lebar layar (tanpa scroll
+                                horizontal halaman); elemen yg melewati layar
+                                dicatat sbg finding.
+                             -> 8.1 navigasi bisa DIPAKAI: item menu adalah
+                                elemen teratas di titik tengahnya
+                                (elementFromPoint), langsung atau setelah tap
+                                hamburger (i.bi-list).
+                             -> 8.1 area konten berisi.
+                             HASIL 15 Nov 2026: 571/571 lolos; navigasi via
+                             hamburger terverifikasi 190x. Bug SCRIPT yg
+                             ditemukan & diperbaiki selama pengembangan:
+                             (1) selector hamburger salah; (2) isVisible() &
+                             boundingBox() menganggap item sidebar yg terpotong
+                             sbg tampil -> diganti elementFromPoint; (3) halaman
+                             Purge tampak kosong di ponsel -> dibuktikan BUKAN
+                             bug (login segar + tunggu: 212 node di semua
+                             lebar); penyebab: networkidle tercapai sebelum
+                             SPA me-render stlh Confirm -> util gerbang kini
+                             menunggu konten & menu.
+
+ 5   TC-SWEEP-A11Y-01  [DONE]  TC-SWEEP-A11Y-01-Verify-Interactive-Elements-Have-Accessible-Names.spec.ts
+                             (+) 8.3
+                             Verify Interactive Elements On Every Menu Have
+                             Accessible Names
+                             -> Per unit (sesi Admin), elemen yg TAMPIL.
+                             [VERIFICATION per unit]
+                             -> 8.3 input/select/textarea punya nama aksesibel
+                                (aria-label, aria-labelledby, label for/
+                                pembungkus, title; placeholder TIDAK dihitung).
+                             -> 8.3 button/link punya nama (teks, aria-label,
+                                aria-labelledby, title, atau alt/aria-label
+                                elemen anak).
+                             -> 8.3 <img> punya alt.
+                             HASIL 15 Nov 2026: cacat sistemik app-wide -> BUG
+                             BG-416 (Medium): input tanpa label terprogram di
+                             96 halaman (termasuk kotak Search sidebar), tombol
+                             ikon tanpa nama di 93 halaman (collapse sidebar,
+                             ikon edit/hapus tabel, ikon timesheet), foto Buzz
+                             tanpa alt. TC sengaja FAILED. False positive yg
+                             diperbaiki: link logo (nama sah dari alt gambar
+                             anak). Audit WCAG penuh dgn axe-core belum: pemasangan
+                             paket belum diizinkan di lingkungan ini.
+
+ 6   TC-SWEEP-XBROWSER-01  [DONE]  TC-SWEEP-XBROWSER-01-Verify-Every-Menu-Loads-In-Firefox-And-WebKit.spec.ts
+                             (+) 8.2 | 1.5 | 7.1
+                             Verify Every Menu Page Loads Cleanly In Firefox And
+                             WebKit (Safari Engine)
+                             -> Firefox & WebKit diluncurkan dari test, login
+                                Admin lewat form Login sungguhan.
+                             -> Per browser x unit: buka URL (halaman perantara
+                                resolver dibiarkan selesai dulu).
+                             [VERIFICATION per browser x unit]
+                             -> 8.2/1.5 halaman termuat & berisi.
+                             -> 8.2/7.1 tanpa console error / uncaught exception.
+                             HASIL 15 Nov 2026: 382/383 lolos. Satu-satunya
+                             gagal = U093 tab Job di WebKit = BG-414 yg sama dgn
+                             Chromium (Firefox tidak mencatat resource gagal sbg
+                             console error -> beda cara log, bukan beda app).
+                             Kesimpulan 8.2: tidak ada bug spesifik browser.
+                             ROOT CAUSE run pertama (14 gagal): TC sendiri --
+                             resolver URL membuka halaman perantara lalu goto
+                             berikutnya membatalkan request-nya; WebKit
+                             melaporkan request batal sbg "due to access control
+                             checks", Firefox "t is undefined". Dibuktikan:
+                             menunggu halaman perantara selesai -> hilang.
+
+ 7   TC-SWEEP-API-01  [DONE]  TC-SWEEP-API-01-Verify-List-And-Detail-API-Contract-Per-Menu.spec.ts
+                             (A) 6.1 6.2 6.3 6.4 6.6 | (S) 5.8 | (-) 2.6
+                             Verify Each Menu's List/Detail API: Contract, Auth,
+                             Method, Paging, Sensitive Data, Unknown Id
+                             -> Endpoint per unit = request yg BENAR-BENAR
+                                dikirim halaman menu (inventaris live
+                                tools/coverage/api-discovery.json, registry
+                                src/data/unitApiRegistry.ts, 47 unit).
+                             [API VERIFICATION per unit]
+                             -> 6.1/6.2 GET list -> 200 + data[] & meta.total.
+                             -> 6.4 tanpa sesi -> 401 persis, tanpa data.
+                             -> 6.3 PATCH -> 405 persis.
+                             -> 6.6 limit=-1 / limit=abc / offset=-5 (& sortOrder
+                                / sortField invalid bila halaman memakai sort)
+                                -> 422 persis.
+                             -> 5.8 tidak ada field password/hash/secret/token/
+                                salt di respons.
+                             -> 2.6 kontrol id nyata -> 200, lalu id 999999 ->
+                                404/422 (bukan 2xx/5xx).
+                             HASIL 15 Nov 2026: 453/453 lolos (2 unit dilewati
+                             krn list kosong -> tanpa id kontrol). [TEMUAN
+                             POSITIF] lapisan API konsisten di semua menu.
 
   RUN COMMAND:
     npx playwright test tests/_global/sweep --project=chromium --workers=1
