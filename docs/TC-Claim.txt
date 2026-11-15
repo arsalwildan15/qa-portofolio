@@ -1,0 +1,750 @@
+================================================================================
+  DAFTAR TEST CASE, CLAIM
+  Modul    : Claim (Assign Claim, Submit Claim ESS, Approval, Configuration
+             Events)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/claim/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+  [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+
+  FORMAT ID  : TC-CLAIM-<SECTION>-NN
+               (SECTION = ASSIGN | SUBMIT | APPROVAL | CONFIG-EVENT)
+  FILE       : TC-CLAIM-<SECTION>-NN-Verify-Name-In-English.spec.ts
+  FOLDER     : tests/claim/assign/   (Admin: Assign Claim, expense,
+                                      attachment, akses API, state/edge
+                                      case klaim milik akun login)
+               tests/claim/submit/   (ESS: Submit Claim lewat akun ESS
+                                      sungguhan)
+               tests/claim/approval/ (cross-role: Admin Approve/Reject
+                                      klaim milik ESS)
+               tests/claim/config/   (Configuration > Events)
+               [CATATAN] Folder submit/approval/config dibuat di Fase 2
+               (P2.2 lapis 1, 15 Nov 2026) setelah tersedia infra akun ESS
+               (createEssAccount + loginAs, Fase 1). TC ASSIGN-08 & 13
+               sebenarnya menguji route Submit Claim, tapi dipertahankan di
+               folder assign/ dgn ID lama agar riwayat Bug-List/commit tetap
+               terhubung.
+
+================================================================================
+  FUNGSI & IMPACT MODUL, CLAIM
+================================================================================
+
+  Claim adalah modul reimbursement biaya karyawan OrangeHRM: karyawan (ESS)
+  membuat klaim (Event + Currency + Remarks), menambah baris expense
+  (Expense Type, Date, Amount, Note) dan lampiran bukti, lalu men-Submit.
+  Admin memeriksa klaim SUBMITTED dan memutuskan Approve atau Reject. Admin
+  juga bisa membuat klaim atas nama employee lain (Assign Claim) dan
+  mengatur master data Event di Configuration.
+
+  IMPACT kalau ada validation gap di sini bersifat FINANSIAL, bukan cuma
+  data sampah: di demo ini Approve langsung memindahkan klaim ke status
+  PAID (uang dianggap sudah dibayar). Celah pada state machine (klaim yang
+  sudah dibatalkan/ditolak bisa di-approve), segregation of duties (pemilik
+  klaim meng-approve klaimnya sendiri), IDOR (membaca klaim karyawan lain),
+  atau validasi nominal/lampiran yang longgar langsung berarti risiko
+  pembayaran yang tidak sah atau kebocoran data keuangan karyawan.
+
+================================================================================
+  CATATAN TEKNIS, CLAIM
+  Dikonfirmasi via Playwright discovery run live terhadap OrangeHRM OS 5.9
+  (eksplorasi 14 Nov 2026 + eksplorasi ulang P2.2 15 Nov 2026)
+================================================================================
+
+  URL (CONFIRMED):
+    Assign Claim (Admin, form create)  : /web/index.php/claim/assignClaim
+    Detail klaim (sisi Admin)          : /web/index.php/claim/assignClaim/id/<id>
+    Employee Claims (daftar Admin)     : /web/index.php/claim/viewAssignClaim
+    Submit Claim (ESS, form create)    : /web/index.php/claim/submitClaim
+    Detail klaim (sisi pemilik/ESS)    : /web/index.php/claim/submitClaim/id/<id>
+    Configuration > Events (daftar)    : /web/index.php/claim/viewEvents
+    Configuration > Events (Add form)  : /web/index.php/claim/saveEvents
+  Framework  : Vue 3 + OXD Design System (oxd-* components)
+
+  LOCATORS (CONFIRMED, src/pages/AssignClaimPage.ts, SubmitClaimPage.ts,
+  ClaimEventsPage.ts):
+    Employee Name (autocomplete) : page.getByPlaceholder('Type for hints...')
+                                   lalu klik '.oxd-autocomplete-option' pertama
+                                   setelah teks "Searching...." hilang
+    Event select                 : page.locator('.oxd-select-text').first()
+    Currency select              : page.locator('.oxd-select-text').nth(1)
+                                   (dipilih per index, bukan nama -- nama
+                                   currency adalah data locale, tidak stabil
+                                   untuk di-hardcode)
+    Remarks                      : page.locator('textarea')
+    Tombol Create                : page.getByRole('button', { name: 'Create' })
+    Tombol Add Expense           : page.getByRole('button', { name: 'Add' }).first()
+                                   [TEMUAN] Halaman detail punya DUA tombol
+                                   "Add": pertama = Expenses, kedua (nth(1))
+                                   = Attachments.
+    Dialog Add Expense           : '.oxd-dialog-container, [role="dialog"]'.last()
+                                   [TEMUAN] Dialog hanya punya 2 <input> polos
+                                   (Date lalu Amount, urutan DOM) + 1
+                                   <textarea> Note. Amount tidak punya
+                                   placeholder/name pembeda, jadi diakses
+                                   posisional (inputs.nth(1)). Format tanggal
+                                   yang dipakai suite: yyyy-dd-mm (mis.
+                                   2026-30-11).
+    File input lampiran          : page.locator('input[type="file"]')
+    Tombol aksi detail klaim     : page.getByRole('button', { name: 'Approve' |
+                                   'Reject' | 'Submit' | 'Cancel', exact: true })
+                                   (helper AssignClaimPage.clickAction())
+    Event Name (Add Event)       : '.oxd-input-group' yang berisi teks
+                                   "Event Name" -> input
+    Active toggle (Add Event)    : page.locator('.oxd-switch-input')
+                                   (default: ON / Active)
+    Pesan error field Event      : page.locator('.oxd-input-field-error-message')
+    Baris tabel Events           : page.locator('.oxd-table-card')
+
+  API ENDPOINT (CONFIRMED):
+    POST /api/v2/claim/employees/<empNumber>/requests
+         , Admin membuat klaim untuk employee (Assign Claim)
+           Body: {claimEventId, currencyId, remarks}
+           Response: {"data":{"id":N,"referenceId":"...","status":"INITIATED",...}}
+           [TEMUAN] Bukan collection datar "employee-claims".
+    POST /api/v2/claim/requests
+         , ESS membuat klaim MILIK SENDIRI (Submit Claim)
+    GET  /api/v2/claim/requests/<id>
+         , endpoint DATAR, ber-scope ke klaim milik akun login. Klaim milik
+           employee lain -> 403 walaupun yang login Admin. Berisi
+           meta.allowedActions.
+    GET  /api/v2/claim/employees/<empNumber>/requests/<id>
+         , endpoint BER-SCOPE yang dipakai UI Employee Claims; Admin boleh
+           membaca klaim employee lain lewat sini (by design).
+    GET  /api/v2/claim/employees/requests?limit=..&offset=..&includeEmployees=onlyCurrent
+         , daftar klaim (dipakai ASSIGN-04/08/13 untuk mencari klaim)
+    PUT  /api/v2/claim/requests/<id>/action
+         , Body: {"action": "SUBMIT" | "CANCEL" | "APPROVE" | "REJECT"}
+    POST /api/v2/claim/requests/<id>/expenses
+         , Body: {expenseTypeId, date, amount, note}
+    GET  /api/v2/claim/requests/<id>/expenses
+         , meta.total (jumlah baris), meta.totalAmount (total nominal)
+    POST /api/v2/claim/requests/<id>/attachments
+         , upload lampiran klaim
+    POST /api/v2/claim/events
+         , Body: {name, description, status} (status boolean = Active)
+
+  STATE MACHINE & HAK AKSI (CONFIRMED live 15 Nov 2026):
+    INITIATED --Submit--> SUBMITTED --Approve--> PAID
+                                    --Reject---> REJECTED
+                                    --Cancel---> CANCELLED (oleh pemilik)
+    [TEMUAN] Admin "Approve" LANGSUNG memindahkan klaim SUBMITTED ke PAID.
+    TIDAK ADA langkah "Pay" terpisah (rencana awal "Approve -> Pay" keliru).
+    meta.allowedActions:
+      - ESS atas klaim SUBMITTED miliknya  = [CANCEL]
+      - Admin atas klaim SUBMITTED milik ESS = [APPROVE, REJECT]
+      - Pemilik klaim (termasuk Admin atas klaimnya sendiri) TIDAK PERNAH
+        mendapat APPROVE/REJECT/PAY
+      - State terminal (PAID / REJECTED / CANCELLED) = [] dan aksi lanjutan
+        apa pun via API ditolak 403
+    [TEMUAN, KOREKSI 15 Nov 2026] Klaim yang di-Assign lalu di-Submit oleh
+    Admin langsung berstatus PAID (melewati approval), sedangkan klaim yang
+    diajukan ESS sendiri melewati alur approval normal.
+
+  PERILAKU PENTING:
+    - [TEMUAN] Halaman detail Admin TIDAK me-refresh tombolnya setelah
+      Approve: tombol Approve/Reject tetap tampil walau klaim sudah PAID
+      (lihat TC-CLAIM-APPROVAL-05 / BG-374).
+    - [TEMUAN] page.goto() ke URL yang SAMA adalah no-op di SPA ini (router
+      tidak re-fetch kalau route tidak berubah). Setelah menyimpan expense,
+      tabel Expenses baru akurat setelah page.reload() penuh.
+    - [TEMUAN] Tombol Cancel klaim hanya ada di route /claim/submitClaim/id/
+      <id>. Untuk klaim milik akun login, route admin /claim/assignClaim/id/
+      <id> menjadi READ-ONLY total begitu status SUBMITTED.
+    - [TEMUAN] Form Add Expense menampilkan loading overlay
+      (.oxd-form-loader) segera setelah klik Save, yang memblokir klik
+      kedua (proteksi double-submit bekerja).
+    - [TEMUAN] Event NON-aktif tidak ditawarkan di dropdown Event form
+      Submit Claim milik ESS.
+    - [TEMUAN] Membuat klaim untuk empNumber=7 (akun admin yang dipakai
+      berulang di demo publik ini) bisa hang/timeout karena volume data;
+      TC ASSIGN memakai helper pickLightlyUsedEmployee() untuk memilih
+      employee yang datanya ringan.
+
+  INFRA CROSS-ROLE (Fase 1, dipakai TC SUBMIT/APPROVAL/CONFIG):
+    createEssAccount() : membuat employee baru via PIM Add Employee dengan
+                         toggle "Create Login Details" -> user yang terbentuk
+                         SELALU ber-role ESS (dikonfirmasi via GET
+                         /api/v2/admin/users).
+    loginAs()          : login di browser context TERPISAH (cookie/sesi
+                         sendiri), sehingga satu test bisa menjalankan Admin
+                         dan ESS sekaligus.
+    createEssClaim()   : setup via API ESS (bukan objek uji): POST
+                         claim/requests {claimEventId:1, currencyId:"AFN"},
+                         opsional POST expenses {expenseTypeId:1, amount
+                         "150.50"}, opsional PUT action {SUBMIT}.
+
+================================================================================
+  TEST CASES
+================================================================================
+
+No.  Test Case ID   Status   Skenario / Deskripsi
+---  -------------  -------  -----------------------------------------------
+
+================================================================================
+  GROUP 1, ASSIGN CLAIM (ADMIN), POSITIVE CASES
+================================================================================
+
+ 1   TC-CLAIM-ASSIGN-01  [DONE]  TC-CLAIM-ASSIGN-01-Verify-Create-Claim-Valid.spec.ts
+                             (+) Verify Creating A Claim Request With Valid
+                             Data Succeeds
+                             -> Pilih employee (pickLightlyUsedEmployee),
+                                Event "Travel Allowance", Currency index 1,
+                                klik Create.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/claim/employees/
+                                <empNumber>/requests status === 200.
+                             [UI VERIFICATION]
+                             -> Buka /claim/viewAssignClaim, verify
+                                referenceId klaim baru muncul di daftar.
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+ 2   TC-CLAIM-ASSIGN-03  [DONE]  TC-CLAIM-ASSIGN-03-Verify-Add-Expense-Line-Item.spec.ts
+                             (+) Verify Adding An Expense Line Item To A
+                             Claim Succeeds
+                             -> Buat klaim baru, buka detail
+                                /claim/assignClaim/id/<id>.
+                             -> Add Expense: Accommodation, tanggal
+                                2026-30-11, amount 500, note "Taxi receipt".
+                             [API VERIFICATION]
+                             -> Verify POST requests/<id>/expenses status
+                                === 200 dan response amount === 500.
+                             [UI VERIFICATION]
+                             -> page.reload(), verify baris "Accommodation"
+                                + 500 muncul di tabel Expenses.
+                             -> Verify Total Amount terupdate ke 500.00
+                                (bukan lagi 0.00).
+                             NOTE [BUG SCRIPT ditemukan & diperbaiki]:
+                             goto() ke URL yang sama tidak me-refresh tabel
+                             (no-op SPA), diganti page.reload().
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+ 3   TC-CLAIM-ASSIGN-08  [DONE]  TC-CLAIM-ASSIGN-08-Verify-Cancel-Submitted-Claim.spec.ts
+                             (+) Verify Cancelling A SUBMITTED Claim
+                             Transitions It To CANCELLED
+                             -> [API] Cari klaim berstatus SUBMITTED milik
+                                akun login dari seed data yang sudah ada.
+                             -> Buka /claim/submitClaim/id/<id>, klik
+                                Cancel.
+                             [API VERIFICATION]
+                             -> Verify PUT requests/<id>/action status ===
+                                200.
+                             -> Verify GET requests/<id>: status ===
+                                CANCELLED, allowedActions kosong (terminal).
+                             NOTE: TC memakai seed data (bukan klaim baru)
+                             karena create klaim untuk empNumber=7 tidak
+                             reliable. Kalau seed SUBMITTED sudah habis, TC
+                             mencatat report.finding() dan lolos dengan
+                             observasi, bukan exception.
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+================================================================================
+  GROUP 2, ASSIGN CLAIM (ADMIN), NEGATIVE / BOUNDARY
+================================================================================
+
+ 4   TC-CLAIM-ASSIGN-05  [DONE]  TC-CLAIM-ASSIGN-05-Verify-Required-Field-Validation.spec.ts
+                             (-) Verify Required Field Validation On Create
+                             Claim Request
+                             -> Buka form Assign Claim, langsung klik Create
+                                tanpa mengisi apa pun.
+                             [API VERIFICATION]
+                             -> Verify TIDAK ada POST /api/v2/claim/
+                                terkirim.
+                             [UI VERIFICATION]
+                             -> Verify minimal 3 pesan "Required" muncul
+                                (Employee Name, Event, Currency).
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+ 5   TC-CLAIM-ASSIGN-06  [DONE]  TC-CLAIM-ASSIGN-06-Verify-Expense-Amount-Boundary.spec.ts
+                             (B) Verify Expense Amount Boundary (Negative,
+                             Zero)
+                             -> Buat klaim baru, buka detail.
+                             -> Add Expense dengan amount -100.
+                             -> Reload, Add Expense dengan amount 0.
+                             [API VERIFICATION]
+                             -> Amount -100: verify TIDAK ada POST expenses
+                                terkirim (diblokir client-side, field Amount
+                                menolak karakter "-").
+                             -> Amount 0: verify POST terkirim dan ditolak
+                                server 422, invalidParamKeys berisi
+                                "amount".
+                             [UI VERIFICATION]
+                             -> Toast "Error / Invalid Parameter" tampil,
+                                halaman tetap interaktif.
+                             NOTE: hanya log browser "Failed to load
+                             resource ... 422" yang di-whitelist (penolakan
+                             server yang benar); pageerror TIDAK
+                             di-whitelist.
+                             STATUS AKTUAL: GAGAL (BUG, lihat Bug-List
+                             BG-333) -> saat server menolak amount=0,
+                             frontend melempar uncaught exception minified
+                             ("fe") ke console di balik layar walau toast
+                             error ke user benar. Medium, konfirmasi bug
+                             app-wide BG-199 (unhandled exception pada
+                             response non-2xx) di modul Claim.
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+================================================================================
+  GROUP 3, ASSIGN CLAIM (ADMIN), SECURITY
+================================================================================
+
+ 6   TC-CLAIM-ASSIGN-02  [DONE]  TC-CLAIM-ASSIGN-02-Verify-XSS-In-Remarks.spec.ts
+                             (S) Verify XSS Payload In Claim Remarks Does
+                             Not Execute
+                             -> Buat klaim (Event "Medical Reimbursement")
+                                dengan Remarks
+                                <script>window.__xssClaimRemarks=true</script>.
+                             [API VERIFICATION]
+                             -> Verify POST create status === 200 (payload
+                                diterima sebagai string literal).
+                             [UI VERIFICATION]
+                             -> Verify window.__xssClaimRemarks TIDAK
+                                ter-set (script tidak tereksekusi).
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+ 7   TC-CLAIM-ASSIGN-04  [DONE]  TC-CLAIM-ASSIGN-04-Verify-Approve-Reject-NA-For-Single-Account.spec.ts
+                             (S/-) Verify Owner Cannot Approve/Reject Their
+                             Own Claim (Segregation Of Duties)
+                             -> [API] Ambil semua klaim milik akun login
+                                (status apa pun) via GET claim/employees/
+                                requests, filter empNumber akun login.
+                             -> [API] Untuk setiap klaim, GET
+                                requests/<id> dan baca meta.allowedActions.
+                             [API VERIFICATION]
+                             -> Verify ditemukan minimal 1 klaim milik
+                                akun login.
+                             -> Verify TIDAK ada satu pun klaim milik
+                                sendiri yang menawarkan APPROVE/REJECT/PAY
+                                ke pemiliknya.
+                             NOTE [KOREKSI 15 Nov 2026, P0.4 Fase 0]: versi
+                             lama menyimpulkan "Approve/Reject N/A untuk
+                             suite single-account" -- terlalu luas. Yang
+                             terbukti hanya pemilik tidak bisa approve
+                             klaim SENDIRI; alur approval klaim ESS diuji
+                             terpisah di CLAIM-APPROVAL-*. Nama file lama
+                             dipertahankan agar riwayat Bug-List/commit
+                             tetap terhubung.
+                             NOTE: tidak termasuk regresi 15 Nov 2026
+                             (versi revisi diverifikasi 3x stabil saat
+                             P0.4).
+
+ 8   TC-CLAIM-ASSIGN-07  [DONE]  TC-CLAIM-ASSIGN-07-Verify-SQLi-In-Remarks.spec.ts
+                             (S) Verify SQL Injection Payload In Claim
+                             Remarks Does Not Execute
+                             -> Buat klaim dengan Remarks
+                                ' OR '1'='1'; DROP TABLE ohrm_claim_request; --
+                             [API VERIFICATION]
+                             -> Verify POST create status === 200.
+                             -> Verify response remarks === payload literal
+                                (tidak dieksekusi sebagai SQL).
+                             [UI VERIFICATION]
+                             -> Buka /claim/viewAssignClaim: verify tidak
+                                ada DB error leak (SQLSTATE, mysql_, syntax
+                                error), daftar masih menampilkan "Records
+                                Found" (tidak crash).
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+ 9   TC-CLAIM-ASSIGN-09  [DONE]  TC-CLAIM-ASSIGN-09-Verify-IDOR-Claim-Requests.spec.ts
+                             (S) Verify IDOR Behavior On Claim Requests
+                             Endpoints
+                             -> Buat klaim baru milik employee lain (A).
+                                Employee B = akun login.
+                             [API VERIFICATION]
+                             -> GET /claim/requests/<id> (endpoint datar)
+                                untuk klaim A -> verify 403.
+                             -> GET /claim/employees/<empA>/requests/<id>
+                                (scoped, empNumber benar) -> verify 200,
+                                response hanya berisi data+meta+rels.
+                             -> IDOR path mismatch: klaim A diminta di
+                                bawah /claim/employees/<empB>/requests/<id>
+                                -> verify BUKAN 200.
+                             -> ID "999999", "-1", "abc" -> verify ditolak
+                                aman (400/404, bukan 500).
+                             -> Context baru tanpa sesi login -> verify
+                                bukan 200.
+                             NOTE [KOREKSI 15 Nov 2026, P0.4 Fase 0]: versi
+                             lama melabeli klaim #1 sebagai "milik employee
+                             lain" padahal milik akun login sendiri
+                             (empNumber 7), sehingga jalur klaim orang lain
+                             tidak pernah teruji. Ditulis ulang dengan klaim
+                             employee lain sungguhan.
+                             NOTE: tidak termasuk regresi 15 Nov 2026
+                             (versi revisi diverifikasi 3x stabil saat
+                             P0.4).
+
+10   TC-CLAIM-ASSIGN-10  [DONE]  TC-CLAIM-ASSIGN-10-Verify-File-Upload-Extension-Bypass.spec.ts
+                             (S) Verify File Upload Rejects Disguised
+                             Executable (Renamed Extension)
+                             -> Buat klaim baru, buka detail, section
+                                Attachments (tombol "Add" kedua).
+                             -> Upload malicious.php (ekstensi asli).
+                             -> Reload, upload malicious_renamed.jpg
+                                (payload PHP identik, ekstensi diganti).
+                             -> Reload, upload valid.txt (kontrol).
+                             [API VERIFICATION]
+                             -> .php langsung: verify TIDAK ada POST
+                                attachments (ditolak client-side).
+                             -> .php di-rename .jpg: SEHARUSNYA ditolak
+                                server (bukan 200).
+                             -> .txt valid: verify POST status === 200.
+                             STATUS AKTUAL: GAGAL (BUG, lihat Bug-List
+                             BG-338, High) -> .php yang di-rename .jpg
+                             diterima penuh (POST 200, fileType
+                             "image/jpeg" diambil dari ekstensi, bukan
+                             magic byte) dan bisa di-download kembali via
+                             UI. Severity dibatasi karena disajikan sebagai
+                             forced-download (bukan inline-execute), tapi
+                             validasi konten asli tidak ada sama sekali.
+                             NOTE: fixture di tests/fixtures/uploads/.
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+11   TC-CLAIM-ASSIGN-11  [DONE]  TC-CLAIM-ASSIGN-11-Verify-Mass-Assignment-Protection.spec.ts
+                             (S) Verify Mass Assignment Protection On Create
+                             Claim Request
+                             -> [API] Baseline: POST create claim
+                                {claimEventId:3, currencyId:"AFN"}.
+                             -> [API] POST create claim yang sama + field
+                                asing {"status":"APPROVED","id":99999}.
+                             [API VERIFICATION]
+                             -> Verify baseline status === 200.
+                             -> Verify request dengan field asing ditolak
+                                SELURUHNYA (422), bukan diam-diam sukses.
+                             -> Verify invalidParamKeys berisi "status" dan
+                                "id".
+                             NOTE: [TEMUAN POSITIF] validasi whitelist DTO
+                             ketat, tidak ada kerentanan mass assignment.
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+================================================================================
+  GROUP 4, ASSIGN CLAIM (ADMIN), UNEXPECTED / EDGE CASES
+================================================================================
+
+12   TC-CLAIM-ASSIGN-12  [DONE]  TC-CLAIM-ASSIGN-12-Verify-Double-Submit-Protection.spec.ts
+                             (!) Verify Double-Click Submit Does Not Create
+                             Duplicate Expense Rows
+                             -> Buat klaim baru, buka dialog Add Expense,
+                                isi Accommodation / 2026-30-11 / 100.
+                             -> Klik Save, lalu klik Save kedua secara
+                                cepat (tanpa force, perilaku klik wajar).
+                             [API VERIFICATION]
+                             -> Verify hanya 1 POST /expenses terkirim.
+                             -> Verify GET requests/<id>/expenses
+                                meta.total === 1 (tidak ada duplikat).
+                             NOTE: [TEMUAN POSITIF] loading overlay
+                             .oxd-form-loader muncul segera setelah klik
+                             pertama dan memblokir klik kedua.
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+13   TC-CLAIM-ASSIGN-13  [DONE]  TC-CLAIM-ASSIGN-13-Verify-Concurrent-Cancel-Race-Condition.spec.ts
+                             (!) Verify Concurrent Cancel Requests On The
+                             Same Claim Don't Double-Process
+                             -> [API] Cari klaim SUBMITTED milik akun login
+                                dari seed data.
+                             -> Buka /claim/submitClaim/id/<id> di 2
+                                browser context terpisah (cookie login
+                                sama).
+                             -> Klik Cancel di kedua sesi secara paralel
+                                (Promise.all).
+                             [API VERIFICATION]
+                             -> Verify TEPAT 1 response PUT action 200 dan
+                                1 ditolak (bukan 2x 200).
+                             -> Verify status akhir CANCELLED,
+                                allowedActions kosong.
+                             NOTE: [TEMUAN POSITIF] request kedua 403,
+                             server mengevaluasi ulang state saat request
+                             diproses, tidak ada double-cancel.
+                             NOTE: kalau seed SUBMITTED habis, TC mencatat
+                             report.finding() dan lolos dengan observasi.
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+14   TC-CLAIM-ASSIGN-14  [DONE]  TC-CLAIM-ASSIGN-14-Verify-Browser-Back-Forward-No-Resubmit.spec.ts
+                             (!) Verify Browser Back/Forward After Create
+                             Does Not Resubmit
+                             -> Buat klaim baru via Assign Claim.
+                             -> Klik browser Back, lalu browser Forward.
+                             [API VERIFICATION]
+                             -> Verify TIDAK ada POST create terkirim ulang
+                                setelah Back maupun Forward.
+                             [UI VERIFICATION]
+                             -> Verify URL kembali ke /claim/assignClaim.
+                             -> Verify form via Forward BERSIH (placeholder
+                                "-- Select --", bukan data lama).
+                             NOTE: [TEMUAN POSITIF] sukses Create tidak
+                             push history state baru (SPA single-route),
+                             jadi tidak ada state form basi untuk
+                             di-resubmit.
+                             NOTE: tidak termasuk regresi 15 Nov 2026.
+
+15   TC-CLAIM-ASSIGN-15  [CANCEL]  (file dihapus, P0.4 Fase 0, 15 Nov 2026)
+                             (!) Cross-User Edit Concurrency (2 Akun
+                             Berbeda) -- "N/A dibuktikan"
+                             -> Versi lama menyimpulkan N/A karena hanya
+                                ada 1 akun ber-role Admin di demo (14
+                                lainnya ESS).
+                             NOTE: dibatalkan karena "N/A" tersebut TIDAK
+                             terbukti: suite ini sendiri bisa membuat akun
+                             ESS/Admin baru kapan saja (createTestUser /
+                             createEssAccount), jadi skenario ini belum
+                             dicoba, bukan tidak mungkin. Direncanakan
+                             diganti TC cross-admin sungguhan
+                             (CLAIM-APPROVAL-06 / cross-admin concurrency,
+                             P2.2 lapis 2, belum dibuat).
+
+================================================================================
+  GROUP 5, SUBMIT CLAIM (ESS)
+================================================================================
+
+16   TC-CLAIM-SUBMIT-01  [DONE]  TC-CLAIM-SUBMIT-01-Verify-ESS-Create-Expense-Submit.spec.ts
+                             (+) Verify An ESS Employee Can Create A Claim,
+                             Add An Expense, And Submit It
+                             -> Setup: createEssAccount(), loginAs() di
+                                sesi terpisah.
+                             -> [ESS UI] /claim/submitClaim: Event
+                                "Accommodation", Currency index 1, Create.
+                             -> [ESS UI] Detail klaim, Add Expense
+                                Accommodation / 2026-07-07 / 150.50 /
+                                "Hotel 1 malam".
+                             -> [ESS UI] Klik Submit.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/claim/requests 200,
+                                status awal INITIATED.
+                             -> Verify POST expenses 200, GET expenses
+                                meta.totalAmount === 150.5.
+                             -> Verify PUT action 200 -> status SUBMITTED.
+                             -> Verify allowedActions sisi ESS ===
+                                [CANCEL].
+                             -> Verify allowedActions sisi Admin (GET
+                                scoped employees/<empNumber>/requests/<id>)
+                                === [APPROVE, REJECT].
+                             NOTE: PASS 2x pada regresi 15 Nov 2026.
+
+17   TC-CLAIM-SUBMIT-02  [DONE]  TC-CLAIM-SUBMIT-02-Verify-Submit-Without-Expense-Blocked.spec.ts
+                             (-) Verify A Claim With No Expenses Cannot Be
+                             Submitted (And Approved/Paid)
+                             -> Setup: createEssClaim() dengan klaim
+                                INITIATED TANPA expense ({submit:false}).
+                             -> [ESS UI] Buka detail klaim, klik Submit.
+                             -> [Admin API] Kalau lolos ter-submit: PUT
+                                action {APPROVE}.
+                             [API VERIFICATION]
+                             -> Verify klaim tanpa expense TIDAK berubah
+                                jadi SUBMITTED.
+                             -> (Kondisional) Verify klaim kosong TIDAK
+                                bisa di-Approve jadi PAID.
+                             STATUS AKTUAL: GAGAL (BUG, lihat Bug-List
+                             BG-375) -> Submit menerima klaim kosong
+                             (SUBMITTED, toast "Successfully Saved") dan
+                             Admin bisa meng-Approve-nya menjadi PAID
+                             dengan total 0. Low. Bisa jadi keputusan
+                             desain OrangeHRM, perlu konfirmasi product
+                             owner.
+                             NOTE: GAGAL konsisten 2x pada regresi 15 Nov
+                             2026 (sengaja, mendokumentasikan bug).
+
+================================================================================
+  GROUP 6, APPROVAL (CROSS-ROLE: ADMIN atas KLAIM ESS)
+================================================================================
+
+18   TC-CLAIM-APPROVAL-01  [DONE]  TC-CLAIM-APPROVAL-01-Verify-Admin-Approve-Pays-Claim.spec.ts
+                             (+) Verify Admin Approving An ESS Claim Moves
+                             It To PAID
+                             -> Setup: createEssClaim() -> klaim SUBMITTED
+                                (1 expense 150.50).
+                             -> [Admin UI] Buka /claim/assignClaim/id/<id>,
+                                klik Approve.
+                             [API VERIFICATION]
+                             -> Verify PUT action 200 dan status langsung
+                                PAID.
+                             -> Verify sisi Admin (GET scoped): PAID,
+                                allowedActions kosong.
+                             -> Verify sisi ESS (GET datar): PAID,
+                                allowedActions kosong (tidak bisa Cancel
+                                lagi).
+                             NOTE: tidak ada langkah "Pay" terpisah,
+                             Approve = PAID (lihat Catatan Teknis).
+                             NOTE: PASS 2x pada regresi 15 Nov 2026.
+
+19   TC-CLAIM-APPROVAL-02  [DONE]  TC-CLAIM-APPROVAL-02-Verify-Reject-Is-Terminal.spec.ts
+                             (+) Verify Rejecting An ESS Claim Is Terminal
+                             (Cannot Be Approved Afterward)
+                             -> Setup: createEssClaim() -> klaim SUBMITTED.
+                             -> [Admin UI] Buka detail klaim, klik Reject.
+                             -> [Admin API] PUT action {APPROVE} pada
+                                klaim yang sudah REJECTED.
+                             [API VERIFICATION]
+                             -> Verify Reject 200 -> status REJECTED.
+                             -> Verify ESS melihat REJECTED.
+                             -> Verify APPROVE setelah REJECT ditolak
+                                (bukan 200; confirmed live 403).
+                             -> Verify status tetap REJECTED.
+                             NOTE: PASS 2x pada regresi 15 Nov 2026.
+
+20   TC-CLAIM-APPROVAL-03  [DONE]  TC-CLAIM-APPROVAL-03-Verify-ESS-Cannot-Approve-Own-Claim.spec.ts
+                             (S) Verify An ESS Employee Cannot Approve Their
+                             Own Claim
+                             -> Setup: createEssClaim() -> klaim SUBMITTED.
+                             -> [ESS UI] Buka /claim/submitClaim/id/<id>.
+                             -> [ESS API] PUT action {APPROVE} pada klaim
+                                sendiri.
+                             [UI VERIFICATION]
+                             -> Verify halaman detail selesai dirender
+                                (anchor tombol Back) sebelum cek negatif.
+                             -> Verify tombol Approve TIDAK tampil untuk
+                                ESS.
+                             [API VERIFICATION]
+                             -> Verify APPROVE oleh pemilik ditolak (bukan
+                                200; confirmed live 403).
+                             -> Verify status tetap SUBMITTED.
+                             NOTE: melengkapi TC-CLAIM-ASSIGN-04 (sisi
+                             Admin atas klaimnya sendiri) dengan akun ESS
+                             sungguhan, segregation of duties (BFLAC).
+                             NOTE: PASS 2x pada regresi 15 Nov 2026.
+
+21   TC-CLAIM-APPROVAL-04  [DONE]  TC-CLAIM-APPROVAL-04-Verify-Approve-Cancelled-Claim-Rejected.spec.ts
+                             (-) Verify A Claim Cancelled By Its Owner
+                             Cannot Be Approved Via API
+                             -> Setup: createEssClaim() -> SUBMITTED, lalu
+                                [ESS API] PUT action {CANCEL}.
+                             -> [Admin UI] Buka detail klaim CANCELLED.
+                             -> [Admin API] PUT action {APPROVE}.
+                             [API VERIFICATION]
+                             -> Verify Cancel 200 -> status CANCELLED.
+                             -> Verify APPROVE klaim CANCELLED ditolak
+                                (bukan 200; confirmed live 403).
+                             -> Verify status tetap CANCELLED.
+                             [UI VERIFICATION]
+                             -> Verify detail selesai dirender (anchor
+                                tombol Back), tombol Approve TIDAK tampil.
+                             NOTE: memastikan klaim yang sudah dibatalkan
+                             karyawan tidak bisa "dibayar" diam-diam lewat
+                             API (state machine bypass).
+                             NOTE: PASS 2x pada regresi 15 Nov 2026.
+
+22   TC-CLAIM-APPROVAL-05  [DONE]  TC-CLAIM-APPROVAL-05-Verify-Stale-Reject-After-Approve.spec.ts
+                             (!) Verify A Stale "Reject" Button After
+                             Approve Cannot Undo A PAID Claim
+                             -> Setup: createEssClaim() -> klaim SUBMITTED.
+                             -> [Admin UI] Buka detail, klik Approve, TANPA
+                                reload halaman.
+                             -> [Admin UI] Klik tombol Reject yang masih
+                                tampil (basi).
+                             [API VERIFICATION]
+                             -> Verify Approve -> PAID.
+                             -> Verify Reject atas klaim PAID ditolak
+                                server (bukan 200).
+                             -> Verify status akhir tetap PAID.
+                             [UI VERIFICATION]
+                             -> report.finding(): tombol Reject masih
+                                tampil setelah Approve (UI tidak refresh).
+                             NOTE: log "Failed to load resource ... 4xx"
+                             di-whitelist (penolakan server memang yang
+                             diharapkan); pageerror TIDAK di-whitelist.
+                             STATUS AKTUAL: GAGAL (BUG, lihat Bug-List
+                             BG-374) -> server benar menolak (403) dan
+                             status tetap PAID, tapi UI melempar "Uncaught
+                             exception: fe" tanpa pesan apa pun ke user.
+                             Konfirmasi ke-6 bug app-wide BG-199.
+                             NOTE: GAGAL konsisten 2x pada regresi 15 Nov
+                             2026 (sengaja, mendokumentasikan bug).
+
+================================================================================
+  GROUP 7, CONFIGURATION (EVENTS)
+================================================================================
+
+23   TC-CLAIM-CONFIG-EVENT-01  [DONE]  TC-CLAIM-CONFIG-EVENT-01-Verify-Add-Event-Available-To-ESS.spec.ts
+                             (+) Verify A New Active Event Is Saved And
+                             Offered To ESS Employees
+                             -> [Admin UI] /claim/saveEvents: isi Event
+                                Name unik "QaEvent <timestamp>" (Active
+                                default), Save.
+                             -> [Admin UI] Buka /claim/viewEvents.
+                             -> Setup: createEssAccount(), loginAs().
+                             -> [ESS UI] /claim/submitClaim, buka dropdown
+                                Event.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/claim/events 200.
+                             -> Verify response status === true dan name
+                                === nama event.
+                             [UI VERIFICATION]
+                             -> Verify event baru ada di daftar Events.
+                             -> Verify event baru muncul di dropdown Event
+                                form Submit Claim ESS (efek konfigurasi
+                                lintas role, bukan cuma tersimpan).
+                             NOTE: PASS 2x pada regresi 15 Nov 2026.
+
+24   TC-CLAIM-CONFIG-EVENT-02  [DONE]  TC-CLAIM-CONFIG-EVENT-02-Verify-Required-And-Inactive-Event-Hidden.spec.ts
+                             (-) Verify Event Name Is Required And Inactive
+                             Events Are Not Offered
+                             -> [Admin UI] /claim/saveEvents, klik Save
+                                dengan form kosong.
+                             -> [Admin API, setup] POST claim/events: 1
+                                event NON-aktif "QaEventOff <stamp>"
+                                (status:false) + 1 event aktif pembanding
+                                "QaEventOn <stamp>" (status:true).
+                             -> Setup: createEssAccount(), loginAs().
+                             -> [ESS UI] /claim/submitClaim, buka dropdown
+                                Event.
+                             [API VERIFICATION]
+                             -> Verify form kosong TIDAK mengirim POST.
+                             -> Verify kedua event setup tersimpan (200).
+                             [UI VERIFICATION]
+                             -> Verify pesan "Required" muncul.
+                             -> Verify event NON-aktif TIDAK ditawarkan di
+                                dropdown ESS.
+                             -> Verify event aktif pembanding ditawarkan.
+                             NOTE: PASS 2x pada regresi 15 Nov 2026.
+
+================================================================================
+  RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
+================================================================================
+
+  Total TC         : 24 entri = 23 TC aktif + 1 [CANCEL]
+                     -> ASSIGN       : 14 aktif (01-14) + ASSIGN-15 [CANCEL]
+                     -> SUBMIT       : 2  (01-02)
+                     -> APPROVAL     : 5  (01-05)
+                     -> CONFIG-EVENT : 2  (01-02)
+
+  Batch regresi 15 Nov 2026 (P2.2 lapis 1, 9 TC baru, dijalankan 2x):
+  PASSED           : 7
+    -> TC-CLAIM-SUBMIT-01, TC-CLAIM-APPROVAL-01, 02, 03, 04,
+       TC-CLAIM-CONFIG-EVENT-01, 02
+  FAILED (BUG, sengaja, dikonfirmasi) : 2
+    -> TC-CLAIM-SUBMIT-02 (BG-375, klaim tanpa expense bisa di-Submit lalu
+       di-Approve menjadi PAID dengan total 0, Low, perlu konfirmasi
+       product owner apakah keputusan desain)
+    -> TC-CLAIM-APPROVAL-05 (BG-374, tombol Reject basi setelah Approve:
+       server benar 403 & status tetap PAID, tapi UI "Uncaught exception:
+       fe" tanpa pesan ke user, konfirmasi ke-6 app-wide BG-199)
+
+  TC ASSIGN-01..14 : TIDAK termasuk batch regresi 15 Nov 2026.
+    -> Status bug yang tercatat: TC-CLAIM-ASSIGN-06 (BG-333, Medium,
+       uncaught exception saat amount=0 ditolak 422, instans BG-199) dan
+       TC-CLAIM-ASSIGN-10 (BG-338, High, bypass upload .php di-rename
+       .jpg) sengaja FAILED untuk mendokumentasikan bug.
+    -> TC-CLAIM-ASSIGN-04 & 09 ditulis ulang di P0.4 Fase 0 (15 Nov 2026)
+       dan diverifikasi 3x stabil saat revisi.
+    -> TC-CLAIM-ASSIGN-08 & 13 bergantung pada sisa klaim SUBMITTED di
+       seed data demo publik; kalau habis, hasilnya berupa finding
+       (observasi), bukan verifikasi transisi.
+
+  Belum dicakup (P2.2 lapis 2, lihat docs/Execution-Plan.md): CONFIG-EVENT
+  duplikat/XSS/delete event terpakai, CONFIG-EXPTYPE (Expense Types),
+  SUBMIT-03 My Claims filter, Approve vs Reject paralel, cross-admin
+  concurrency (pengganti ASSIGN-15), ASSIGN-16..21, LIST-01..03.
+
+  RUN COMMAND (semua TC):
+    npx playwright test tests/claim --project=chromium --workers=1
+  RUN COMMAND (batch 15 Nov 2026, 9 TC baru):
+    npx playwright test tests/claim/submit tests/claim/approval tests/claim/config --project=chromium --workers=1

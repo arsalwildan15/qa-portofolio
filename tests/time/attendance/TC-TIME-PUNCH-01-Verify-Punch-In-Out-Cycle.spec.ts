@@ -60,7 +60,7 @@ test('TC-TIME-PUNCH-01: punching in then punching out completes a clean attendan
 
   report.step('Klik "Out" (Punch Out), verify kembali ke state "Punch In" semula');
   const { response: outResponse } = await timeAttendancePage.submit();
-  report.check('[API] POST attendance/records (Punch Out) status === 200', outResponse?.status() === 200, `status=${outResponse?.status()}`);
+  report.check('[API] PUT attendance/records (Punch Out) status === 200', outResponse?.status() === 200, `status=${outResponse?.status()}`);
   await timeAttendancePage.goto();
   const finalButtonText = await timeAttendancePage.submitButton.textContent();
   report.check(

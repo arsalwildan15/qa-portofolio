@@ -185,7 +185,15 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | PIM | 164 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 59 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
-| **Total** | **445** | |
+| Performance | 30 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
+| Claim | 23 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
+| Leave | 21 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
+| Time | 12 | [docs/TC-Time.txt](docs/TC-Time.txt) |
+| **Total** | **531** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
+
+**Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
+
+**Environment resilience:** the shared demo periodically resets and flips its global date format between `yyyy-dd-mm` and `yyyy-mm-dd`, and typed dates are parsed in whichever format is currently displayed. `src/utils/dateInput.ts` reads the live placeholder and converts values, which restored four Leave tests that had broken purely because of this drift.
 
 **Cross-cutting edge cases (2026-11-12):** two scenarios that are easy to forget in test design, refreshing mid-submit and a dropped connection mid-submit, were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails because of a dropped network connection, the SPA throws an unhandled JS exception that reaches the console/global error handler instead of being caught at its source, reproduced identically (same exception name) in Admin, PIM, Recruitment, and Buzz. The app still shows the user a generic "Unexpected Error!" toast in all four cases, so this is a code-level error-handling defect, not a silent failure the user would never notice. Login is unaffected, since its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
 
@@ -274,6 +282,33 @@ Three more TCs close out previously-untested features: editing an own post, dele
 - No rate limiting on candidate creation
 
 Cross-origin mutation (CSRF) on vacancy creation is confirmed **blocked by CORS** (no bug). There's also a documented intermittent client-side rendering bug where Application Stage/Candidate History cards occasionally get stuck loading forever with no underlying API error.
+
+### Performance (30 TCs)
+
+Configure > KPIs (10: add/edit/delete, required fields, rating boundary, duplicate names, default-scale behavior, filter by Job Title, injection, invalid id), Manage Reviews (13: create, the supervisor-link prerequisite, activation rules, KPI scoping, completion validation, date order, list filters, delete, edit lock after activation, double-click activate, IDOR and broken function-level access control using real ESS accounts), the evaluation page (5: full save → In Progress → Complete → read-only, per-KPI rating min/max on both UI and API, stored XSS in comments, evaluating an Inactive review via API, non-numeric ratings), and Trackers (2).
+
+Notable confirmed behaviors: a review can only name a "Supervisor Reviewer" who is already linked to the employee in PIM > Report-to; activation is refused (HTTP 400) unless the employee's Job Title has KPIs; marking a second KPI as "default scale" silently un-defaults the first one for that Job Title.
+
+**Confirmed bugs:**
+- Re-opening the edit page of an already-activated review: the app's own data fetch returns 404, which throws an unhandled JS exception and leaves the form blank (another instance of the app-wide unhandled-exception defect). No data risk, since the server rejects edits to an activated review with 422 (`TC-PERF-REVIEW-10`, BG-356)
+- The evaluation API accepts a non-numeric rating (`"abc"`) with HTTP 200 and silently stores it as `0.00`. Numeric validation exists only in the browser, even though the same endpoint correctly rejects out-of-range and negative ratings (`TC-PERF-EVAL-15`, BG-373)
+
+### Claim (23 TCs)
+
+Admin-side Assign Claim (14: create, required fields, expenses incl. amount boundary, attachments incl. renamed-executable upload, XSS/SQL injection, cancel, mass assignment, double-submit, concurrent cancel, back/forward, IDOR, segregation of duties) plus ESS-side Submit Claim, the approval state machine and event configuration (9). Approve moves a claim straight to PAID (there is no separate "Pay" step); PAID, REJECTED and CANCELLED are terminal, and any further action is refused with 403. An ESS user only ever gets `CANCEL` on their own submitted claim.
+
+**Confirmed bugs:**
+- A claim with zero expenses can be submitted and then approved to PAID with a total of 0. This may be a product decision, so it's logged as Low and flagged for product-owner confirmation (`TC-CLAIM-SUBMIT-02`, BG-375)
+- After Approve, the detail page keeps showing a stale Reject button. Clicking it is correctly refused by the server (403, claim stays PAID), but the UI throws an unhandled exception and shows the user nothing (`TC-CLAIM-APPROVAL-05`, BG-374, another confirmation of the app-wide defect)
+- Earlier findings in this module remain open: unhandled exception on an amount-boundary 422 (BG-333) and attachment upload accepting a `.php` file renamed to `.jpg` (BG-338)
+
+### Leave (21 TCs)
+
+Apply (6), Assign (6), Leave List incl. cancel-restores-balance and IDOR (3 + 1), and the cross-role flow added in Fase 2 (5): an ESS user applies, the Admin approves (Pending Approval → Scheduled, balance deducted once) or rejects (balance restored, terminal), the ESS user cancels their own request from My Leave, and an entitlement added by the Admin becomes the ESS user's visible balance. The full Leave suite passes, old and new tests alike. No new application bugs in this module this round.
+
+### Time (12 TCs)
+
+Attendance punch in/out incl. XSS in notes, Admin proxy punch-in, invalid-id handling, the employee report, timesheet hour entry and duration validation, and the cross-role timesheet flow added in Fase 2 (5): an ESS user fills and submits a weekly timesheet, the Admin approves it with a comment (APPROVED, no longer editable) or rejects it (the employee can correct and resubmit, so Reject is not terminal), self-approval through the API is refused, and approving a timesheet that was never submitted is refused (400). All 12 pass. Finding, not logged as a bug: a timesheet can be rejected without any comment.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

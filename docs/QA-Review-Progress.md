@@ -1915,3 +1915,35 @@ kerja Fase 0-8 yg disetujui user utk menuntaskan ini + modul lama + modul baru).
 
 **Jangan baca update2 2026-11-14 di atas sbg status final** -- baca `docs/Execution-Plan.md`
 utk status PALING AKTUAL (field STATUS di bagian atas file tsb).
+
+## STATUS FINAL FASE 2 LAPIS 1 -- 4 MODUL (2026-11-15)
+
+Semua item "Yg BELUM diperbaiki" bagian approval di atas SUDAH dikerjakan dgn akun ESS sungguhan
+(infra Fase 1: createEssAccount/loginAs/assignSupervisor). Detail per modul, fakta live & LOG commit:
+`docs/Execution-Plan.md` (P2.1-P2.4). Dokumen TC per modul: `docs/TC-Performance.txt`,
+`TC-Claim.txt`, `TC-Leave.txt`, `TC-Time.txt`.
+
+| Modul | Total TC | Baru di Fase 2 | Hasil run terakhir (15 Nov) | Bug baru (BG) |
+|---|---:|---:|---|---|
+| Performance | 30 | 24 (REVIEW-01..13, EVAL-11..15, TRACKER-01/02, KPI-07..10) | 22/24 TC baru lolos; 2 gagal SENGAJA | BG-356, BG-373 |
+| Claim | 23 | 9 (SUBMIT-01/02, APPROVAL-01..05, CONFIG-EVENT-01/02) | 7/9 lolos; 2 gagal SENGAJA | BG-374, BG-375 |
+| Leave | 21 | 5 (APPROVAL-01..03, MY-01, ENT-01) | 21/21 lolos (lama+baru) | -- |
+| Time | 12 | 5 (TS-SUBMIT-01, TS-APPROVAL-01..04) | 12/12 lolos | -- |
+
+TC yg SENGAJA FAILED (aturan R3, bug nyata tdk di-whitelist): TC-PERF-REVIEW-10 (BG-356, buka ulang
+halaman edit review Activated -> 404 + uncaught exception), TC-PERF-EVAL-15 (BG-373, rating "abc"
+diterima & disimpan 0.00), TC-CLAIM-APPROVAL-05 (BG-374, Reject basi stlh Approve -> uncaught
+exception, instans BG-199), TC-CLAIM-SUBMIT-02 (BG-375, klaim tanpa expense bisa sampai PAID).
+
+Koreksi kesimpulan lama yg terbukti SALAH di Fase 2 (R4): "Approve/Reject Leave N/A" (bisa, dgn
+request yg diajukan ESS); "Trackers = konfigurasi KPI" (ternyata jurnal kinerja per employee);
+"Approve->Pay->PAID" di Claim (Approve langsung PAID); "BG-356 intermiten & makin sering seiring data"
+(console 404 itu dari setup halaman PIM Job, bukan BG-356).
+
+Temuan lingkungan lintas modul: format tanggal demo berganti yyyy-dd-mm <-> yyyy-mm-dd dan nilai
+ketik ditafsirkan sesuai format tampil -> `src/utils/dateInput.ts`. 9 page object modul LAMA masih
+hardcode format lama -> dijadwalkan Fase 4 (lihat Execution-Plan.md).
+
+Sisa (LAPIS 2, sesuai urutan yg disetujui user): self-eval ESS, KPI pagination, Tracker lanjutan,
+Claim Expense Types/My Claims filter/paralel, Leave Half Day/holiday/overlap/Reports/Config, Time
+multi-row/komentar sel/Customer-Project, + P2.5 lintas-modul (CSRF, rate limit, headers, dst).

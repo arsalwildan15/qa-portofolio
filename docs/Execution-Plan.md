@@ -10,7 +10,7 @@
 > Ditetapkan user 2026-11-15. Sumber rencana: laporan coverage gap (sesi 2026-11-15).
 
 ## STATUS
-- **Fase aktif:** 2 -- P2.1 Performance lapis 1 TUNTAS (24 TC; sengaja FAILED: REVIEW-10=BG-356,
+- **Fase aktif:** FASE 3 TUNTAS (dokumentasi 4 modul) -> lanjut lapis 2 Fase 2. Riwayat: P2.1 Performance lapis 1 TUNTAS (24 TC; sengaja FAILED: REVIEW-10=BG-356,
   EVAL-15=BG-373); P2.2 Claim lapis 1 TUNTAS (9 TC; sengaja FAILED: SUBMIT-02=BG-375,
   APPROVAL-05=BG-374)
 - **Task terakhir selesai:** FASE 2 LAPIS 1 TUNTAS (4 modul): Performance 24 TC, Claim 9, Leave 5 (+4 TC
@@ -24,11 +24,10 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** FASE 3 -- tulis docs/TC-Performance.txt, TC-Claim.txt, TC-Leave.txt, TC-Time.txt
-  (format = TC-Buzz.txt / memory feedback_tc_doc_format: banner, legend, fungsi&impact, catatan teknis
-  locator+API terkonfirmasi, grup per kategori, entri bernomor dgn ->langkah, [API VERIFICATION],
-  [UI VERIFICATION], NOTE). Mencakup SEMUA TC modul (lama+baru), status [DONE]/[BLOCKED-BUG?] sesuai
-  hasil run terakhir, rujuk BG-ID. 4 agent paralel (hanya baca spec + tulis doc), lalu saya review.
+- **NEXT ACTION:** (6) LAPIS 2 Fase 2 sesuai urutan disetujui -- mulai P2.3 Leave lapis 2 (APPLY-07 Half
+  Day/Specify Time, hari libur, overlap, tgl lampau) & P2.2 Claim Expense Types; lalu Performance/Time
+  lapis 2, lalu P2.5 lintas-modul. Setiap TC baru: verifikasi per file, full batch per modul, docs/TC-*.txt
+  ikut diperbarui (status FASE 3 sudah ada, cukup tambah entri).
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -295,9 +294,14 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - [ ] Leave | [ ] Claim | [ ] Performance | [ ] Time
 
 ## FASE 3 — Dokumentasi (per modul setelah P2.x selesai)
-- [ ] docs/TC-Performance.txt | [ ] TC-Claim.txt | [ ] TC-Leave.txt | [ ] TC-Time.txt (format TC-Login.txt)
-- [ ] README: tabel coverage + subsection 4 modul (bug & temuan desain), total benar
-- [ ] QA-Review-Progress.md status final 4 modul
+- [x] docs/TC-Performance.txt (30) | [x] TC-Claim.txt (23 + ASSIGN-15 [CANCEL]) | [x] TC-Leave.txt (21) |
+      [x] TC-Time.txt (12) -- format TC-Buzz.txt; ditulis 4 agent paralel lalu DIREVIEW manual: versi
+      app dikoreksi "5.x"->"OS 5.9", status 403 REVIEW-12/13 & severity BG-356 dilengkapi dari output run,
+      2 label check usang di spec diperbaiki (PUNCH-01 Punch Out = PUT; TS-APPROVAL-04 "NOT SUBMITTED").
+- [x] README: tabel coverage (531 TC + 3 infra) + paragraf multi-role & ketahanan format tanggal +
+      subsection Performance/Claim/Leave/Time (bug & temuan desain)
+- [x] QA-Review-Progress.md: blok "STATUS FINAL FASE 2 LAPIS 1" (tabel 4 modul, TC sengaja FAILED,
+      koreksi R4, sisa lapis 2)
 
 ## FASE 4 — Audit Ulang Modul Lama
 - [ ] (BARU dari Fase 2, WAJIB duluan) Drift format tanggal: 9 page object lama masih hardcode
@@ -354,3 +358,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P2.2 lapis 1 | 9 TC Claim (SUBMIT-01/02, APPROVAL-01..05, CONFIG-EVENT-01/02) + createEssClaim + SubmitClaimPage + ClaimEventsPage + AssignClaimPage.clickAction; 2 bug baru: BG-375 (klaim kosong bisa submit->PAID), BG-374 (Reject basi -> uncaught exception, instans BG-199). Run: 7 pass, 2 gagal sengaja | 1 commit
 - 2026-11-15 | P2.3 lapis 1 | 5 TC Leave (APPROVAL-01..03, MY-01, ENT-01) + createEssLeaveRequest; fix lingkungan: dateInput.ts (format tanggal drift) di Apply/AssignLeavePage + Performance, LeaveListPage.rowByDate/actOnRow, LeaveEntitlementPage.save tunggu dialog; koreksi R4 klaim "Approve/Reject N/A"; fix isVisible-tanpa-tunggu di 11 TC baru. Verifikasi gabungan 54 TC: 50 pass + 4 gagal sengaja | 1 commit
 - 2026-11-15 | P2.4 lapis 1 | 5 TC Time (TS-SUBMIT-01, TS-APPROVAL-01..04) + createEssTimesheet + EmployeeTimesheetPage; TimeAttendancePage -> DATE_INPUT_SELECTOR; fakta: timesheet employee baru dibuat saat page load, status id "NOT SUBMITTED". Full batch Time 12/12 lolos. FASE 2 LAPIS 1 TUNTAS | 1 commit
+- 2026-11-15 | FASE 3 | docs/TC-Performance/Claim/Leave/Time.txt (86 TC + 1 CANCEL) via 4 agent + review manual; README coverage 531 + 4 subsection; QA-Review-Progress status final; 2 label spec usang diperbaiki | 1 commit

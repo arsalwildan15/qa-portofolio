@@ -1,0 +1,980 @@
+================================================================================
+  DAFTAR TEST CASE, PERFORMANCE
+  Modul    : Performance (Configure > KPIs, Configure > Trackers,
+             Manage Reviews, Evaluate Review)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/performance/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+  [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+  [TEMUAN]      = Hasil didokumentasikan via report.finding() (temuan desain/
+                   observasi), bukan pass/fail tegas
+
+  FORMAT ID  : TC-PERF-<SECTION>-NN  (SECTION = KPI / REVIEW / EVAL / TRACKER)
+  FILE       : TC-PERF-<SECTION>-NN-Verify-Name-In-English.spec.ts
+  FOLDER     : tests/performance/kpi/      (TC-PERF-KPI-*, Configure > KPIs)
+               tests/performance/review/   (TC-PERF-REVIEW-*, Manage Reviews:
+                                            create/activate/list/delete/akses)
+               tests/performance/evaluate/ (TC-PERF-EVAL-*, halaman evaluasi
+                                            reviewEvaluateByAdmin/<id>)
+               tests/performance/tracker/  (TC-PERF-TRACKER-*, Configure >
+                                            Trackers)
+               NOTE PENOMORAN: ID EVAL dimulai dari 11 mengikuti ID rencana di
+               docs/Execution-Plan.md (P2.1), bukan berarti ada EVAL-01..10
+               yg hilang/dihapus. TC-PERF-REVIEW-01 versi LAMA (false pass,
+               P0.3) sudah dihapus dan diganti set REVIEW-01..13 yg sekarang.
+
+  CAKUPAN SAAT INI: Lapis 1 Performance TUNTAS (P2.1 batch 1 + batch 2,
+  15 Nov 2026) -- 30 TC: KPI 10, REVIEW 13, EVAL 5, TRACKER 2.
+
+  BELUM DICAKUP (LAPIS 2, sengaja ditunda sesuai urutan Execution Plan):
+    -> EVAL-10 self-evaluation oleh ESS
+    -> KPI-11 pagination/sort daftar KPI
+    -> TRACKER-03..08 (duplikat, edit/delete, log, XSS di log, ESS
+       My Trackers, IDOR tracker)
+
+================================================================================
+  FUNGSI & IMPACT MODUL, PERFORMANCE
+================================================================================
+
+  Performance adalah modul penilaian kinerja karyawan. Alurnya berlapis:
+    1. Configure > KPIs: HR mendefinisikan KPI (Key Performance Indicator)
+       per JOB TITLE, lengkap dgn rentang rating Min/Max dan opsi "Make
+       Default Scale".
+    2. Manage Reviews: Admin/HR membuat review utk seorang employee
+       (Employee Name, Supervisor Reviewer, Review Period, Due Date), lalu
+       meng-Activate-nya. KPI yg muncul di form evaluasi = PERSIS set KPI
+       milik Job Title employee tsb.
+    3. Evaluate: reviewer mengisi rating per KPI + komentar + Review
+       Finalization (Date of Completion, Final Rating, Final Comments),
+       Save lalu Complete -> review jadi read-only permanen.
+    4. Configure > Trackers: jurnal/catatan kinerja per employee dgn
+       reviewer tertentu (BUKAN konfigurasi KPI/review, lihat Catatan
+       Teknis).
+
+  IMPACT kalau ada gap di sini: data Performance adalah dasar keputusan
+  karier (kenaikan gaji, promosi, bonus, PIP). Rating yg tersimpan salah
+  (mis. nilai non-angka diam-diam jadi 0, lihat TC-PERF-EVAL-15/BG-373)
+  langsung merusak Final Rating seorang karyawan TANPA ada error yg
+  terlihat oleh reviewer. Kebocoran akses (ESS membaca review orang lain)
+  membuka data penilaian yg sifatnya rahasia. Karena review yg sudah
+  Completed tidak bisa di-undo, kesalahan data di tahap evaluasi bersifat
+  permanen.
+
+================================================================================
+  CATATAN TEKNIS, PERFORMANCE
+  Dikonfirmasi via Playwright discovery/probe run live terhadap OrangeHRM
+  OS 5.9 demo publik (P2.1, 15 Nov 2026)
+================================================================================
+
+  Framework  : Vue 3 + OXD Design System (oxd-* components)
+
+  URL (CONFIRMED):
+    Daftar KPI               : /web/index.php/performance/searchKpi
+                               (form Add KPI dibuka via tombol "Add" di sini)
+    Manage Reviews (list)     : /web/index.php/performance/searchPerformanceReview
+    Add / Edit Review         : /web/index.php/performance/saveReview[/<id>]
+                               (form Add & Edit SAMA, field sama)
+    Halaman evaluasi Admin    : /web/index.php/performance/reviewEvaluateByAdmin/<id>
+    Daftar Performance Tracker: /web/index.php/performance/viewPerformanceTracker
+    Add Performance Tracker   : /web/index.php/performance/addPerformanceTracker
+
+  LOCATORS (CONFIRMED):
+    KPI (PerformanceKpiPage):
+      Key Performance Indicator : .oxd-input-group (label "Key Performance
+                                  Indicator") >> input
+      Job Title select          : .oxd-select-text (first), opsi via
+                                  .oxd-select-dropdown .oxd-select-option
+      Minimum / Maximum Rating   : .oxd-input-group (label "Minimum Rating" /
+                                  "Maximum Rating") >> input
+      Make Default Scale toggle  : .oxd-switch-input
+      Baris tabel               : .oxd-table-card
+      Ikon edit / delete baris   : .bi-pencil-fill / .bi-trash
+                                  [TEMUAN] Baris KPI TIDAK punya atribut
+                                  title="Edit"/"Delete" seperti baris Review,
+                                  harus ditarget via class ikon.
+    Manage Reviews (PerformanceManageReviewsPage):
+      Employee Name / Supervisor Reviewer : getByPlaceholder('Type for
+                                  hints...') nth(0) / nth(1), opsi
+                                  .oxd-autocomplete-option
+                                  [TEMUAN] Autocomplete match substring nama
+                                  DAN employee id. Employee test punya id
+                                  4 digit ("0421") sementara lastName acak
+                                  mengandung angka ("QA204213"), jadi opsi
+                                  pertama bisa milik employee LAIN -> opsi
+                                  WAJIB dipilih yg memuat lastName unik.
+      Filter Employee Name (list) : .oxd-input-group (label "Employee Name")
+                                  >> input -- widget autocomplete yg SAMA dgn
+                                  form Add; fill() saja TIDAK mem-bind nilai,
+                                  harus pilih suggestion, kalau tidak Search
+                                  jalan TANPA filter (semua review muncul).
+      Date inputs                : input[placeholder="yyyy-dd-mm"],
+                                  input[placeholder="yyyy-mm-dd"] (lihat
+                                  Perilaku Penting: format tanggal berubah)
+      Tombol                    : Save / Cancel / Activate / Search / Reset
+                                  (getByRole button)
+      Aksi baris                 : button[title="Edit"] (status Inactive),
+                                  button[title="Evaluate"] (pasca-Activate),
+                                  tombol trash = button pertama di baris
+      Dialog konfirmasi delete   : getByRole('dialog') -> "No, Cancel" /
+                                  "Yes, Delete"
+    Evaluate (PerformanceEvaluatePage):
+      Rating per KPI             : input.oxd-input:not([placeholder]) -- input
+                                  TANPA type/placeholder, urutan = urutan KPI
+      Final Rating               : input rating TERAKHIR (posisi setelah semua
+                                  KPI) -> jumlah input = jumlah KPI + 1
+      Komentar KPI + General     : textarea.orangehrm-evaluation-grid-comment
+      Final Comments             : textarea:not(.orangehrm-evaluation-grid-comment)
+      Error field                : .oxd-input-field-error-message
+      Dialog Complete            : "Confirm Review Submission" (Cancel / Ok)
+    Tracker (PerformanceTrackerPage):
+      Tracker Name               : .oxd-input-group (label "Tracker Name") >> input
+      Employee Name / Reviewers  : getByPlaceholder('Type for hints...')
+                                  nth(0) / nth(1)
+      Error field                : .oxd-input-field-error-message
+
+  API ENDPOINT (CONFIRMED):
+    KPI:
+      POST   /api/v2/performance/kpis            , buat KPI
+                                                    Response: {"data":{"id":N,
+                                                    "minRating":..,"maxRating":..,
+                                                    "isDefault":..}}
+      PUT    /api/v2/performance/kpis/<id>       , edit KPI
+      GET    /api/v2/performance/kpis/<id>       , detail KPI (404 utk id tak eksis)
+      DELETE /api/v2/performance/kpis            , hapus KPI, body {"ids":[..]}
+    Manage Reviews:
+      POST   /api/v2/performance/manage/reviews  , buat review
+                                                    Response: data.id,
+                                                    data.overallStatus.statusName,
+                                                    data.jobTitle, dueDate, dst
+      GET    /api/v2/performance/manage/reviews?..empNumber=.. , list ber-filter
+      GET    /api/v2/performance/manage/reviews/<id> , detail (404 setelah
+                                                    review Activated, lihat BG-356)
+      PUT    /api/v2/performance/manage/reviews/<id> , update / Activate
+      DELETE /api/v2/performance/manage/reviews  , hapus review -- [TEMUAN] TANPA
+                                                    id di path, id dikirim di
+                                                    BODY (beda dgn kebanyakan
+                                                    endpoint delete lain di app)
+    Evaluate:
+      GET    /api/v2/performance/reviews/<id>/kpis              , KPI review
+      GET    /api/v2/performance/reviews/<id>/evaluation/employee
+      GET/PUT /api/v2/performance/reviews/<id>/evaluation/supervisor
+                                                    , rating per kpiId +
+                                                    generalComment
+      PUT    /api/v2/performance/reviews/<id>/evaluation/final  , finalisasi
+                                                    {complete, finalRating,
+                                                    finalComment, completedDate}
+    Tracker:
+      POST   /api/v2/performance/config/trackers , {trackerName, empNumber,
+                                                    reviewerEmpNumbers}
+    Setup (dipakai util setupReviewableEmployee):
+      GET    /api/v2/admin/job-titles?limit=0    , cari id Job Title
+      PUT    /api/v2/pim/employees/<id>/job-details , set Job Title via API
+
+  PERILAKU PENTING, SIKLUS STATUS REVIEW:
+    [TEMUAN] Inactive -> (Activate) Activated -> (Save evaluasi) In Progress
+    -> (Complete + Ok) Completed. Detail:
+      - Save di form Add Review TIDAK pindah halaman: form direset + toast.
+        Status awal selalu "Inactive"; selfReviewStatus adalah field terpisah.
+      - Setelah Activated, ikon baris berganti Edit -> Evaluate.
+      - Save di halaman evaluasi = DUA request: PUT evaluation/supervisor +
+        PUT evaluation/final (complete:false) -> status "In Progress".
+      - Complete membuka dialog "Confirm Review Submission" (menyatakan
+        review jadi read-only & "cannot be undone"); Ok mengirim
+        complete:true -> "Completed". PUT evaluasi berikutnya ditolak 403.
+      - Review Inactive yg di-evaluasi langsung via API: PUT supervisor 422,
+        PUT final 403 (server menegakkan aturan, bukan cuma UI).
+
+  PERILAKU PENTING, PRASYARAT MEMBUAT & MENG-ACTIVATE REVIEW:
+    [TEMUAN] (1) "Supervisor Reviewer" HANYA menawarkan supervisor yg sudah
+    ter-link ke employee via PIM > Report-to. Employee tanpa supervisor ->
+    "No Records Found" utk SEMUA pencarian, Save diblokir client-side
+    ("Invalid"). (2) Activate ditolak API dgn 400 "Cannot activate review
+    for employees who doesn't have a Job Title with KPI" kalau Job Title
+    employee kosong / tidak punya KPI. Create review sendiri TIDAK
+    mensyaratkan Job Title. Kedua prasyarat ini dibungkus util
+    `setupReviewableEmployee()` (employee baru + akun login di-link sbg
+    supervisor Direct + Job Title opsional) dan `createReview()` (setup +
+    create + Activate opsional, Job Title "QA Engineer" yg punya KPI).
+
+  PERILAKU PENTING, KPI DEFAULT SCALE EKSKLUSIF SECARA DIAM-DIAM:
+    [TEMUAN] Menandai KPI B "Make Default Scale" utk Job Title yg SAMA dgn
+    KPI A (sudah default) DITERIMA 200, dan KPI A otomatis un-default tanpa
+    pesan apa pun. Response save KPI A tetap bilang isDefault:true (snapshot
+    saat itu), tapi daftar yg dibaca ulang hanya menunjukkan KPI B "Yes".
+
+  PERILAKU PENTING, TRACKERS BUKAN KONFIGURASI KPI:
+    [TEMUAN] "Configure > Trackers" dan "My/Employee Trackers" adalah fitur
+    jurnal/catatan kinerja per employee, BUKAN konfigurasi KPI/review --
+    koreksi atas asumsi audit lama.
+
+  PERILAKU PENTING, FORMAT TANGGAL BERUBAH ANTAR SESI (LINGKUNGAN):
+    [TEMUAN] Placeholder tanggal site-wide (dari Admin > Localization)
+    berganti "yyyy-dd-mm" <-> "yyyy-mm-dd" antar sesi di demo publik (pola
+    reset yg sama dgn korupsi identitas empNumber=7). Nilai yg DIKETIK
+    ditafsirkan sesuai format yg sedang tampil: mengetik 2026-07-10 di
+    bawah yyyy-dd-mm tersimpan sbg 7 Okt (terkirim 2026-10-07). Solusi:
+    util `fillDate()` (src/utils/dateInput.ts) membaca placeholder dan
+    menyusun ulang nilai ISO ke format tampil; locator tanggal wajib match
+    KEDUA placeholder. Date of Completion di TC EVAL memakai tanggal
+    hari==bulan (2026-07-07) supaya kebal terhadap pergantian format ini.
+
+  KOREKSI PENTING, CONSOLE 404 DI TC ACTIVATE (bukan BG-356):
+    Klaim awal batch 1 bahwa "BG-356 intermiten di semua TC yg memanggil
+    Activate & makin sering seiring jumlah data" SALAH. Console 404 di TC-TC
+    tsb berasal dari SETUP: set Job Title via halaman PIM > Job memicu
+    GET /api/v2/admin/job-titles/<id>/specification -> 404 (Job Title tanpa
+    file spek; ditangani app, tidak ada exception, BUKAN bug), tapi teks
+    console error-nya identik dgn bug sungguhan sehingga mencemari console-
+    error check. Setup kini set Job Title via API PUT
+    /api/v2/pim/employees/<id>/job-details -> TC-TC Activate (REVIEW-04/05/
+    06/08/11/12, semua EVAL) bersih. BG-356 yg asli HANYA direproduksi saat
+    membuka ULANG halaman edit review yg sudah Activated (TC-PERF-REVIEW-10).
+    Risiko yg sama mungkin ada di TC modul lain yg set Job Title via UI ->
+    dijadwalkan dicek di Fase 4.
+
+================================================================================
+  TEST CASES
+================================================================================
+
+No.  Test Case ID         Status   Skenario / Deskripsi
+---  -------------------  -------  -----------------------------------------
+
+================================================================================
+  GROUP 1, POSITIVE CASES (Happy Path)
+================================================================================
+
+ 1   TC-PERF-KPI-01       [DONE]   TC-PERF-KPI-01-Verify-Add-KPI-Valid.spec.ts
+                                   (+) Verify Adding A KPI With Valid Data
+                                   Succeeds
+                                   -> Buka daftar KPI, klik Add.
+                                   -> Isi Key Performance Indicator (nama
+                                      unik "QaKpi..."), Job Title "QA
+                                      Engineer", Min Rating 0, Max Rating 100,
+                                      klik Save.
+                                   [API VERIFICATION]
+                                   -> Verify POST /api/v2/performance/kpis
+                                      status === 200.
+                                   [UI VERIFICATION]
+                                   -> Buka ulang daftar KPI, verify baris
+                                      dgn nama KPI baru terlihat.
+                                   NOTE: tidak termasuk regresi 15 Nov 2026
+                                   (TC lama, terakhir diverifikasi sebelum
+                                   Fase 2).
+
+ 2   TC-PERF-KPI-08       [DONE]   TC-PERF-KPI-08-Verify-Search-By-Job-Title.spec.ts
+                                   (+) Verify KPI List Search By Job Title
+                                   Filters Correctly
+                                   -> Buka daftar KPI, pilih Job Title "QA
+                                      Engineer", klik Search.
+                                   -> Reset (buka ulang), pilih Job Title "HR
+                                      Manager", klik Search.
+                                   [UI VERIFICATION]
+                                   -> Filter "QA Engineer": minimal 1 baris,
+                                      dan SEMUA baris mengandung "QA
+                                      Engineer".
+                                   -> Filter "HR Manager": TIDAK ada baris yg
+                                      mengandung "QA Engineer" (himpunan
+                                      hasil benar-benar berbeda).
+                                   NOTE: filter berfungsi normal, tidak ada
+                                   bug ditemukan.
+
+ 3   TC-PERF-KPI-09       [DONE]   TC-PERF-KPI-09-Verify-Edit-KPI-Valid.spec.ts
+                                   (+) Verify Editing An Existing KPI's Rating
+                                   Range Succeeds
+                                   -> Buat KPI baru (QA Engineer, 0-100).
+                                   -> Di daftar, klik ikon pensil
+                                      (.bi-pencil-fill) pd baris KPI tsb.
+                                   -> Ubah Max Rating jadi 80, klik Save.
+                                   [API VERIFICATION]
+                                   -> Verify POST kpis awal status 200.
+                                   -> Verify PUT /api/v2/performance/kpis/<id>
+                                      status === 200 dan body
+                                      data.maxRating === 80.
+                                   [UI VERIFICATION]
+                                   -> Verify form edit ter-prefill dgn nama
+                                      KPI yg benar.
+                                   -> Verify baris KPI di daftar menunjukkan
+                                      Max = 80.
+                                   NOTE: baris KPI tidak punya title="Edit"
+                                   -> ditarget via class ikon. Di batch 1
+                                   sempat gagal di full batch tapi 6/6 check
+                                   lolos terisolasi (flaky-under-load, pola
+                                   P0.7); di regresi 15 Nov (batch 2) PASS.
+
+ 4   TC-PERF-KPI-10       [DONE]   TC-PERF-KPI-10-Verify-Delete-KPI.spec.ts
+                                   (+) Verify Deleting A KPI Removes It From
+                                   The List
+                                   -> Buat KPI baru (QA Engineer, 0-100).
+                                   -> Di daftar, klik ikon trash (.bi-trash)
+                                      pd baris KPI tsb.
+                                   -> Klik "Yes, Delete" di dialog konfirmasi.
+                                   [API VERIFICATION]
+                                   -> Verify DELETE /api/v2/performance/kpis
+                                      status === 200.
+                                   [UI VERIFICATION]
+                                   -> Verify modal konfirmasi delete muncul.
+                                   -> Buka ulang daftar, verify KPI TIDAK lagi
+                                      muncul.
+
+ 5   TC-PERF-REVIEW-01    [DONE]   TC-PERF-REVIEW-01-Verify-Create-Review-Valid.spec.ts
+                                   (+) Verify Creating A Performance Review
+                                   With Valid Data Succeeds
+                                   -> Setup: employee baru + akun login di-
+                                      link sbg supervisor (setupReviewable
+                                      Employee, tanpa Job Title).
+                                   -> Buka Add Review, pilih Employee Name
+                                      (opsi by lastName unik), pilih
+                                      Supervisor Reviewer.
+                                   -> Isi Review Period 2026-01-01 s/d
+                                      2026-06-30, Due Date 2026-07-15, Save.
+                                   [API VERIFICATION]
+                                   -> Verify POST /api/v2/performance/manage/
+                                      reviews status === 200.
+                                   -> Verify data.overallStatus.statusName ===
+                                      "Inactive" (status awal).
+                                   -> Verify reviewPeriodStart === 2026-01-01
+                                      dan dueDate === 2026-07-15 (tanggal
+                                      tersimpan benar walau format tampil
+                                      berubah, berkat fillDate()).
+                                   [UI VERIFICATION]
+                                   -> Verify Supervisor Reviewer punya opsi
+                                      (bukan "No Records Found").
+                                   -> Search list by Employee Name, verify
+                                      review baru muncul.
+                                   NOTE: Di batch 1 sempat gagal di full
+                                   batch tapi 7/7 check lolos terisolasi
+                                   (flaky-under-load); di regresi 15 Nov PASS
+                                   setelah fix race searchByEmployeeName.
+
+ 6   TC-PERF-REVIEW-04    [DONE]   TC-PERF-REVIEW-04-Verify-Activate-Succeeds-With-Job-Title-KPI.spec.ts
+                                   (+) Verify Activate Succeeds For An
+                                   Employee With A Job Title+KPI
+                                   -> Setup: employee + supervisor + Job Title
+                                      "QA Engineer" (punya KPI, di-set via
+                                      API).
+                                   -> Buat review, buka saveReview/<id>, klik
+                                      Activate.
+                                   -> Buka daftar, search by Employee Name.
+                                   [API VERIFICATION]
+                                   -> Verify create: data.jobTitle.name ===
+                                      "QA Engineer" (Job Title terbawa).
+                                   -> Verify PUT /api/v2/performance/manage/
+                                      reviews/<id> status === 200 dan
+                                      overallStatus -> "Activated".
+                                   [UI VERIFICATION]
+                                   -> Verify status baris = "Activated".
+                                   -> Verify tombol "Evaluate" muncul, tombol
+                                      "Edit" TIDAK lagi ada.
+                                   NOTE: counter-case TC-PERF-REVIEW-03. TC
+                                   ini TIDAK membuka ulang halaman edit, jadi
+                                   bersih dari BG-356. Cek ikon Evaluate/Edit
+                                   dikembalikan jadi hard check di batch 2
+                                   (flaky sebelumnya ternyata akibat race
+                                   searchByEmployeeName, bukan app).
+
+ 7   TC-PERF-REVIEW-05    [DONE]   TC-PERF-REVIEW-05-Verify-Evaluation-KPIs-Scoped-To-Job-Title.spec.ts
+                                   (+) Verify The Evaluation Page Lists Exactly
+                                   The KPIs Of The Employee's Job Title
+                                   -> Setup: employee + supervisor + Job Title
+                                      "QA Engineer", buat + Activate review.
+                                   -> [UI] Buka Configure > KPIs, filter Job
+                                      Title "QA Engineer", ambil daftar nama
+                                      KPI resmi.
+                                   -> [API] GET /api/v2/performance/reviews/
+                                      <id>/kpis, ambil daftar title KPI yg
+                                      dipakai halaman evaluasi.
+                                   [API VERIFICATION]
+                                   -> Verify himpunan KPI review (diurutkan)
+                                      PERSIS SAMA dgn KPI resmi Job Title
+                                      (tidak lebih, tidak kurang).
+                                   -> Verify minimal 1 KPI muncul.
+                                   NOTE: kedua daftar direkam sbg finding
+                                   utk audit. Fitur berfungsi normal.
+
+ 8   TC-PERF-REVIEW-08    [DONE]   TC-PERF-REVIEW-08-Verify-Search-Filter-List.spec.ts
+                                   (+) Verify Manage Reviews List Search/Filter
+                                   By Employee Name And Review Status
+                                   -> Setup: employee + supervisor + Job
+                                      Title, buat + Activate review.
+                                   -> Search by Employee Name (pilih
+                                      suggestion by lastName).
+                                   -> Reset, pilih Employee Name lagi + Review
+                                      Status "Inactive", Search.
+                                   [UI VERIFICATION]
+                                   -> Verify minimal 1 baris dan SEMUA baris
+                                      hasil search mengandung nama employee.
+                                   -> Verify review yg sudah Activated TIDAK
+                                      muncul saat filter Review Status =
+                                      Inactive (atau "No Records Found").
+                                   NOTE: [BUG SCRIPT ditemukan & diperbaiki]
+                                   count() tidak auto-wait -> tabel lambat
+                                   menghasilkan 0 baris dan check "semua
+                                   baris cocok" lolos kosong (vacuous pass).
+                                   Diperbaiki: tunggu baris employee ini
+                                   visible dulu sebelum menghitung.
+
+ 9   TC-PERF-REVIEW-09    [DONE]   TC-PERF-REVIEW-09-Verify-Delete-Review-Confirm-Cancel.spec.ts
+                                   (+/-) Verify Delete Review Confirmation
+                                   Dialog (Cancel Keeps It, Confirm Deletes It)
+                                   -> Setup: employee + supervisor, buat review
+                                      (status Inactive, masih punya trash).
+                                   -> Search by Employee Name, klik trash ->
+                                      klik "No, Cancel".
+                                   -> Klik trash lagi (baris di-fetch ulang)
+                                      -> klik "Yes, Delete".
+                                   [API VERIFICATION]
+                                   -> Verify DELETE /api/v2/performance/manage/
+                                      reviews (tanpa id di path) status ===
+                                      200.
+                                   [UI VERIFICATION]
+                                   -> Verify modal "Are you Sure?" muncul.
+                                   -> Verify setelah "No, Cancel" review masih
+                                      ada di daftar.
+                                   -> Verify setelah "Yes, Delete" review
+                                      hilang dari daftar.
+                                   NOTE: [BUG SCRIPT ditemukan & diperbaiki]
+                                   memakai ulang referensi baris lama setelah
+                                   Cancel bikin hang 90 detik ("element was
+                                   detached from the DOM") krn list re-render
+                                   -> baris di-fetch ulang sebelum delete
+                                   kedua.
+
+10   TC-PERF-EVAL-11      [DONE]   TC-PERF-EVAL-11-Verify-Finalize-Review-Completed.spec.ts
+                                   (+) Verify A Fully-Filled Evaluation Can Be
+                                   Saved, Completed, And Becomes Read-Only
+                                   -> Setup: createReview() (review Activated,
+                                      Job Title "QA Engineer").
+                                   -> [API] GET reviews/<id>/kpis utk rentang
+                                      min/max tiap KPI.
+                                   -> Buka reviewEvaluateByAdmin/<id>, isi
+                                      rating tiap KPI (nilai tengah
+                                      rentangnya), semua komentar grid, Final
+                                      Rating 75, Final Comments, Date of
+                                      Completion 2026-07-07, Save.
+                                   -> Klik Complete -> Ok di dialog konfirmasi.
+                                   -> [API] PUT evaluation/supervisor lagi
+                                      setelah Completed.
+                                   [API VERIFICATION]
+                                   -> Verify review punya >= 1 KPI.
+                                   -> Verify Save: PUT evaluation/supervisor
+                                      200 + PUT evaluation/final 200, status
+                                      "In Progress".
+                                   -> Verify Complete: PUT final 200, status
+                                      "Completed", finalRating === 75.
+                                   -> Verify PUT evaluasi setelah Completed
+                                      TIDAK 200 (read-only ditegakkan server,
+                                      live: 403).
+                                   [UI VERIFICATION]
+                                   -> Verify jumlah input rating = jumlah KPI
+                                      + 1 (Final Rating).
+                                   NOTE: tanggal hari==bulan dipakai krn
+                                   format tanggal berubah antar sesi (lihat
+                                   Catatan Teknis).
+
+11   TC-PERF-TRACKER-01   [DONE]   TC-PERF-TRACKER-01-Verify-Add-Tracker-Valid.spec.ts
+                                   (+) Verify Adding A Performance Tracker With
+                                   Valid Data Succeeds
+                                   -> Setup: employee baru (target tracker),
+                                      ambil identitas akun login (reviewer).
+                                   -> Buka addPerformanceTracker, isi Tracker
+                                      Name unik, pilih Employee Name (by
+                                      lastName), pilih Reviewer = akun login,
+                                      Save.
+                                   [API VERIFICATION]
+                                   -> Verify POST /api/v2/performance/config/
+                                      trackers status === 200.
+                                   -> Verify data.trackerName benar,
+                                      data.employee.empNumber = employee yg
+                                      dipilih, data.reviewers memuat empNumber
+                                      akun login.
+                                   [UI VERIFICATION]
+                                   -> Buka viewPerformanceTracker, verify
+                                      tracker baru ada di daftar.
+                                   NOTE: memakai getLoggedInEmployeeName()
+                                   yg self-heal identitas empNumber=7 (lihat
+                                   memory/Fase 1), jadi tahan terhadap reset
+                                   data demo.
+
+================================================================================
+  GROUP 2, NEGATIVE / BOUNDARY CASES
+================================================================================
+
+12   TC-PERF-KPI-03       [DONE]   TC-PERF-KPI-03-Verify-Required-Field-Validation.spec.ts
+                                   (-) Verify Required Field Validation On Add
+                                   KPI
+                                   -> Buka form Add KPI, LANGSUNG klik Save
+                                      tanpa isi apa pun.
+                                   [API VERIFICATION]
+                                   -> Verify TIDAK ada POST /api/v2/
+                                      performance/kpis terkirim.
+                                   [UI VERIFICATION]
+                                   -> Verify minimal 1 pesan "Required"
+                                      muncul.
+                                   NOTE: tidak termasuk regresi 15 Nov 2026
+                                   (TC lama, terakhir diverifikasi sebelum
+                                   Fase 2).
+
+13   TC-PERF-KPI-04       [DONE]   TC-PERF-KPI-04-Verify-Rating-Boundary.spec.ts
+                                   (B) Verify Min/Max Rating Boundary On Add
+                                   KPI
+                                   -> Kasus 1: Min 5 > Max 1 (Job Title HR
+                                      Manager), Save.
+                                   -> Kasus 2: Min 0, Max 5, Save.
+                                   -> Kasus 3: Min -1, Max 5, Save.
+                                   [API VERIFICATION]
+                                   -> Kasus 1: TIDAK ada POST terkirim.
+                                   -> Kasus 2: POST status 200 dan
+                                      data.minRating === 0 (batas bawah bisnis
+                                      valid).
+                                   -> Kasus 3: TIDAK ada POST terkirim
+                                      (diblokir client-side).
+                                   [UI VERIFICATION]
+                                   -> Kasus 1: pesan "should be less than" /
+                                      "should be greater than" muncul.
+                                   NOTE: nilai negatif ditolak di level
+                                   browser (dikonfirmasi live). Tidak termasuk
+                                   regresi 15 Nov 2026 (TC lama, terakhir
+                                   diverifikasi sebelum Fase 2).
+
+14   TC-PERF-KPI-05       [DONE]   TC-PERF-KPI-05-Verify-Duplicate-Name-Allowed.spec.ts
+                                   (-) [TEMUAN] Verify Duplicate KPI Name (Same
+                                   Job Title) Is Allowed
+                                   -> Buat KPI "Dup Conflict Test <ts>" utk
+                                      Job Title HR Manager (1-5).
+                                   -> Buat KPI KEDUA dgn nama + Job Title
+                                      PERSIS SAMA.
+                                   [API VERIFICATION]
+                                   -> Verify KPI pertama 200.
+                                   -> Verify KPI kedua TETAP diterima 200.
+                                   -> Verify id KPI kedua BERBEDA dari yg
+                                      pertama (2 record terpisah).
+                                   NOTE: temuan DESAIN, bukan bug -- tidak
+                                   ada unique constraint utk kombinasi title
+                                   + Job Title, didokumentasikan eksplisit via
+                                   report.finding() sesuai taksonomi 2.3
+                                   (Duplicate/Unique Conflict). Tidak termasuk
+                                   regresi 15 Nov 2026 (TC lama, terakhir
+                                   diverifikasi sebelum Fase 2).
+
+15   TC-PERF-REVIEW-02    [DONE]   TC-PERF-REVIEW-02-Verify-Supervisor-Required-Before-Create.spec.ts
+                                   (-/B) Verify Supervisor Reviewer Is Scoped
+                                   To The Employee's Actual Supervisor
+                                   -> Setup: employee baru TANPA supervisor
+                                      link (createTestEmployee saja).
+                                   -> Buka Add Review, pilih employee tsb,
+                                      cari Supervisor Reviewer dgn query luas
+                                      "a".
+                                   -> Isi tanggal, coba Save.
+                                   [API VERIFICATION]
+                                   -> Verify TIDAK ada POST manage/reviews
+                                      terkirim (diblokir client-side).
+                                   [UI VERIFICATION]
+                                   -> Verify opsi Supervisor Reviewer = "No
+                                      Records Found" (bukan daftar employee
+                                      umum).
+                                   -> Verify pesan "Invalid" muncul di bawah
+                                      Supervisor Reviewer.
+                                   NOTE: field ini SENGAJA di-scope ke relasi
+                                   Report-to, jadi review tidak bisa dibuat
+                                   utk employee tanpa supervisor sama sekali.
+                                   Perilaku by design, bukan bug.
+
+16   TC-PERF-REVIEW-03    [DONE]   TC-PERF-REVIEW-03-Verify-Activate-Blocked-Without-Job-Title-KPI.spec.ts
+                                   (-/B) Verify Activate Is Blocked For An
+                                   Employee Without A Job Title+KPI
+                                   -> Setup: employee + supervisor, TANPA Job
+                                      Title.
+                                   -> Buat review (harus bisa), buka
+                                      saveReview/<id>, klik Activate.
+                                   -> Buka daftar, search by Employee Name.
+                                   [API VERIFICATION]
+                                   -> Verify create 200 + reviewId ada, dan
+                                      data.jobTitle.id === null (prasyarat).
+                                   -> Verify PUT Activate ditolak 400 dgn
+                                      error.message memuat "Job Title with
+                                      KPI".
+                                   [UI VERIFICATION]
+                                   -> Verify status di daftar TETAP
+                                      "Inactive".
+                                   NOTE: console "Failed to load resource
+                                   ...400" di-whitelist di TC ini krn 400
+                                   memang ekspektasinya. Gap coverage yg
+                                   ditemukan via eksplorasi live Fase 2
+                                   (sebelumnya cuma hipotesis audit).
+
+17   TC-PERF-REVIEW-06    [DONE]   TC-PERF-REVIEW-06-Verify-Complete-Required-Field-Validation.spec.ts
+                                   (-/B) Verify "Complete" On The Evaluation
+                                   Page Requires Finalization Fields
+                                   -> Setup: employee + supervisor + Job Title
+                                      "QA Engineer", buat + Activate review.
+                                   -> Buka reviewEvaluateByAdmin/<id>, klik
+                                      Complete TANPA mengisi Review
+                                      Finalization apa pun.
+                                   [API VERIFICATION]
+                                   -> Verify TIDAK ada request API non-GET ke
+                                      /api/v2/performance/ terkirim.
+                                   [UI VERIFICATION]
+                                   -> Verify tepat 3 pesan "Required" (Date of
+                                      Completion, Final Rating, Final
+                                      Comments).
+
+18   TC-PERF-REVIEW-07    [DONE]   TC-PERF-REVIEW-07-Verify-Review-Period-Date-Order-Boundary.spec.ts
+                                   (B) Verify Review Period Date-Order Boundary
+                                   On Add Review
+                                   -> Setup: employee + supervisor.
+                                   -> Buka Add Review, isi Start 2026-06-30,
+                                      End 2026-01-01 (End SEBELUM Start), Due
+                                      2026-07-15, Save.
+                                   [API VERIFICATION]
+                                   -> Verify TIDAK ada POST terkirim.
+                                   [UI VERIFICATION]
+                                   -> Verify pesan "start date should be
+                                      before period end date" muncul.
+                                   -> Verify pesan "end date should be after
+                                      period start date" muncul.
+
+19   TC-PERF-REVIEW-10    [DONE]   TC-PERF-REVIEW-10-Verify-Edit-Blocked-After-Activation.spec.ts
+                                   (-/B) Verify Editing (Employee/Supervisor/
+                                   Dates) Is Blocked After Activation
+                                   -> Setup: employee + supervisor + Job
+                                      Title, buat + Activate review.
+                                   -> Navigasi LANGSUNG ke saveReview/<id>
+                                      setelah Activated, catat response 404 &
+                                      isi field Employee Name.
+                                   -> [API] PUT manage/reviews/<id> dgn
+                                      empNumber + tanggal baru (2025-01-01 s/d
+                                      2025-06-30, due 2025-07-15).
+                                   [API VERIFICATION]
+                                   -> Verify PUT field inti ditolak 422.
+                                   -> Verify error.data.invalidParamKeys
+                                      memuat reviewPeriodStart dan
+                                      reviewPeriodEnd.
+                                   [UI VERIFICATION]
+                                   -> Console-error check: TIDAK boleh ada
+                                      uncaught exception (TIDAK di-whitelist,
+                                      sesuai R3).
+                                   NOTE: proteksi SESUNGGUHNYA ada di API
+                                   tulis (422, deterministik) -> TIDAK ada
+                                   risiko data. Kalau TC ini gagal di check
+                                   SELAIN console-error, itu regresi baru,
+                                   bukan BG-356.
+                                   STATUS AKTUAL: GAGAL (BUG, lihat Bug-List
+                                   BG-356) -> membuka ulang saveReview/<id>
+                                   review Activated: GET /api/v2/performance/
+                                   manage/reviews/<id> 404 -> "Uncaught
+                                   exception: fe", form Edit Review tampil
+                                   KOSONG (route tidak diblokir, data tidak
+                                   ter-prefill). Instance dari bug app-wide
+                                   BG-199 (unhandled exception utk respons
+                                   non-2xx, signature sama BG-333 Claim). TC
+                                   ini SENGAJA dibiarkan FAILED supaya BG-356
+                                   tetap Open (pola TC-CLAIM-ASSIGN-06).
+
+20   TC-PERF-EVAL-12      [DONE]   TC-PERF-EVAL-12-Verify-Rating-Min-Max-Boundary.spec.ts
+                                   (B) Verify KPI Rating Min/Max Boundary
+                                   (Client-Side And Server-Side)
+                                   -> Setup: createReview() (Activated), ambil
+                                      KPI pertama + min/max-nya via API.
+                                   -> [UI] Isi rating KPI pertama: max+1, min-1,
+                                      tepat max, tepat min (Tab setiap kali).
+                                   -> [API] PUT evaluation/supervisor dgn
+                                      rating max+50 dan -10 (bypass UI).
+                                   [API VERIFICATION]
+                                   -> Verify rating > max ditolak 422.
+                                   -> Verify rating negatif ditolak 422.
+                                   [UI VERIFICATION]
+                                   -> Verify max+1 -> "Rating should be less
+                                      than or equal to <max>".
+                                   -> Verify min-1 -> "...greater than or
+                                      equal to <min>".
+                                   -> Verify tepat max & tepat min diterima
+                                      tanpa error rentang.
+                                   NOTE: rentang berlaku PER KPI (dari
+                                   Configure > KPIs). Rating NON-ANGKA via API
+                                   adalah bug terpisah -> TC-PERF-EVAL-15.
+
+21   TC-PERF-EVAL-14      [DONE]   TC-PERF-EVAL-14-Verify-Evaluate-Inactive-Review-Via-API-Rejected.spec.ts
+                                   (-) Verify An Inactive Review Cannot Be
+                                   Evaluated Or Completed Via Direct API Calls
+                                   -> Setup: createReview() dgn activate:false
+                                      (status Inactive).
+                                   -> [API] PUT evaluation/supervisor (rating
+                                      70) utk review Inactive.
+                                   -> [API] PUT evaluation/final complete:true
+                                      utk review Inactive.
+                                   -> [API] GET manage/reviews/<id>.
+                                   [API VERIFICATION]
+                                   -> Verify rating ditolak (bukan 200; live:
+                                      422).
+                                   -> Verify complete ditolak (bukan 200;
+                                      live: 403).
+                                   -> Verify overallStatus TETAP "Inactive".
+                                   NOTE: di UI review Inactive tidak punya
+                                   tombol Evaluate; TC ini membuktikan
+                                   larangan itu juga ditegakkan server
+                                   (business-logic bypass ditolak).
+
+22   TC-PERF-EVAL-15      [DONE]   TC-PERF-EVAL-15-Verify-Non-Numeric-Rating-Rejected-By-API.spec.ts
+                                   (-) Verify The API Rejects A Non-Numeric KPI
+                                   Rating
+                                   -> Setup: createReview() (Activated), ambil
+                                      kpiId pertama.
+                                   -> [API] PUT evaluation/supervisor dgn
+                                      rating "abc".
+                                   -> [API] GET evaluation/supervisor, cek
+                                      rating yg tersimpan utk KPI tsb (belum
+                                      pernah dirating sebelumnya).
+                                   [API VERIFICATION]
+                                   -> Verify rating non-angka ditolak 422.
+                                   -> Verify rating KPI tetap kosong (null),
+                                      tidak diam-diam diubah jadi angka.
+                                   STATUS AKTUAL: GAGAL (BUG, lihat Bug-List
+                                   BG-373, Medium) -> PUT dgn rating "abc"
+                                   DITERIMA 200 (response meng-echo "abc"),
+                                   tapi yg TERSIMPAN adalah "0.00" -- silent
+                                   coercion, validasi angka server-side tidak
+                                   ada (cuma di client). Kontras dgn EVAL-12:
+                                   server MENOLAK > max / negatif, tapi lolos
+                                   utk non-angka. TC SENGAJA dibiarkan FAILED
+                                   (R3).
+
+23   TC-PERF-TRACKER-02   [DONE]   TC-PERF-TRACKER-02-Verify-Required-Field-Validation.spec.ts
+                                   (-) Verify Add Tracker Required-Field
+                                   Validation
+                                   -> Buka addPerformanceTracker, LANGSUNG
+                                      Save tanpa isi apa pun.
+                                   [API VERIFICATION]
+                                   -> Verify TIDAK ada POST /api/v2/
+                                      performance/config/trackers terkirim.
+                                   [UI VERIFICATION]
+                                   -> Verify tepat 3 pesan "Required"
+                                      (Tracker Name, Employee Name,
+                                      Reviewers).
+
+================================================================================
+  GROUP 3, SECURITY / ACCESS CONTROL
+================================================================================
+
+24   TC-PERF-KPI-02       [DONE]   TC-PERF-KPI-02-Verify-XSS-SQLi-In-Name.spec.ts
+                                   (S) Verify XSS/SQLi Payload In KPI Name Does
+                                   Not Break The App
+                                   -> Isi Key Performance Indicator dgn nama
+                                      unik + payload
+                                      <script>window.__xssKpi=true</script>
+                                      ' OR '1'='1'; DROP TABLE ohrm_kpi;--
+                                   -> Job Title QA Engineer, 0-100, Save.
+                                   [API VERIFICATION]
+                                   -> Verify POST kpis status 200 (payload
+                                      diterima sbg string literal).
+                                   [UI VERIFICATION]
+                                   -> Verify window.__xssKpi TIDAK ter-set
+                                      (script tidak tereksekusi).
+                                   -> Buka ulang daftar KPI, verify list masih
+                                      render normal (minimal 1 baris).
+                                   NOTE: tidak termasuk regresi 15 Nov 2026
+                                   (TC lama, terakhir diverifikasi sebelum
+                                   Fase 2).
+
+25   TC-PERF-KPI-06       [DONE]   TC-PERF-KPI-06-Verify-Invalid-ID-Handled-Safely.spec.ts
+                                   (S/-) Verify Invalid/Nonexistent KPI IDs Are
+                                   Handled Safely
+                                   -> [API] DELETE /api/v2/performance/kpis
+                                      body {"ids":[999999]}.
+                                   -> [API] GET /api/v2/performance/kpis/999999.
+                                   -> [API] GET /api/v2/performance/kpis/-1.
+                                   [API VERIFICATION]
+                                   -> Verify DELETE id tidak eksis -> 404
+                                      bersih (bukan 500/crash).
+                                   -> Verify GET id tidak eksis -> 404.
+                                   -> Verify GET id negatif -> 404/422 (bukan
+                                      500/leak).
+                                   NOTE: tidak termasuk regresi 15 Nov 2026
+                                   (TC lama, terakhir diverifikasi sebelum
+                                   Fase 2).
+
+26   TC-PERF-REVIEW-12    [DONE]   TC-PERF-REVIEW-12-Verify-IDOR-Cross-Employee-Review-Access.spec.ts
+                                   (S) Verify An ESS Employee Cannot Access
+                                   Another Employee's Review Data (IDOR)
+                                   -> Setup (Admin): employee B + supervisor +
+                                      Job Title, buat + Activate review B.
+                                   -> Buat akun ESS LAIN (A, tidak terkait
+                                      review B) via createEssAccount(), login
+                                      di sesi browser terpisah via loginAs().
+                                   -> [API, sbg ESS A] GET reviews/<id>/kpis,
+                                      GET reviews/<id>/evaluation/employee,
+                                      GET manage/reviews/<id> milik B.
+                                   [API VERIFICATION]
+                                   -> Verify GET kpis review orang lain TIDAK
+                                      200.
+                                   -> Verify GET evaluation/employee review
+                                      orang lain TIDAK 200.
+                                   -> Verify GET manage/reviews/<id> (endpoint
+                                      khusus Admin) TIDAK 200 utk akun ESS.
+                                   NOTE: reviewId sequential (mudah ditebak),
+                                   jadi ini skenario IDOR realistis. Diuji
+                                   dari sesi ESS sungguhan (infra Fase 1),
+                                   bukan asumsi single-role. Lolos: akses
+                                   ditolak dgn benar -- ketiga request
+                                   mendapat 403 (run 15 Nov 2026).
+
+27   TC-PERF-REVIEW-13    [DONE]   TC-PERF-REVIEW-13-Verify-ESS-Cannot-Create-Review-Via-API.spec.ts
+                                   (S) Verify An ESS Account Cannot Create/
+                                   Activate A Review Via Direct API Call
+                                   -> Buat akun ESS baru, login di sesi
+                                      terpisah.
+                                   -> [API, sbg ESS] POST manage/reviews
+                                      (empNumber & reviewerEmpNumber = diri
+                                      sendiri, periode 2026-01-01 s/d
+                                      2026-06-30, due 2026-07-15).
+                                   -> [API, sbg ESS] PUT manage/reviews/1
+                                      {activate:true}.
+                                   [API VERIFICATION]
+                                   -> Verify POST create review sbg ESS TIDAK
+                                      200.
+                                   -> Verify PUT activate sbg ESS TIDAK 200.
+                                   NOTE: menu Manage Reviews TIDAK ADA di
+                                   sidebar ESS (TC-INFRA-01), tapi menu yg
+                                   disembunyikan bukan bukti endpoint aman --
+                                   TC ini cek Broken Function-Level Access
+                                   Control. Lolos: endpoint menolak ESS --
+                                   POST dan PUT sama2 403 (run 15 Nov 2026).
+
+28   TC-PERF-EVAL-13      [DONE]   TC-PERF-EVAL-13-Verify-XSS-In-Evaluation-Comments.spec.ts
+                                   (S) Verify XSS Payloads In Evaluation
+                                   Comments Are Stored As Text, Not Executed
+                                   -> Setup: createReview() (Activated).
+                                   -> Isi rating 50 semua KPI, payload
+                                      <img src=x onerror="window.__perfXss=1">
+                                      di SEMUA komentar KPI + General Comment,
+                                      Final Rating 50, Final Comments =
+                                      payload, Date 2026-07-07, Save.
+                                   -> Reload halaman evaluasi.
+                                   [API VERIFICATION]
+                                   -> Verify Save: PUT supervisor 200 dan PUT
+                                      final 200.
+                                   [UI VERIFICATION]
+                                   -> Verify window.__perfXss undefined
+                                      (payload tidak tereksekusi).
+                                   -> Verify tidak ada <img src="x"> tersuntik
+                                      ke DOM.
+                                   -> Verify komentar grid pertama & Final
+                                      Comments kembali UTUH sbg teks biasa.
+                                   NOTE: stored XSS ditangani aman, tidak ada
+                                   bug ditemukan.
+
+================================================================================
+  GROUP 4, UNEXPECTED / EDGE CASES
+================================================================================
+
+29   TC-PERF-KPI-07       [DONE]   TC-PERF-KPI-07-Verify-Default-Scale-Is-Exclusive-Per-Job-Title.spec.ts
+                                   (B/!) Verify "Make Default Scale" Is
+                                   Silently Exclusive Per Job Title
+                                   -> Buat KPI A (Job Title "QA Lead", 0-100)
+                                      dgn Make Default Scale = ON, Save.
+                                   -> Buat KPI B (Job Title SAMA) dgn Make
+                                      Default Scale = ON, Save.
+                                   -> Buka ulang daftar KPI.
+                                   [API VERIFICATION]
+                                   -> Verify KPI A 200 dgn isDefault=true.
+                                   -> Verify KPI B DITERIMA 200 (bukan ditolak
+                                      krn Job Title sudah punya default) dgn
+                                      isDefault=true.
+                                   [UI VERIFICATION]
+                                   -> Verify baris KPI A TIDAK lagi "Yes" di
+                                      kolom Is Default.
+                                   -> Verify baris KPI B "Yes".
+                                   NOTE: [TEMUAN] eksklusivitas ditegakkan
+                                   DIAM-DIAM (KPI A un-default tanpa pesan
+                                   apa pun), bukan ditolak dan bukan 2
+                                   default sekaligus. Response KPI A tetap
+                                   isDefault:true (snapshot saat save).
+                                   Didokumentasikan sbg perilaku, bukan bug.
+
+30   TC-PERF-REVIEW-11    [DONE]   TC-PERF-REVIEW-11-Verify-Double-Click-Activate.spec.ts
+                                   (!) Verify Double-Clicking Activate Does Not
+                                   Corrupt State Or Duplicate Effects
+                                   -> Setup: employee + supervisor + Job
+                                      Title, buat review.
+                                   -> Buka saveReview/<id>, klik Activate 2x
+                                      secepat mungkin (klik kedua force, tanpa
+                                      menunggu response pertama).
+                                   -> [API] GET manage/reviews/<id>; kalau
+                                      bukan 200, cek status via daftar.
+                                   [API VERIFICATION]
+                                   -> Kalau GET 200: verify overallStatus ===
+                                      "Activated".
+                                   -> Kalau GET bukan 200 (perilaku 404 pasca-
+                                      Activate yg sudah terdokumentasi):
+                                      status direkam sbg finding.
+                                   [UI VERIFICATION]
+                                   -> Verify status di daftar = "Activated"
+                                      (satu baris, satu status, tidak ganda/
+                                      korup).
+                                   NOTE: [BUG SCRIPT ditemukan & diperbaiki]
+                                   double-click bisa meninggalkan navigasi
+                                   SPA yg masih jalan; goto() langsung
+                                   bertabrakan (net::ERR_ABORTED) -> tunggu
+                                   networkidle + 1 detik dulu. Race condition
+                                   TIDAK ditemukan di app: status final tetap
+                                   konsisten.
+
+================================================================================
+  RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
+================================================================================
+
+  Total TC modul   : 30 (KPI 10, REVIEW 13, EVAL 5, TRACKER 2)
+  Dijalankan       : 24 (full batch Performance: REVIEW-01..13,
+                     EVAL-11..15, TRACKER-01..02, KPI-07..10)
+                     KPI-01..06 TIDAK termasuk batch ini (TC lama, terakhir
+                     diverifikasi sebelum Fase 2).
+  PASSED           : 22
+  FAILED (BUG, dikonfirmasi, SENGAJA dibiarkan FAILED sesuai R3) : 2
+    -> TC-PERF-REVIEW-10 (BG-356, Low, buka ulang saveReview/<id> review
+       Activated: GET manage/reviews/<id> 404 -> "Uncaught exception: fe",
+       form kosong; TIDAK ada risiko data krn PUT field inti review
+       Activated ditolak 422; instance bug app-wide BG-199)
+    -> TC-PERF-EVAL-15 (BG-373, Medium, PUT evaluation/supervisor rating
+       "abc" -> 200 dan tersimpan 0.00, silent coercion, validasi angka
+       server-side tidak ada)
+  FAILED lain      : 0 (gagal selain 2 TC di atas = regresi, wajib
+                     diinvestigasi)
+  False positive/false passed : 0 -- semua failure di-root-cause satu per
+                     satu. Bug SCRIPT / infra yg ditemukan & diperbaiki
+                     selama P2.1:
+    -> KOREKSI BG-356: console 404 di TC Activate ternyata dari setup
+       (halaman PIM Job memicu GET admin/job-titles/<id>/specification 404),
+       setup kini set Job Title via API PUT pim/employees/<id>/job-details
+       -> TC-TC tsb bersih.
+    -> searchByEmployeeName kini MENUNGGU respons list ber-filter
+       (empNumber=...); networkidle resolve sebelum hasil filter datang ->
+       hitungan baris 0.
+    -> Opsi autocomplete dipilih by lastName unik, bukan opsi pertama (id
+       4 digit bisa match lastName acak employee lain).
+    -> REVIEW-04: cek ikon Evaluate/Edit dikembalikan jadi hard check
+       (flaky-nya akibat race searchByEmployeeName).
+    -> REVIEW-08: tunggu baris visible sebelum count() (cegah vacuous pass).
+    -> REVIEW-09: baris di-fetch ulang setelah Cancel (cegah hang
+       "element was detached").
+    -> REVIEW-11: tunggu navigasi SPA settle sebelum goto() (cegah
+       net::ERR_ABORTED).
+    -> TestReport: pageerror kini ikut expectedConsoleErrorPatterns (dulu
+       cuma console 'error').
+    -> Batch 1: KPI-09 & REVIEW-01 sempat gagal di full batch tapi 6/6 &
+       7/7 lolos terisolasi (flaky-under-load, pola P0.7); di batch 2 PASS.
+
+  RUN COMMAND (semua TC Performance, TANPA --reporter=list supaya
+  bugListReporter aktif, sesuai R8):
+    npx playwright test tests/performance --project=chromium --workers=1

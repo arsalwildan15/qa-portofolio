@@ -1,0 +1,741 @@
+================================================================================
+  DAFTAR TEST CASE, LEAVE
+  Modul    : Leave (Apply, Assign Leave, Leave List, Approval, My Leave,
+             Entitlements)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/leave/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+  [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+
+  FORMAT ID  : TC-LEAVE-<SECTION>-NN
+               (SECTION: APPLY, ASSIGN, LIST, APPROVAL, MY, ENT, IDOR)
+  FILE       : TC-LEAVE-<SECTION>-NN-Verify-Name-In-English.spec.ts
+  FOLDER     : satu subfolder per area, tests/leave/<subfolder>/:
+               TC-LEAVE-APPLY-*     -> tests/leave/apply/
+               TC-LEAVE-ASSIGN-*    -> tests/leave/assign/
+               TC-LEAVE-IDOR-01     -> tests/leave/assign/ (endpoint
+                                       Entitlements, ditaruh di assign/
+                                       krn sama-sama jalur administratif)
+               TC-LEAVE-LIST-*      -> tests/leave/leave-list/
+               TC-LEAVE-APPROVAL-*  -> tests/leave/approval/
+               TC-LEAVE-MY-*        -> tests/leave/my-leave/
+               TC-LEAVE-ENT-*       -> tests/leave/entitlements/
+
+  CAKUPAN SAAT INI: 21 TC. 16 TC lama (Apply/Assign/Leave List/IDOR, akun
+  Admin tunggal) + 5 TC lapis 1 Fase 2 (P2.3, 2026-11-15) yang memakai akun
+  ESS sungguhan (createEssAccount + loginAs, infrastruktur Fase 1):
+  APPROVAL-01..03, MY-01, ENT-01.
+
+  BELUM DICAKUP (backlog P2.3 di docs/Execution-Plan.md): Half Day/Specify
+  Time, efek Holiday, overlap, tanggal lampau, Unicode/RTL, double-click/
+  refresh/koneksi putus di Apply, approval per-hari multi-day, filter/
+  pagination Leave List, Entitlement upsert/edit/delete/boundary, Reports,
+  Configure (Leave Type/Holiday/Period/Work Week -- R6, perlu persetujuan).
+
+================================================================================
+  FUNGSI & IMPACT MODUL, LEAVE
+================================================================================
+
+  Leave adalah modul cuti OrangeHRM: Admin memberi jatah cuti (Entitlement)
+  per employee per Leave Type per Leave Period, employee mengajukan cuti
+  sendiri (Apply, status "Pending Approval"), Admin/supervisor menyetujui
+  atau menolak (Approve -> "Scheduled", Reject -> "Rejected"), dan Admin
+  juga bisa langsung membukukan cuti untuk employee (Assign Leave, langsung
+  "Scheduled" tanpa approval). Employee bisa membatalkan request miliknya
+  sendiri (Cancel -> "Cancelled").
+
+  IMPACT kalau ada gap di sini menyentuh UANG & HAK KARYAWAN secara langsung:
+  saldo cuti yang salah hitung (dobel potong, tidak dikembalikan saat
+  reject/cancel, weekend ikut terpotong) berarti karyawan kehilangan hak
+  cuti atau perusahaan membayar cuti yang tidak berhak. Gap kontrol akses
+  (ESS bisa approve cuti sendiri, approve request yang sudah dibatalkan)
+  adalah pelanggaran segregation of duties, bukan sekadar bug tampilan.
+
+================================================================================
+  CATATAN TEKNIS, LEAVE
+  Dikonfirmasi via Playwright discovery run live terhadap OrangeHRM OS 5.9
+  (demo publik), terakhir diperbarui 15 Nov 2026
+================================================================================
+
+  URL (CONFIRMED):
+    Apply Leave         : /web/index.php/leave/applyLeave
+    Assign Leave        : /web/index.php/leave/assignLeave
+    Leave List (Admin)  : /web/index.php/leave/viewLeaveList
+    My Leave (ESS)      : /web/index.php/leave/viewMyLeaveList
+    Add Entitlement     : /web/index.php/leave/addLeaveEntitlement
+    Detail request      : /web/index.php/leave/viewLeaveRequest/<id>
+  Framework  : Vue 3 + OXD Design System (oxd-* components)
+
+  LOCATORS (CONFIRMED):
+    Date input (semua form) : 'input[placeholder="yyyy-dd-mm"],
+                               input[placeholder="yyyy-mm-dd"]'
+                               (DATE_INPUT_SELECTOR, src/utils/dateInput.ts)
+                               [TEMUAN] .fill() polos pada input ini
+                               MENAMBAH (append), bukan mengganti -- wajib
+                               dikosongkan dulu (fillDate() sudah menangani).
+    Leave Type select       : page.locator('.oxd-select-text').first()
+    Leave Balance (Apply)   : page.getByText(/Day\(s\)/)
+    Comments                : page.locator('textarea')
+    Tombol Apply / Assign   : getByRole('button', { name: 'Apply' | 'Assign' })
+    Field error             : '.oxd-input-group .oxd-text--span'
+    Pesan tanpa saldo       : getByText('No Leave Types with Leave Balance')
+    Employee autocomplete   : getByPlaceholder('Type for hints...') +
+                               '.oxd-autocomplete-option' (tunggu teks
+                               "Searching...." hilang dulu)
+    Dialog override Assign  : '.oxd-dialog-container, [role="dialog"]'
+                               tombol 'Ok' / 'Cancel' (.first(), lihat NOTE
+                               TC-LEAVE-ASSIGN-02)
+    Tombol Confirm Entitle. : getByRole('button', { name: 'Confirm' })
+    Baris Leave List        : page.locator('.oxd-table-card')
+    Status chip default     : '.oxd-chip' (hapus via ikon 'i.bi-x')
+                               [TEMUAN] Leave List SELALU memasang chip
+                               "Pending Approval" secara default dan tombol
+                               Reset TIDAK menghapusnya -- chip harus
+                               dihapus eksplisit (clearStatusChip()) agar
+                               status lain bisa dicari.
+    Approve / Reject (baris): row.getByRole('button', { name, exact: true })
+    Kebab menu baris        : '.oxd-table-cell-actions button,
+                               button:has(i.bi-three-dots-vertical)'
+                               -> "Cancel Leave" / "View Leave Details"
+
+  API ENDPOINT (CONFIRMED):
+    POST /api/v2/leave/leave-entitlements
+         {empNumber, leaveTypeId, fromDate, toDate, entitlement}
+         -- tambah entitlement (Admin).
+    POST /api/v2/leave/leave-requests
+         {leaveTypeId, fromDate, toDate, comment, duration:{type}}
+         -- Apply Leave self-service (Admin maupun ESS).
+    GET  /api/v2/leave/leave-requests
+         -- daftar request MILIK SENDIRI (ESS). Status di
+            leaveBreakdown[0].name, aksi yang diizinkan di allowedActions.
+    GET  /api/v2/leave/employees/leave-requests
+         -- daftar request semua employee (Leave List Admin).
+    POST /api/v2/leave/employees/leave-requests
+         -- Assign Leave (Admin).
+    PUT  /api/v2/leave/employees/leave-requests/<id>  {action}
+         -- APPROVE / REJECT oleh Admin.
+    PUT  .../leave-requests/<id> -- Cancel (ESS di My Leave, Admin di
+         Leave List).
+    GET  /api/v2/leave/leave-balance/leave-type/<id>
+         [?fromDate&toDate&duration[type]=full_day]
+         -- saldo (real-time per tanggal kalau diberi rentang). Request
+            Pending SUDAH memotong saldo.
+    GET  /api/v2/leave/overlap-leaves?fromDate&toDate -- cek overlap.
+    GET  /api/v2/leave/leave-period -- Leave Period aktif.
+    GET  /api/v2/leave/employees/<empNumber>/entitlements -- entitlement
+         per employee.
+    Leave Type ID yang dipakai suite: 1 = "US - Vacation",
+    4 = "US - Personal", plus "US - FMLA" (dipilih by nama).
+
+  PERILAKU PENTING (dikonfirmasi live):
+    1. Tanpa entitlement, Apply Leave TIDAK bisa dipakai sama sekali
+       (halaman menampilkan "No Leave Types with Leave Balance"), jadi
+       hampir semua TC diawali createLeaveEntitlement().
+    2. Saldo dipotong SAAT APPLY (status masih "Pending Approval"), bukan
+       saat approval. Approve tidak memotong lagi; Reject dan Cancel
+       mengembalikan saldo penuh.
+    3. Rentang yang mencakup akhir pekan dipecah SERVER-SIDE jadi record
+       per hari kalender; hari Sabtu/Minggu berstatus "Weekend" 0 jam dan
+       tidak memotong saldo.
+    4. Assign Leave oleh Admin langsung "Scheduled" (melewati approval).
+       Kalau saldo tidak cukup, muncul dialog "Confirm Leave Assignment"
+       yang menawarkan OVERRIDE -- Confirm tetap membuat record walau saldo
+       0 (saldo bisa negatif). Dialog hanya muncul kalau baris entitlement
+       untuk leave type tsb ADA (walau nilainya 0).
+    5. Add Entitlement adalah UPSERT: Save memunculkan dialog konfirmasi
+       "Updating Entitlement ... 0.00 will be updated to X" BAHKAN untuk
+       employee yang belum punya entitlement sama sekali, dan dialog ini
+       bisa telat > 2.6 detik di demo yang lambat. LeaveEntitlementPage.
+       save() kini menunggu MANA DULUAN: dialog Confirm atau POST langsung.
+       Setelah save sukses, app me-redirect dirinya sendiri via timer JS --
+       page.goto() tepat di jendela itu kena net::ERR_ABORTED, jadi ada
+       jeda tetap 2 detik (settleAfterSave) + retry 1x di goto() semua
+       page object Leave.
+    6. Pemilihan Leave Type memicu fetch saldo ASYNC -- panel "Leave
+       Balance" yang dibaca terlalu cepat masih "0.00 Day(s)" (stale) dan
+       menyebabkan 400 "No Working Days Selected". selectLeaveType()
+       menunggu GET /api/v2/leave/employees selesai.
+    7. [TEMUAN APLIKASI, gap UX] Untuk rentang MULTI-hari yang overlap
+       atau melebihi saldo, client menjalankan pre-flight check sendiri
+       lalu DIAM-DIAM tidak mengirim POST -- tanpa toast, tanpa dialog.
+       Toast "Leave Balance Exceeded" hanya muncul untuk kasus 1 hari
+       (ditolak server). Karena itu TC memakai hasOverlap() dan
+       getRealTimeBalanceFor() untuk memilih tanggal yang aman.
+    8. getRealTimeBalanceFor() dan hasOverlap() mengonversi tanggal ke ISO
+       yyyy-mm-dd: endpoint API selalu ISO, berbeda dengan input UI.
+       (Bug script lama: tanggal yyyy-dd-mm dikirim mentah -> 422 untuk
+       hari > 12, atau diam-diam query tanggal yang tertukar.)
+    9. Leave Period terdefinisi (leavePeriodDefined: true), periode saat ini
+       2026-01-01 s/d 2027-01-30 -- relevan untuk boundary periode
+       (TC-LEAVE-ASSIGN-06).
+
+  KOREKSI (R4, 15 Nov 2026) -- APPROVE / REJECT BUKAN "N/A":
+    Klaim lama di LeaveListPage bahwa Approve/Reject "N/A" di demo ini
+    SALAH. Klaim itu muncul karena dulu hanya diuji pada request MILIK
+    Admin sendiri dan request hasil Assign (langsung Scheduled). Untuk
+    request "Pending Approval" yang diajukan oleh akun ESS sungguhan,
+    baris di Leave List Admin MENAMPILKAN tombol Approve / Reject dan
+    keduanya berfungsi (PUT employees/leave-requests/<id> {action}).
+    Dibuktikan oleh TC-LEAVE-APPROVAL-01 dan TC-LEAVE-APPROVAL-02.
+
+  CATATAN LINGKUNGAN -- FORMAT TANGGAL DEMO BERUBAH-UBAH:
+    Format tanggal site-wide (Admin > Localization) di demo publik bergeser
+    antara "yyyy-dd-mm" dan "yyyy-mm-dd" antar sesi, dan nilai yang DIKETIK
+    ditafsirkan sesuai format yang SEDANG tampil (mengetik "2026-07-10" di
+    bawah yyyy-dd-mm tersimpan sbg 7 Okt). Suite lama dibangun di atas
+    yyyy-dd-mm. Fix: src/utils/dateInput.ts -- DATE_INPUT_SELECTOR (cocok
+    dgn kedua placeholder) + fillDate(input, value, valueFormat) yang
+    menyusun ulang nilai ke format tampil; LeaveListPage.rowByDate() mencari
+    baris sesuai format tampil (BUKAN regex "dua-duanya", krn 2026-12-07 vs
+    2026-07-12 adalah hari berbeda). Fix ini memulihkan 4 TC lama yang
+    sempat rusak: ASSIGN-01, ASSIGN-02, LIST-01, LIST-03.
+
+  CATATAN IDENTITAS AKUN ADMIN (empNumber=7):
+    TC self-service lama (APPLY-*, LIST-01/03) memakai employee milik akun
+    Admin yang login, di-resolve lewat getLoggedInEmployeeName() (redirect
+    /pim/viewMyDetails -> empNumber, lalu GET /api/v2/pim/employees/<N>).
+    Record ini di demo publik berulang kali kembali ke snapshot yang sudah
+    korup (employeeId "CA"); helper kini SELF-HEAL otomatis (employeeId < 5
+    karakter -> ditimpa via Personal Details) sebelum dipakai untuk
+    pencarian autocomplete. TC Assign memakai pickLightlyUsedEmployee()
+    (employee terbaru, bukan empNumber 7) krn employee Admin sudah
+    menumpuk ribuan request dan bikin endpoint Leave lambat/hang.
+
+  CATATAN TESTREPORT:
+    Beberapa TC mem-whitelist console "Failed to load resource ... 4xx"
+    (APPLY-04/05, ASSIGN-01/02/04/05) -- itu adalah fetch internal app
+    sendiri (pre-check saldo / percobaan tanggal yang ditolak) yang memang
+    sah ditolak, bukan bukti bug.
+
+================================================================================
+  TEST CASES
+================================================================================
+
+No.  Test Case ID   Status   Skenario / Deskripsi
+---  -------------  -------  -----------------------------------------------
+
+================================================================================
+  GROUP 1, APPLY LEAVE (Self-Service, akun Admin)
+================================================================================
+
+ 1   TC-LEAVE-APPLY-01  [DONE]  TC-LEAVE-APPLY-01-Verify-Apply-Leave-Valid.spec.ts
+                             (+) Verify Apply Leave With Valid Data Succeeds
+                             And Deducts Balance Immediately
+                             -> Resolve employee yang login
+                                (getLoggedInEmployeeName), assign entitlement
+                                500 hari "US - Vacation" via UI Add
+                                Entitlement (dicari by employeeId).
+                             -> Buka Apply Leave, pilih "US - Vacation",
+                                catat Leave Balance.
+                             -> Cari tanggal weekday yang aman (maks 8
+                                percobaan: real-time balance >= 8 jam, bukan
+                                weekend, tidak overlap), isi From=To,
+                                comment, klik Apply.
+                             [API VERIFICATION]
+                             -> POST leave-entitlements status === 200 dan
+                                nama hasil autocomplete cocok dgn employee
+                                yang login.
+                             -> POST leave-requests status === 200, response
+                                berisi id request baru (number).
+                             -> GET employees/leave-requests: record baru
+                                punya leaveBreakdown "Pending Approval" dan
+                                allowedActions berisi "CANCEL".
+                             [UI VERIFICATION]
+                             -> Form Apply tampil (bukan "No Leave Types
+                                with Leave Balance").
+                             -> Toast "Successfully Saved" terlihat.
+                             -> Leave Balance setelah reload BERBEDA dari
+                                sebelum apply (dipotong saat apply, bukan
+                                setelah approval).
+                             NOTE [BUG SCRIPT diperbaiki, P0.7]: perbandingan
+                             nama dulu gagal terus utk employee tanpa
+                             middleName -- autocomplete Entitlement merender
+                             "First  Last" (DUA spasi, slot middleName tetap
+                             disisipkan), sedangkan getLoggedInEmployeeName()
+                             membangun nama dgn SATU spasi. Fix: normalisasi
+                             spasi berurutan sebelum dibandingkan,
+                             diverifikasi 3x stabil.
+                             NOTE: entitlement bersifat kumulatif lintas run
+                             (bukan overwrite walau wording dialog bilang
+                             "updated to"), maka nilai 500 sengaja besar.
+
+ 2   TC-LEAVE-APPLY-02  [DONE]  TC-LEAVE-APPLY-02-Verify-Weekend-Excluded-From-Balance.spec.ts
+                             (+) Verify Weekend Days Are Excluded From
+                             Balance Deduction
+                             -> Assign entitlement 500 hari, cari rentang
+                                Jumat-Senin (mencakup 1 Sabtu + 1 Minggu)
+                                dalam 60 hari ke depan yang balance-nya cukup
+                                dan tidak overlap.
+                             -> Apply Leave rentang tsb, catat balance
+                                sebelum.
+                             [API VERIFICATION]
+                             -> POST leave-requests status === 200.
+                             -> GET employees/leave-requests: leaveBreakdown
+                                level-list teragregasi jadi 1 entri "Pending
+                                Approval" dgn lengthDays = 2 (hari kerja
+                                saja, bukan 4).
+                             [UI VERIFICATION]
+                             -> Halaman detail viewLeaveRequest/<id>: tepat
+                                2 baris "Weekend" dgn durasi 0.00 jam.
+                             -> Leave Balance berkurang TEPAT 2.00 hari.
+                             NOTE [TEMUAN]: endpoint LIST meng-agregasi per
+                             status (hari Weekend tidak muncul sama sekali),
+                             sedangkan halaman detail merinci SATU baris per
+                             hari kalender termasuk Weekend.
+
+ 3   TC-LEAVE-APPLY-03  [DONE]  TC-LEAVE-APPLY-03-Verify-Required-Field-Validation.spec.ts
+                             (-) Verify Required Field Validation (From Date
+                             Not Filled)
+                             -> Assign entitlement 10 hari agar form bisa
+                                diakses, buka Apply Leave, pilih leave type,
+                                JANGAN isi tanggal, klik Apply.
+                             [API VERIFICATION]
+                             -> TIDAK ada POST /api/v2/leave/leave-requests
+                                terkirim (listener request).
+                             [UI VERIFICATION]
+                             -> Pesan error "Required" tampil.
+                             -> URL tetap di /leave/applyLeave.
+
+ 4   TC-LEAVE-APPLY-04  [DONE]  TC-LEAVE-APPLY-04-Verify-Invalid-Date-Range-Rejected.spec.ts
+                             (-/B) Verify To Date Earlier Than From Date Is
+                             Rejected
+                             -> Assign entitlement, isi From Date = weekday
+                                acak, To Date = 5 hari SEBELUMNYA, comment,
+                                klik Apply.
+                             [API VERIFICATION]
+                             -> Status POST BUKAN 200 (atau tidak terkirim).
+                             [UI VERIFICATION]
+                             -> ATAU muncul field error / toast error.
+                             Verify: salah satu sinyal penolakan di atas
+                             terpenuhi -- rentang terbalik tidak diterima
+                             diam-diam.
+                             NOTE: fetch pre-check saldo milik app sendiri
+                             kena 422 utk rentang terbalik (console "Failed
+                             to load resource ... 422" di-whitelist, bukan
+                             bug).
+
+ 5   TC-LEAVE-APPLY-05  [DONE]  TC-LEAVE-APPLY-05-Verify-Insufficient-Balance-Rejected.spec.ts
+                             (-) Verify Applying Beyond Available Balance Is
+                             Rejected
+                             -> Assign entitlement +1 hari "US - Personal"
+                                (id=4), baca saldo AKTUAL via
+                                getRealTimeBalanceFor() (tidak diasumsikan,
+                                krn entitlement kumulatif lintas run).
+                             -> Ajukan (saldo hari + 3) hari kerja berurutan
+                                mulai ~20 hari ke depan, klik Apply.
+                             [API VERIFICATION]
+                             -> POST leave-entitlements status === 200.
+                             -> Response Apply BUKAN 200.
+                             [UI VERIFICATION]
+                             -> Ditolak via toast yang menyebut "balance"
+                                ATAU silent pre-flight block (tidak ada
+                                response & tidak ada toast).
+                             NOTE [TEMUAN APLIKASI, gap UX]: utk rentang
+                             multi-hari yang melebihi saldo, client cukup
+                             TIDAK mengirim POST tanpa feedback apa pun ke
+                             user (lihat Perilaku Penting no. 7). Fungsi
+                             penolakannya benar, gap-nya ada di feedback.
+
+================================================================================
+  GROUP 2, ASSIGN LEAVE (Administratif)
+================================================================================
+
+ 6   TC-LEAVE-ASSIGN-01  [DONE]  TC-LEAVE-ASSIGN-01-Verify-Valid-Assign-Lands-Scheduled.spec.ts
+                             (+) Verify Valid Assign Leave Lands As
+                             "Scheduled" (No Approval Step)
+                             -> Pilih employee target via
+                                pickLightlyUsedEmployee(), assign
+                                entitlement 500 hari "US - Vacation".
+                             -> Assign Leave: pilih employee + leave type,
+                                isi 1 tanggal weekday, klik Assign (maks 3
+                                percobaan tanggal kalau server menolak).
+                             [API VERIFICATION]
+                             -> POST employees/leave-requests status === 200.
+                             -> TIDAK ada dialog override balance (saldo
+                                cukup).
+                             [UI VERIFICATION]
+                             -> Leave List difilter employee + status
+                                "Scheduled" (chip default dihapus dulu):
+                                baris dgn tanggal tsb muncul (rowByDate).
+                             NOTE [BUG SCRIPT diperbaiki]: rowByText('')
+                             saat semua percobaan gagal match SEMUA baris
+                             (false-positive PASS). Kini ada guard: kalau
+                             usedDate kosong, verifikasi list dilewati dan
+                             TC tetap FAILED dari check assign.
+                             NOTE: sempat rusak oleh drift format tanggal,
+                             pulih setelah fillDate()/rowByDate().
+
+ 7   TC-LEAVE-ASSIGN-02  [DONE]  TC-LEAVE-ASSIGN-02-Verify-Insufficient-Balance-Override-Dialog.spec.ts
+                             (-) Verify Insufficient-Balance Override Dialog
+                             (Cancel & Confirm Paths)
+                             -> Set entitlement "US - FMLA" = 0 secara
+                                EKSPLISIT utk employee target
+                                (pickLightlyUsedEmployee) -- menjamin baris
+                                entitlement ada DAN saldo 0.
+                             -> [Cancel path] Assign 1 hari, klik CANCEL di
+                                dialog override.
+                             -> [Confirm path] Assign 1 hari (tanggal lain),
+                                klik OK di dialog override.
+                             [API VERIFICATION]
+                             -> POST leave-entitlements status === 200.
+                             -> Cancel path: TIDAK ada POST sukses.
+                             -> Confirm path: POST status === 200 walau
+                                saldo 0.
+                             [UI VERIFICATION]
+                             -> Dialog override MUNCUL di kedua path.
+                             -> Leave List "Scheduled": TIDAK ada record utk
+                                cancelDate, ADA record utk confirmDate.
+                             NOTE [TEMUAN, business logic]: Admin secara
+                             sadar diberi opsi melewati cek saldo -> saldo
+                             bisa negatif. Didokumentasikan sbg perilaku by
+                             design yang berisiko, check TC mengharapkan
+                             record tercipta.
+                             NOTE [FIX 14 Nov 2026]: TC dulu bergantung pada
+                             saldo historis employee Admin yang ikut berubah
+                             oleh aktivitas lain di demo; dialog juga butuh
+                             baris entitlement eksplisit. Kini entitlement=0
+                             di-set sesaat sebelum test.
+                             NOTE [BUG SCRIPT diperbaiki]: tombol Ok/Cancel
+                             dialog tanpa .first() ambigu (strict mode),
+                             dan isVisible() tidak menunggu dialog render
+                             (> 600 ms) -> diganti waitFor({state:
+                             'visible'}). Sempat rusak oleh drift format
+                             tanggal, pulih setelah rowByDate().
+
+ 8   TC-LEAVE-ASSIGN-03  [DONE]  TC-LEAVE-ASSIGN-03-Verify-Required-Field-Validation.spec.ts
+                             (-) Verify Required Field Validation (No
+                             Employee/Date Selected)
+                             -> Buka Assign Leave, JANGAN isi apa pun,
+                                langsung klik Assign.
+                             [API VERIFICATION]
+                             -> TIDAK ada POST employees/leave-requests
+                                terkirim.
+                             [UI VERIFICATION]
+                             -> Pesan "Required" tampil (minimal utk
+                                Employee Name).
+                             -> URL tetap di /leave/assignLeave.
+
+ 9   TC-LEAVE-ASSIGN-05  [DONE]  TC-LEAVE-ASSIGN-05-Verify-Leap-Year-Date-Boundary.spec.ts
+                             (B) Verify Leap Year Date Boundary (29 Feb)
+                             -> Assign Leave employee target, leave type
+                                "US - FMLA", isi 29 Feb 2028 (leap year,
+                                valid), lalu ganti ke 29 Feb 2027 (bukan
+                                leap year, tanggal tidak eksis).
+                             [UI VERIFICATION]
+                             -> 2028-02-29: TIDAK ada pesan "Should be a
+                                valid date", info Balance/Day(s) tetap
+                                tampil (balance check jalan).
+                             -> 2027-02-29: pesan "Should be a valid date"
+                                muncul minimal di 1 field (From/To).
+                             NOTE: jumlah pesan (1 atau 2 field) bervariasi
+                             tergantung timing re-render, jadi dicek
+                             minimal 1, bukan exact count. Tanggal ditulis
+                             yyyy-dd-mm di spec, dikonversi fillDate() ke
+                             format tampil.
+
+10   TC-LEAVE-ASSIGN-06  [DONE]  TC-LEAVE-ASSIGN-06-Verify-Leave-Period-Boundary.spec.ts
+                             (B) Verify Date Range Spanning The Leave Period
+                             Boundary Is Handled Safely
+                             -> [API] GET /api/v2/leave/leave-period,
+                                konfirmasi periode terdefinisi.
+                             -> Assign Leave "US - FMLA", isi rentang
+                                29 Jan 2027 s/d 2 Feb 2027 (melintasi batas
+                                periode 30/31 Jan).
+                             [API VERIFICATION]
+                             -> meta.leavePeriodDefined === true dan
+                                currentLeavePeriod.endDate ada.
+                             [UI VERIFICATION]
+                             -> TIDAK ada error "Should be a valid date".
+                             -> Info Balance/Day(s) tetap tampil.
+                             -> TIDAK ada "NaN"/"undefined" ter-render.
+                             NOTE [TEMUAN]: Leave Period (setara fiscal
+                             year) sebelumnya dianggap "tidak relevan" di
+                             taksonomi 3.4 -- ternyata ADA dan relevan.
+
+================================================================================
+  GROUP 3, LEAVE LIST (Admin)
+================================================================================
+
+11   TC-LEAVE-LIST-01  [DONE]  TC-LEAVE-LIST-01-Verify-Search-Filter-By-Status.spec.ts
+                             (+) Verify Search/Filter By Status Returns
+                             Matching Records
+                             -> Assign entitlement 500 hari, apply 1 hari
+                                weekday tanpa overlap (status "Pending
+                                Approval").
+                             -> Leave List: filter employee, Search (chip
+                                default "Pending Approval").
+                             -> Hapus chip, pilih status "Rejected", Search.
+                             [API VERIFICATION]
+                             -> POST leave-requests status === 200.
+                             [UI VERIFICATION]
+                             -> Record baru MUNCUL di filter "Pending
+                                Approval".
+                             -> Record baru TIDAK muncul di filter
+                                "Rejected" (filter benar-benar diterapkan
+                                server-side).
+                             NOTE [TEMUAN]: chip "Pending Approval" sticky,
+                             tidak hilang hanya dgn memilih status lain di
+                             dropdown -- tanpa clearStatusChip() search
+                             tetap terfilter ke Pending. Sempat rusak oleh
+                             drift format tanggal, pulih setelah rowByDate().
+
+12   TC-LEAVE-LIST-03  [DONE]  TC-LEAVE-LIST-03-Verify-Cancel-Leave-Restores-Balance.spec.ts
+                             (+) Verify Cancel Leave Restores The Deducted
+                             Balance
+                             -> Assign entitlement, catat balance, apply 1
+                                hari, catat balance lagi.
+                             -> Leave List: cari baris tanggal tsb, kebab
+                                menu -> "Cancel Leave".
+                             [API VERIFICATION]
+                             -> POST leave-requests status === 200.
+                             -> Response cancel (non-GET leave-requests)
+                                diterima.
+                             [UI VERIFICATION]
+                             -> Balance berkurang >= 1 hari setelah apply.
+                             -> Baris record ditemukan di Leave List.
+                             -> Balance setelah cancel SAMA dgn sebelum
+                                apply (selisih < 0.01).
+                             NOTE [BUG SCRIPT diperbaiki]: cancelLeave() dulu
+                             mengasumsikan selalu ada dialog "Yes" -- cancel
+                             request Pending ternyata TANPA dialog, langsung
+                             toast "Successfully Updated". Listener response
+                             kini dipasang sebelum klik. Sempat rusak oleh
+                             drift format tanggal, pulih setelah rowByDate().
+
+================================================================================
+  GROUP 4, APPROVAL (Cross-Role ESS / Admin)
+================================================================================
+
+13   TC-LEAVE-APPROVAL-01  [DONE]  TC-LEAVE-APPROVAL-01-Verify-ESS-Apply-Admin-Approve.spec.ts
+                             (+) Verify An ESS Leave Request Can Be Approved
+                             By Admin (Pending -> Scheduled)
+                             -> Setup (createEssLeaveRequest, apply: false):
+                                akun ESS baru + entitlement 10 hari
+                                "US - Vacation" via API.
+                             -> [ESS UI] Apply Leave 1 hari weekday (~21
+                                hari ke depan).
+                             -> [Admin UI] Leave List, cari employee ESS
+                                (lastName), klik Approve di barisnya.
+                             [API VERIFICATION]
+                             -> POST leave-requests (ESS) 200 + id ada.
+                             -> Sebelum approve (sesi ESS): status "Pending
+                                Approval", saldo 9.
+                             -> PUT employees/leave-requests/<id> (approve)
+                                status === 200.
+                             -> Sesudah approve (sesi ESS): status
+                                "Scheduled", saldo TETAP 9 (tidak terpotong
+                                dobel), allowedActions masih berisi
+                                "CANCEL".
+                             [UI VERIFICATION]
+                             -> Tombol Approve tersedia di baris Leave List
+                                Admin utk request milik ESS.
+                             NOTE: TC inilah bukti KOREKSI R4 -- Approve
+                             BUKAN "N/A" (lihat Catatan Teknis).
+
+14   TC-LEAVE-APPROVAL-02  [DONE]  TC-LEAVE-APPROVAL-02-Verify-Reject-Restores-Balance.spec.ts
+                             (+) Verify Rejecting An ESS Leave Request
+                             Restores Its Balance And Is Terminal
+                             -> Setup: akun ESS + entitlement 10 hari + 1
+                                request Pending (via API).
+                             -> [Admin UI] Leave List, cari employee ESS,
+                                klik Reject.
+                             -> [Admin API] PUT APPROVE ke request yang sudah
+                                di-reject.
+                             [API VERIFICATION]
+                             -> Sebelum: "Pending Approval", saldo 9.
+                             -> PUT reject status === 200.
+                             -> Sesudah (sesi ESS): status "Rejected", saldo
+                                KEMBALI 10, allowedActions kosong.
+                             -> APPROVE setelah Reject ditolak (bukan 200)
+                                -- Rejected adalah status terminal.
+                             [UI VERIFICATION]
+                             -> Tombol Reject tersedia & berfungsi di baris
+                                Leave List Admin.
+
+15   TC-LEAVE-APPROVAL-03  [DONE]  TC-LEAVE-APPROVAL-03-Verify-ESS-Cannot-Approve-Own-Leave.spec.ts
+                             (S) Verify An ESS Employee Cannot Approve Their
+                             Own Leave Request (Segregation Of Duties /
+                             BFLAC)
+                             -> Setup: akun ESS + 1 request Pending miliknya.
+                             -> [ESS API] PUT
+                                /api/v2/leave/employees/leave-requests/<id>
+                                {action: "APPROVE"} langsung dari sesi ESS.
+                             [API VERIFICATION]
+                             -> allowedActions ESS hanya ["CANCEL"].
+                             -> PUT APPROVE oleh pemilik request ditolak
+                                (bukan 200).
+                             -> Status tetap "Pending Approval".
+                             NOTE: endpoint approval Admin dipanggil
+                             langsung (bypass UI) utk membuktikan kontrol
+                             ada di server, bukan sekadar tombol yang
+                             disembunyikan.
+
+================================================================================
+  GROUP 5, MY LEAVE (ESS)
+================================================================================
+
+16   TC-LEAVE-MY-01  [DONE]  TC-LEAVE-MY-01-Verify-ESS-Cancel-Own-Pending-Leave.spec.ts
+                             (+) Verify An ESS Employee Can See And Cancel
+                             Their Own Pending Leave In My Leave
+                             -> Setup: akun ESS + entitlement 10 hari + 1
+                                request Pending (saldo 9).
+                             -> [ESS UI] Buka /leave/viewMyLeaveList, cari
+                                baris "Pending Approval", klik tombol
+                                Cancel inline (fallback: kebab menu ->
+                                "Cancel Leave").
+                             -> [Admin API] PUT APPROVE ke request yang sudah
+                                dibatalkan.
+                             [API VERIFICATION]
+                             -> PUT .../leave-requests/<id> (cancel) status
+                                === 200.
+                             -> Sesudah (sesi ESS): status "Cancelled",
+                                saldo KEMBALI 10.
+                             -> APPROVE request Cancelled ditolak (bukan
+                                200).
+                             [UI VERIFICATION]
+                             -> Request Pending milik ESS tampil di My Leave
+                                (ditunggu maks 15 detik).
+
+================================================================================
+  GROUP 6, ENTITLEMENTS
+================================================================================
+
+17   TC-LEAVE-ENT-01  [DONE]  TC-LEAVE-ENT-01-Verify-Add-Entitlement-Visible-To-ESS.spec.ts
+                             (+) Verify An Entitlement Added By Admin Becomes
+                             The ESS Employee's Visible Balance
+                             -> Setup: akun ESS baru TANPA entitlement.
+                             -> [ESS UI] Buka Apply Leave sebelum
+                                entitlement.
+                             -> [Admin UI] Add Entitlement 5 hari
+                                "US - Vacation" (employee dicari via
+                                lastName unik), konfirmasi dialog
+                                "Updating Entitlement".
+                             -> [ESS] Cek saldo & buka Apply Leave lagi.
+                             [API VERIFICATION]
+                             -> POST leave-entitlements status === 200,
+                                nama hasil autocomplete mengandung lastName
+                                ESS.
+                             -> GET leave-balance/leave-type/1 dari sesi ESS:
+                                balance === 5.
+                             [UI VERIFICATION]
+                             -> Sebelum: "No Leave Types with Leave Balance"
+                                tampil.
+                             -> Sesudah: dropdown Leave Type tampil, pesan
+                                kosong hilang.
+                             NOTE: dialog "Updating Entitlement ... 0.00 will
+                             be updated to 5" tetap muncul walau ini
+                             entitlement PERTAMA (lihat Perilaku Penting
+                             no. 5).
+
+================================================================================
+  GROUP 7, SECURITY / IDOR
+================================================================================
+
+18   TC-LEAVE-APPLY-06  [DONE]  TC-LEAVE-APPLY-06-Verify-XSS-SQLi-In-Comments.spec.ts
+                             (S) Verify XSS/SQLi Payload In Apply Leave
+                             Comments Does Not Execute Or Break The App
+                             -> Assign entitlement, cari tanggal aman, isi
+                                Comments dgn payload gabungan
+                                <script>window.__xssApplyComment=true
+                                </script>' OR '1'='1'; DROP TABLE
+                                ohrm_leave;--, klik Apply.
+                             [API VERIFICATION]
+                             -> POST leave-requests status === 200 (payload
+                                diterima sbg string literal).
+                             [UI VERIFICATION]
+                             -> window.__xssApplyComment TIDAK ter-set
+                                (script tidak dieksekusi).
+                             -> Leave List masih render normal (ada baris
+                                ATAU "No Records Found"), tidak error.
+
+19   TC-LEAVE-ASSIGN-04  [DONE]  TC-LEAVE-ASSIGN-04-Verify-XSS-In-Comments.spec.ts
+                             (S) Verify XSS Payload In Assign Leave Comments
+                             Does Not Execute
+                             -> Employee target (pickLightlyUsedEmployee) +
+                                entitlement 500 hari, isi Comments Assign
+                                Leave dgn <script>window.__xssAssignComment=
+                                true</script>, klik Assign (maks 3 percobaan
+                                tanggal).
+                             [API VERIFICATION]
+                             -> POST employees/leave-requests status === 200.
+                             [UI VERIFICATION]
+                             -> window.__xssAssignComment TIDAK ter-set.
+                             NOTE: jalur administratif, titik input terpisah
+                             dari Apply Leave (TC-LEAVE-APPLY-06).
+
+20   TC-LEAVE-LIST-02  [DONE]  TC-LEAVE-LIST-02-Verify-IDOR-View-Leave-Request-Details.spec.ts
+                             (S) Verify Access Control On Leave Request
+                             Details (IDOR Check)
+                             -> [API] GET /api/v2/leave/leave-requests/1,
+                                /999999, dan /-1 dgn sesi Admin.
+                             -> Clear cookies, GET /leave-requests/1 lagi
+                                tanpa sesi.
+                             [API VERIFICATION]
+                             -> id=1: 200 (Admin berhak melihat semua leave
+                                by design) ATAU 404; kalau 200, shape
+                                response sesuai skema (data.id ada).
+                             -> id=999999: 404 (bukan 500, bukan 200 data
+                                palsu).
+                             -> id=-1: 4xx yang jelas.
+                             -> Tanpa sesi: BUKAN 200.
+                             NOTE: pengujian IDOR lintas role (ESS vs data
+                             employee lain) belum di TC ini; kontrol akses
+                             ESS diuji di TC-LEAVE-APPROVAL-03.
+
+21   TC-LEAVE-IDOR-01  [DONE]  TC-LEAVE-IDOR-01-Verify-Entitlements-Invalid-ID-Handled-Safely.spec.ts
+                             (S/-) Verify Invalid Employee/Entitlement IDs
+                             Are Handled Safely On The Entitlements API
+                             -> [API] GET employees/999999/entitlements,
+                                GET employees/-1/entitlements, DELETE
+                                leave-entitlements/999999.
+                             [API VERIFICATION]
+                             -> empNumber tidak eksis -> 404 bersih.
+                             -> empNumber negatif -> 404 bersih.
+                             -> DELETE ID tidak eksis -> 405 (ditolak aman,
+                                bukan 500/crash).
+                             NOTE: melengkapi IDOR coverage dari
+                             leave-requests (TC-LEAVE-LIST-02) ke endpoint
+                             Entitlements. File ada di tests/leave/assign/.
+
+================================================================================
+  RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
+================================================================================
+
+  Total TC         : 21 (16 TC lama + 5 TC lapis 1 P2.3: APPROVAL-01/02/03,
+                     MY-01, ENT-01)
+  PASSED           : 21 (verifikasi gabungan 15 Nov 2026, seluruh suite
+                     Leave)
+  FAILED           : 0
+  Bug aplikasi baru: tidak ada. Temuan yang tercatat (bukan kegagalan TC):
+    -> Override saldo di Assign Leave bisa membuat saldo negatif
+       (TC-LEAVE-ASSIGN-02, perilaku by design yang berisiko).
+    -> Silent pre-flight block tanpa feedback utk rentang multi-hari yang
+       overlap/melebihi saldo (TC-LEAVE-APPLY-05, gap UX).
+  Koreksi dokumentasi: klaim "Approve/Reject N/A" dicabut (R4), dibuktikan
+    salah oleh TC-LEAVE-APPROVAL-01/02.
+  Perbaikan lingkungan/script pada sesi ini:
+    -> dateInput.ts (fillDate) + LeaveListPage.rowByDate(): format tanggal
+       demo yang bergeser yyyy-dd-mm <-> yyyy-mm-dd; memulihkan ASSIGN-01,
+       ASSIGN-02, LIST-01, LIST-03.
+    -> LeaveEntitlementPage.save() menunggu dialog Confirm ATAU POST
+       (dialog "Updating Entitlement" bisa telat > 2.6 detik).
+    -> getLoggedInEmployeeName() self-heal identitas empNumber=7.
+    -> Normalisasi spasi nama di TC-LEAVE-APPLY-01 (P0.7).
+  False positive/false passed : 0 (guard usedDate kosong di ASSIGN-01
+                                   mencegah PASS palsu dari rowByText(''))
+
+  RUN COMMAND (semua TC):
+    npx playwright test tests/leave --project=chromium --workers=1

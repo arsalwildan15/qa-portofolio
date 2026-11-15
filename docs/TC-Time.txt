@@ -1,0 +1,553 @@
+================================================================================
+  DAFTAR TEST CASE, TIME
+  Modul    : Time (Timesheets, Timesheet Approval, Attendance, Reports)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/time/*
+             (+ /web/index.php/attendance/* utk Employee Records)
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+  [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+  [TEMUAN]      = Perilaku yang didokumentasikan via report.finding() /
+                   catatan, bukan pass/fail tegas (mis. keputusan desain)
+
+  FORMAT ID  : TC-TIME-<SECTION>-NN
+               SECTION: TIMESHEET (My Timesheet), TS-SUBMIT (ESS submit),
+               TS-APPROVAL (alur approval Admin <-> ESS), PUNCH (Punch
+               In/Out self-service), ADMIN-ATTENDANCE (Employee Records /
+               access control API), REPORTS (Employee Reports)
+  FILE       : TC-TIME-<SECTION>-NN-Verify-Name-In-English.spec.ts
+  FOLDER     : tests/time/timesheet/  (TIMESHEET-*, TS-SUBMIT-*, TS-APPROVAL-*)
+               tests/time/attendance/ (PUNCH-*, ADMIN-ATTENDANCE-*, REPORTS-*)
+               NOTE: TC-TIME-REPORTS-01 dan TC-TIME-ADMIN-ATTENDANCE-02
+               secara lokasi ada di attendance/, walau keduanya juga
+               menyentuh data timesheet (REPORTS-01 mengisi jam via My
+               Timesheet; ADMIN-ATTENDANCE-02 juga menguji endpoint
+               timesheet entries). Pengelompokan di dokumen ini mengikuti
+               FUNGSI yg diuji, bukan folder.
+
+================================================================================
+  FUNGSI & IMPACT MODUL, TIME
+================================================================================
+
+  Time adalah modul pencatatan jam kerja OrangeHRM, terdiri dari 3 alur:
+  (1) TIMESHEET: karyawan (ESS) mengisi jam per Project + Activity per hari
+      dalam satu periode mingguan, Save, lalu Submit ke atasan/admin;
+  (2) TIMESHEET APPROVAL: Admin/supervisor melihat timesheet SUBMITTED di
+      "Timesheets Pending Action", lalu Approve atau Reject (dgn komentar);
+  (3) ATTENDANCE: Punch In/Out harian (self-service), plus Admin bisa
+      melihat & melakukan proxy punch atas nama employee lain via Employee
+      Records. Ditambah Reports yg membaca kembali jam yg sudah dicatat.
+
+  IMPACT kalau ada gap di sini: data Time adalah dasar perhitungan jam
+  kerja, billing project ke customer, dan (di banyak organisasi) payroll/
+  lembur. Gap state machine (mis. timesheet bisa di-Approve tanpa pernah
+  di-Submit karyawan, atau karyawan bisa meng-Approve timesheet-nya
+  sendiri) langsung berarti jam kerja yg belum diverifikasi ikut terhitung
+  dan pemisahan tugas (segregation of duties) karyawan vs approver jebol.
+  Karena itu alur approval diuji CROSS-ROLE dgn akun ESS sungguhan (sesi
+  browser terpisah), bukan hanya dari sisi admin.
+
+================================================================================
+  CATATAN TEKNIS, TIME
+  Dikonfirmasi via Playwright discovery run live terhadap OrangeHRM OS 5.x
+  (demo publik), mayoritas tervalidasi ulang 15 Nov 2026
+================================================================================
+
+  Framework  : Vue 3 + OXD Design System (oxd-* components)
+  Format tgl : placeholder input tanggal di demo ini "yyyy-dd-mm" (bisa juga
+               "yyyy-mm-dd" tergantung config) -- semua page object Time
+               memakai DATE_INPUT_SELECTOR (src/utils/dateInput.ts) yg
+               mencocokkan KEDUA format, bukan hardcode satu placeholder.
+
+  URL (CONFIRMED):
+    My Timesheet (ESS/diri sendiri) : /web/index.php/time/viewMyTimesheet
+    Employee Timesheets (Admin)     : /web/index.php/time/viewEmployeeTimesheet
+                                      (judul list "Timesheets Pending Action")
+    Detail timesheet (Admin)        : /web/index.php/time/viewTimesheet/
+                                      employeeId/<empNumber>?startDate=<senin>
+                                      (tombol Edit / Reject / Approve + 1
+                                      textarea komentar)
+    Punch In/Out                    : TIDAK ada deep link yg dikonfirmasi
+                                      reliable -- navigasi via
+                                      time/viewEmployeeTimesheet -> tab
+                                      "Attendance" -> "Punch In/Out"
+    Employee Records (Admin)        : /web/index.php/attendance/viewAttendanceRecord
+    Employee Reports                : /web/index.php/time/displayEmployeeReportCriteria
+
+  LOCATORS (CONFIRMED):
+    MyTimesheetPage (src/pages/MyTimesheetPage.ts):
+      Edit / Save / Submit button : page.getByRole('button', { name: 'Edit' | 'Save' | 'Submit' })
+      Project input               : page.getByPlaceholder('Type for hints...').first()
+      Activity dropdown           : page.locator('.oxd-select-text').first()
+      Duration input per hari     : page.locator('td.orangehrm-timesheet-table-body-cell.\\--duration-input input')
+                                    [TEMUAN] input durasi TIDAK punya
+                                    placeholder/name sama sekali (bare
+                                    <input class="oxd-input">), harus diakses
+                                    POSISIONAL: index 0 = Senin ... 6 = Minggu.
+      Status text                 : page.getByText('Status:') -> "Status: Not
+                                    Submitted" / "Submitted" / "Approved"
+      [BUG SCRIPT, diperbaiki] Opsi index 0 di dropdown Activity adalah
+      placeholder "-- Select --", bukan opsi sungguhan. Versi awal
+      fillFirstRow() memilih placeholder itu sendiri, Save lalu gagal diam2
+      dgn error client-side "Select an Activity". Sekarang placeholder &
+      "No Records Found" difilter keluar.
+      [TEMUAN] Sebagian project seed di demo shared ini punya NOL activity
+      terkonfigurasi. fillFirstRow() mencoba kandidat project berurutan
+      (ACME, Apache, Coca-Cola, Fresh Books, FreeWave) dan memakai yg
+      pertama yg dropdown Activity-nya benar2 berisi opsi.
+
+    EmployeeTimesheetPage (src/pages/EmployeeTimesheetPage.ts):
+      Baris Pending Action        : page.locator('.oxd-table-card').filter({ hasText: <lastName ESS> })
+      Tombol View per baris       : row.getByRole('button', { name: 'View' })
+      Komentar                    : page.locator('textarea')
+      Approve / Reject            : page.getByRole('button', { name: 'Approve' | 'Reject', exact: true })
+
+    TimeAttendancePage (src/pages/TimeAttendancePage.ts):
+      Submit button (In/Out)      : page.locator('button[type="submit"]')
+                                    (label "In" atau "Out" tergantung state)
+      Note                        : page.locator('textarea')
+      Time input                  : page.locator('input[placeholder="hh:mm"]').first()
+
+    AdminAttendanceRecordsPage (src/pages/AdminAttendanceRecordsPage.ts):
+      Employee name               : page.getByPlaceholder('Type for hints...')
+      Tombol View (search)        : page.getByRole('button', { name: 'View' }).first()
+      Tombol Add (proxy punch)    : page.getByRole('button', { name: 'Add' })
+      Tombol In / Out             : page.getByRole('button', { name: 'In' | 'Out', exact: true })
+
+    TimeEmployeeReportPage (src/pages/TimeEmployeeReportPage.ts):
+      Employee name               : page.getByPlaceholder('Type for hints...').first()
+      From / To                   : page.getByPlaceholder('From' | 'To')
+      Tombol View                 : page.getByRole('button', { name: 'View' })
+
+  API ENDPOINT (CONFIRMED):
+    GET  /api/v2/time/timesheets/default
+         , timesheet minggu berjalan milik user yg login. Response berisi
+           data.id, data.startDate (Senin), data.status.id.
+    PUT  /api/v2/time/timesheets/<id>/entries
+         , SAVE. Body: {entries:[{projectId, activityId, dates:{
+           "yyyy-mm-dd":{duration:"hh:mm"}}}], deletedEntries:[]}.
+           Response data[0].total.label = total jam (mis. "15:30").
+    GET  /api/v2/time/timesheets/<id>/entries
+         , dipanggil setelah load/reload My Timesheet (sesudah GET default).
+    PUT  /api/v2/time/timesheets/<id>          {action:"SUBMIT"}
+         , SUBMIT oleh pemilik timesheet (ESS).
+    PUT  /api/v2/time/employees/<empNumber>/timesheets/<id>  {action, comment}
+         , APPROVE / REJECT oleh Admin/supervisor.
+    POST /api/v2/attendance/records            , Punch In
+    PUT  /api/v2/attendance/records            , Punch Out (endpoint SAMA,
+                                                 method beda)
+    GET  /api/v2/attendance/punch-in/overlaps  , validasi async saat form
+         /api/v2/attendance/punch-out/overlaps   proxy punch dibuka
+    GET  /api/v2/attendance/employees/<empNumber>/records
+    GET  /api/v2/time/reports/data             , data Employee Report
+
+  STATUS TIMESHEET (CONFIRMED, status.id):
+    "NOT SUBMITTED" (PAKAI SPASI, bukan underscore) -> SUBMITTED ->
+    APPROVED | REJECTED. REJECTED BUKAN terminal: ESS bisa Submit ulang
+    -> kembali SUBMITTED.
+
+  PERILAKU PENTING (CONFIRMED):
+    [TEMUAN] Timesheet employee BARU dibuat oleh PAGE LOAD, bukan API create.
+      Utk employee yg baru dibuat, GET timesheets/default mengembalikan
+      id:null sampai halaman time/viewMyTimesheet dibuka SEKALI oleh
+      employee tsb. Tidak ada request "create timesheet" yg teramati; load
+      halaman itu sendiri yg membuat record-nya. Util createEssTimesheet()
+      sengaja membuka halaman ini dulu sebelum membaca id.
+    [TEMUAN] Reject TANPA komentar DITERIMA server (probe 15 Nov 2026).
+      Dicatat sbg finding (bisa jadi keputusan desain), BUKAN bug.
+    [TEMUAN] Approve timesheet yg BELUM PERNAH di-Submit via API DITOLAK
+      (400) -- state machine dijaga di server, tidak cuma disembunyikan UI.
+    [TEMUAN] Halaman Punch In/Out TIDAK re-render otomatis setelah POST:
+      tombol masih berlabel "In" sesaat setelah submit walau API sudah 200.
+      Perlu navigasi ulang (goto()) utk melihat state terbaru.
+    [BUG SCRIPT, diperbaiki] Punch Out memakai PUT (bukan POST) ke endpoint
+      yg sama. Versi awal page object hanya menunggu POST, sehingga submit()
+      saat Punch Out selalu timeout walau request-nya sukses.
+    [BUG SCRIPT, workaround] Deep link attendance/viewAttendanceRecord?
+      employeeId=X&date=Y dgn tanggal yg dibangun manual TIDAK reliable:
+      kadang render halaman "No Records Found" terpotong tanpa search form
+      & tanpa tombol "Add". Jalur reliable: list page -> search nama ->
+      klik "View" pada hasil.
+    [BUG SCRIPT, diperbaiki] Form proxy punch memicu beberapa GET overlaps
+      async sesaat setelah render; klik "In" sebelum GET terakhir selesai
+      TIDAK memicu POST apa pun. openAddForm() kini menunggu eksplisit
+      response overlaps tsb.
+
+  SEED DATA DEMO (CONFIRMED 15 Nov 2026):
+    Project "ACME Ltd" id 2, Activity "Administration" id 11 -- dipakai
+    createEssTimesheet() utk mengisi entries via API. Kalau demo reset
+    mengubah id ini, PUT entries gagal keras (bukan diam2 salah isi).
+
+  UTIL PENDUKUNG:
+    createEssAccount()  , buat employee baru + login ESS sekaligus via Add
+                          Employee "Create Login Details" (role SELALU ESS,
+                          tidak ada role selector). Linkage employee<->user
+                          dijamin benar, tanpa pencarian nama yg ambigu.
+    loginAs()           , buka browser context BARU yg terisolasi & login
+                          dgn kredensial tertentu -> 1 test bisa
+                          mengendalikan 2 identitas sekaligus (Admin + ESS).
+    createEssTimesheet(), createEssAccount + loginAs + buka My Timesheet
+                          (memicu pembuatan timesheet) + PUT entries 8:00
+                          (Senin) + 7:30 (Selasa) + opsional SUBMIT. Semua
+                          via API milik ESS sendiri (setup saja).
+    getEssTimesheetStatus(), baca status.id timesheet default dari sesi ESS.
+
+================================================================================
+  TEST CASES
+================================================================================
+
+No.  Test Case ID              Status   Skenario / Deskripsi
+---  ------------------------  -------  ----------------------------------------
+
+================================================================================
+  GROUP 1, TIMESHEET (MY TIMESHEET)
+================================================================================
+
+ 1   TC-TIME-TIMESHEET-01  [DONE]  TC-TIME-TIMESHEET-01-Verify-Add-Hours-Valid.spec.ts
+                             (+) Verify Logging Hours Against A Project/
+                             Activity Succeeds And Persists
+                             -> Login Admin, buka My Timesheet, klik Edit.
+                             -> Isi Project + Activity pada baris pertama
+                                (fillFirstRow, kandidat ACME/Apache/
+                                Coca-Cola/Fresh Books/FreeWave).
+                             -> Isi "2:00" pada kolom Senin, klik Save.
+                             [API VERIFICATION]
+                             -> Verify response Save (PUT .../entries)
+                                status === 200.
+                             [UI VERIFICATION]
+                             -> Verify toast "Successfully Saved" muncul.
+                             -> Reload, tunggu GET .../timesheets/<id>/entries
+                                selesai, verify nama Project & total "02:00"
+                                masih tampil di tabel.
+                             NOTE [BUG SCRIPT, diperbaiki]: (1) reload sesaat
+                             setelah save kadang kena ERR_ABORTED karena app
+                             melakukan self-redirect -> di-retry sekali;
+                             (2) waitForLoadState('networkidle') resolve di
+                             antara GET default dan GET entries -> diganti
+                             menunggu eksplisit GET entries.
+
+ 2   TC-TIME-TIMESHEET-02  [DONE]  TC-TIME-TIMESHEET-02-Verify-Duration-Format-Validation.spec.ts
+                             (-/B) Verify Duration Format Validation (>24 Jam
+                             Dan Negatif)
+                             -> Buka My Timesheet, Edit, isi Project +
+                                Activity baris pertama.
+                             -> Isi durasi "99:99" pada Senin, klik Save.
+                             -> Isi durasi "-2:00" pada Senin, klik Save.
+                             [API VERIFICATION]
+                             -> Verify TIDAK ada request POST/PUT ke
+                                /api/v2/time/ terkirim utk kedua nilai
+                                (save() === null).
+                             [UI VERIFICATION]
+                             -> Verify pesan "Should Be Less Than 24 and in
+                                HH:MM or Decimal Format" muncul utk kedua
+                                nilai.
+                             NOTE: validasi terjadi CLIENT-SIDE; nilai invalid
+                             tidak pernah sampai ke server.
+
+================================================================================
+  GROUP 2, TIMESHEET SUBMIT & APPROVAL (CROSS-ROLE ESS <-> ADMIN)
+================================================================================
+
+ 3   TC-TIME-TS-SUBMIT-01  [DONE]  TC-TIME-TS-SUBMIT-01-Verify-ESS-Fill-And-Submit-Timesheet.spec.ts
+                             (+) Verify ESS Employee Can Fill And Submit The
+                             Weekly Timesheet, And It Reaches Admin Pending
+                             List
+                             -> Setup: buat akun ESS baru (createEssAccount),
+                                login di sesi browser terpisah (loginAs).
+                             -> [ESS UI] Buka My Timesheet minggu berjalan.
+                             -> Edit, isi Project + Activity baris pertama,
+                                isi "8" (Senin) dan "7.5" (Selasa) --
+                                format desimal -- lalu Save.
+                             -> Klik Submit.
+                             -> [Admin UI] Buka Employee Timesheets.
+                             [API VERIFICATION]
+                             -> Verify Save entries status === 200.
+                             -> Verify total jam di response === "15:30"
+                                (8 + 7.5 dikonversi ke hh:mm).
+                             -> Verify response Submit (PUT
+                                /api/v2/time/timesheets/<id>) status.id ===
+                                "SUBMITTED".
+                             -> Verify GET timesheets/default dari sesi ESS
+                                === "SUBMITTED".
+                             [UI VERIFICATION]
+                             -> Verify status awal "Status: Not Submitted".
+                             -> Verify baris ESS (dicari via lastName unik)
+                                muncul di "Timesheets Pending Action".
+                             NOTE: alur ini sepenuhnya lewat UI (bukan util
+                             createEssTimesheet) supaya Edit/Save/Submit
+                             dari sisi karyawan benar2 teruji.
+
+ 4   TC-TIME-TS-APPROVAL-01  [DONE]  TC-TIME-TS-APPROVAL-01-Verify-Admin-Approve-Timesheet.spec.ts
+                             (+) Verify Admin Can Approve A Submitted ESS
+                             Timesheet (With Comment)
+                             -> Setup: createEssTimesheet() -> ESS baru +
+                                timesheet minggu ini SUBMITTED (15:30 jam).
+                             -> [Admin UI] Employee Timesheets -> baris ESS
+                                -> View -> isi komentar "Disetujui, sesuai
+                                project ACME." -> Approve.
+                             -> [ESS UI] Buka My Timesheet.
+                             -> [Admin UI] Buka lagi Employee Timesheets.
+                             [API VERIFICATION]
+                             -> Verify PUT /api/v2/time/employees/<emp>/
+                                timesheets/<id> status === 200 dan
+                                status.id === "APPROVED".
+                             -> Verify status dari sesi ESS === "APPROVED".
+                             -> Payload Approve dicatat via report.finding().
+                             [UI VERIFICATION]
+                             -> Verify baris ESS ada di Pending Action
+                                sebelum Approve.
+                             -> Verify ESS melihat "Status: Approved" dan
+                                tombol Submit TIDAK ada lagi.
+                             -> Verify baris ESS HILANG dari Pending Action
+                                setelah Approve.
+
+ 5   TC-TIME-TS-APPROVAL-02  [DONE]  TC-TIME-TS-APPROVAL-02-Verify-Reject-Allows-Resubmit.spec.ts
+                             (+) Verify A Rejected Timesheet Can Be
+                             Resubmitted By The ESS (State Machine)
+                             -> Setup: createEssTimesheet() -> timesheet
+                                SUBMITTED.
+                             -> [Admin UI] Pending Action -> View -> isi
+                                komentar alasan "Jam Selasa belum sesuai,
+                                mohon direvisi." -> Reject.
+                             -> [ESS API] PUT /api/v2/time/timesheets/<id>
+                                {action:"SUBMIT"} (submit ulang).
+                             [API VERIFICATION]
+                             -> Verify Reject status === 200 dan status.id
+                                === "REJECTED".
+                             -> Verify status dari sesi ESS === "REJECTED".
+                             -> Verify resubmit status === 200 dan status
+                                ESS kembali "SUBMITTED".
+                             [UI VERIFICATION]
+                             -> Verify baris ESS ada di Pending Action
+                                sebelum Reject.
+                             NOTE: berbeda dgn modul Claim, Reject di
+                             Timesheet BUKAN status terminal. [TEMUAN] probe
+                             15 Nov 2026: Reject TANPA komentar juga diterima
+                             server -- dicatat sbg finding, bukan bug.
+
+ 6   TC-TIME-TS-APPROVAL-04  [DONE]  TC-TIME-TS-APPROVAL-04-Verify-Approve-Unsubmitted-Timesheet-Rejected.spec.ts
+                             (-) Verify A Timesheet That Was Never Submitted
+                             Cannot Be Approved Via API (State Machine
+                             Bypass)
+                             -> Setup: createEssTimesheet(..., {submit:false})
+                                -> timesheet berisi jam 15:30 tapi TIDAK
+                                di-Submit.
+                             -> [Admin API] PUT /api/v2/time/employees/<emp>/
+                                timesheets/<id> {action:"APPROVE"}.
+                             [API VERIFICATION]
+                             -> Verify status awal (sesi ESS) === "NOT
+                                SUBMITTED".
+                             -> Verify APPROVE ditolak (bukan 200; teramati
+                                400 saat eksplorasi).
+                             -> Verify status tetap "NOT SUBMITTED".
+                             NOTE: timesheet yg belum disubmit memang tidak
+                             muncul di Pending Action, TC ini membuktikan
+                             server JUGA menolak bila UI dilewati.
+
+================================================================================
+  GROUP 3, ATTENDANCE / PUNCH IN-OUT (SELF-SERVICE)
+================================================================================
+
+ 7   TC-TIME-PUNCH-01  [DONE]  TC-TIME-PUNCH-01-Verify-Punch-In-Out-Cycle.spec.ts
+                             (+) Verify Punch In Then Punch Out Completes A
+                             Clean Attendance Cycle
+                             -> Buka Punch In/Out (via tab Attendance),
+                                pastikan state awal tombol "In".
+                             -> Isi Note "TC-TIME-PUNCH-01 punch in", klik
+                                "In".
+                             -> Navigasi ulang, lalu klik "Out".
+                             -> Navigasi ulang.
+                             [API VERIFICATION]
+                             -> Verify Punch In (POST
+                                /api/v2/attendance/records) status === 200.
+                             -> Verify Punch Out (PUT ke endpoint yg sama)
+                                status === 200.
+                             [UI VERIFICATION]
+                             -> Verify setelah Punch In: "Punched in time"
+                                tampil, Note yg diisi tampil, tombol berganti
+                                label "Out".
+                             -> Verify setelah Punch Out: tombol kembali "In"
+                                (siklus bersih, tidak nyangkut di satu state).
+                             NOTE: halaman ini satu route yg re-render per
+                             state (tidak ada URL terpisah), dan TIDAK
+                             re-render otomatis setelah submit -- karena itu
+                             ada navigasi ulang sebelum tiap verifikasi.
+                             Punch In = POST, Punch Out = PUT ke endpoint yg
+                             sama (lihat Catatan Teknis).
+
+================================================================================
+  GROUP 4, ADMIN ATTENDANCE (EMPLOYEE RECORDS)
+================================================================================
+
+ 8   TC-TIME-ADMIN-ATTENDANCE-01  [DONE]  TC-TIME-ADMIN-ATTENDANCE-01-Verify-Proxy-Punch-In-For-Employee.spec.ts
+                             (+) Verify Admin Can Proxy Punch In/Out On
+                             Behalf Of An Employee
+                             -> Pilih employee target yg jarang dipakai
+                                (pickLightlyUsedEmployee: 20 employee terbaru,
+                                bukan empNumber 7 / employeeId "0000").
+                             -> Buka Employee Records, cari nama employee,
+                                klik View; empNumber yg terbuka dibaca dari
+                                query param employeeId di URL.
+                             -> Klik Add (tunggu GET overlaps selesai), klik
+                                "In" atau "Out" sesuai state employee saat
+                                itu.
+                             [API VERIFICATION]
+                             -> Verify response proxy punch status === 200.
+                             -> Verify data.employee.empNumber === empNumber
+                                employee TARGET (bukan admin yg login).
+                             -> Verify data.state.id === "PUNCHED IN" (atau
+                                "PUNCHED OUT" bila yg terjadi Punch Out).
+                             [UI VERIFICATION]
+                             -> Verify toast "Successfully Saved" muncul.
+                             NOTE: form proxy otomatis menampilkan "Punch In"
+                             ATAU "Punch Out" tergantung status target di demo
+                             shared ini; TC sengaja menangani KEDUANYA.
+                             [BUG SCRIPT, diperbaiki] pencarian hanya dgn
+                             first name ambigu -> opsi autocomplete kini
+                             dicocokkan dgn lastName, dan empNumber diambil
+                             dari URL sbg ground truth.
+
+================================================================================
+  GROUP 5, REPORTS
+================================================================================
+
+ 9   TC-TIME-REPORTS-01  [DONE]  TC-TIME-REPORTS-01-Verify-Employee-Report-Shows-Logged-Hours.spec.ts
+                             (+) Verify Employee Report Shows Hours Logged
+                             Via My Timesheet (End-To-End Cross-Check)
+                             -> Buka My Timesheet, Edit, isi Project +
+                                Activity, isi "3:00" pada Senin, Save.
+                             -> Ambil employeeId user yg login
+                                (getLoggedInEmployeeName).
+                             -> Buka Employee Reports, pilih employee via
+                                employeeId, isi rentang tanggal awal-akhir
+                                bulan berjalan, klik View.
+                             [API VERIFICATION]
+                             -> Verify Save status === 200.
+                             -> Verify GET /api/v2/time/reports/data
+                                status === 200.
+                             -> Verify response data berisi baris Project/
+                                Activity tsb dgn duration >= 3.00.
+                             [UI VERIFICATION]
+                             -> Verify nama Project dan Activity muncul di
+                                tabel laporan.
+                             NOTE [BUG SCRIPT, diperbaiki]: mencari employee
+                             pakai nama ("John") tidak aman -- demo shared
+                             punya banyak employee seed/junk bernama "John"
+                             dan autocomplete memilih opsi PERTAMA. Diganti
+                             mencari via employeeId yg unik.
+
+================================================================================
+  GROUP 6, SECURITY / ACCESS CONTROL
+================================================================================
+
+10   TC-TIME-PUNCH-02  [DONE]  TC-TIME-PUNCH-02-Verify-XSS-In-Note.spec.ts
+                             (S) Verify XSS Payload In Punch In Note Does Not
+                             Execute
+                             -> Buka Punch In/Out; kalau state masih "Out"
+                                (sisa run sebelumnya), Punch Out dulu.
+                             -> Isi Note dgn payload
+                                <script>window.__xssPunchNote=true</script>,
+                                klik "In".
+                             -> Navigasi ulang (Note tampil sbg "Punched In
+                                Note").
+                             -> Cleanup: Punch Out agar state netral.
+                             [API VERIFICATION]
+                             -> Verify POST /api/v2/attendance/records status
+                                === 200 (payload diterima sbg string literal).
+                             [UI VERIFICATION]
+                             -> Verify window.__xssPunchNote TIDAK ter-set
+                                (payload tidak tereksekusi sbg script).
+
+11   TC-TIME-TS-APPROVAL-03  [DONE]  TC-TIME-TS-APPROVAL-03-Verify-ESS-Cannot-Approve-Own-Timesheet.spec.ts
+                             (S) Verify An ESS Employee Cannot Approve Their
+                             Own Timesheet (Segregation Of Duties / BFLAC)
+                             -> Setup: createEssTimesheet() -> timesheet ESS
+                                SUBMITTED.
+                             -> [ESS UI] Buka My Timesheet.
+                             -> [ESS API] PUT /api/v2/time/employees/
+                                <empNumber diri sendiri>/timesheets/<id>
+                                {action:"APPROVE"} langsung dari sesi ESS.
+                             [API VERIFICATION]
+                             -> Verify APPROVE oleh pemilik timesheet DITOLAK
+                                (status bukan 200).
+                             -> Verify status tetap "SUBMITTED".
+                             [UI VERIFICATION]
+                             -> Verify halaman selesai dirender ("Status:
+                                Submitted" tampil).
+                             -> Verify tombol Approve TIDAK tampil utk ESS.
+                             NOTE: kontrol akses dijaga di server, tidak cuma
+                             dgn menyembunyikan tombol. Kode status persis yg
+                             dikembalikan tidak di-assert (cukup non-200).
+
+12   TC-TIME-ADMIN-ATTENDANCE-02  [DONE]  TC-TIME-ADMIN-ATTENDANCE-02-Verify-Invalid-ID-Handled-Safely.spec.ts
+                             (S/-) Verify Invalid Employee/Timesheet IDs Are
+                             Handled Safely
+                             -> [API] GET /api/v2/attendance/employees/999999/
+                                records (empNumber tidak eksis).
+                             -> [API] GET /api/v2/attendance/employees/-1/
+                                records (empNumber negatif).
+                             -> [API] GET /api/v2/time/timesheets/999999/
+                                entries (timesheetId tidak eksis).
+                             [API VERIFICATION]
+                             -> Verify empNumber tidak eksis -> 422.
+                             -> Verify empNumber negatif -> 422.
+                             -> Verify timesheetId tidak eksis -> 404 bersih.
+                             NOTE: tujuan TC adalah memastikan ID invalid
+                             ditolak dgn 4xx yg jelas, bukan 500/crash/leak
+                             data.
+
+================================================================================
+  RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
+================================================================================
+
+  Total TC         : 12 (7 TC lama + 5 TC baru Fase 2 lapis 1 P2.4:
+                     TS-SUBMIT-01, TS-APPROVAL-01, -02, -03, -04)
+  PASSED           : 12 / 12 (full batch modul Time)
+  FAILED           : 0
+  Bug aplikasi     : tidak ada yg ditemukan dari batch ini
+  Temuan desain    : Reject timesheet TANPA komentar diterima server
+                     (finding, bukan bug -- lihat TC-TIME-TS-APPROVAL-02)
+
+  CATATAN RUN PERTAMA 5 TC BARU:
+    Run pertama ke-5 TC baru GAGAL, tapi akar masalahnya adalah ASUMSI
+    SETUP di script, BUKAN bug aplikasi:
+    -> Asumsi bahwa employee baru langsung punya timesheet: kenyataannya
+       GET timesheets/default mengembalikan id:null sampai halaman My
+       Timesheet dibuka sekali (page load yg membuat timesheet). Diperbaiki
+       di createEssTimesheet(): buka time/viewMyTimesheet dulu baru baca id.
+    -> Status id ditebak "NOT_SUBMITTED" (underscore); nilai asli dari API
+       adalah "NOT SUBMITTED" (pakai spasi). Diperbaiki di TC-TIME-TS-
+       APPROVAL-04 dan didokumentasikan di getEssTimesheetStatus().
+    Setelah kedua bug script diperbaiki, full batch Time 12/12 PASSED.
+
+  False positive/false passed : 0 (setiap failure di-root-cause; bug
+                                   script yg ditemukan & diperbaiki selama
+                                   pengembangan modul ini -- placeholder
+                                   "-- Select --" di dropdown Activity,
+                                   Punch Out = PUT bukan POST, deep link
+                                   Employee Records tidak reliable, race
+                                   GET overlaps, pencarian employee via nama
+                                   yg ambigu, race reload setelah Save --
+                                   semua terdokumentasi di Catatan Teknis &
+                                   NOTE per TC di atas)
+
+  BELUM DICAKUP (rencana lapis 2, lihat docs/Execution-Plan.md P2.4):
+    TIMESHEET-03..11 (multi-row, hapus/duplikat row, komentar sel, navigasi
+    minggu, reset, XSS komentar, total >24 jam/hari lintas row), Reject
+    tanpa komentar sbg TC tersendiri, PUNCH-03..05, ADMIN-ATTENDANCE-03/04,
+    REPORTS-02..05, Customer & Project (Time > Project Info).
+
+  RUN COMMAND (semua TC):
+    npx playwright test tests/time --project=chromium --workers=1

@@ -38,7 +38,7 @@ test('TC-TIME-TS-APPROVAL-04: a timesheet that was never submitted cannot be app
 
   report.step('[Admin API] APPROVE timesheet yg belum disubmit');
   const approve = await page.request.put(`/web/index.php/api/v2/time/employees/${ess.empNumber}/timesheets/${timesheetId}`, { data: { action: 'APPROVE' } });
-  report.check('APPROVE timesheet NOT_SUBMITTED ditolak (bukan 200)', approve.status() !== 200, `status=${approve.status()}`);
+  report.check('APPROVE timesheet "NOT SUBMITTED" ditolak (bukan 200)', approve.status() !== 200, `status=${approve.status()}`);
   const after = await getEssTimesheetStatus(essPage);
   report.check('Status tetap "NOT SUBMITTED"', after === 'NOT SUBMITTED', `status=${after}`);
 
