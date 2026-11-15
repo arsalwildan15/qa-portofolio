@@ -27,18 +27,17 @@ test('TC-PERF-REVIEW-07: Review Period End Date before Start Date is rejected cl
   page,
   addEmployeePage,
   reportToPage,
-  jobPage,
   performanceManageReviewsPage,
 }, testInfo) => {
   testInfo.setTimeout(90_000);
   const report = new TestReport('TC-PERF-REVIEW-07', 'Review Period Date-Order Boundary', env.baseURL, page);
 
   report.step('Setup: employee + supervisor');
-  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, jobPage, 'QaRevDate');
+  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, 'QaRevDate');
 
   report.step('Buka Add Review, isi End Date SEBELUM Start Date, coba Save');
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(emp.employeeId);
+  await performanceManageReviewsPage.selectEmployee(emp.employeeId, emp.lastName);
   await performanceManageReviewsPage.selectSupervisorReviewer(supervisorSearchTerm);
   await performanceManageReviewsPage.fillReviewPeriod('2026-06-30', '2026-01-01', '2026-07-15');
   const resp = await performanceManageReviewsPage.save();

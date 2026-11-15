@@ -45,6 +45,8 @@ export { AssignLeavePage } from './AssignLeavePage';
 export { TimeAttendancePage } from './TimeAttendancePage';
 export { PerformanceKpiPage } from './PerformanceKpiPage';
 export { PerformanceManageReviewsPage } from './PerformanceManageReviewsPage';
+export { PerformanceEvaluatePage } from './PerformanceEvaluatePage';
+export { PerformanceTrackerPage } from './PerformanceTrackerPage';
 export { AssignClaimPage } from './AssignClaimPage';
 export { MyTimesheetPage } from './MyTimesheetPage';
 export { AdminAttendanceRecordsPage } from './AdminAttendanceRecordsPage';

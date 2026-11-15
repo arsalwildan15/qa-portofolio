@@ -29,18 +29,17 @@ test('TC-PERF-REVIEW-01: creating a review with valid data succeeds, initial sta
   page,
   addEmployeePage,
   reportToPage,
-  jobPage,
   performanceManageReviewsPage,
 }, testInfo) => {
   testInfo.setTimeout(90_000);
   const report = new TestReport('TC-PERF-REVIEW-01', 'Create Review Valid', env.baseURL, page);
 
   report.step('Setup: employee baru + supervisor ter-link (prasyarat Supervisor Reviewer)');
-  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, jobPage, 'QaRevValid');
+  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, 'QaRevValid');
 
   report.step('Buka Add Review, isi Employee Name + Supervisor Reviewer + tanggal, Save');
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(emp.employeeId);
+  await performanceManageReviewsPage.selectEmployee(emp.employeeId, emp.lastName);
   const supOptions = await performanceManageReviewsPage.selectSupervisorReviewer(supervisorSearchTerm);
   report.check('Supervisor Reviewer punya opsi (employee sudah ter-link supervisor)', supOptions[0] !== 'No Records Found', `options=${JSON.stringify(supOptions)}`);
   await performanceManageReviewsPage.fillReviewPeriod('2026-01-01', '2026-06-30', '2026-07-15');
@@ -54,7 +53,7 @@ test('TC-PERF-REVIEW-01: creating a review with valid data succeeds, initial sta
 
   report.step('Verify: review baru muncul di daftar Manage Reviews');
   // employeeId (unik), BUKAN firstName -- lihat catatan di TC-PERF-REVIEW-04.
-  await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId);
+  await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId, emp.lastName);
   const found = await performanceManageReviewsPage.rowFor(emp.firstName).isVisible({ timeout: 10_000 }).catch(() => false);
   report.check('Review baru ditemukan di daftar', found, `employee=${emp.firstName}`);
 

@@ -32,16 +32,15 @@ test('TC-PERF-REVIEW-12: an ESS account cannot read another employee\'s review K
   browser,
   addEmployeePage,
   reportToPage,
-  jobPage,
   performanceManageReviewsPage,
 }, testInfo) => {
   testInfo.setTimeout(120_000);
   const report = new TestReport('TC-PERF-REVIEW-12', 'IDOR Cross-Employee Review Access', env.baseURL, page);
 
   report.step('Setup: employee target (B) dgn review Activated (punya KPI utk dibaca)');
-  const { emp: empB, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, jobPage, 'QaRevIdorB', 'QA Engineer');
+  const { emp: empB, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, 'QaRevIdorB', 'QA Engineer');
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(empB.employeeId);
+  await performanceManageReviewsPage.selectEmployee(empB.employeeId, empB.lastName);
   await performanceManageReviewsPage.selectSupervisorReviewer(supervisorSearchTerm);
   await performanceManageReviewsPage.fillReviewPeriod('2026-01-01', '2026-06-30', '2026-07-15');
   const saveResp = await performanceManageReviewsPage.save();
@@ -53,7 +52,6 @@ test('TC-PERF-REVIEW-12: an ESS account cannot read another employee\'s review K
   }
   await performanceManageReviewsPage.gotoEdit(reviewId);
   await performanceManageReviewsPage.activate(reviewId);
-  report.finding('BG-356', 'Kalau console-error check di akhir gagal, itu kemungkinan bug self-refresh 404 pasca-Activate yg sudah tercatat (lihat TC-PERF-REVIEW-04) -- SAH, bukan regresi script. Check IDOR di bawah tetap independen dari itu.');
   await page.waitForTimeout(1_000);
 
   report.step('Buat akun ESS LAIN (A, tidak terkait sama sekali dgn review B), login di sesi terpisah');

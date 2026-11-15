@@ -28,7 +28,6 @@ test('TC-PERF-REVIEW-03: Activate fails with 400 for an employee with no Job Tit
   page,
   addEmployeePage,
   reportToPage,
-  jobPage,
   performanceManageReviewsPage,
 }, testInfo) => {
   testInfo.setTimeout(90_000);
@@ -41,11 +40,11 @@ test('TC-PERF-REVIEW-03: Activate fails with 400 for an employee with no Job Tit
   );
 
   report.step('Setup: employee + supervisor, TANPA Job Title (default kosong dari createTestEmployee)');
-  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, jobPage, 'QaRevNoKpi');
+  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, 'QaRevNoKpi');
 
   report.step('Buat review utk employee tsb (harus bisa, Create tidak mensyaratkan Job Title)');
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(emp.employeeId);
+  await performanceManageReviewsPage.selectEmployee(emp.employeeId, emp.lastName);
   await performanceManageReviewsPage.selectSupervisorReviewer(supervisorSearchTerm);
   await performanceManageReviewsPage.fillReviewPeriod('2026-01-01', '2026-06-30', '2026-07-15');
   const saveResp = await performanceManageReviewsPage.save();
@@ -69,7 +68,7 @@ test('TC-PERF-REVIEW-03: Activate fails with 400 for an employee with no Job Tit
     report.step('Verify: overallStatus review TETAP Inactive (tidak berubah jadi Activated)');
     await performanceManageReviewsPage.goto();
     // employeeId (unik), BUKAN firstName -- lihat catatan di TC-PERF-REVIEW-04.
-    await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId);
+    await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId, emp.lastName);
     const rowText = await performanceManageReviewsPage.rowFor(emp.firstName).innerText().catch(() => '');
     report.check('Status di daftar masih "Inactive"', rowText.includes('Inactive'), `rowText=${rowText}`);
   } else {

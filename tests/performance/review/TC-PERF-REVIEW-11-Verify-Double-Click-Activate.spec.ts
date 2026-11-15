@@ -27,16 +27,15 @@ test('TC-PERF-REVIEW-11: double-clicking Activate does not corrupt the review\'s
   page,
   addEmployeePage,
   reportToPage,
-  jobPage,
   performanceManageReviewsPage,
 }, testInfo) => {
   testInfo.setTimeout(90_000);
   const report = new TestReport('TC-PERF-REVIEW-11', 'Double-Click Activate', env.baseURL, page);
 
   report.step('Setup: employee + supervisor + Job Title, buat review');
-  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, jobPage, 'QaRevDouble', 'QA Engineer');
+  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, 'QaRevDouble', 'QA Engineer');
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(emp.employeeId);
+  await performanceManageReviewsPage.selectEmployee(emp.employeeId, emp.lastName);
   await performanceManageReviewsPage.selectSupervisorReviewer(supervisorSearchTerm);
   await performanceManageReviewsPage.fillReviewPeriod('2026-01-01', '2026-06-30', '2026-07-15');
   const saveResp = await performanceManageReviewsPage.save();
@@ -56,7 +55,6 @@ test('TC-PERF-REVIEW-11: double-clicking Activate does not corrupt the review\'s
   await performanceManageReviewsPage.activateButton.click();
   await performanceManageReviewsPage.activateButton.click({ force: true }).catch(() => {});
   responses.push(await p1);
-  report.finding('BG-356', 'Kalau console-error check di akhir gagal, itu kemungkinan bug self-refresh 404 pasca-Activate yg sudah tercatat (lihat TC-PERF-REVIEW-04) -- SAH, bukan regresi script.');
   await page.waitForTimeout(2_000);
 
   report.step('[API] Verify status final review tetap konsisten (satu nilai yg jelas, bukan korup)');
@@ -73,7 +71,7 @@ test('TC-PERF-REVIEW-11: double-clicking Activate does not corrupt the review\'s
     await page.waitForTimeout(1_000);
     await performanceManageReviewsPage.goto();
     // employeeId (unik), BUKAN firstName -- lihat catatan di TC-PERF-REVIEW-04.
-    await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId);
+    await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId, emp.lastName);
     const rowText = await performanceManageReviewsPage.rowFor(emp.firstName).innerText().catch(() => '');
     report.check('Status di daftar = "Activated" (satu baris, satu status, tidak ganda/korup)', rowText.includes('Activated'), `rowText=${rowText}`);
   }

@@ -27,16 +27,15 @@ test('TC-PERF-REVIEW-06: Complete without Review Finalization fields is blocked 
   page,
   addEmployeePage,
   reportToPage,
-  jobPage,
   performanceManageReviewsPage,
 }, testInfo) => {
   testInfo.setTimeout(90_000);
   const report = new TestReport('TC-PERF-REVIEW-06', 'Complete Required Field Validation', env.baseURL, page);
 
   report.step('Setup: employee + supervisor + Job Title "QA Engineer", buat + activate review');
-  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, jobPage, 'QaRevComplete', 'QA Engineer');
+  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, 'QaRevComplete', 'QA Engineer');
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(emp.employeeId);
+  await performanceManageReviewsPage.selectEmployee(emp.employeeId, emp.lastName);
   await performanceManageReviewsPage.selectSupervisorReviewer(supervisorSearchTerm);
   await performanceManageReviewsPage.fillReviewPeriod('2026-01-01', '2026-06-30', '2026-07-15');
   const saveResp = await performanceManageReviewsPage.save();
@@ -48,7 +47,6 @@ test('TC-PERF-REVIEW-06: Complete without Review Finalization fields is blocked 
   }
   await performanceManageReviewsPage.gotoEdit(reviewId);
   await performanceManageReviewsPage.activate(reviewId);
-  report.finding('BG-356', 'Kalau console-error check di akhir gagal, itu kemungkinan bug self-refresh 404 pasca-Activate yg sudah tercatat (lihat TC-PERF-REVIEW-04) -- SAH, bukan regresi script.');
   await page.waitForLoadState('networkidle').catch(() => {});
 
   report.step('Buka halaman evaluasi, klik Complete TANPA mengisi apapun di Review Finalization');

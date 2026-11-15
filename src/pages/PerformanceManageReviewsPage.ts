@@ -62,12 +62,23 @@ export class PerformanceManageReviewsPage extends BasePage {
     await this.page.waitForLoadState('networkidle').catch(() => {});
   }
 
-  /** Fills Employee Name autocomplete and picks the first (and normally only) matching option. */
-  async selectEmployee(searchTerm: string): Promise<void> {
-    await this.hintInputs.nth(0).fill(searchTerm);
+  /**
+   * Fills Employee Name autocomplete and picks the option containing `optionMustContain`. The
+   * autocomplete substring-matches BOTH names and employee ids, and generated test employees
+   * have 4-digit ids ("0421") while their random last names contain digits ("QA204213") -- so
+   * an id search can surface OTHER employees first (confirmed live). Always pass the employee's
+   * unique last name here.
+   */
+  async selectEmployee(searchTerm: string, optionMustContain: string): Promise<void> {
+    await this.pickOption(this.hintInputs.nth(0), searchTerm, optionMustContain);
+  }
+
+  private async pickOption(input: Locator, searchTerm: string, optionMustContain: string): Promise<void> {
+    await input.fill(searchTerm);
     await this.page.getByText('Searching....').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
-    await this.page.locator('.oxd-autocomplete-option').first().waitFor({ state: 'visible', timeout: 10_000 });
-    await this.page.locator('.oxd-autocomplete-option').first().click();
+    const option = this.page.locator('.oxd-autocomplete-option').filter({ hasText: optionMustContain }).first();
+    await option.waitFor({ state: 'visible', timeout: 10_000 });
+    await option.click();
   }
 
   /**
@@ -116,15 +127,19 @@ export class PerformanceManageReviewsPage extends BasePage {
    * a suggestion must be selected, or Search silently runs with no name filter applied at all
    * (returns every review in the system).
    */
-  async searchByEmployeeName(name: string): Promise<void> {
-    await this.employeeNameFilterInput.fill(name);
-    await this.page.getByText('Searching....').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
-    const option = this.page.locator('.oxd-autocomplete-option').first();
-    if (await option.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await option.click();
-    }
+  /**
+   * Waits for the actual filtered list response (empNumber=...) rather than networkidle --
+   * the SPA's XHR after Search doesn't reset the page load state, so networkidle resolved
+   * BEFORE the filtered results arrived and row counts read 0 (confirmed live).
+   */
+  async searchByEmployeeName(searchTerm: string, optionMustContain: string): Promise<void> {
+    await this.pickOption(this.employeeNameFilterInput, searchTerm, optionMustContain);
+    const filtered = this.page
+      .waitForResponse((r) => r.url().includes('/api/v2/performance/manage/reviews?') && r.url().includes('empNumber='), { timeout: 15_000 })
+      .catch(() => null);
     await this.searchButton.click();
-    await this.page.waitForLoadState('networkidle').catch(() => {});
+    await filtered;
+    await this.page.locator('.oxd-table-card, .oxd-table-body:has-text("No Records Found")').first().waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {});
   }
 
   rowFor(matchText: string): Locator {

@@ -26,16 +26,15 @@ test('TC-PERF-REVIEW-08: list search by Employee Name and Review Status filter c
   page,
   addEmployeePage,
   reportToPage,
-  jobPage,
   performanceManageReviewsPage,
 }, testInfo) => {
   testInfo.setTimeout(90_000);
   const report = new TestReport('TC-PERF-REVIEW-08', 'Search Filter List', env.baseURL, page);
 
   report.step('Setup: employee + supervisor + Job Title, buat + activate review (status akan jadi Activated)');
-  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, jobPage, 'QaRevSearch', 'QA Engineer');
+  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, 'QaRevSearch', 'QA Engineer');
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(emp.employeeId);
+  await performanceManageReviewsPage.selectEmployee(emp.employeeId, emp.lastName);
   await performanceManageReviewsPage.selectSupervisorReviewer(supervisorSearchTerm);
   await performanceManageReviewsPage.fillReviewPeriod('2026-01-01', '2026-06-30', '2026-07-15');
   const saveResp = await performanceManageReviewsPage.save();
@@ -43,15 +42,16 @@ test('TC-PERF-REVIEW-08: list search by Employee Name and Review Status filter c
   if (reviewId) {
     await performanceManageReviewsPage.gotoEdit(reviewId);
     await performanceManageReviewsPage.activate(reviewId);
-    report.finding('BG-356', 'Kalau console-error check di akhir gagal, itu kemungkinan bug self-refresh 404 pasca-Activate yg sudah tercatat (lihat TC-PERF-REVIEW-04) -- SAH, bukan regresi script.');
     await page.waitForLoadState('networkidle').catch(() => {});
   }
 
   report.step('Search by Employee Name -> harapannya hanya baris employee ini muncul');
   await performanceManageReviewsPage.goto();
   // employeeId (unik), BUKAN firstName -- lihat catatan di TC-PERF-REVIEW-04.
-  await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId);
-  await page.waitForTimeout(1_000);
+  await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId, emp.lastName);
+  // count() does not auto-wait: wait for this employee's row to render first, otherwise a
+  // slow table yields 0 rows and the "every row matches" check passes vacuously.
+  await performanceManageReviewsPage.rowFor(emp.firstName).waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {});
   const rowCount = await performanceManageReviewsPage.tableRows.count();
   const allRowsMatch = await performanceManageReviewsPage.tableRows.allInnerTexts();
   report.check('Semua baris hasil search mengandung nama employee tsb', allRowsMatch.every((t) => t.includes(emp.firstName)), `rows=${JSON.stringify(allRowsMatch)}`);
@@ -64,10 +64,8 @@ test('TC-PERF-REVIEW-08: list search by Employee Name and Review Status filter c
   // -- raw fill() saja TIDAK mem-bind nilainya, harus pilih suggestion dulu.
   await performanceManageReviewsPage.employeeNameFilterInput.fill(emp.employeeId);
   await page.getByText('Searching....').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
-  const nameOption = page.locator('.oxd-autocomplete-option').first();
-  if (await nameOption.isVisible({ timeout: 5_000 }).catch(() => false)) {
-    await nameOption.click();
-  }
+  // Pick the suggestion for THIS employee (unique last name) -- see selectEmployee() note.
+  await page.locator('.oxd-autocomplete-option').filter({ hasText: emp.lastName }).first().click({ timeout: 10_000 });
   const statusSelect = page.locator('.oxd-select-text').filter({ hasText: '-- Select --' }).nth(1);
   await statusSelect.click();
   await page.getByRole('option', { name: 'Inactive', exact: true }).click();

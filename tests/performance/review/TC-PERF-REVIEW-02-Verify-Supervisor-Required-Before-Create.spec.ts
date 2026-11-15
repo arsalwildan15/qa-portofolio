@@ -39,7 +39,7 @@ test('TC-PERF-REVIEW-02: employee without a supervisor link cannot be given a Su
 
   report.step('Buka Add Review, pilih employee tsb, cari Supervisor Reviewer dgn query luas ("a")');
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(emp.employeeId);
+  await performanceManageReviewsPage.selectEmployee(emp.employeeId, emp.lastName);
   const supOptions = await performanceManageReviewsPage.selectSupervisorReviewer('a');
   report.check('Supervisor Reviewer = "No Records Found" (employee blm ada supervisor)', supOptions[0] === 'No Records Found', `options=${JSON.stringify(supOptions)}`);
 

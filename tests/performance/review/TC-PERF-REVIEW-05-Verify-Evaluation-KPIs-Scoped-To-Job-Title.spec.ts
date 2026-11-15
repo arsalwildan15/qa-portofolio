@@ -28,7 +28,6 @@ test('TC-PERF-REVIEW-05: evaluation page KPIs exactly match the employee Job Tit
   page,
   addEmployeePage,
   reportToPage,
-  jobPage,
   performanceManageReviewsPage,
   performanceKpiPage,
 }, testInfo) => {
@@ -37,9 +36,9 @@ test('TC-PERF-REVIEW-05: evaluation page KPIs exactly match the employee Job Tit
   const jobTitleName = 'QA Engineer';
 
   report.step('Setup: employee + supervisor + Job Title "QA Engineer", buat + activate review');
-  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, jobPage, 'QaRevKpiScope', jobTitleName);
+  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, 'QaRevKpiScope', jobTitleName);
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(emp.employeeId);
+  await performanceManageReviewsPage.selectEmployee(emp.employeeId, emp.lastName);
   await performanceManageReviewsPage.selectSupervisorReviewer(supervisorSearchTerm);
   await performanceManageReviewsPage.fillReviewPeriod('2026-01-01', '2026-06-30', '2026-07-15');
   const saveResp = await performanceManageReviewsPage.save();
@@ -51,7 +50,6 @@ test('TC-PERF-REVIEW-05: evaluation page KPIs exactly match the employee Job Tit
   }
   await performanceManageReviewsPage.gotoEdit(reviewId);
   await performanceManageReviewsPage.activate(reviewId);
-  report.finding('BG-356', 'Kalau console-error check di akhir gagal, itu kemungkinan bug self-refresh 404 pasca-Activate yg sudah tercatat (lihat TC-PERF-REVIEW-04) -- SAH, bukan regresi script.');
   await page.waitForLoadState('networkidle').catch(() => {});
 
   report.step('[UI] Ambil daftar KPI resmi utk Job Title "QA Engineer" dari Configure > KPIs (filter by Job Title)');

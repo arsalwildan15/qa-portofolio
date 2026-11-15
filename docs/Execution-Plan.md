@@ -10,17 +10,28 @@
 > Ditetapkan user 2026-11-15. Sumber rencana: laporan coverage gap (sesi 2026-11-15).
 
 ## STATUS
-- **Fase aktif:** 2 (P2.1 Performance batch 1 TUNTAS: 13 TC Review + 4 TC KPI, BG-356 ditemukan)
-- **Task terakhir selesai:** P2.1 batch 1 (lihat checklist P2.1 + LOG)
-- **NEXT ACTION:** P2.1 BATCH 2 -- probe widget Rating per-KPI di reviewEvaluateByAdmin/<id> (input
-  tanpa type/placeholder) -> EVAL-11 finalize positif, EVAL-12 rating min/max, EVAL-13 XSS komentar,
-  EVAL-14 eval Inactive via API, EVAL-10 self-eval ESS, KPI-11, lalu eksplor+TC TRACKER-01..08.
-  Setelah itu docs/TC-Performance.txt, baru P2.2 Claim.
-- **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). REVIEW-10 SENGAJA FAILED (BG-356);
-  REVIEW-04/05/06/08/11/12 boleh gagal INTERMITEN HANYA di console-check (BG-356) -- gagal di check
-  lain = regresi baru, investigasi.
+- **Fase aktif:** 2 (P2.1 Performance LAPIS 1 TUNTAS: 24 TC, full batch 22/24 -- 2 gagal SENGAJA:
+  REVIEW-10=BG-356, EVAL-15=BG-373)
+- **Task terakhir selesai:** P2.1 batch 2 (lihat checklist P2.1 + LOG)
+- **URUTAN BARU (disetujui user 2026-11-15, pendekatan 2 LAPIS):** lapis 1 = alur inti + approval
+  lintas role (ESS) + keamanan di SEMUA modul dulu; lapis 2 = edge case sisa SETELAH 4 modul punya
+  lapis 1. Urutan: (1) P2.1 batch 2 ringkas -> (2) P2.2 Claim lapis 1 -> (3) P2.3 Leave lapis 1 ->
+  (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
+  Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
+  dicatat lalu tinggal; run TC asli tanpa --reporter=list.
+- **NEXT ACTION:** P2.2 Claim LAPIS 1 -- eksplor live: aksi Admin pd klaim SUBMITTED milik ESS
+  (Approve/Reject/Pay), Event inactive vs dropdown, submit tanpa expense -> TC SUBMIT-01 (ESS create->
+  expense->Submit), APPROVAL-01 Approve->Pay->PAID, APPROVAL-02 Reject, APPROVAL-03 ESS tdk bisa
+  approve sendiri, CONFIG-EVENT/EXPTYPE dasar. Pakai createEssAccount+loginAs+assignSupervisor.
+- **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
+  REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
+  (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
+  networkidle utk XHR pasca-klik -- tunggu respons spesifiknya; (3) autocomplete: pilih opsi by
+  lastName unik, bukan opsi pertama.
 - **Blocker:** —
-- **Perlu persetujuan user (antrian):** — (identity self-heal otomatis sejak Fase 1, TIDAK perlu
+- **Perlu persetujuan user (antrian):** — | R6 DISETUJUI user 2026-11-15 ("setuju semua"): TC yg
+  mengubah config global (Leave Period, Work Week, Attendance Config, dst) BOLEH dijalankan, WAJIB
+  dibungkus withConfigRestore() + verifikasi nilai kembali ke semula setelahnya. (identity self-heal otomatis sejak Fase 1, TIDAK perlu
   tanya ulang lagi kalau kambuh -- itulah tujuan fix-nya. Kalau POLA korupsinya beda dari yg
   terdokumentasi (bukan employeeId pendek), baru perlu investigasi/tanya ulang.)
 
@@ -159,20 +170,37 @@ halaman Trackers config, review utk employee tanpa KPI.
       via API (=ACCESS-16 BFLAC) -- keduanya pakai infra Fase 1 (createEssAccount+loginAs), lolos.
 - [x] KPI (file -> ID rencana): 07 Default Scale eksklusif (=plan 09) | 08 Filter Job Title (=plan 10) |
       09 Edit (=plan 07) | 10 Delete (=plan 08)
-- [x] BUG NYATA: BG-356 -- setelah Activate, GET manage/reviews/<id> 404 -> uncaught exception "fe"
-      (signature sama BG-333), form edit kosong; frekuensi naik seiring jumlah review. TIDAK ada risiko
-      data (PUT field inti ke review Activated selalu 422). Sesuai R3: TIDAK di-whitelist; REVIEW-10 =
-      reproducer konsisten yg SENGAJA FAILED (jaga BG-356 Open); REVIEW-04/05/06/08/11/12 bisa gagal
-      INTERMITEN di console-check krn bug ini (+report.finding) -> pengecualian R3 "3x bersih" yg sah
-      sampai bug diperbaiki dev. Baris duplikat otomatis dari script2 itu -> tutup "Duplicate of BG-356".
+- [x] BUG NYATA: BG-356 -- membuka ULANG halaman edit (saveReview/<id>) utk review yg sudah Activated
+      -> GET manage/reviews/<id> 404 -> uncaught exception "fe" (signature sama BG-333), form kosong.
+      TIDAK ada risiko data (PUT field inti ke review Activated selalu 422). Sesuai R3 tdk di-whitelist;
+      REVIEW-10 = reproducer yg SENGAJA FAILED (jaga BG-356 Open).
+      KOREKSI (batch 2): klaim awal "BG-356 intermiten di semua TC yg memanggil Activate & makin sering
+      seiring jumlah data" SALAH. Console 404 di TC-TC itu berasal dari SETUP: set Job Title via
+      halaman PIM Job memicu GET admin/job-titles/<id>/specification -> 404 (title tanpa file spek;
+      ditangani app, bukan bug). Setup kini via API (PUT pim/employees/<id>/job-details) -> TC-TC itu
+      bersih. Risiko yg sama mungkin ada di TC modul lain yg set Job Title via UI -> cek di Fase 4.
 - [x] Perbaikan infra selama P2.1: `TestReport` pageerror kini ikut expectedConsoleErrorPatterns (dulu cuma
       console 'error'; dicek: whitelist lama di repo tdk ada yg match "Uncaught exception"). Memory baru:
       JANGAN `--reporter=list` utk TC asli (override bugListReporter) -- sesuai R8.
-- [ ] P2.1 BATCH 2 (sisa, BELUM dikerjakan): eksplor dulu widget Rating per-KPI (input tanpa type/
-      placeholder, 6 utk KPI + 1 Final Rating) -> EVAL-11 finalize positif (isi rating+komentar+tanggal ->
-      Complete -> status Completed) | EVAL-12 Rating luar min/max (KPI "targeted new customer" 50-90) |
-      EVAL-13 XSS komentar | EVAL-14 evaluasi review Inactive via API (-) | EVAL-10 self-eval ESS
-      (lintas role) | KPI-11 Pagination/sort | TRACKER-01..08 (fitur jurnal, perlu eksplor + page object)
+- [x] P2.1 BATCH 2 (ringkas): `PerformanceEvaluatePage` + `PerformanceTrackerPage` (+fixture) + util
+      `createReview()`. FAKTA LIVE: rating = input teks per KPI (validasi client per-KPI min/max) + Final
+      Rating di posisi terakhir; Save = PUT evaluation/supervisor + PUT evaluation/final(complete:false)
+      -> "In Progress"; Complete -> dialog Ok -> "Completed" & PUT berikutnya 403; review Inactive: PUT
+      supervisor 422, PUT final 403; tanggal Date of Completion DITAFSIRKAN sesuai format tampil (ketik
+      2026-07-10 terkirim 2026-10-07) -> pakai tanggal hari==bulan. Tracker: POST config/trackers.
+      TC: EVAL-11 finalize->Completed+read-only | EVAL-12 min/max UI+API | EVAL-13 XSS komentar aman |
+      EVAL-14 eval review Inactive via API ditolak | EVAL-15 rating non-angka (BUG) | TRACKER-01 Add |
+      TRACKER-02 Required.
+- [x] BUG NYATA BARU (EVAL-15): PUT evaluation/supervisor dgn rating "abc" -> 200 (echo "abc"), yg
+      tersimpan "0.00" -- nilai non-angka DIAM-DIAM dikonversi jadi 0; validasi angka cuma di client.
+      TC sengaja FAILED (R3).
+- [x] Perbaikan script selama batch 2: (a) `searchByEmployeeName` kini MENUNGGU respons list ber-filter
+      empNumber (networkidle resolve sebelum hasil filter datang -> hitung baris 0); (b) pilih opsi
+      autocomplete yg memuat lastName unik, bukan opsi pertama (id 4-digit "0421" bisa match lastName
+      acak "QA204213" employee lain); (c) REVIEW-04 cek ikon Evaluate/Edit dikembalikan jadi hard check
+      (flaky-nya ternyata akibat race (a)).
+- [ ] LAPIS 2 (ditunda sesuai urutan baru): EVAL-10 self-eval ESS | KPI-11 Pagination/sort |
+      TRACKER-03..08 (duplikat, edit/delete, log, XSS log, ESS My Trackers, IDOR)
 - [ ] Regresi modul + docs/TC-Performance.txt + commit
 
 ### P2.2 Claim (~30) — eksplor: aksi admin pada klaim SUBMITTED milik ESS, Event inactive vs dropdown,
@@ -266,3 +294,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P0.7 | 5/9 fixed by repair; 3/9 flaky-under-load (pass isolated); 1/9 real script bug (whitespace) fixed+3x stable; identity RE-corrupted identik -> repaired lagi, didokumentasikan sbg risiko berulang lintas 11 file/4 area | 1 commit
 - 2026-11-15 | P1.1-P1.8 | 7 util baru (createEssAccount/createSecondAdmin/assignSupervisor/loginAs/withConfigRestore/networkEdge + getLoggedInEmployeeName self-heal) + AdminUsersPage.selectEmployee() + createTestEmployee+employeeId + 3 TC infra, 9/9 check x3 run; self-heal TERBUKTI jalan live (korupsi kambuh di tengah run, INFRA-02 tetap lolos) | 1 commit
 - 2026-11-15 | P2.1 batch 1 | 13 TC Review + 4 TC KPI + PerformanceManageReviewsPage + setupReviewableEmployee + TestReport pageerror-whitelist fix; BG-356 (404+exception pasca-Activate) ditemukan & dicatat (R3: tdk di-whitelist, REVIEW-10 sengaja FAILED). Run akhir 17 TC: 8 pass; 7 gagal HANYA console-check (BG-356, semua check fungsional lolos); KPI-09 & REVIEW-01 gagal tanpa ringkasan di batch tapi 6/6 & 7/7 lolos terisolasi (flaky-under-load, pola P0.7) | 1 commit
+- 2026-11-15 | P2.1 batch 2 | +7 TC (EVAL-11..15, TRACKER-01/02) + PerformanceEvaluatePage/TrackerPage + createReview(); BG-373 baru (rating non-angka -> 0 diam-diam); KOREKSI BG-356 (console 404 di TC Activate = setup job-spec 404, setup kini via API); fix race searchByEmployeeName + pilih opsi by lastName. Full batch Performance 24 TC: 22 pass, 2 gagal sengaja (REVIEW-10, EVAL-15) | 1 commit

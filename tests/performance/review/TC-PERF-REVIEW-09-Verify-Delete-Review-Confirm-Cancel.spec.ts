@@ -27,22 +27,21 @@ test('TC-PERF-REVIEW-09: delete confirmation dialog — Cancel keeps the review,
   page,
   addEmployeePage,
   reportToPage,
-  jobPage,
   performanceManageReviewsPage,
 }, testInfo) => {
   testInfo.setTimeout(90_000);
   const report = new TestReport('TC-PERF-REVIEW-09', 'Delete Review Confirm Cancel', env.baseURL, page);
 
   report.step('Setup: employee + supervisor, buat review (status Inactive, masih punya trash+edit)');
-  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, jobPage, 'QaRevDelete');
+  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, 'QaRevDelete');
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(emp.employeeId);
+  await performanceManageReviewsPage.selectEmployee(emp.employeeId, emp.lastName);
   await performanceManageReviewsPage.selectSupervisorReviewer(supervisorSearchTerm);
   await performanceManageReviewsPage.fillReviewPeriod('2026-01-01', '2026-06-30', '2026-07-15');
   await performanceManageReviewsPage.save();
   await performanceManageReviewsPage.goto();
   // employeeId (unik), BUKAN firstName -- lihat catatan di TC-PERF-REVIEW-04.
-  await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId);
+  await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId, emp.lastName);
 
   report.step('Klik trash -> modal muncul -> klik "No, Cancel" -> review TETAP ada');
   const row = performanceManageReviewsPage.rowFor(emp.firstName);

@@ -39,7 +39,6 @@ test('TC-PERF-REVIEW-10: direct navigation to the edit URL after Activation does
   page,
   addEmployeePage,
   reportToPage,
-  jobPage,
   performanceManageReviewsPage,
 }, testInfo) => {
   testInfo.setTimeout(90_000);
@@ -49,9 +48,9 @@ test('TC-PERF-REVIEW-10: direct navigation to the edit URL after Activation does
   const report = new TestReport('TC-PERF-REVIEW-10', 'Edit Blocked After Activation', env.baseURL, page);
 
   report.step('Setup: employee + supervisor + Job Title, buat + activate review');
-  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, jobPage, 'QaRevEditLock', 'QA Engineer');
+  const { emp, supervisorSearchTerm } = await setupReviewableEmployee(page, addEmployeePage, reportToPage, 'QaRevEditLock', 'QA Engineer');
   await performanceManageReviewsPage.gotoAdd();
-  await performanceManageReviewsPage.selectEmployee(emp.employeeId);
+  await performanceManageReviewsPage.selectEmployee(emp.employeeId, emp.lastName);
   await performanceManageReviewsPage.selectSupervisorReviewer(supervisorSearchTerm);
   await performanceManageReviewsPage.fillReviewPeriod('2026-01-01', '2026-06-30', '2026-07-15');
   const saveResp = await performanceManageReviewsPage.save();
