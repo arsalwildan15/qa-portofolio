@@ -144,11 +144,54 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                                 tabel; 1.1-D DELETE 200 & hilang.
                              HASIL 16 Nov 2026: 8/8 lolos.
 
+ 6   TC-MYINFO-DEPENDENT-01  [DONE]  TC-MYINFO-DEPENDENT-01-Verify-Employee-Manages-Own-Dependents.spec.ts
+                             (+) 1.1-C 1.1-R 1.1-D 1.8 | (-) 2.1 | (B) 3.4
+                             Verify An Employee Can Manage Their Own Dependents,
+                             With Required And Future-Date Checks
+                             -> Add kosong (Required) -> DOB masa depan (finding)
+                                -> Add valid (Child, DOB lampau) -> hapus.
+                             [VERIFICATION]
+                             -> 2.1 "Required" tanpa POST; 3.4 DOB masa depan
+                                respons terkendali; 1.1-C POST 200 + 1.8 toast;
+                                1.1-R di tabel; 1.1-D DELETE 200 & hilang.
+                             HASIL 16 Nov 2026: 9/9 lolos. [TEMUAN] DOB masa
+                             depan DITERIMA (tidak divalidasi; known behaviour).
+
+ 7   TC-MYINFO-MEMBERSHIP-01  [DONE]  TC-MYINFO-MEMBERSHIP-01-Verify-Employee-Manages-Own-Memberships.spec.ts
+                             (+) 1.1-C 1.1-R 1.1-D 1.8 | (-) 2.1 | (B) 3.2
+                             Verify An Employee Can Manage Their Own Memberships,
+                             With Required And Numeric-Amount Checks
+                             -> Add kosong (Required) -> amount "abc" (validasi)
+                                -> Add valid (Membership opsi pertama, amount
+                                angka) -> hapus.
+                             [VERIFICATION]
+                             -> 2.1 "Required" tanpa POST; 3.2 amount huruf
+                                ditolak; 1.1-C POST 200 + 1.8 toast; 1.1-R di
+                                tabel; 1.1-D DELETE 200 & hilang.
+                             HASIL 16 Nov 2026: 9/9 lolos.
+
+ 8   TC-MYINFO-ATTACHMENT-01  [DONE -- BUG]  TC-MYINFO-ATTACHMENT-01-Verify-Employee-Attachment-Upload-On-Own-Record.spec.ts
+                             (+) 1.7 | (S) 5.3-Rename
+                             Verify An Employee's Attachment Upload On Their Own
+                             Record (Valid File And Renamed-Executable)
+                             -> Upload PDF valid ke Attachments Personal Details
+                                (form INLINE, bukan modal) -> lalu executable
+                                (header "MZ") di-rename .pdf.
+                             [VERIFICATION]
+                             -> 1.7 PDF valid POST 200 & muncul di daftar.
+                             -> 5.3-Rename executable di-rename .pdf DITOLAK
+                                (validasi isi file).
+                             STATUS AKTUAL: GAGAL (BUG BG-422, High) --
+                             executable di-rename .pdf DITERIMA 200. Konfirmasi
+                             gap upload app-wide keluarga BG-003 pada permukaan
+                             Attachments yg diunggah karyawan sendiri. TC
+                             sengaja FAILED (R3).
+
 ================================================================================
   GROUP 5, SECURITY (ISOLASI ANTAR-KARYAWAN)
 ================================================================================
 
- 6   TC-MYINFO-IDOR-01  [DONE]  TC-MYINFO-IDOR-01-Verify-Employee-Cannot-Read-Or-Write-Another-Employees-Data.spec.ts
+ 9   TC-MYINFO-IDOR-01  [DONE]  TC-MYINFO-IDOR-01-Verify-Employee-Cannot-Read-Or-Write-Another-Employees-Data.spec.ts
                              (S) 5.2-IDOR
                              Verify An Employee Cannot Read Or Write Another
                              Employee's PIM Data Via The API
@@ -168,13 +211,16 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
   RINGKASAN
 ================================================================================
 
-  Total TC         : 6 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, IDOR 1)
-  PASSED           : 5
-  FAILED (BUG, sengaja) : 1 -> TC-MYINFO-PD-02 (BG-420, High, field terkunci
-                     Personal Details bisa diubah karyawan lewat API)
-  BELUM DICAKUP (backlog): Dependents/Immigration/Qualifications/Memberships
-    CRUD + boundary tanggal/numerik; Attachments (upload valid + exe-rename,
-    seturut BG-003 di PIM); Profile Picture.
+  Total TC         : 9 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, DEPENDENT 1,
+                     MEMBERSHIP 1, ATTACHMENT 1, IDOR 1)
+  PASSED           : 7
+  FAILED (BUG, sengaja) : 2
+    -> TC-MYINFO-PD-02 (BG-420, High, field terkunci Personal Details bisa
+       diubah karyawan lewat API)
+    -> TC-MYINFO-ATTACHMENT-01 (BG-422, High, executable di-rename .pdf
+       diterima sbg attachment karyawan; keluarga BG-003)
+  BELUM DICAKUP (backlog): Immigration & Qualifications CRUD; Profile Picture
+    upload/remove.
 
   RUN COMMAND (semua TC My Info):
     npx playwright test tests/my-info --project=chromium --workers=1

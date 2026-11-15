@@ -18,6 +18,7 @@ export async function loginAs(
   const loginPage = new LoginPage(page);
   await loginPage.goto();
   await loginPage.login(username, password);
-  await page.waitForURL('**/dashboard/index', { timeout: 20_000 });
+  // 60s, not 20s: the shared demo's login round-trip is slow during degraded periods (2026-11-16).
+  await page.waitForURL('**/dashboard/index', { timeout: 60_000 });
   return { page, close: () => context.close() };
 }

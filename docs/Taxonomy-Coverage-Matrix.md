@@ -11,13 +11,13 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Directory | 18 | 8 | 45 | 69.2% |
 | Leave | 286 | 213 | 424 | 57.3% |
 | Maintenance | 48 | 49 | 116 | 49.5% |
-| My Info | 64 | 398 | 319 | 13.9% |
+| My Info | 107 | 355 | 319 | 23.2% |
 | PIM | 482 | 444 | 494 | 52.1% |
 | Performance | 243 | 178 | 289 | 57.7% |
 | Recruitment | 144 | 72 | 68 | 66.7% |
 | Sidebar | 0 | 24 | 47 | 0.0% |
 | Time | 264 | 218 | 370 | 54.8% |
-| **Total** | **2470** | **2183** | **3086** | **53.1%** |
+| **Total** | **2513** | **2140** | **3086** | **54.0%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -25,30 +25,28 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
 | Item | Taxonomy | Units with GAP |
 |---|---|---:|
-| 1.1-C | Create valid | 11 |
-| 1.1-R | Read / list | 8 |
-| 1.1-U | Update valid | 59 |
-| 1.1-D | Delete valid | 27 |
+| 1.1-C | Create valid | 8 |
+| 1.1-R | Read / list | 5 |
+| 1.1-U | Update valid | 55 |
+| 1.1-D | Delete valid | 24 |
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 81 |
 | 1.3 | State transition valid | 6 |
 | 1.4 | Relasi antar-entity | 70 |
 | 1.5 | Permission/role positif | 13 |
 | 1.6 | Search/filter/sort valid | 62 |
-| 1.7 | Upload file valid | 1 |
-| 1.8 | Notifikasi/feedback UI | 80 |
-| 2.1 | Required field kosong | 48 |
-| 2.2 | Format salah | 6 |
+| 1.8 | Notifikasi/feedback UI | 77 |
+| 2.1 | Required field kosong | 45 |
+| 2.2 | Format salah | 3 |
 | 2.3 | Duplicate/unique conflict | 14 |
 | 2.4 | Aksi tanpa permission (UI/API) | 6 |
 | 2.5 | State transition invalid | 13 |
 | 2.6 | Operasi pada record invalid/tak eksis | 35 |
 | 2.8 | Reject/cancel tanpa alasan | 6 |
 | 3.1 | Panjang karakter field | 8 |
-| 3.2 | Nilai numerik | 1 |
 | 3.3 | Ukuran file upload | 7 |
-| 3.4 | Tanggal | 25 |
+| 3.4 | Tanggal | 23 |
 | 3.5 | Pagination | 67 |
-| 3.6 | Jumlah hasil (0/1/limit) | 34 |
+| 3.6 | Jumlah hasil (0/1/limit) | 31 |
 | 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 79 |
 | 4.2 | Aksi ganda/cepat (double submit) | 77 |
 | 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 48 |
@@ -65,8 +63,8 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.2-IDOR | IDOR | 10 |
 | 5.2-PrivEsc | Privilege escalation | 25 |
 | 5.2-MassAssign | Mass assignment | 82 |
-| 5.3-BadExt | Upload ekstensi terlarang | 4 |
-| 5.3-Rename | Upload file di-rename | 6 |
+| 5.3-BadExt | Upload ekstensi terlarang | 3 |
+| 5.3-Rename | Upload file di-rename | 5 |
 | 5.3-ContentType | Content-Type spoofing | 2 |
 | 5.3-DoubleExt | Double extension | 10 |
 | 5.3-Oversize | Oversized file | 7 |
@@ -76,16 +74,16 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.6 | Security headers | 14 |
 | 5.8 | Sensitive data exposure | 14 |
 | 5.9 | Business logic abuse | 20 |
-| 6.1 | Status code benar | 10 |
+| 6.1 | Status code benar | 7 |
 | 6.2 | Response schema/contract | 54 |
 | 6.3 | Request method salah (405) | 59 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 62 |
 | 6.5 | Parameter negatif (tipe salah/extra/null) | 102 |
 | 6.6 | Pagination & sorting param | 25 |
 | 6.7 | Idempotency | 51 |
-| 7.1 | JS console error | 7 |
-| 7.2 | Network anomali | 7 |
-| 7.3 | Resource 404 | 7 |
+| 7.1 | JS console error | 4 |
+| 7.2 | Network anomali | 4 |
+| 7.3 | Resource 404 | 4 |
 | 7.4 | Warning log | 14 |
 | 7.5 | Performance dasar | 14 |
 | 8.1 | Responsive/layout | 14 |
