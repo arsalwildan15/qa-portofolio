@@ -125,6 +125,19 @@ export class AssignClaimPage extends BasePage {
     await options.nth(index).click();
   }
 
+  /**
+   * Clicks an action button on the claim detail page (Admin: "Approve" / "Reject"; ESS: "Submit"
+   * / "Cancel") and returns the PUT requests/<id>/action response. Confirmed live: Admin
+   * "Approve" moves a SUBMITTED claim straight to PAID -- there is no separate Pay step.
+   */
+  async clickAction(buttonName: string): Promise<import('@playwright/test').Response | null> {
+    const responsePromise = this.page
+      .waitForResponse((r) => /\/api\/v2\/claim\/requests\/\d+\/action/.test(r.url()) && r.request().method() === 'PUT', { timeout: 15_000 })
+      .catch(() => null);
+    await this.page.getByRole('button', { name: buttonName, exact: true }).click();
+    return responsePromise;
+  }
+
   /** Confirmed live: POST goes to /api/v2/claim/employees/<empNumber>/requests, not a flat "employee-claims" collection. */
   async create(): Promise<import('@playwright/test').Response | null> {
     const responsePromise = this.page

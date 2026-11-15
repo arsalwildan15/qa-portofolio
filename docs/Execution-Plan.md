@@ -10,19 +10,20 @@
 > Ditetapkan user 2026-11-15. Sumber rencana: laporan coverage gap (sesi 2026-11-15).
 
 ## STATUS
-- **Fase aktif:** 2 (P2.1 Performance LAPIS 1 TUNTAS: 24 TC, full batch 22/24 -- 2 gagal SENGAJA:
-  REVIEW-10=BG-356, EVAL-15=BG-373)
-- **Task terakhir selesai:** P2.1 batch 2 (lihat checklist P2.1 + LOG)
+- **Fase aktif:** 2 -- P2.1 Performance lapis 1 TUNTAS (24 TC; sengaja FAILED: REVIEW-10=BG-356,
+  EVAL-15=BG-373); P2.2 Claim lapis 1 TUNTAS (9 TC; sengaja FAILED: SUBMIT-02=BG-375,
+  APPROVAL-05=BG-374)
+- **Task terakhir selesai:** P2.2 Claim lapis 1 (lihat checklist P2.2 + LOG)
 - **URUTAN BARU (disetujui user 2026-11-15, pendekatan 2 LAPIS):** lapis 1 = alur inti + approval
   lintas role (ESS) + keamanan di SEMUA modul dulu; lapis 2 = edge case sisa SETELAH 4 modul punya
   lapis 1. Urutan: (1) P2.1 batch 2 ringkas -> (2) P2.2 Claim lapis 1 -> (3) P2.3 Leave lapis 1 ->
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** P2.2 Claim LAPIS 1 -- eksplor live: aksi Admin pd klaim SUBMITTED milik ESS
-  (Approve/Reject/Pay), Event inactive vs dropdown, submit tanpa expense -> TC SUBMIT-01 (ESS create->
-  expense->Submit), APPROVAL-01 Approve->Pay->PAID, APPROVAL-02 Reject, APPROVAL-03 ESS tdk bisa
-  approve sendiri, CONFIG-EVENT/EXPTYPE dasar. Pakai createEssAccount+loginAs+assignSupervisor.
+- **NEXT ACTION:** P2.3 Leave LAPIS 1 -- eksplor live alur approval leave milik ESS: entitlement utk
+  ESS -> ESS Apply -> Admin/supervisor Approve/Reject (balance kembali saat Reject?) -> My Leave +
+  Cancel oleh ESS; Entitlement CRUD dasar. Pakai createEssAccount+loginAs+assignSupervisor+
+  createLeaveEntitlement (util lama, cek dulu signature-nya).
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -205,12 +206,22 @@ halaman Trackers config, review utk employee tanpa KPI.
 
 ### P2.2 Claim (~30) — eksplor: aksi admin pada klaim SUBMITTED milik ESS, Event inactive vs dropdown,
 submit tanpa expense.
-- [ ] Eksplorasi P2.2
-- [ ] CONFIG-EVENT-01..06 (Add, Required, Duplikat, XSS, Inactive hilang dari dropdown, Delete dipakai)
-- [ ] CONFIG-EXPTYPE-01..06 (pola sama)
-- [ ] SUBMIT-01 ESS create->expense->Submit | 02 Submit tanpa expense | 03 My Claims filter
-- [ ] APPROVAL-01 Approve->Pay->PAID | 02 Reject terminal | 03 ESS tak bisa approve sendiri | 04 Approve
-      CANCELLED via API (-) | 05 Approve vs Reject paralel (!) | 06 Cross-admin concurrency
+- [x] Eksplorasi P2.2 (lapis 1). FAKTA LIVE: ESS Submit Claim = claim/submitClaim (Create = POST
+      claim/requests, detail claim/submitClaim/id/<id>); aksi = PUT requests/<id>/action {SUBMIT|CANCEL|
+      APPROVE|REJECT}; expense = POST requests/<id>/expenses {expenseTypeId,date,amount,note}. Admin
+      "Approve" LANGSUNG -> PAID (TIDAK ada langkah Pay; rencana "Approve->Pay" keliru). allowedActions:
+      ESS atas klaim SUBMITTED miliknya = [CANCEL]; Admin = [APPROVE,REJECT]; terminal (PAID/REJECTED/
+      CANCELLED) = [] dan aksi lanjutan 403. Halaman detail Admin TIDAK refresh tombol stlh Approve.
+      Events: claim/viewEvents & saveEvents, POST claim/events {name,description,status}.
+- [x] Lapis 1 (9 TC, util `createEssClaim()`, page object `SubmitClaimPage` (extends AssignClaimPage),
+      `ClaimEventsPage`, `AssignClaimPage.clickAction()`): SUBMIT-01 ESS create->expense->Submit (UI) |
+      SUBMIT-02 submit tanpa expense (BUG BG-375) | APPROVAL-01 Approve->PAID | 02 Reject terminal |
+      03 ESS tak bisa approve sendiri (UI+API) | 04 Approve CANCELLED via API ditolak | 05 Reject basi
+      stlh Approve (server 403 benar, tapi UI "Uncaught exception: fe" = BUG BG-374, instans BG-199) |
+      CONFIG-EVENT-01 event baru tersedia di dropdown ESS | CONFIG-EVENT-02 Required + event non-aktif
+      disembunyikan. Run pertama: 7 pass, 2 gagal SENGAJA (SUBMIT-02, APPROVAL-05).
+- [ ] LAPIS 2: CONFIG-EVENT duplikat/XSS/delete dipakai | CONFIG-EXPTYPE-01..06 | SUBMIT-03 My Claims
+      filter | APPROVAL Approve vs Reject paralel | cross-admin concurrency
 - [ ] ASSIGN-16 Assign+Submit->PAID (aturan bisnis) | 17 Edit/delete expense | 18 Delete attachment
       | 19 Attachment 1MB tepat/>1MB (B) | 20 Double extension + nama file berbahaya (S) | 21 IDOR scoped+ESS
 - [ ] LIST-01 Filter Employee Claims | 02 Pagination/sort | 03 Kombinasi filter
@@ -295,3 +306,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P1.1-P1.8 | 7 util baru (createEssAccount/createSecondAdmin/assignSupervisor/loginAs/withConfigRestore/networkEdge + getLoggedInEmployeeName self-heal) + AdminUsersPage.selectEmployee() + createTestEmployee+employeeId + 3 TC infra, 9/9 check x3 run; self-heal TERBUKTI jalan live (korupsi kambuh di tengah run, INFRA-02 tetap lolos) | 1 commit
 - 2026-11-15 | P2.1 batch 1 | 13 TC Review + 4 TC KPI + PerformanceManageReviewsPage + setupReviewableEmployee + TestReport pageerror-whitelist fix; BG-356 (404+exception pasca-Activate) ditemukan & dicatat (R3: tdk di-whitelist, REVIEW-10 sengaja FAILED). Run akhir 17 TC: 8 pass; 7 gagal HANYA console-check (BG-356, semua check fungsional lolos); KPI-09 & REVIEW-01 gagal tanpa ringkasan di batch tapi 6/6 & 7/7 lolos terisolasi (flaky-under-load, pola P0.7) | 1 commit
 - 2026-11-15 | P2.1 batch 2 | +7 TC (EVAL-11..15, TRACKER-01/02) + PerformanceEvaluatePage/TrackerPage + createReview(); BG-373 baru (rating non-angka -> 0 diam-diam); KOREKSI BG-356 (console 404 di TC Activate = setup job-spec 404, setup kini via API); fix race searchByEmployeeName + pilih opsi by lastName. Full batch Performance 24 TC: 22 pass, 2 gagal sengaja (REVIEW-10, EVAL-15) | 1 commit
+- 2026-11-15 | P2.2 lapis 1 | 9 TC Claim (SUBMIT-01/02, APPROVAL-01..05, CONFIG-EVENT-01/02) + createEssClaim + SubmitClaimPage + ClaimEventsPage + AssignClaimPage.clickAction; 2 bug baru: BG-375 (klaim kosong bisa submit->PAID), BG-374 (Reject basi -> uncaught exception, instans BG-199). Run: 7 pass, 2 gagal sengaja | 1 commit
