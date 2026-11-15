@@ -304,7 +304,7 @@ Admin-side Assign Claim (14: create, required fields, expenses incl. amount boun
 
 ### Leave (26 TCs)
 
-Apply (6), Assign (6), Leave List incl. cancel-restores-balance and IDOR (3 + 1), and the cross-role flow added in Fase 2 (5): an ESS user applies, the Admin approves (Pending Approval → Scheduled, balance deducted once) or rejects (balance restored, terminal), the ESS user cancels their own request from My Leave, and an entitlement added by the Admin becomes the ESS user's visible balance. The full Leave suite passes, old and new tests alike. No new application bugs in this module this round.
+Apply (11), Assign (6), Leave List incl. cancel-restores-balance and IDOR (3 + 1), and the cross-role flow added in Fase 2 (5): an ESS user applies, the Admin approves (Pending Approval → Scheduled, balance deducted once) or rejects (balance restored, terminal), the ESS user cancels their own request from My Leave, and an entitlement added by the Admin becomes the ESS user's visible balance. Layer 2 added duration and calendar rules: a half day deducts 0.5, "Specify Time" deducts by hours and rejects reversed or zero-length ranges (422), a request falling only on a holiday (read live from the holiday calendar) or only on a weekend is rejected with "No Working Days Selected", overlapping requests are rejected, and retroactive (past-date) leave is accepted by design. The full Leave suite passes, old and new tests alike. No new application bugs in this module this round.
 
 ### Time (12 TCs)
 
