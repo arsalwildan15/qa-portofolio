@@ -789,7 +789,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify pesan "Required" muncul, POST TIDAK
                                 terkirim.
 
- 3   TC-ADMIN-USER-03   [DONE]   TC-ADMIN-USER-03-Verify-Password-Mismatch.spec.ts
+ 3   TC-ADMIN-USER-03   [DONE]   TC-ADMIN-USER-03-Verify-Password-Mismatch-Validation.spec.ts
                              (-) Verify Password dan Confirm Password Tidak Sama
                              -> Isi Password dan Confirm Password dengan nilai
                                 BERBEDA, submit.
@@ -972,7 +972,7 @@ LEGEND SIMBOL SKENARIO
                                    dengan TC-PIM-ADD-28 dan
                                    TC-RECRUITMENT-CANDIDATE-11.
 
- 8   TC-ADMIN-JOBTITLE-08   [DONE]   TC-ADMIN-JOBTITLE-08-Verify-Pure-Exe-Rejected.spec.ts
+ 8   TC-ADMIN-JOBTITLE-08   [DONE]   TC-ADMIN-JOBTITLE-08-Verify-Pure-Exe-Upload-Rejected.spec.ts
                              (S) Verify File .exe Ekstensi Asli Ditolak (Baseline)
                              -> Upload file .exe TANPA rename (ekstensi asli)
                                 sebagai Job Specification.
@@ -1128,7 +1128,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify pesan "Required" muncul, POST TIDAK
                                 terkirim.
 
- 3   TC-ADMIN-SHIFT-03   [DONE]   TC-ADMIN-SHIFT-03-Verify-From-Equals-To.spec.ts
+ 3   TC-ADMIN-SHIFT-03   [DONE]   TC-ADMIN-SHIFT-03-Verify-From-Equals-To-Duration.spec.ts
                              (!) Verify From = To (Durasi Shift 0 Jam / 24 Jam) [TEMUAN]
                              -> Isi From dan To dengan nilai yang SAMA, submit.
                              NOTE: Hasil didokumentasikan via report.finding()
@@ -1150,7 +1150,7 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: CORPORATE BRANDING (5 TC)
 ================================================================================
 
- 1   TC-ADMIN-CORPBRAND-01   [DONE]   TC-ADMIN-CORPBRAND-01-Verify-Form-Elements.spec.ts
+ 1   TC-ADMIN-CORPBRAND-01   [DONE]   TC-ADMIN-CORPBRAND-01-Verify-Form-Loads.spec.ts
                              (+) Verify Form Termuat dengan 3 File Input + Tombol
                              [UI VERIFICATION]
                              -> Verify 3 file input (Client Logo, Client
@@ -1224,7 +1224,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify pesan "Required" muncul, POST TIDAK
                                 terkirim.
 
- 3   TC-ADMIN-SKILL-03   [DONE]   TC-ADMIN-SKILL-03-Verify-Name-Very-Long-Text.spec.ts
+ 3   TC-ADMIN-SKILL-03   [DONE]   TC-ADMIN-SKILL-03-Verify-Skill-Name-Very-Long-Text.spec.ts
                              (B) Verify Name Sangat Panjang (300 Karakter) [TEMUAN]
                              -> Isi Name 300 karakter, submit.
                              NOTE: Hasil didokumentasikan via report.finding().
@@ -1255,7 +1255,7 @@ LEGEND SIMBOL SKENARIO
                              [UI VERIFICATION]
                              -> Verify Skill tidak lagi muncul di list.
 
- 8   TC-ADMIN-SKILL-08   [DONE]   TC-ADMIN-SKILL-08-Verify-IDOR.spec.ts
+ 8   TC-ADMIN-SKILL-08   [DONE]   TC-ADMIN-SKILL-08-Verify-IDOR-Edit-Delete-By-Id.spec.ts
                              (S) Verify IDOR: Cross-record Access + Bogus-id Handling
                              -> GET/PUT/DELETE via id milik record lain dan id
                                 bogus yang tidak ada.
@@ -1273,7 +1273,7 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: QUALIFICATIONS - EDUCATION (5 TC)
 ================================================================================
 
- 1   TC-ADMIN-EDU-01   [DONE]   TC-ADMIN-EDU-01-Verify-Add-Education-Valid.spec.ts
+ 1   TC-ADMIN-EDU-01   [DONE]   TC-ADMIN-EDU-01-Verify-Add-Education-Level-Valid.spec.ts
                              (+) Verify Add Education Level Valid ("Level", Bukan "Name")
                              -> Isi field Level (BUKAN "Name" -- label berbeda
                                 dari 4 sub-screen Qualifications lain), submit.
@@ -1300,7 +1300,7 @@ LEGEND SIMBOL SKENARIO
                              -> Isi Level dengan nama yang sudah ada, submit.
                              NOTE: Hasil didokumentasikan apa adanya.
 
- 5   TC-ADMIN-EDU-05   [DONE]   TC-ADMIN-EDU-05-Verify-Delete-Education.spec.ts
+ 5   TC-ADMIN-EDU-05   [DONE]   TC-ADMIN-EDU-05-Verify-Delete-Education-Level.spec.ts
                              (+) Verify Delete Education Level yang Baru Dibuat
                              -> Buat Level baru, hapus via icon trash.
                              [UI VERIFICATION]
@@ -1363,7 +1363,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify pesan "Required" muncul, POST TIDAK
                                 terkirim.
 
- 3   TC-ADMIN-LANG-03   [DONE]   TC-ADMIN-LANG-03-Verify-Name-Very-Long-Text.spec.ts
+ 3   TC-ADMIN-LANG-03   [DONE]   TC-ADMIN-LANG-03-Verify-Language-Name-Very-Long-Text.spec.ts
                              (B) Verify Name Sangat Panjang (300 Karakter) [TEMUAN]
                              -> Isi Name 300 karakter, submit.
                              NOTE: Hasil didokumentasikan via report.finding().
@@ -1448,7 +1448,7 @@ LEGEND SIMBOL SKENARIO
                              [UI VERIFICATION]
                              -> Verify TIDAK ada dialog JS ter-trigger.
 
- 4   TC-ADMIN-NATIONALITY-04   [DONE]   TC-ADMIN-NATIONALITY-04-Verify-IDOR.spec.ts
+ 4   TC-ADMIN-NATIONALITY-04   [DONE]   TC-ADMIN-NATIONALITY-04-Verify-IDOR-By-Id.spec.ts
                              (S) Verify IDOR: GET Cross-record (Read-only) + Bogus-id Handling
                              -> GET cross-record (read-only) dan PUT/DELETE
                                 dengan id bogus. SENGAJA TIDAK PERNAH
@@ -1476,7 +1476,7 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: ORGANIZATION - GENERAL INFORMATION (6 TC)
 ================================================================================
 
- 1   TC-ADMIN-ORGGI-01   [DONE]   TC-ADMIN-ORGGI-01-Verify-Edit-Save-Restore.spec.ts
+ 1   TC-ADMIN-ORGGI-01   [DONE]   TC-ADMIN-ORGGI-01-Verify-Save-Valid-Data.spec.ts
                              (+) Verify Toggle Edit, Ubah Notes, Save -> Tersimpan, Restore
                              -> Toggle switch "Edit", ubah Notes, klik Save.
                              [API VERIFICATION]
@@ -1486,7 +1486,7 @@ LEGEND SIMBOL SKENARIO
                                 asli di akhir test (record GLOBAL, dilihat
                                 semua user demo publik).
 
- 2   TC-ADMIN-ORGGI-02   [DONE]   TC-ADMIN-ORGGI-02-Verify-Empty-Organization-Name.spec.ts
+ 2   TC-ADMIN-ORGGI-02   [DONE]   TC-ADMIN-ORGGI-02-Verify-Empty-Organization-Name-Validation.spec.ts
                              (-) Verify Kosongkan Organization Name (Required)
                              -> Toggle Edit, kosongkan Organization Name,
                                 submit.
@@ -1507,13 +1507,13 @@ LEGEND SIMBOL SKENARIO
                              -> Verify TIDAK ada dialog JS ter-trigger setelah
                                 save/reload.
 
- 5   TC-ADMIN-ORGGI-05   [DONE]   TC-ADMIN-ORGGI-05-Verify-SQL-Injection-In-Tax-ID.spec.ts
+ 5   TC-ADMIN-ORGGI-05   [DONE]   TC-ADMIN-ORGGI-05-Verify-SQL-Injection-In-Tax-Id.spec.ts
                              (S) Verify SQL Injection Payload di Tax ID
                              -> Isi Tax ID dengan payload SQLi, submit.
                              [UI VERIFICATION]
                              -> Verify tidak ada server error/crash.
 
- 6   TC-ADMIN-ORGGI-06   [DONE]   TC-ADMIN-ORGGI-06-Verify-Toggle-Edit-Off-Without-Save.spec.ts
+ 6   TC-ADMIN-ORGGI-06   [DONE]   TC-ADMIN-ORGGI-06-Verify-Edit-Toggle-Off-Discards-Without-Save.spec.ts
                              (!) Verify Toggle Edit Off TANPA Save
                              -> Toggle Edit on, ubah field, toggle Edit off
                                 TANPA klik Save (TIDAK ADA tombol Cancel di
@@ -1588,7 +1588,7 @@ LEGEND SIMBOL SKENARIO
                              [UI VERIFICATION]
                              -> Verify Location tidak lagi muncul di list.
 
- 9   TC-ADMIN-LOCATION-09   [DONE]   TC-ADMIN-LOCATION-09-Verify-IDOR.spec.ts
+ 9   TC-ADMIN-LOCATION-09   [DONE]   TC-ADMIN-LOCATION-09-Verify-IDOR-Edit-Delete-By-Id.spec.ts
                              (S) Verify IDOR: Cross-record Access + Bogus-id Handling
                              -> PUT/DELETE via id milik record lain dan id
                                 bogus (form edit menaruh id langsung di URL
@@ -1604,7 +1604,7 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: ORGANIZATION - STRUCTURE (9 TC)
 ================================================================================
 
- 1   TC-ADMIN-STRUCTURE-01   [DONE]   TC-ADMIN-STRUCTURE-01-Verify-Add-Unit-Under-Root.spec.ts
+ 1   TC-ADMIN-STRUCTURE-01   [DONE]   TC-ADMIN-STRUCTURE-01-Verify-Add-Unit-Under-Root-Valid.spec.ts
                              (+) Verify Add Organization Unit di Bawah Root Valid
                              -> Pilih root node ("OrangeHRM"), klik "Add",
                                 isi Name (satu-satunya required), submit modal.
@@ -1639,7 +1639,7 @@ LEGEND SIMBOL SKENARIO
                              [UI VERIFICATION]
                              -> Verify tree masih berfungsi normal.
 
- 6   TC-ADMIN-STRUCTURE-06   [DONE]   TC-ADMIN-STRUCTURE-06-Verify-Cancel-Discards-Dialog.spec.ts
+ 6   TC-ADMIN-STRUCTURE-06   [DONE]   TC-ADMIN-STRUCTURE-06-Verify-Cancel-Discards-Form.spec.ts
                              (!) Verify Cancel Membatalkan Dialog Add Organization Unit
                              -> Isi sebagian field, klik Cancel.
                              [UI VERIFICATION]
@@ -1675,7 +1675,7 @@ LEGEND SIMBOL SKENARIO
                              [UI VERIFICATION]
                              -> Verify unit tidak lagi muncul di tree.
 
- 9   TC-ADMIN-STRUCTURE-09   [DONE]   TC-ADMIN-STRUCTURE-09-Verify-Add-Child-Unit.spec.ts
+ 9   TC-ADMIN-STRUCTURE-09   [DONE]   TC-ADMIN-STRUCTURE-09-Verify-Nested-Child-Unit.spec.ts
                              (!) Verify Add Child Unit di Bawah Unit Lain (Bukan Root)
                              -> Buat unit A, lalu buat unit B sebagai child
                                 dari unit A (bukan dari root).
@@ -1689,21 +1689,21 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: CONFIGURATION - EMAIL CONFIGURATION (5 TC) [VALIDATE-ONLY]
 ================================================================================
 
- 1   TC-ADMIN-EMAILCONFIG-01   [DONE]   TC-ADMIN-EMAILCONFIG-01-Verify-Form-Elements.spec.ts
+ 1   TC-ADMIN-EMAILCONFIG-01   [DONE]   TC-ADMIN-EMAILCONFIG-01-Verify-Form-Loads.spec.ts
                              (+) [VALIDATE-ONLY] Verify Form Termuat (Mail Sent As, Sending Method, Reset/Save)
                              [UI VERIFICATION]
                              -> Verify field Mail Sent As, 3 radio Sending
                                 Method (SECURE SMTP/SMTP/Sendmail), tombol
                                 Reset/Save visible.
 
- 2   TC-ADMIN-EMAILCONFIG-02   [DONE]   TC-ADMIN-EMAILCONFIG-02-Verify-Empty-Mail-Sent-As.spec.ts
+ 2   TC-ADMIN-EMAILCONFIG-02   [DONE]   TC-ADMIN-EMAILCONFIG-02-Verify-Empty-Mail-Sent-As-Validation.spec.ts
                              (-) [VALIDATE-ONLY] Verify Mail Sent As Kosong -> Required On-blur
                              -> Kosongkan Mail Sent As, blur field. TIDAK
                                 PERNAH klik Save (SMTP global demo publik).
                              [UI VERIFICATION]
                              -> Verify pesan "Required" muncul on-blur.
 
- 3   TC-ADMIN-EMAILCONFIG-03   [DONE]   TC-ADMIN-EMAILCONFIG-03-Verify-XSS-In-Mail-Sent-As.spec.ts
+ 3   TC-ADMIN-EMAILCONFIG-03   [DONE]   TC-ADMIN-EMAILCONFIG-03-Verify-XSS-Invalid-Format-Mail-Sent-As.spec.ts
                              (S) [VALIDATE-ONLY] Verify XSS Payload di Mail Sent As -> Format Ditolak
                              -> Isi Mail Sent As dengan payload XSS, blur.
                                 TIDAK PERNAH klik Save.
@@ -1712,7 +1712,7 @@ LEGEND SIMBOL SKENARIO
                                 admin@example.com" muncul (format email
                                 ditolak on-blur).
 
- 4   TC-ADMIN-EMAILCONFIG-04   [DONE]   TC-ADMIN-EMAILCONFIG-04-Verify-Sending-Method-Switch.spec.ts
+ 4   TC-ADMIN-EMAILCONFIG-04   [DONE]   TC-ADMIN-EMAILCONFIG-04-Verify-Sending-Method-Conditional-Fields.spec.ts
                              (!) Verify Switch Sending Method (Sendmail<->SMTP)
                              -> Pilih radio SMTP, lalu Sendmail, lalu SMTP
                                 lagi.
@@ -1733,14 +1733,14 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: CONFIGURATION - EMAIL SUBSCRIPTIONS (5 TC) [FULLY EXERCISED]
 ================================================================================
 
- 1   TC-ADMIN-EMAILSUB-01   [DONE]   TC-ADMIN-EMAILSUB-01-Verify-Notification-Types-List.spec.ts
+ 1   TC-ADMIN-EMAILSUB-01   [DONE]   TC-ADMIN-EMAILSUB-01-Verify-List-Loads.spec.ts
                              (+) Verify List 5 Notification Type Tampil
                              [UI VERIFICATION]
                              -> Verify 5 baris: Leave Applications/Approvals/
                                 Assignments/Cancellations/Rejections, masing2
                                 punya icon person-plus + switch toggle.
 
- 2   TC-ADMIN-EMAILSUB-02   [DONE]   TC-ADMIN-EMAILSUB-02-Verify-Add-Subscriber.spec.ts
+ 2   TC-ADMIN-EMAILSUB-02   [DONE]   TC-ADMIN-EMAILSUB-02-Verify-Add-Delete-Subscriber-Restore.spec.ts
                              (+) Verify Add Subscriber (Name+Email) ke Leave Cancellations
                              -> Buka sub-page Leave Cancellations, isi Name +
                                 Email (2 field teks bebas, BUKAN autocomplete),
@@ -1761,7 +1761,7 @@ LEGEND SIMBOL SKENARIO
                              [UI VERIFICATION]
                              -> Verify subscriber baru TIDAK tersimpan.
 
- 5   TC-ADMIN-EMAILSUB-05   [DONE]   TC-ADMIN-EMAILSUB-05-Verify-XSS-SQLi-In-Name.spec.ts
+ 5   TC-ADMIN-EMAILSUB-05   [DONE]   TC-ADMIN-EMAILSUB-05-Verify-XSS-SQLi-In-Employee-Search.spec.ts
                              (S) Verify XSS/SQLi Payload di Name (Leave Approvals)
                              -> Isi Name dengan payload XSS/SQLi, submit.
                              [UI VERIFICATION]
@@ -1772,33 +1772,33 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: CONFIGURATION - LOCALIZATION (5 TC) [VALIDATE-ONLY]
 ================================================================================
 
- 1   TC-ADMIN-LOCALIZATION-01   [DONE]   TC-ADMIN-LOCALIZATION-01-Verify-Form-Elements.spec.ts
+ 1   TC-ADMIN-LOCALIZATION-01   [DONE]   TC-ADMIN-LOCALIZATION-01-Verify-Form-Loads.spec.ts
                              (+) [VALIDATE-ONLY] Verify Form Termuat (Language, Date Format, Save, TANPA Cancel)
                              [UI VERIFICATION]
                              -> Verify 2 dropdown (Language, Date Format),
                                 tombol Save, TIDAK ADA tombol Cancel.
 
- 2   TC-ADMIN-LOCALIZATION-02   [DONE]   TC-ADMIN-LOCALIZATION-02-Verify-Language-Options.spec.ts
+ 2   TC-ADMIN-LOCALIZATION-02   [DONE]   TC-ADMIN-LOCALIZATION-02-Verify-Language-Dropdown-Options.spec.ts
                              (!) [VALIDATE-ONLY] Verify Dropdown Language Berisi > 1 Opsi
                              -> Buka dropdown Language. TIDAK PERNAH klik Save.
                              [UI VERIFICATION]
                              -> Verify opsi > 1 tersedia.
 
- 3   TC-ADMIN-LOCALIZATION-03   [DONE]   TC-ADMIN-LOCALIZATION-03-Verify-Language-Not-Persisted-Without-Save.spec.ts
+ 3   TC-ADMIN-LOCALIZATION-03   [DONE]   TC-ADMIN-LOCALIZATION-03-Verify-Language-Change-Not-Saved-Without-Save.spec.ts
                              (!) [VALIDATE-ONLY] Verify Pilih Language Lain TANPA Save -> Tidak Ter-persist
                              -> Pilih Language lain, reload TANPA Save.
                              [UI VERIFICATION]
                              -> Verify Language kembali ke nilai asli setelah
                                 reload.
 
- 4   TC-ADMIN-LOCALIZATION-04   [DONE]   TC-ADMIN-LOCALIZATION-04-Verify-Date-Format-Not-Persisted-Without-Save.spec.ts
+ 4   TC-ADMIN-LOCALIZATION-04   [DONE]   TC-ADMIN-LOCALIZATION-04-Verify-Date-Format-Change-Not-Saved-Without-Save.spec.ts
                              (!) [VALIDATE-ONLY] Verify Pilih Date Format Lain TANPA Save -> Tidak Ter-persist
                              -> Pilih Date Format lain, reload TANPA Save.
                              [UI VERIFICATION]
                              -> Verify Date Format kembali ke nilai asli
                                 setelah reload.
 
- 5   TC-ADMIN-LOCALIZATION-05   [DONE]   TC-ADMIN-LOCALIZATION-05-Verify-Language-Options-Consistent-With-Packages.spec.ts
+ 5   TC-ADMIN-LOCALIZATION-05   [DONE]   TC-ADMIN-LOCALIZATION-05-Verify-Language-Options-Match-Language-Packages.spec.ts
                              (!) Verify Opsi Dropdown Language Konsisten dengan Language Packages
                              [API VERIFICATION]
                              -> Verify GET /api/v2/admin/i18n/languages?
@@ -1809,7 +1809,7 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: CONFIGURATION - LANGUAGE PACKAGES (4 TC) [FULLY EXERCISED]
 ================================================================================
 
- 1   TC-ADMIN-LANGPACK-01   [DONE]   TC-ADMIN-LANGPACK-01-Verify-List-Elements.spec.ts
+ 1   TC-ADMIN-LANGPACK-01   [DONE]   TC-ADMIN-LANGPACK-01-Verify-List-Loads.spec.ts
                              (+) Verify List 9 Package Tampil, 4 Icon Aksi per Baris, Tombol Add
                              [API VERIFICATION]
                              -> Verify GET /api/v2/admin/i18n/languages?
@@ -1818,7 +1818,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify 4 icon per baris (upload, translate,
                                 download, trash), tombol Add visible.
 
- 2   TC-ADMIN-LANGPACK-02   [DONE]   TC-ADMIN-LANGPACK-02-Verify-Delete-Re-Add-Round-Trip.spec.ts
+ 2   TC-ADMIN-LANGPACK-02   [DONE]   TC-ADMIN-LANGPACK-02-Verify-Delete-ReAdd-Restore.spec.ts
                              (+) Verify Delete "Tamil (India)" lalu Re-Add -> Round-trip Bersih
                              -> Delete "Tamil (India)", lalu Add kembali
                                 (dropdown Add TIDAK bisa tambah locale baru --
@@ -1847,7 +1847,7 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: CONFIGURATION - MODULES (5 TC) [VALIDATE-ONLY]
 ================================================================================
 
- 1   TC-ADMIN-MODULES-01   [DONE]   TC-ADMIN-MODULES-01-Verify-Form-Elements.spec.ts
+ 1   TC-ADMIN-MODULES-01   [DONE]   TC-ADMIN-MODULES-01-Verify-Form-Loads.spec.ts
                              (+) [VALIDATE-ONLY] Verify Form Termuat, Ke-11 Module Tampil, Tombol Save
                              [UI VERIFICATION]
                              -> Verify 11 module (Admin, Pim, Leave, Time,
@@ -1856,20 +1856,20 @@ LEGEND SIMBOL SKENARIO
                                 dengan switch masing2, tombol Save (tanpa
                                 Reset/Cancel).
 
- 2   TC-ADMIN-MODULES-02   [DONE]   TC-ADMIN-MODULES-02-Verify-Admin-Module-Disabled.spec.ts
+ 2   TC-ADMIN-MODULES-02   [DONE]   TC-ADMIN-MODULES-02-Verify-Admin-Module-Locked.spec.ts
                              (!) Verify Switch Admin Module Ter-disable (Self-lock)
                              [UI VERIFICATION]
                              -> Verify switch Admin Module punya HTML
                                 attribute `disabled` (aplikasi mengunci
                                 dirinya sendiri).
 
- 3   TC-ADMIN-MODULES-03   [DONE]   TC-ADMIN-MODULES-03-Verify-Baseline-All-Enabled.spec.ts
+ 3   TC-ADMIN-MODULES-03   [DONE]   TC-ADMIN-MODULES-03-Verify-All-Modules-Enabled.spec.ts
                              (+) Verify Baseline: Semua 11 Module dalam State Enabled
                              [API VERIFICATION]
                              -> Verify GET /api/v2/admin/modules -> semua 11
                                 module enabled=true.
 
- 4   TC-ADMIN-MODULES-04   [DONE]   TC-ADMIN-MODULES-04-Verify-Toggle-Without-Save.spec.ts
+ 4   TC-ADMIN-MODULES-04   [DONE]   TC-ADMIN-MODULES-04-Verify-Toggle-Not-Saved-Without-Save.spec.ts
                              (!) [VALIDATE-ONLY] Verify Toggle Switch Buzz TANPA Save -> Tidak Ter-persist
                              -> Toggle switch Buzz, reload TANPA klik Save.
                              [API VERIFICATION]
@@ -1887,7 +1887,7 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: CONFIGURATION - SOCIAL MEDIA AUTHENTICATION (5 TC) [VALIDATE-ONLY]
 ================================================================================
 
- 1   TC-ADMIN-SOCIALAUTH-01   [DONE]   TC-ADMIN-SOCIALAUTH-01-Verify-Provider-List.spec.ts
+ 1   TC-ADMIN-SOCIALAUTH-01   [DONE]   TC-ADMIN-SOCIALAUTH-01-Verify-List-Loads.spec.ts
                              (+) Verify Provider List Termuat, Tombol Add
                              [UI VERIFICATION]
                              -> Verify "No Records Found" (belum ada provider
@@ -1926,7 +1926,7 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: CONFIGURATION - OAUTH CLIENT (5 TC) [FULLY EXERCISED]
 ================================================================================
 
- 1   TC-ADMIN-OAUTH-01   [DONE]   TC-ADMIN-OAUTH-01-Verify-Add-OAuth-Client-Valid.spec.ts
+ 1   TC-ADMIN-OAUTH-01   [DONE]   TC-ADMIN-OAUTH-01-Verify-Add-Valid.spec.ts
                              (+) Verify Add OAuth Client Valid -> Tersimpan, Status Enabled
                              -> Isi Name, Redirect URI, submit (checkbox
                                 "Enable Client" TIDAK dicentang).
@@ -1962,7 +1962,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify jumlah client tidak berubah, client
                                 baru TIDAK muncul di list.
 
- 5   TC-ADMIN-OAUTH-05   [DONE]   TC-ADMIN-OAUTH-05-Verify-Add-Delete-Client.spec.ts
+ 5   TC-ADMIN-OAUTH-05   [DONE]   TC-ADMIN-OAUTH-05-Verify-Delete.spec.ts
                              (+) Verify Add lalu Delete Client Baru
                              -> Buat client baru, hapus via icon trash.
                              [UI VERIFICATION]
@@ -1977,7 +1977,7 @@ LEGEND SIMBOL SKENARIO
   TEST CASES: CONFIGURATION - LDAP CONFIGURATION (5 TC) [VALIDATE-ONLY]
 ================================================================================
 
- 1   TC-ADMIN-LDAP-01   [DONE]   TC-ADMIN-LDAP-01-Verify-Form-Elements.spec.ts
+ 1   TC-ADMIN-LDAP-01   [DONE]   TC-ADMIN-LDAP-01-Verify-Form-Loads.spec.ts
                              (+) Verify Form Termuat, Teks Peringatan Backup Terlihat
                              [UI VERIFICATION]
                              -> Verify teks peringatan aplikasi sendiri soal
@@ -1992,7 +1992,7 @@ LEGEND SIMBOL SKENARIO
                              [UI VERIFICATION]
                              -> Verify pesan "Required" muncul.
 
- 3   TC-ADMIN-LDAP-03   [DONE]   TC-ADMIN-LDAP-03-Verify-Injection-In-Distinguished-Name.spec.ts
+ 3   TC-ADMIN-LDAP-03   [DONE]   TC-ADMIN-LDAP-03-Verify-XSS-SQLi-In-Distinguished-Name.spec.ts
                              (S) Verify XSS/SQLi/LDAP-injection di Distinguished Name via Test Connection
                              -> Isi Distinguished Name dengan payload
                                 XSS/SQLi/LDAP-injection, klik "Test
@@ -2007,7 +2007,7 @@ LEGEND SIMBOL SKENARIO
                              [UI VERIFICATION]
                              -> Verify app tidak crash.
 
- 5   TC-ADMIN-LDAP-05   [DONE]   TC-ADMIN-LDAP-05-Verify-Test-Connection-Safe.spec.ts
+ 5   TC-ADMIN-LDAP-05   [DONE]   TC-ADMIN-LDAP-05-Verify-Test-Connection-Non-Mutating.spec.ts
                              (!) Verify Test Connection dengan Default TIDAK Mengubah Apa Pun di Server
                              -> Klik "Test Connection" dengan Host/Port default
                                 (localhost/389).

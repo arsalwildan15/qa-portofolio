@@ -24,9 +24,11 @@ LEGEND SIMBOL SKENARIO
   FOLDER     : tests/_global/login/positive/ (Group 1), tests/_global/login/negative/ (Group 2),
                tests/_global/login/boundary/ (Group 3), tests/_global/login/security/ (Group 4),
                tests/_global/login/edge/ (Group 5)
-               [REORGANISASI 12 Nov 2026]: sebelumnya flat tests/_global/login/*.spec.ts,
+               [REORGANISASI 12 Nov 2026]: sebelumnya flat tests/login/*.spec.ts,
                dipecah ke subfolder PERSIS mengikuti 5 grup di bawah, supaya
                struktur folder konsisten dgn modul lain (Recruitment, Buzz).
+               [PINDAH 15 Nov 2026]: tests/login/ -> tests/_global/login/ krn Login
+               bukan menu sidebar; folder top-level tests/ kini = menu sidebar.
                Path import relatif & header komentar "Path"/"RUN COMMAND" di
                setiap file sudah disesuaikan. Isi/logika tiap TC TIDAK berubah
                akibat reorganisasi ini kecuali 2 perbaikan bug script yang
@@ -665,7 +667,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
        npx playwright test tests/_global/login --project=chromium
 
   3. Jalankan satu TC:
-       npx playwright test tests/_global/login/TC-LOGIN-01-*.spec.ts --project=chromium
+       npx playwright test tests/_global/login/positive/TC-LOGIN-01 --project=chromium
        (RUN COMMAND spesifik per TC ada di JSDoc header masing-masing file
        .spec.ts, termasuk flag --headed untuk observasi visual.)
 
