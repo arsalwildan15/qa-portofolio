@@ -1400,5 +1400,65 @@
   "url": "dashboard/index",
   "traits": {},
   "id": "U107"
+ },
+ {
+  "path": "My Info > Contact Details",
+  "url": "pim/contactDetails/empNumber/<self>",
+  "traits": {},
+  "id": "U108"
+ },
+ {
+  "path": "My Info > Emergency Contacts",
+  "url": "pim/viewEmergencyContacts/empNumber/<self>",
+  "traits": {},
+  "id": "U109"
+ },
+ {
+  "path": "My Info > Dependents",
+  "url": "pim/viewDependents/empNumber/<self>",
+  "traits": {},
+  "id": "U110"
+ },
+ {
+  "path": "My Info > Immigration",
+  "url": "pim/viewImmigration/empNumber/<self>",
+  "traits": {},
+  "id": "U111"
+ },
+ {
+  "path": "My Info > Job",
+  "url": "pim/viewJobDetails/empNumber/<self>",
+  "traits": {},
+  "id": "U112"
+ },
+ {
+  "path": "My Info > Salary",
+  "url": "pim/viewSalaryList/empNumber/<self>",
+  "traits": {},
+  "id": "U113"
+ },
+ {
+  "path": "My Info > Report-to",
+  "url": "pim/viewReportToDetails/empNumber/<self>",
+  "traits": {},
+  "id": "U114"
+ },
+ {
+  "path": "My Info > Qualifications",
+  "url": "pim/viewQualifications/empNumber/<self>",
+  "traits": {},
+  "id": "U115"
+ },
+ {
+  "path": "My Info > Memberships",
+  "url": "pim/viewMemberships/empNumber/<self>",
+  "traits": {},
+  "id": "U116"
+ },
+ {
+  "path": "My Info > Attachments & Profile Picture",
+  "url": "(attachment section per tab, pim/viewPhotograph/empNumber/<self>)",
+  "traits": {},
+  "id": "U117"
  }
 ]

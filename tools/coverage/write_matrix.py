@@ -17,7 +17,7 @@ FILL = {'COVERED': PatternFill('solid', fgColor='C6EFCE'), 'GAP': PatternFill('s
 FLAG_DOC = {'L': 'list', 'C': 'create', 'E': 'edit', 'D': 'delete', 'T': 'free text', 'N': 'numeric', 'DT': 'date', 'UP': 'upload',
             'W': 'workflow/status', 'RJ': 'reject/cancel action', 'ID': 'id-keyed record', 'AO': 'admin-only', 'ESS': 'used by ESS',
             'URL': 'URL field', 'UQ': 'unique name', 'SR': 'search/filter', 'PII': 'personal data', 'LOG': 'auth flow', 'RO': 'read-only',
-            'SET': 'single settings form', 'EXP': 'file path import/export'}
+            'SET': 'single settings form', 'EXP': 'file path import/export', 'PE': 'privilege boundary (read-only for ESS)'}
 module = lambda p: p.split(' > ')[0]
 
 def header(ws, cols, widths):
@@ -111,8 +111,10 @@ for uid, row in matrix.items():
         if st == 'GAP': gaps_by_item[code].append(units[uid]['path'])
 label = dict(items)
 lines = ['# Taxonomy Coverage Matrix', '',
-         'Generated from the live menu inventory (107 units) and all spec files. Full cell-level detail '
-         '(TC ids per cell, N/A reasons) lives in `docs/Taxonomy-Coverage-Matrix.xlsx`.', '',
+         f'Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Performance, Dashboard, '
+         f'Directory, Maintenance, Claim, Buzz) plus the sidebar Search box -- {len(units)} menu units taken from a live '
+         'click-through. Login and header items are outside this matrix (their existing TCs still run). '
+         'Full cell-level detail (TC ids per cell, N/A reasons) lives in `docs/Taxonomy-Coverage-Matrix.xlsx`.', '',
          '| Module | COVERED | GAP | N/A | Coverage of applicable |', '|---|---:|---:|---:|---:|']
 tot = defaultdict(int)
 for mod in sorted(cnt):

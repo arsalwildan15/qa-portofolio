@@ -11,8 +11,15 @@ from collections import defaultdict
 S = sys.argv[1]
 OUT_MD = sys.argv[2]
 specs = json.load(open(S + '/specs.json', encoding='utf-8'))
-units = {u['id']: u for u in json.load(open(S + '/units.json', encoding='utf-8'))}
-by_path = {u['path']: uid for uid, u in units.items()}
+# SCOPE (instruksi user 2026-11-15): HANYA 12 modul sidebar (Admin, PIM, Leave, Time, Recruitment,
+# My Info, Performance, Dashboard, Directory, Maintenance, Claim, Buzz) + kotak Search sidebar.
+# Login & item header (About/Support/Change Password/Help/Upgrade) bukan menu sidebar -> di luar matrix
+# (TC Login yg ada tetap dipertahankan & dijalankan, hanya tidak dihitung di matrix menu).
+SCOPE_MODULES = {'Admin', 'PIM', 'Leave', 'Time', 'Recruitment', 'My Info', 'Performance', 'Dashboard',
+                 'Directory', 'Maintenance', 'Claim', 'Buzz', 'Sidebar'}
+ALL_UNITS = {u['id']: u for u in json.load(open(S + '/units.json', encoding='utf-8'))}
+units = {k: u for k, u in ALL_UNITS.items() if u['path'].split(' > ')[0] in SCOPE_MODULES}
+by_path = {u['path']: uid for uid, u in ALL_UNITS.items()}
 U = lambda p: by_path[p]
 
 # ---------------------------------------------------------------- 1. spec -> units
@@ -191,7 +198,8 @@ json.dump(tags, open(S + '/tags.json', 'w', encoding='utf-8'), indent=0)
 #        SR search box | PII sensitive data | LOG login | RO read-only | SET single settings form | EXP export/import path
 F = defaultdict(set)
 def flag(paths, *fl):
-    for p in paths: F[U(p)] |= set(fl)
+    for p in paths:
+        if U(p) in units: F[U(p)] |= set(fl)
 ADMIN_LISTS = ['Admin > Job > Job Titles', 'Admin > Job > Pay Grades', 'Admin > Job > Employment Status', 'Admin > Job > Job Categories',
                'Admin > Job > Work Shifts', 'Admin > Organization > Locations', 'Admin > Qualifications > Skills', 'Admin > Qualifications > Education',
                'Admin > Qualifications > Licenses', 'Admin > Qualifications > Languages', 'Admin > Qualifications > Memberships', 'Admin > Nationalities',
@@ -229,6 +237,17 @@ flag(['PIM > Employee > Salary', 'PIM > Employee > Memberships', 'Admin > Job > 
 flag(['PIM > Employee > Job'], 'W', 'AO')
 flag(['PIM > Employee > Salary'], 'AO')
 flag(['PIM > Employee > Attachments (all tabs)', 'PIM > Employee > Profile Picture'], 'ID', 'ESS', 'E')
+MYINFO_EDIT = ['My Info > Contact Details', 'My Info > Emergency Contacts', 'My Info > Dependents', 'My Info > Immigration',
+               'My Info > Qualifications', 'My Info > Memberships', 'My Info > Attachments & Profile Picture']
+flag(MYINFO_EDIT, 'E', 'T', 'ID', 'PII', 'ESS')
+flag(['My Info > Emergency Contacts', 'My Info > Dependents', 'My Info > Immigration', 'My Info > Qualifications',
+      'My Info > Memberships', 'My Info > Attachments & Profile Picture'], 'L', 'C', 'D')
+flag(['My Info > Dependents', 'My Info > Immigration', 'My Info > Qualifications', 'My Info > Memberships'], 'DT')
+flag(['My Info > Memberships'], 'N')
+flag(['My Info > Attachments & Profile Picture'], 'UP')
+# PE = privilege boundary: shown to the employee but must stay read-only for ESS (edit only by Admin).
+flag(['My Info > Job', 'My Info > Salary', 'My Info > Report-to'], 'RO', 'ESS', 'ID', 'PII', 'PE', 'L')
+flag(['My Info > Personal Details'], 'PE')
 flag(['Leave > Leave List'], 'L', 'W', 'RJ', 'ID', 'SR', 'DT', 'AO')
 flag(['Leave > My Leave', 'Leave > Apply'], 'ESS', 'W', 'DT', 'T', 'ID')
 flag(['Leave > Apply', 'Leave > Assign Leave'], 'C', 'N')
@@ -315,7 +334,7 @@ ITEMS = [  # (code, label, rule -> (applicable, reason_if_not))
  ('5.1-SSRF', 'SSRF', lambda f: ('URL' in f, 'tidak ada field URL yg diproses server')),
  ('5.2-IDOR', 'IDOR', lambda f: ('ID' in f, 'tidak meng-key data by ID')),
  ('5.2-BFLAC', 'Broken function level access control', lambda f: ('AO' in f, 'menu tidak admin-only')),
- ('5.2-PrivEsc', 'Privilege escalation', lambda f: (bool({'ESS'} & f) and bool({'E'} & f), 'tidak ada data diri yg bisa diubah user non-admin')),
+ ('5.2-PrivEsc', 'Privilege escalation', lambda f: ('ESS' in f and bool({'E', 'PE'} & f), 'tidak ada data diri yg bisa diubah user non-admin')),
  ('5.2-MassAssign', 'Mass assignment', lambda f: (bool({'C', 'E', 'SET'} & f), 'tidak ada endpoint mutasi')),
  ('5.2-OpenRedirect', 'Open redirect', lambda f: ('LOG' in f, 'tidak ada parameter redirect')),
  ('5.3-BadExt', 'Upload ekstensi terlarang', lambda f: ('UP' in f, 'tidak ada upload')),

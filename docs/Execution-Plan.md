@@ -362,7 +362,7 @@ unicode/RTL, API param negatif (offset/limit/sortField).
       kosong (dibuktikan) -> ditulis ulang membangun post ESS sendiri, lolos.
 - [x] (BARU) TC-RECRUITMENT-VACANCY-19: POST vacancies dgn description null -> 500 = BUG BG-409 (Low);
       STATUS-15 kini membangun vacancy tanpa hiring manager sendiri (hapus manajer dari PIM).
-- [x] (BARU, instruksi user) P4.0 Taxonomy Coverage Matrix: inventaris menu LIVE (107 unit), tools/coverage/,
+- [x] (BARU, instruksi user) P4.0 Taxonomy Coverage Matrix (SCOPE: 12 modul sidebar + Search, instruksi user; Login & header di luar matrix): 109 unit, tools/coverage/,
       docs/Taxonomy-Coverage-Matrix.xlsx/.md. Baseline 23.5% -> 39.1% stlh sweep PAGE-01 (1.5/7.x, 97 unit) &
       HDR-01 (5.6). 23 TC lemah (cek "tanpa exception" saja) tdk dihitung -> wajib diperkuat. BUG BG-414 (tab
       Job minta job-spec yg tak ada -> 404 tiap kunjungan, Low).

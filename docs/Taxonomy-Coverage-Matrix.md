@@ -1,6 +1,6 @@
 # Taxonomy Coverage Matrix
 
-Generated from the live menu inventory (107 units) and all spec files. Full cell-level detail (TC ids per cell, N/A reasons) lives in `docs/Taxonomy-Coverage-Matrix.xlsx`.
+Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Performance, Dashboard, Directory, Maintenance, Claim, Buzz) plus the sidebar Search box -- 109 menu units taken from a live click-through. Login and header items are outside this matrix (their existing TCs still run). Full cell-level detail (TC ids per cell, N/A reasons) lives in `docs/Taxonomy-Coverage-Matrix.xlsx`.
 
 | Module | COVERED | GAP | N/A | Coverage of applicable |
 |---|---:|---:|---:|---:|
@@ -9,17 +9,15 @@ Generated from the live menu inventory (107 units) and all spec files. Full cell
 | Claim | 153 | 157 | 187 | 49.4% |
 | Dashboard | 11 | 25 | 106 | 30.6% |
 | Directory | 10 | 16 | 45 | 38.5% |
-| Header | 21 | 93 | 241 | 18.4% |
 | Leave | 185 | 314 | 424 | 37.1% |
-| Login | 35 | 58 | 120 | 37.6% |
 | Maintenance | 30 | 67 | 116 | 30.9% |
-| My Info | 11 | 30 | 30 | 26.8% |
+| My Info | 11 | 451 | 319 | 2.4% |
 | PIM | 352 | 574 | 494 | 38.0% |
 | Performance | 171 | 250 | 289 | 40.6% |
 | Recruitment | 114 | 102 | 68 | 52.8% |
 | Sidebar | 0 | 24 | 47 | 0.0% |
 | Time | 170 | 312 | 370 | 35.3% |
-| **Total** | **1735** | **2704** | **3158** | **39.1%** |
+| **Total** | **1679** | **2974** | **3086** | **36.1%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -27,73 +25,71 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
 | Item | Taxonomy | Units with GAP |
 |---|---|---:|
-| 1.1-C | Create valid | 6 |
-| 1.1-R | Read / list | 54 |
-| 1.1-U | Update valid | 55 |
-| 1.1-D | Delete valid | 22 |
-| 1.2 | Variasi input valid (opsional diisi/kosong) | 75 |
+| 1.1-C | Create valid | 12 |
+| 1.1-R | Read / list | 56 |
+| 1.1-U | Update valid | 61 |
+| 1.1-D | Delete valid | 28 |
+| 1.2 | Variasi input valid (opsional diisi/kosong) | 81 |
 | 1.3 | State transition valid | 6 |
-| 1.4 | Relasi antar-entity | 63 |
-| 1.5 | Permission/role positif | 9 |
-| 1.6 | Search/filter/sort valid | 53 |
-| 1.8 | Notifikasi/feedback UI | 77 |
-| 2.1 | Required field kosong | 45 |
-| 2.2 | Format salah | 17 |
+| 1.4 | Relasi antar-entity | 70 |
+| 1.5 | Permission/role positif | 13 |
+| 1.6 | Search/filter/sort valid | 62 |
+| 1.7 | Upload file valid | 1 |
+| 1.8 | Notifikasi/feedback UI | 83 |
+| 2.1 | Required field kosong | 49 |
+| 2.2 | Format salah | 22 |
 | 2.3 | Duplicate/unique conflict | 14 |
-| 2.4 | Aksi tanpa permission (UI/API) | 76 |
+| 2.4 | Aksi tanpa permission (UI/API) | 82 |
 | 2.5 | State transition invalid | 13 |
-| 2.6 | Operasi pada record invalid/tak eksis | 68 |
-| 2.7 | Kredensial/auth salah | 3 |
+| 2.6 | Operasi pada record invalid/tak eksis | 78 |
 | 2.8 | Reject/cancel tanpa alasan | 6 |
-| 3.1 | Panjang karakter field | 2 |
-| 3.2 | Nilai numerik | 1 |
-| 3.3 | Ukuran file upload | 6 |
-| 3.4 | Tanggal | 22 |
-| 3.5 | Pagination | 58 |
-| 3.6 | Jumlah hasil (0/1/limit) | 29 |
-| 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 74 |
-| 4.2 | Aksi ganda/cepat (double submit) | 73 |
-| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 43 |
+| 3.1 | Panjang karakter field | 8 |
+| 3.2 | Nilai numerik | 2 |
+| 3.3 | Ukuran file upload | 7 |
+| 3.4 | Tanggal | 26 |
+| 3.5 | Pagination | 67 |
+| 3.6 | Jumlah hasil (0/1/limit) | 38 |
+| 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 79 |
+| 4.2 | Aksi ganda/cepat (double submit) | 77 |
+| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 48 |
 | 4.4 | Race condition | 17 |
-| 4.5 | Session/koneksi terputus | 67 |
-| 4.6 | Data kosong/null (empty state) | 102 |
-| 4.7 | Konkurensi multi-user edit | 69 |
-| 4.8 | Behavior non-obvious terdokumentasi | 10 |
-| 5.1-SQLi | SQL Injection | 57 |
-| 5.1-XSS-Stored | Stored XSS | 21 |
-| 5.1-XSS-Reflected | Reflected XSS | 26 |
-| 5.1-CmdPath | Command/Path injection | 13 |
+| 4.5 | Session/koneksi terputus | 71 |
+| 4.6 | Data kosong/null (empty state) | 105 |
+| 4.7 | Konkurensi multi-user edit | 75 |
+| 4.8 | Behavior non-obvious terdokumentasi | 14 |
+| 5.1-SQLi | SQL Injection | 62 |
+| 5.1-XSS-Stored | Stored XSS | 27 |
+| 5.1-XSS-Reflected | Reflected XSS | 22 |
+| 5.1-CmdPath | Command/Path injection | 14 |
 | 5.1-SSRF | SSRF | 5 |
-| 5.2-IDOR | IDOR | 60 |
+| 5.2-IDOR | IDOR | 70 |
 | 5.2-BFLAC | Broken function level access control | 62 |
-| 5.2-PrivEsc | Privilege escalation | 20 |
-| 5.2-MassAssign | Mass assignment | 76 |
-| 5.2-OpenRedirect | Open redirect | 1 |
-| 5.3-BadExt | Upload ekstensi terlarang | 3 |
-| 5.3-Rename | Upload file di-rename | 5 |
-| 5.3-ContentType | Content-Type spoofing | 1 |
-| 5.3-DoubleExt | Double extension | 9 |
-| 5.3-Oversize | Oversized file | 6 |
-| 5.3-Filename | Malicious filename | 10 |
-| 5.4 | CSRF | 74 |
-| 5.5 | Rate limit / brute force / spam | 55 |
-| 5.6 | Security headers | 8 |
-| 5.7 | Session security | 2 |
-| 5.8 | Sensitive data exposure | 9 |
-| 5.9 | Business logic abuse | 19 |
-| 6.1 | Status code benar | 5 |
-| 6.2 | Response schema/contract | 92 |
-| 6.3 | Request method salah (405) | 103 |
-| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 105 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 93 |
-| 6.6 | Pagination & sorting param | 56 |
-| 6.7 | Idempotency | 45 |
-| 7.1 | JS console error | 5 |
-| 7.2 | Network anomali | 5 |
-| 7.3 | Resource 404 | 5 |
-| 7.4 | Warning log | 10 |
-| 7.5 | Performance dasar | 10 |
-| 8.1 | Responsive/layout | 107 |
-| 8.2 | Cross-browser | 107 |
-| 8.3 | Accessibility dasar | 99 |
-| 8.4 | Konsistensi pesan | 80 |
+| 5.2-PrivEsc | Privilege escalation | 29 |
+| 5.2-MassAssign | Mass assignment | 82 |
+| 5.3-BadExt | Upload ekstensi terlarang | 4 |
+| 5.3-Rename | Upload file di-rename | 6 |
+| 5.3-ContentType | Content-Type spoofing | 2 |
+| 5.3-DoubleExt | Double extension | 10 |
+| 5.3-Oversize | Oversized file | 7 |
+| 5.3-Filename | Malicious filename | 11 |
+| 5.4 | CSRF | 80 |
+| 5.5 | Rate limit / brute force / spam | 58 |
+| 5.6 | Security headers | 14 |
+| 5.8 | Sensitive data exposure | 14 |
+| 5.9 | Business logic abuse | 20 |
+| 6.1 | Status code benar | 12 |
+| 6.2 | Response schema/contract | 94 |
+| 6.3 | Request method salah (405) | 105 |
+| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 107 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 102 |
+| 6.6 | Pagination & sorting param | 65 |
+| 6.7 | Idempotency | 51 |
+| 7.1 | JS console error | 12 |
+| 7.2 | Network anomali | 12 |
+| 7.3 | Resource 404 | 12 |
+| 7.4 | Warning log | 14 |
+| 7.5 | Performance dasar | 14 |
+| 8.1 | Responsive/layout | 109 |
+| 8.2 | Cross-browser | 109 |
+| 8.3 | Accessibility dasar | 103 |
+| 8.4 | Konsistensi pesan | 83 |
