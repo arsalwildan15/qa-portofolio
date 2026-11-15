@@ -1,0 +1,198 @@
+================================================================================
+  DAFTAR TEST CASE, LINTAS MODUL (P2.5)
+  Modul    : Leave, Claim, Performance, Time (aspek yang sama diuji di keempat
+             modul sekaligus)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/{leave,
+             claim,performance,time}/* + /api/v2/{leave,claim,performance,
+             time,core}/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [TODO]        = Belum dibuat / belum dijalankan
+  [DONE]        = Test case selesai & script berjalan
+  [CANCEL]      = Dibatalkan (redundan / tidak relevan)
+
+LEGEND SIMBOL SKENARIO
+  (+)           = Positive / Happy Path
+  (-)           = Negative
+  (B)           = Boundary
+  (S)           = Security
+  (!)           = Unexpected / Edge Case
+  [TEMUAN]      = Perilaku yang didokumentasikan via report.finding(), bukan
+                  pass/fail tegas
+
+  FORMAT ID  : TC-XMOD-NN
+  FILE       : TC-XMOD-NN-Verify-Name-In-English.spec.ts
+  FOLDER     : tests/xmod/
+
+================================================================================
+  FUNGSI & ALASAN PENDEKATAN
+================================================================================
+
+  Aspek P2.5 (header keamanan, CSRF, validasi parameter API, unicode, emoji,
+  ketahanan jaringan) ditangani oleh lapisan yang SAMA di keempat modul:
+  web-server, router API /api/v2, klien HTTP (axios) dan komponen form
+  bersama. Satu TC per aspek yang melingkari keempat modul memberi bukti
+  per modul (setiap check diberi label [Leave]/[Claim]/[Performance]/[Time])
+  tanpa menggandakan 4x file yang isinya identik. Bila satu modul berbeda
+  perilaku, label check-nya langsung menunjukkan modul mana.
+
+  Modul lama (Login, Admin, PIM, Recruitment, Buzz) sudah punya TC sejenis
+  per modul (mis. TC-ADMIN-SECURITY-01/02, TC-BUZZ-SECURITY-06/10); TC-XMOD
+  menutup aspek yang sama untuk empat modul Fase 2.
+
+================================================================================
+  DAFTAR TEST CASE
+================================================================================
+
+ 1   TC-XMOD-01  [DONE]  TC-XMOD-01-Verify-Clickjacking-Protection-Header-4-Modules.spec.ts
+                             (S) Verify Leave, Claim, Performance And Time
+                             Send A Clickjacking Protection Header
+                             -> [API] GET halaman tiap modul (viewLeaveList,
+                                viewAssignClaim, searchKpi,
+                                viewEmployeeTimesheet) + satu endpoint API
+                                tiap modul.
+                             [API VERIFICATION]
+                             -> Verify X-Frame-Options ATAU CSP
+                                frame-ancestors ada (halaman & API).
+                             -> Kontrol: nosniff + HSTS ada.
+                             NOTE: [BUG BG-404, Medium] keempat modul
+                             mengirim CSP, nosniff, HSTS, tetapi TANPA
+                             X-Frame-Options/frame-ancestors -> bisa
+                             di-iframe. Gap yang sama dengan BG-030/066/
+                             096/145/175. TC SENGAJA FAILED (R3).
+
+ 2   TC-XMOD-02  [DONE]  TC-XMOD-02-Verify-Cross-Site-Mutation-Blocked-4-Modules.spec.ts
+                             (S) Verify A Cross-Site Page Cannot Create Data
+                             In Leave, Claim, Performance Or Time (CSRF)
+                             -> Buka https://example.com di browser yang
+                                sama dengan sesi Admin (halaman penyerang).
+                             -> Per modul, dari halaman penyerang:
+                                (a) fetch JSON + credentials:'include';
+                                (b) "simple request" form-urlencoded
+                                    mode:'no-cors' (tanpa preflight).
+                                Endpoint: leave/leave-types, claim/events,
+                                performance/kpis, time/customers.
+                             -> [Admin API] cek daftar tiap modul.
+                             [VERIFICATION]
+                             -> Verify (a) diblokir CORS.
+                             -> Verify TIDAK ada data dari (a) maupun (b).
+                             NOTE: [TEMUAN] (b) terkirim tapi tidak
+                             membuat data karena cookie sesi SameSite=Lax.
+                             Server sendiri menerima body form-urlencoded,
+                             tidak memeriksa Origin, dan tidak memakai
+                             token CSRF (POST langsung dgn Origin asing +
+                             cookie -> 200) -> perlindungan bergantung
+                             penuh pada SameSite=Lax + CORS di browser.
+                             Dicatat sbg temuan, bukan bug.
+
+ 3   TC-XMOD-03  [DONE]  TC-XMOD-03-Verify-List-API-Rejects-Invalid-Paging-And-Sort-4-Modules.spec.ts
+                             (-/S) Verify List APIs Reject Invalid Paging
+                             And Sort Parameters Cleanly
+                             -> [API] Per modul (leave/employees/
+                                leave-requests, claim/employees/requests,
+                                performance/kpis, time/projects):
+                                limit=-1, limit=abc, offset=-5,
+                                sortField=xyz, sortField="1;DROP TABLE x",
+                                sortOrder=SIDEWAYS, limit=100000.
+                             [API VERIFICATION]
+                             -> Verify parameter valid -> 200 (kontrol).
+                             -> Verify tiap nilai invalid -> 422 dengan
+                                invalidParamKeys yang tepat.
+                             -> Verify limit=100000 bukan 5xx.
+                             NOTE: [TEMUAN POSITIF] validasi seragam di
+                             keempat modul, tidak ada 500 / bocoran SQL.
+
+ 4   TC-XMOD-04  [DONE]  TC-XMOD-04-Verify-Unicode-RTL-Names-Round-Trip-4-Modules.spec.ts
+                             (+) Verify Arabic (RTL), CJK And Accented
+                             Names Are Stored And Shown Unchanged
+                             -> [Admin API] Buat Leave Type, Claim Event,
+                                KPI, Time Customer bernama "<Mod> مرحبا 你好
+                                Ñandú ★ <stamp>" (<= 50 karakter).
+                             -> [Admin UI] Buka daftar Claim Events & Time
+                                Customers.
+                             [VERIFICATION]
+                             -> Verify create 200 & respons memuat nama
+                                identik; GET list mengembalikan nama
+                                identik.
+                             -> Verify nama tampil utuh di UI.
+                             NOTE: batas panjang nama Leave Type = 50
+                             (51 -> 422). Emoji diuji terpisah (XMOD-05).
+
+ 5   TC-XMOD-05  [DONE]  TC-XMOD-05-Verify-Emoji-In-Name-Handled-Without-Server-Error.spec.ts
+                             (-/!) Verify An Emoji In A Name Is Handled With
+                             A Clear Message, Not A Server Error
+                             -> Per form (Claim Event, Leave Type, Time
+                                Customer): [API] POST create dgn nama
+                                "QaEmoji 🚀 <stamp>"; [API] GET endpoint
+                                cek-nama-unik dgn nilai yang sama.
+                             -> [UI] Ketik nama tsb di form, klik Save.
+                             [VERIFICATION]
+                             -> Verify POST create bukan 5xx (hasil: 422
+                                [name], terkendali).
+                             -> Verify cek-nama-unik bukan 5xx.
+                             -> Verify user mendapat pesan yang jelas,
+                                bukan "Unexpected Error Occurred".
+                             NOTE: [BUG BG-405, Medium] GET core/
+                             validation/unique (ClaimEvent, LeaveType) &
+                             time/validation/customer-name -> 500; form
+                             melempar "Uncaught exception: fe", data
+                             tidak tersimpan, user hanya melihat toast
+                             generik. Arab/CJK/aksen/★ normal (XMOD-04)
+                             -> khusus karakter 4-byte. Diduga charset
+                             database utf8 (3-byte). TC SENGAJA FAILED.
+
+ 6   TC-XMOD-06  [DONE]  TC-XMOD-06-Verify-Network-Drop-And-Refresh-During-Save.spec.ts
+                             (!) Verify A Dropped Connection Or A Refresh
+                             During Save Never Creates Duplicates
+                             -> Per form (Claim Event, Time Customer, Leave
+                                Type): isi nama unik, putuskan koneksi
+                                tepat saat POST create
+                                (dropConnectionDuringSave), lalu Save ulang
+                                (bila form macet: muat ulang & isi ulang
+                                dulu).
+                             -> Isi nama lain, reload saat POST create
+                                tertunda (refreshDuringPendingSave).
+                             [VERIFICATION]
+                             -> Verify tidak ada data saat koneksi putus.
+                             -> Verify spinner form hilang <= 10 detik
+                                (form bisa dipakai lagi).
+                             -> Verify Save ulang 200 dan tepat SATU data.
+                             -> Verify refresh saat tertunda: paling banyak
+                                satu data.
+                             NOTE: [BUG BG-406, Low, konfirmasi ke-7
+                             BG-199] di ketiga form spinner TIDAK pernah
+                             hilang + "Uncaught exception: fe"; user harus
+                             reload & mengetik ulang. Tidak ada duplikat.
+                             BATASAN: penundaan refresh dilakukan di sisi
+                             browser (page.route), jadi request belum
+                             sampai server -> hasil selalu 0; cek ini
+                             membuktikan tidak ada kiriman ulang otomatis
+                             setelah reload, bukan perilaku server yang
+                             sedang memproses. TC SENGAJA FAILED.
+
+================================================================================
+  RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
+================================================================================
+
+  Total TC         : 6
+  PASSED           : 3 (XMOD-02, 03, 04)
+  FAILED (BUG, sengaja, dikonfirmasi) : 3
+    -> TC-XMOD-01 (BG-404, Medium, clickjacking 4 modul)
+    -> TC-XMOD-05 (BG-405, Medium, emoji -> 500 di cek nama unik)
+    -> TC-XMOD-06 (BG-406, Low, form macet di spinner setelah koneksi
+       putus, konfirmasi ke-7 BG-199)
+  Bug script selama pengembangan: XMOD-06 versi pertama menunggu klik Save
+    tanpa batas waktu saat form macet -> test timeout 4 menit (noise run
+    pertama ditulis ulang menjadi BG-406). Kini klik ber-timeout 10 detik
+    dan kemacetan form menjadi check eksplisit.
+
+  BELUM DICAKUP: rate limiting (sengaja tidak dijalankan ke demo publik
+  bersama -- beban berlebih bisa mengganggu pengguna lain; lebih tepat di
+  instance self-host, lihat keputusan target ZAP), sesi kedaluwarsa saat
+  form terbuka.
+
+  RUN COMMAND:
+    npx playwright test tests/xmod --project=chromium --workers=1

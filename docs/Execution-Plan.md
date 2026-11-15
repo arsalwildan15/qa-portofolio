@@ -10,12 +10,12 @@
 > Ditetapkan user 2026-11-15. Sumber rencana: laporan coverage gap (sesi 2026-11-15).
 
 ## STATUS
-- **Fase aktif:** FASE 3 TUNTAS (dokumentasi 4 modul) -> lanjut lapis 2 Fase 2. Riwayat: P2.1 Performance lapis 1 TUNTAS (24 TC; sengaja FAILED: REVIEW-10=BG-356,
-  EVAL-15=BG-373); P2.2 Claim lapis 1 TUNTAS (9 TC; sengaja FAILED: SUBMIT-02=BG-375,
-  APPROVAL-05=BG-374)
-- **Task terakhir selesai:** FASE 2 LAPIS 1 TUNTAS (4 modul): Performance 24 TC, Claim 9, Leave 5 (+4 TC
-  lama dipulihkan), Time 5 (modul Time 12/12 lolos). TC yg SENGAJA FAILED: REVIEW-10 (BG-356),
-  EVAL-15 (BG-373), CLAIM-APPROVAL-05 (BG-374), CLAIM-SUBMIT-02 (BG-375).
+- **Fase aktif:** FASE 2 TUNTAS & FASE 3 TUNTAS -> mulai FASE 4. Ringkasan Fase 2: lapis 1 (43 TC) + lapis 2
+  (Leave 5, Claim 6, Performance 8, Time 5) + P2.5 lintas modul (6 TC, tests/xmod). Total suite 561 TC.
+- **Task terakhir selesai:** P2.5 lintas modul (XMOD-01..06). TC yg SENGAJA FAILED di 4 modul + xmod:
+  REVIEW-10 (BG-356), EVAL-15 (BG-373), CLAIM-ASSIGN-06 (BG-333), CLAIM-ASSIGN-10 (BG-338),
+  CLAIM-APPROVAL-05 (BG-374), CLAIM-SUBMIT-02 (BG-375), TIME-TIMESHEET-11 (BG-402), XMOD-01 (BG-404),
+  XMOD-05 (BG-405), XMOD-06 (BG-406).
 - **INSTRUKSI USER 2026-11-15:** begitu Fase 2 (lapis 1 keempat modul) selesai, LANGSUNG lanjut
   otomatis ke Fase 3 (dokumentasi) tanpa menunggu konfirmasi. **DIPERLUAS:** lanjutkan SEMUA fase
   berikutnya (lapis 2, P2.5, Fase 4-8) secara OTOMATIS tanpa konfirmasi user. (Tetap: aturan R1-R9
@@ -26,11 +26,10 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** (6) LAPIS 2 Fase 2 TUNTAS (Leave, Claim, Performance, Time). Berikutnya: P2.5
-  lintas-modul (per modul: CSRF, header keamanan, API param negatif offset/limit/sortField, unicode/
-  RTL, refresh saat pending, koneksi putus), lalu Fase 4-8.
-  Setiap TC baru: verifikasi per file, full batch per modul (--workers=1 utk modul dgn setup ESS),
-  docs/TC-*.txt ikut diperbarui.
+- **NEXT ACTION:** FASE 2 TUNTAS (lapis 1 + lapis 2 + P2.5). Berikutnya FASE 4 (audit ulang modul lama):
+  mulai item WAJIB-duluan: drift format tanggal di 9 page object lama (pakai dateInput.ts), isVisible
+  tanpa tunggu di TC lama, setup Job Title via API (hindari 404 job-spec), lalu P4.1 access control ESS
+  di modul lama, P4.2-P4.5. Setelah itu Fase 5-8.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -326,7 +325,13 @@ efek Holiday ke hitungan.
 
 ### P2.5 Lintas-modul 4 modul (~28): per modul CSRF, rate limit, headers, refresh pending, koneksi putus,
 unicode/RTL, API param negatif (offset/limit/sortField).
-- [ ] Leave | [ ] Claim | [ ] Performance | [ ] Time
+- [x] Leave | [x] Claim | [x] Performance | [x] Time -- diwujudkan sbg 6 TC lintas modul di tests/xmod/
+      (docs/TC-XMOD.txt), tiap check berlabel modul: XMOD-01 clickjacking (BUG BG-404, Medium) | XMOD-02
+      CSRF dari halaman penyerang: JSON diblokir CORS, form simple POST tdk membuat data (SameSite=Lax);
+      temuan: server tdk cek Origin/tanpa token | XMOD-03 param list invalid -> 422 | XMOD-04 Arab/CJK/
+      aksen/BMP round-trip | XMOD-05 emoji di nama -> cek-nama-unik 500 + toast generik (BUG BG-405,
+      Medium) | XMOD-06 koneksi putus -> form macet di spinner + uncaught (BUG BG-406, Low, konfirmasi
+      ke-7 BG-199), tanpa duplikat. Rate limit SENGAJA tidak dijalankan ke demo publik bersama.
 
 ## FASE 3 — Dokumentasi (per modul setelah P2.x selesai)
 - [x] docs/TC-Performance.txt (30) | [x] TC-Claim.txt (23 + ASSIGN-15 [CANCEL]) | [x] TC-Leave.txt (21) |
@@ -397,3 +402,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P2.2 lapis 2 | +6 TC Claim (CONFIG-EVENT-03/04, CONFIG-EXPTYPE-01/02, SUBMIT-03, APPROVAL-06), semua lolos run pertama; ASSIGN-08/13 ditulis ulang (data sendiri, bukan seed milik karyawan lain); full batch Claim 29 TC: 25 pass + 4 gagal sengaja; noise BG-384..387 diarsip; TC-Claim.txt 30 entri, README 542 | 1 commit
 - 2026-11-15 | P2.1 lapis 2 | +8 TC Performance (EVAL-10/16, KPI-11, TRACKER-03..07) + createEssReview.ts + PerformanceSelfEvaluatePage + PerformanceTrackerPage edit/delete/log; tanpa bug app baru (nama tracker duplikat = finding desain); full batch 38: 27 pass + 9 lolos serial (demo terdegradasi) + 2 gagal sengaja; createTestEmployee guard employeeId null; noise BG-388..399 diarsip; README 550 | 1 commit
 - 2026-11-15 | P2.4 lapis 2 | +5 TC Time (TIMESHEET-04/10/11, PROJECT-01/02); BUG baru BG-402 (total harian >24j lintas baris diterima, Medium); fix searchAndView (waitForURL); full batch 17: 16 pass + 1 gagal sengaja; noise BG-400/401/403 diarsip; README 555. LAPIS 2 FASE 2 TUNTAS | 1 commit
+- 2026-11-15 | P2.5 lintas-modul | 6 TC tests/xmod (XMOD-01..06) + docs/TC-XMOD.txt; 3 BUG baru: BG-404 clickjacking 4 modul (Medium), BG-405 emoji -> 500 di cek nama unik (Medium), BG-406 form macet spinner stlh koneksi putus (Low, BG-199); 3 pass (CSRF, param API, unicode). README 561. FASE 2 TUNTAS | 1 commit
