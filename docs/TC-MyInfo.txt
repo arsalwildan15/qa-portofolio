@@ -1,0 +1,180 @@
+================================================================================
+  DAFTAR TEST CASE, MY INFO
+  Modul    : My Info (tab data karyawan dari sudut pandang karyawan/ESS)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/pim/*
+             (dibuka oleh akun ESS utk dirinya sendiri)
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [DONE]        = Test case selesai & script berjalan
+  [TODO]        = Belum dibuat
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug
+
+LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
+  (+) Positive  (-) Negative  (B) Boundary  (!) Edge Case  (S) Security  (A) API
+  Tiap entri mencantumkan KODE item taksonomi yg diverifikasi; tiap check di
+  script diberi label kode tsb.
+
+  FORMAT ID  : TC-MYINFO-<SECTION>-NN
+  FILE       : TC-MYINFO-<SECTION>-NN-Verify-Name-In-English.spec.ts
+  FOLDER     : tests/my-info/personal-details/ | job-salary-report-to/ |
+               contact-details/ | records/ | security/
+
+================================================================================
+  FUNGSI & ALASAN PENDEKATAN
+================================================================================
+
+  My Info adalah halaman PIM yang SAMA dengan PIM > Employee List, tetapi dibuka
+  oleh karyawan untuk DIRINYA SENDIRI (role ESS), bukan oleh Admin. Karena itu
+  TC di sini memakai page object PIM yang sudah ada, dijalankan dengan sesi ESS
+  sungguhan (akun dibuat via Add Employee + Create Login Details, login di
+  context terpisah -- util src/utils/myInfo.ts). Yang diuji khusus My Info:
+  BATAS HAK karyawan atas datanya sendiri (apa yang boleh ia ubah vs read-only),
+  dan isolasi antar-karyawan (IDOR).
+
+  Fakta hak akses (confirmed live 16 Nov 2026, akun ESS):
+    - Personal Details : editable, KECUALI Employee Id, Driver's License Number,
+                         Date of Birth (disabled di UI).
+    - Contact Details  : editable penuh. Endpoint PUT memakai path TUNGGAL
+                         "employee": pim/employee/<id>/contact-details.
+    - Emergency Contacts / Dependents / Immigration / Qualifications (Work Exp,
+      Education, Skills, Languages, License) / Memberships : Add (CRUD) +
+      Attachments.
+    - Job / Salary / Report-to : READ-ONLY (tanpa tombol Add/Save).
+
+  Catatan teknis: tab bergaya form (Personal/Contact Details) merender input
+  lebih dulu lalu MENIMPA-nya saat respons GET hidrasi tiba -- nilai yg diketik
+  sebelum GET itu terhapus (body PUT jadi kosong). Util gotoTabAndHydrate()
+  menunggu GET tsb sebelum form diisi.
+
+================================================================================
+  GROUP 1, PERSONAL DETAILS
+================================================================================
+
+ 1   TC-MYINFO-PD-01  [DONE]  TC-MYINFO-PD-01-Verify-Employee-Edits-Own-Personal-Details.spec.ts
+                             (+) 1.1-U 1.5 1.8 | (-) 2.4
+                             Verify An Employee Can Edit Their Own Personal
+                             Details From My Info
+                             -> Setup: akun ESS, buka My Info lewat menu sidebar.
+                             -> Ubah Other Id, Gender, Marital Status -> Save.
+                             [VERIFICATION]
+                             -> 1.5 My Info terbuka di record milik sendiri.
+                             -> 2.4 Employee Id, Driver's License Number, Date of
+                                Birth tampil DISABLED.
+                             -> 1.1-U PUT personal-details 200 & nilai tersimpan
+                                (dibaca Admin). 1.8 toast "Successfully Updated".
+                             HASIL 16 Nov 2026: 10/10 lolos.
+
+ 2   TC-MYINFO-PD-02  [DONE -- BUG]  TC-MYINFO-PD-02-Verify-Locked-Personal-Fields-Enforced-By-Server.spec.ts
+                             (S) 5.2-PrivEsc 5.2-MassAssign | (-) 2.4
+                             Verify Personal Fields Locked For Employees Cannot
+                             Be Changed Through The API
+                             -> Rekam body PUT personal-details dari Save normal
+                                ESS, lalu kirim ulang dgn satu field terkunci
+                                diubah per percobaan (Employee Id, Driver's
+                                License Number, Date of Birth).
+                             [VERIFICATION]
+                             -> Kontrol: Other Id (boleh) tetap bisa diubah.
+                             -> 5.2-PrivEsc tiap field terkunci: ditolak 4xx
+                                ATAU nilai tersimpan tetap lama.
+                             STATUS AKTUAL: GAGAL (BUG BG-420, High) -- ketiga
+                             field terkunci DITERIMA 200 & TERSIMPAN (dibaca
+                             Admin). Penguncian hanya di UI, tidak ditegakkan
+                             server. TC sengaja FAILED (R3).
+
+================================================================================
+  GROUP 2, JOB / SALARY / REPORT-TO (READ-ONLY)
+================================================================================
+
+ 3   TC-MYINFO-JOB-01  [DONE]  TC-MYINFO-JOB-01-Verify-Job-Salary-Report-To-Read-Only-For-Employee.spec.ts
+                             (-) 2.4 | (S) 5.2-BFLAC 5.2-PrivEsc
+                             Verify Job, Salary And Report-To Are Read-Only For
+                             An Employee In My Info
+                             -> [ESS UI] tab Job tanpa tombol Save; Salary &
+                                Report-to tanpa tombol Add.
+                             -> [ESS API] PUT job-details, POST salary-components,
+                                POST supervisors, POST subordinates atas diri
+                                sendiri.
+                             [VERIFICATION]
+                             -> 2.4 ketiga tab tanpa tombol mutasi.
+                             -> 5.2-BFLAC/PrivEsc keempat request -> 403, dan
+                                tidak ada data terbentuk/berubah.
+                             HASIL 16 Nov 2026: 9/9 lolos. [TEMUAN POSITIF]
+                             Job/Salary/Report-to ditegakkan benar (403) --
+                             kontras dgn Personal Details (BG-420).
+
+================================================================================
+  GROUP 3, CONTACT DETAILS
+================================================================================
+
+ 4   TC-MYINFO-CONTACT-01  [DONE]  TC-MYINFO-CONTACT-01-Verify-Employee-Edits-Own-Contact-Details.spec.ts
+                             (+) 1.1-U 1.8 | (-) 2.2 | (S) 5.1-XSS-Stored
+                             Verify An Employee Edits Their Own Contact Details,
+                             With Email Format And XSS Checks
+                             -> Isi Street/City/Mobile/Work Email valid -> Save.
+                             -> Work Email format salah -> validasi.
+                             -> Payload XSS di Street 1 -> buka ulang (ESS &
+                                Admin).
+                             [VERIFICATION]
+                             -> 1.1-U PUT 200 & City/Work Email tersimpan; 1.8
+                                toast sukses.
+                             -> 2.2 email invalid ditolak (pesan / tidak
+                                tersimpan).
+                             -> 5.1-XSS-Stored payload tampil sbg teks, tidak
+                                tereksekusi di ESS maupun Admin.
+                             HASIL 16 Nov 2026: 9/9 lolos. [TEMUAN POSITIF]
+                             output di-escape. Catatan: perlu menunggu GET
+                             hidrasi sebelum mengisi (gotoTabAndHydrate).
+
+================================================================================
+  GROUP 4, RECORD TABS (EMERGENCY / DEPENDENTS / IMMIGRATION / dst)
+================================================================================
+
+ 5   TC-MYINFO-EMERGENCY-01  [DONE]  TC-MYINFO-EMERGENCY-01-Verify-Employee-Manages-Own-Emergency-Contacts.spec.ts
+                             (+) 1.1-C 1.1-R 1.1-D 1.8 | (-) 2.1
+                             Verify An Employee Can Add, See And Delete Their Own
+                             Emergency Contacts, With Required-Field Check
+                             -> Add -> Save form kosong (validasi) -> Add valid
+                                -> hapus.
+                             [VERIFICATION]
+                             -> 2.1 "Required" di form kosong, tanpa POST.
+                             -> 1.1-C POST 200 + 1.8 toast; 1.1-R muncul di
+                                tabel; 1.1-D DELETE 200 & hilang.
+                             HASIL 16 Nov 2026: 8/8 lolos.
+
+================================================================================
+  GROUP 5, SECURITY (ISOLASI ANTAR-KARYAWAN)
+================================================================================
+
+ 6   TC-MYINFO-IDOR-01  [DONE]  TC-MYINFO-IDOR-01-Verify-Employee-Cannot-Read-Or-Write-Another-Employees-Data.spec.ts
+                             (S) 5.2-IDOR
+                             Verify An Employee Cannot Read Or Write Another
+                             Employee's PIM Data Via The API
+                             -> Setup: ESS korban (dgn data kontak dari Admin) +
+                                ESS penyerang.
+                             -> [Penyerang API] GET 13 endpoint tab milik korban;
+                                PUT contact-details korban.
+                             [VERIFICATION]
+                             -> 5.2-IDOR tiap GET -> 403/404/422 (tidak 200
+                                berisi data).
+                             -> 5.2-IDOR PUT ditolak & data korban tidak berubah.
+                             -> Kontrol: GET data sendiri -> 200.
+                             HASIL 16 Nov 2026: lolos. [TEMUAN POSITIF] isolasi
+                             antar-karyawan ditegakkan.
+
+================================================================================
+  RINGKASAN
+================================================================================
+
+  Total TC         : 6 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, IDOR 1)
+  PASSED           : 5
+  FAILED (BUG, sengaja) : 1 -> TC-MYINFO-PD-02 (BG-420, High, field terkunci
+                     Personal Details bisa diubah karyawan lewat API)
+  BELUM DICAKUP (backlog): Dependents/Immigration/Qualifications/Memberships
+    CRUD + boundary tanggal/numerik; Attachments (upload valid + exe-rename,
+    seturut BG-003 di PIM); Profile Picture.
+
+  RUN COMMAND (semua TC My Info):
+    npx playwright test tests/my-info --project=chromium --workers=1

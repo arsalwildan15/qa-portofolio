@@ -74,6 +74,11 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'cross-module/TC-XMOD-01', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Timesheets > Employee Timesheets', 'Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Time > Project Info > Projects']),
  (r'cross-module/TC-XMOD-0[24]', ['Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Performance > Configure > KPIs', 'Time > Project Info > Customers']),
  (r'cross-module/TC-XMOD-03', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Project Info > Projects']),
+ (r'my-info/personal-details', ['My Info > Personal Details']),
+ (r'my-info/contact-details', ['My Info > Contact Details']),
+ (r'my-info/job-salary-report-to', ['My Info > Job', 'My Info > Salary', 'My Info > Report-to']),
+ (r'my-info/records', ['My Info > Emergency Contacts']),
+ (r'my-info/security', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts']),
  (r'sweep/TC-SWEEP-API', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
                          if u['id'] in set(json.load(open(S + '/api_units.json')))]),
  (r'sweep/TC-SWEEP-(PAGE|HDR|ROLE|VIEW|A11Y|XBROWSER)', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))

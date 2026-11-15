@@ -40,20 +40,15 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** FASE 4 / P4.0 gelombang matrix (matrix 40.6%, 109 unit, 2765 GAP). Selesai: sweep PAGE-01
-  (1.5/7.x), HDR-01 (5.6), ROLE-01 (ESS: 1.5/2.4/5.2-BFLAC/IDOR). URUTAN BERIKUT:
-  (1) sweep halaman sisa di tests/_global/sweep/: VIEW-01 responsive 8.1 (viewport 375px: tanpa scroll
-      horizontal), A11Y-01 8.3 (input berlabel, tombol bernama, img alt), XBROWSER-01 8.2 (PAGE-01 versi
-      firefox+webkit via browserType.launch), LIST-01 4.6/3.6/3.5/1.6 (filter tanpa hasil -> "No Records
-      Found", pagination, sort) per unit ber-list.
-  (2) gelombang B sweep API per unit (registry endpoint list/detail): 6.2 schema, 6.3 405, 6.4 tanpa sesi
-      401, 6.6 paging, 5.8 field sensitif, 2.6 id tak eksis.
-  (3) gelombang C mutasi per unit CRUD (registry create body), (4) gelombang D sisa: My Info ESS (10 tab:
-      edit milik sendiri, Job/Salary/Report-to read-only -> 5.2-PrivEsc via API), IDOR API PIM.
-  (5) gelombang E spesifik unit + perkuat 23 TC lemah.
-  SETIAP gelombang: label check pakai kode taksonomi, docs TC-*.txt format simbol+kode, `python
-  tools/coverage/check_docs.py` = 0, rebuild matrix (tools/coverage/README.md), commit (author Arsal, tanpa
-  trailer) + PUSH (user minta commit & push).
+- **NEXT ACTION:** FASE 4 / P4.0. Selesai gel. A+B (sweep VIEW/A11Y/XBROWSER/API) & My Info gel. D awal
+  (6 TC tests/my-info: PD-01/02, JOB-01, CONTACT-01, EMERGENCY-01, IDOR-01; BUG BG-420 High = field
+  terkunci Personal Details bisa diubah ESS via API). Matrix 53.1%. BERIKUT:
+  (1) My Info sisa: Dependents/Immigration/Qualifications/Memberships CRUD+boundary, Attachments
+      (upload valid + exe-rename seturut BG-003), Profile Picture.
+  (2) gel. C mutasi per unit CRUD (registry create body) utk modul config sederhana yg masih GAP.
+  (3) gel. E spesifik unit + perkuat 23 TC lemah. Lalu Fase 5-8.
+  Catatan util: timeout createEssAccount/createTestEmployee dinaikkan ke 60 dtk (demo lambat);
+  gotoTabAndHydrate() utk tab form yg menimpa input saat GET hidrasi; setTimeout TC lintas-sesi 240 dtk.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -444,3 +439,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | Konsistensi docs | tools/coverage/check_docs.py (docs<->spec, header Path/RUN COMMAND, tabel README); 42 nama file usang di TC-Admin.txt dikoreksi; TC-Login catatan riwayat & contoh run 1 TC diperbaiki; 11 docs = 564 spec, 0 mismatch; push ke origin | 1 commit
 - 2026-11-15 | P4.0 gel. D (bagian 1) | TC-SWEEP-ROLE-01: ESS sungguhan membuka 97 URL menu langsung -> 130/130 lolos (67 admin-only 'Credential Required', 11 tab PIM orang lain kosong tanpa data). Run pertama 11 gagal = kriteria TC terlalu sempit; dibuktikan via API sbg ESS (pim/employees/<lain>/* 422, PUT 404, data sendiri 200) -> tidak ada kebocoran; regex laten diperbaiki & diverifikasi ulang. Finding: penolakan PIM 422 bukan 403 (6.1). Matrix 40.6% | 1 commit
 - 2026-11-15 | P4.0 gel. A+B | sweep VIEW-01 8.1 (571/571; nav via hamburger 190x), A11Y-01 8.3 (BUG BG-416 app-wide Medium), XBROWSER-01 8.2 (382/383; sisa = BG-414; tdk ada bug spesifik browser), API-01 6.1/6.2/6.3/6.4/6.6/5.8/2.6 (453/453, 47 unit, endpoint dari inventaris API live). IDOR PIM diuji ulang dgn path benar (contact-details tunggal) -> tetap aman. Util adminAccessGate. Instal axe-core DITOLAK izin -> 8.3 via DOM. Matrix 52.1% | 1 commit
+- 2026-11-16 | FASE 4 My Info | 6 TC tests/my-info + util myInfo.ts (newEssSession/openMyInfoFromMenu/gotoTabAndHydrate); BUG BG-420 (High, field terkunci Personal Details diubah ESS via API, tersimpan); 5 lolos + 1 sengaja FAILED; fix timeout setup 15->60 dtk (demo lambat); docs/TC-MyInfo.txt; README 575; matrix 53.1% | 1 commit

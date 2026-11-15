@@ -27,7 +27,7 @@ export async function createTestEmployee(
     const responsePromise = page
       .waitForResponse(
         (r) => r.url().includes('/api/v2/pim/employees') && r.request().method() === 'POST',
-        { timeout: 10_000 },
+        { timeout: 60_000 }, // the shared demo slows hard at times; a short wait fails setup spuriously
       )
       .catch(() => null);
     await addEmployeePage.save();

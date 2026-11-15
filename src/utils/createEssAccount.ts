@@ -26,9 +26,12 @@ export async function createEssAccount(
   await addEmployeePage.passwordInput.fill(password);
   await addEmployeePage.confirmPasswordInput.fill(password);
 
+  // 60s, not 15s: the shared public demo periodically slows down hard (Add Employee POST observed
+  // taking well over a minute during degraded periods, 2026-11-16) -- a 15s wait then returned
+  // status=undefined and failed setup for a reason that was purely environmental, not an app bug.
   const responsePromise = page
     .waitForResponse((r) => r.url().includes('/api/v2/pim/employees') && r.request().method() === 'POST', {
-      timeout: 15_000,
+      timeout: 60_000,
     })
     .catch(() => null);
   await addEmployeePage.save();
