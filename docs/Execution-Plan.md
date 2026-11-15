@@ -10,11 +10,15 @@
 > Ditetapkan user 2026-11-15. Sumber rencana: laporan coverage gap (sesi 2026-11-15).
 
 ## STATUS
-- **Fase aktif:** 0
-- **Task terakhir selesai:** P0.6 (+ perbaikan identitas empNumber=7 yg disetujui user)
-- **NEXT ACTION:** P0.7 -- tunggu hasil re-run 9 TC yg kena dampak, verifikasi 3x bersih, lapor checkpoint
+- **Fase aktif:** 0 -> siap lanjut Fase 1 (menunggu laporan checkpoint diterima user)
+- **Task terakhir selesai:** P0.7 (FASE 0 TUNTAS)
+- **NEXT ACTION:** P1.1 (probe API create user ESS/Admin + Report-to + login ESS) -- lihat
+  "RISIKO UTK FASE SELANJUTNYA" di P0.7 SEBELUM mengerjakan TC apa pun di claim/assign,
+  leave/apply, leave/leave-list, time/attendance: cek `GET /api/v2/pim/employees/7` dulu kalau
+  ada kegagalan aneh terkait identitas/balance di area itu.
 - **Blocker:** —
-- **Perlu persetujuan user (antrian):** —
+- **Perlu persetujuan user (antrian):** — (identity-repair sdh pre-approved utk kejadian berulang
+  yg identik; kalau polanya BEDA dari yg sudah terdokumentasi, tanya ulang)
 
 ## ATURAN KERJA (berlaku semua fase)
 - R1 Probe-first: eksplor live dgn file `tests/zz-probe-*.spec.ts`, jalankan SELALU dgn `--reporter=list`
@@ -71,7 +75,29 @@
       (PUT personal-details, 200) jadi firstName="QA" lastName="Admin" employeeId="QAADMIN07" (unik,
       tdk ambigu). Tidak ada hardening kode tambahan dilakukan -- check assertion yg sudah ada di TC
       TERBUKTI bekerja benar (menangkap mismatch ini), jadi root cause murni data, bukan logic.
-- [ ] P0.7 Re-run 9 TC yg kena dampak, verifikasi 3x bersih setelah data diperbaiki -> lapor checkpoint ke user.
+- [x] P0.7 Re-run 9 TC: 5 pass lgsg (APPLY-02/03/04/06, TIME-REPORTS-01) -- identity fix konfirmasi
+      menyelesaikan masalah. 4 sisanya (APPLY-01, APPLY-05, LIST-01, LIST-03) diisolasi 1-per-1:
+      - APPLY-05/LIST-01/LIST-03: pass bersih saat diisolasi -> flaky-under-sustained-load (pola yg
+        sudah dikenal proyek ini: demo melambat setelah run serial panjang), BUKAN bug.
+      - APPLY-01: bug SCRIPT nyata ditemukan & diperbaiki -- perbandingan nama tdk menormalisasi
+        whitespace (UI Entitlement selalu render "First  Last" 2 spasi walau middleName kosong,
+        getLoggedInEmployeeName() bangun fullName via filter(Boolean) = 1 spasi). Fix: normalisasi
+        spasi sblm compare. 3x verifikasi (1 run di antaranya kena temuan di bawah, bkn fix-nya).
+      **[TEMUAN PENTING, cross-cutting]** empNumber=7 TERKORUPSI LAGI persis dgn teks identik
+      ("EJBED"/"Apt 456"/"CA") hanya beberapa menit stlh diperbaiki pertama kali -- pola INI
+      (bukan random garbage BEDA tiap kali) mengindikasikan demo publik kemungkinan RESET
+      PERIODIK ke snapshot baseline yg SUDAH tercemar sejak lama, bukan korupsi live berkelanjutan.
+      Diperbaiki ulang (aksi identik yg sudah disetujui user, tidak minta izin ulang krn sama persis).
+      RISIKO UTK FASE SELANJUTNYA: 11 file di 4 area (`claim/assign`,`leave/apply`,`leave/leave-list`,
+      `time/attendance`) pakai `getLoggedInEmployeeName()` -- SEMUA rentan kena dampak kalau reset
+      kejadian lagi mid-run. TIDAK termasuk modul lama (Admin/PIM/Recruitment/Buzz, mereka pakai
+      employee test khusus, bukan identitas diri sendiri). **Fix arsitektural yg lebih tahan lama
+      (verifikasi via empNumber/API ground-truth, bukan match nama/employeeId yg bisa korup) BELUM
+      dikerjakan -- scope-nya besar (perlu redesign createLeaveEntitlement + LeaveEntitlementPage.
+      selectEmployee), dijadwalkan sbg item tersendiri sebelum/selama Fase 2, BUKAN diburu-buru di
+      P0.7.** Kalau TC di 4 area ini gagal lagi di masa depan dgn simptom serupa ("entitlement ke
+      employee salah", "balance 0 tak terduga"), CEK DULU `GET /api/v2/pim/employees/7` sblm
+      berasumsi bug baru -- besar kemungkinan ini kambuh lagi, bukan regresi kode.
 
 ## FASE 1 — Infrastruktur Multi-Role
 - [ ] P1.1 Probe: endpoint API create user (role ESS/Admin) + linking employee; Report-to API; login ESS.
@@ -189,3 +215,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P0.3+P0.4 | hapus TC-PERF-REVIEW-01+CLAIM-ASSIGN-15, revisi CLAIM-ASSIGN-04(segregation of duties)+09(IDOR path-mismatch sungguhan), 3x stabil | 1 commit
 - 2026-11-15 | P0.5 | QA-Review-Progress.md blok KOREKSI ditambahkan; 6 TC lama N/A single-role dijadwalkan Fase 4.1 (tdk diedit sekarang) | 1 commit
 - 2026-11-15 | P0.6 | baseline 32/43 pass; 9 fail = 1 root cause (empNumber=7 identity corruption); user approved repair; PersonalDetailsPage PUT 200 -> QA Admin/QAADMIN07 | data repair, no code commit
+- 2026-11-15 | P0.7 | 5/9 fixed by repair; 3/9 flaky-under-load (pass isolated); 1/9 real script bug (whitespace) fixed+3x stable; identity RE-corrupted identik -> repaired lagi, didokumentasikan sbg risiko berulang lintas 11 file/4 area | 1 commit
