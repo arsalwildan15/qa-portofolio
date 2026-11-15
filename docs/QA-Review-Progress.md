@@ -761,7 +761,7 @@ docs/TC-Buzz.txt, Bug-List entry terkait (BG-192, BG-194) ditutup dgn kategori "
 **Reorganisasi folder (permintaan user, konsistensi dgn modul lain):**
 - `tests/buzz/` (flat, kecuali security/) -> `posts/`, `engagement/`, `feed-filters/`,
   `security/`.
-- `tests/login/` (flat) -> `positive/`, `negative/`, `boundary/`, `security/`, `edge/` (persis
+- `tests/_global/login/` (flat) -> `positive/`, `negative/`, `boundary/`, `security/`, `edge/` (persis
   5 grup di docs/TC-Login.txt).
 - Semua path import relatif disesuaikan (+1 level `../`), DAN header komentar "Path" +
   "RUN COMMAND" di SETIAP file spec juga disesuaikan dgn folder barunya (bukan cuma pindah
@@ -860,7 +860,7 @@ dulu sebelum lanjut Batch 2.
   lama didesain selalu PASS (cuma cek no-crash), jadi tidak bisa dipakai utk bug resmi tanpa
   auto-close keliru. User pilih: ubah TC-LOGIN-37 supaya FAIL kalau rate limiting tidak ada
   (assertion baru: attempt ke-6 harus 429).
-- Assertion baru SUDAH ditambahkan ke tests/login/TC-LOGIN-37-Verify-Rapid-Multiple-Failed-Logins.spec.ts
+- Assertion baru SUDAH ditambahkan ke tests/_global/login/TC-LOGIN-37-Verify-Rapid-Multiple-Failed-Logins.spec.ts
   (step baru setelah loop 5x, cek attempt ke-6 status === 429).
 - SAAT DICOBA JALANKAN: server demo publik (opensource-demo.orangehrmlive.com) sedang SANGAT
   LAMBAT saat ini (GET /auth/login polos = 6-11 detik via curl, tanpa kaitan brute-force sama
@@ -872,7 +872,7 @@ dulu sebelum lanjut Batch 2.
   assertion-nya). BELUM tercatat di Bug-List sama sekali — reporter tidak sempat jalan sampai
   onEnd() karena test timeout/environment, bukan karena logic bug.**
 - **NEXT ACTION WAJIB kalau lanjut sesi baru:** jalankan ulang
-  `npx playwright test tests/login/TC-LOGIN-37-Verify-Rapid-Multiple-Failed-Logins.spec.ts --project=chromium --timeout=120000`
+  `npx playwright test tests/_global/login/TC-LOGIN-37-Verify-Rapid-Multiple-Failed-Logins.spec.ts --project=chromium --timeout=120000`
   saat server demo publik sedang responsif (cek dulu via curl -w ke /auth/login, harus <3s
   normal). Kalau hasil attempt ke-6 beneran 429 → TC PASS, berarti SUDAH ada rate limiting
   (temuan sebelumnya soal "tidak ada rate limiting" OUTDATED, perlu dicabut dari TC-Login.txt).
@@ -940,7 +940,7 @@ rate-limiting ini tuntas atau di-skip dulu kalau environment tetap tidak stabil.
 ### UPDATE 2026-11-11 (3 TC baru ditulis & dicoba jalankan):
 
 **TC-LOGIN-41 (CSRF) — SELESAI TUNTAS, PASSED, temuan akurat.**
-- File: tests/login/TC-LOGIN-41-Verify-Cross-Origin-Login-CSRF-Protection.spec.ts
+- File: tests/_global/login/TC-LOGIN-41-Verify-Cross-Origin-Login-CSRF-Protection.spec.ts
 - Metodologi: BUKAN curl dengan header Origin/Referer di-forge manual (hasil curl awal
   MENYESATKAN — sempat terlihat seperti "tidak ada CSRF protection" padahal itu cuma karena
   curl tidak bawa cookie sesi yang valid). Dikoreksi pakai Playwright beneran: browser
@@ -956,7 +956,7 @@ rate-limiting ini tuntas atau di-skip dulu kalau environment tetap tidak stabil.
   cookie/session/origin browser yang sesungguhnya.
 
 **TC-LOGIN-42 (session fixation) — BELUM TERVALIDASI, BLOCKED oleh environment.**
-- File SUDAH ditulis: tests/login/TC-LOGIN-42-Verify-Session-ID-Regenerated-After-Login.spec.ts
+- File SUDAH ditulis: tests/_global/login/TC-LOGIN-42-Verify-Session-ID-Regenerated-After-Login.spec.ts
 - 2x percobaan run (paralel dgn TC lain, lalu solo --workers=1) SAMA-SAMA timeout di langkah
   login (60s) karena server demo publik lambat/tidak stabil (curl manual juga sempat gagal
   DNS resolve sesaat, lalu 15s response time). BUKAN kegagalan assertion logic test.
@@ -966,7 +966,7 @@ rate-limiting ini tuntas atau di-skip dulu kalau environment tetap tidak stabil.
 
 **TC-LOGIN-43 (clickjacking header) — BELUM TERVALIDASI VIA PLAYWRIGHT, tapi ground-truth
 SUDAH dikonfirmasi via curl terpisah (independen dari masalah environment Playwright):**
-- File SUDAH ditulis: tests/login/TC-LOGIN-43-Verify-Clickjacking-Protection-Header.spec.ts
+- File SUDAH ditulis: tests/_global/login/TC-LOGIN-43-Verify-Clickjacking-Protection-Header.spec.ts
 - curl manual (terpisah, berhasil di saat server sempat responsif) mengonfirmasi: GET
   /auth/login TIDAK mengirim X-Frame-Options, CSP tidak punya frame-ancestors -> clickjacking
   gap NYATA ADA, konsisten dgn TC-RECRUITMENT-SECURITY-02 yang sudah ada.
@@ -1052,7 +1052,7 @@ ubah status [TODO]->[DONE]/[FAIL] di TC-Login.txt sesuai hasil real, lalu lanjut
   - Session fixation (apakah session ID berubah setelah login vs sebelum) — BELUM ada TC.
   - Clickjacking / X-Frame-Options header pada halaman login — BELUM ada TC (recruitment/security
     sudah punya response header checks, Login belum).
-- File tests/login/*.spec.ts ADA 38 file fisik untuk 40 TC di dokumen (TC-05, TC-14, TC-20 ada
+- File tests/_global/login/*.spec.ts ADA 38 file fisik untuk 40 TC di dokumen (TC-05, TC-14, TC-20 ada
   filenya juga — total match, Glob awal sempat terlihat tidak urut tapi semua 40 ada).
 
 **Gap list sementara (akan difinalisasi setelah regression run):**
@@ -1063,7 +1063,7 @@ ubah status [TODO]->[DONE]/[FAIL] di TC-Login.txt sesuai hasil real, lalu lanjut
 4. Missing rate limiting (TC-LOGIN-37 finding) — TODO: diskusikan ke user apakah ini perlu
    di-escalate ke Bug-List sebagai security finding resmi (saat ini cuma catatan di docs).
 
-**Next action kalau lanjut sesi baru:** jalankan `npx playwright test tests/login --project=chromium`
+**Next action kalau lanjut sesi baru:** jalankan `npx playwright test tests/_global/login --project=chromium`
 dari folder `qa-portofolio`, kumpulkan hasil run real, lalu lanjut Langkah C.
 
 ### UPDATE 2026-11-12: GAP COVERAGE LINTAS-MODUL -- "refresh mid-submit" & "koneksi terputus
@@ -1394,7 +1394,7 @@ meski TC-LOGIN-46 gagal 2x -- ditambahkan MANUAL via openpyxl. Perlu diingat utk
 berikutnya: pakai reporter default config (TANPA override `--reporter=list`) kalau ingin
 Bug-List auto-update, atau tetap tambahkan manual spt yang dilakukan di sini.
 
-File baru: `tests/login/edge/TC-LOGIN-46-Verify-Reset-Password-Request-Completes.spec.ts`.
+File baru: `tests/_global/login/edge/TC-LOGIN-46-Verify-Reset-Password-Request-Completes.spec.ts`.
 Helper baru di `LoginPage.ts`: `gotoResetPassword()`, `resetPasswordUsernameInput`,
 `resetPasswordSubmitButton`. Bug-List.xlsx: BG-224 ditambahkan manual.
 
@@ -1441,7 +1441,7 @@ tersimpan di file ini -- kalau dibutuhkan lagi, bisa direkonstruksi dari git his
 ## UPDATE 2026-11-12 (lanjutan) -- Hapus tests/e2e/ (legacy, tidak terdokumentasi)
 
 Atas permintaan user, folder `tests/e2e/` (`leave.spec.ts`, `pim.spec.ts`) dihapus. Ini legacy/
-prototype files dari sebelum struktur per-modul (`tests/login/`, `tests/pim/`, dst) dibuat --
+prototype files dari sebelum struktur per-modul (`tests/_global/login/`, `tests/pim/`, dst) dibuat --
 dikonfirmasi tidak direferensikan sama sekali di `docs/TC-*.txt` manapun, jadi menghapusnya
 TIDAK mengubah angka TC resmi modul PIM (164 tetap, krn `pim.spec.ts` memang tidak pernah
 dihitung di sana). `leave.spec.ts` adalah SATU-SATUNYA cakupan modul Leave di seluruh proyek
@@ -1559,7 +1559,7 @@ dilanjutkan nanti.
 **CHECKLIST RESUME SESI BERIKUTNYA (urutan disarankan):**
   1. Cek kesehatan server/jaringan dulu sblm mulai apa pun: curl 3x ke
      /web/index.php/auth/login (cepat <2s = sehat), DAN jalankan 1 TC kecil via Playwright
-     (mis. tests/login/positive) utk pastikan traffic BROWSER (bukan cuma curl) juga lancar --
+     (mis. tests/_global/login/positive) utk pastikan traffic BROWSER (bukan cuma curl) juga lancar --
      jangan asumsikan curl sehat = Playwright pasti ikut sehat, sudah terbukti TIDAK selalu
      berkorelasi di sesi ini.
   2. Kalau sehat: lanjut regresi Recruitment (59 TC) dan Buzz (32 TC) dulu (belum dicoba sama

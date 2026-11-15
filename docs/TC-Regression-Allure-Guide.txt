@@ -63,7 +63,7 @@ RINGKASAN JAWABAN CEPAT
       npm run test:chromium
 
   Pilihan C -- satu modul saja:
-      npx playwright test tests/login --project=chromium
+      npx playwright test tests/_global/login --project=chromium
       npx playwright test tests/pim --project=chromium
       npx playwright test tests/recruitment --project=chromium
 

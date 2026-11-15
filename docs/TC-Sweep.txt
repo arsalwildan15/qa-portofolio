@@ -12,7 +12,7 @@ LEGEND STATUS
 
   FORMAT ID  : TC-SWEEP-<ASPEK>-NN
   FILE       : TC-SWEEP-<ASPEK>-NN-Verify-Name-In-English.spec.ts
-  FOLDER     : tests/sweep/
+  FOLDER     : tests/_global/sweep/
 
 ================================================================================
   FUNGSI & ALASAN PENDEKATAN
@@ -71,4 +71,4 @@ LEGEND STATUS
                              web server (finding).
 
   RUN COMMAND:
-    npx playwright test tests/sweep --project=chromium --workers=1
+    npx playwright test tests/_global/sweep --project=chromium --workers=1

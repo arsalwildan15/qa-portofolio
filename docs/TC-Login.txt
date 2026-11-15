@@ -21,10 +21,10 @@ LEGEND SIMBOL SKENARIO
 
   FORMAT ID  : TC-LOGIN-XX
   FILE       : TC-LOGIN-XX-Verify-Name-In-English.spec.ts
-  FOLDER     : tests/login/positive/ (Group 1), tests/login/negative/ (Group 2),
-               tests/login/boundary/ (Group 3), tests/login/security/ (Group 4),
-               tests/login/edge/ (Group 5)
-               [REORGANISASI 12 Nov 2026]: sebelumnya flat tests/login/*.spec.ts,
+  FOLDER     : tests/_global/login/positive/ (Group 1), tests/_global/login/negative/ (Group 2),
+               tests/_global/login/boundary/ (Group 3), tests/_global/login/security/ (Group 4),
+               tests/_global/login/edge/ (Group 5)
+               [REORGANISASI 12 Nov 2026]: sebelumnya flat tests/_global/login/*.spec.ts,
                dipecah ke subfolder PERSIS mengikuti 5 grup di bawah, supaya
                struktur folder konsisten dgn modul lain (Recruitment, Buzz).
                Path import relatif & header komentar "Path"/"RUN COMMAND" di
@@ -662,10 +662,10 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                                (dipakai di TC-LOGIN-04/06/25/26/38/39).
 
   2. Jalankan seluruh modul:
-       npx playwright test tests/login --project=chromium
+       npx playwright test tests/_global/login --project=chromium
 
   3. Jalankan satu TC:
-       npx playwright test tests/login/TC-LOGIN-01-*.spec.ts --project=chromium
+       npx playwright test tests/_global/login/TC-LOGIN-01-*.spec.ts --project=chromium
        (RUN COMMAND spesifik per TC ada di JSDoc header masing-masing file
        .spec.ts, termasuk flag --headed untuk observasi visual.)
 

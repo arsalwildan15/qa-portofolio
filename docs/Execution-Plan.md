@@ -11,7 +11,7 @@
 
 ## STATUS
 - **Fase aktif:** FASE 2 TUNTAS & FASE 3 TUNTAS -> mulai FASE 4. Ringkasan Fase 2: lapis 1 (43 TC) + lapis 2
-  (Leave 5, Claim 6, Performance 8, Time 5) + P2.5 lintas modul (6 TC, tests/xmod). Total suite 561 TC.
+  (Leave 5, Claim 6, Performance 8, Time 5) + P2.5 lintas modul (6 TC, tests/_global/cross-module). Total suite 561 TC.
 - **Task terakhir selesai:** P2.5 lintas modul (XMOD-01..06). TC yg SENGAJA FAILED di 4 modul + xmod:
   REVIEW-10 (BG-356), EVAL-15 (BG-373), CLAIM-ASSIGN-06 (BG-333), CLAIM-ASSIGN-10 (BG-338),
   CLAIM-APPROVAL-05 (BG-374), CLAIM-SUBMIT-02 (BG-375), TIME-TIMESHEET-11 (BG-402), XMOD-01 (BG-404),
@@ -29,6 +29,11 @@
   setiap failure dibuktikan live. Pakai SEMUA skill relevan (test-master, playwright-expert,
   typescript-pro, debugging-wizard, karpathy-guidelines, engineering:testing-strategy/code-review/
   documentation, anthropic-skills:test-case-writing/automation-testing/xlsx, spec-miner).
+- **INSTRUKSI USER 2026-11-15 (STRUKTUR FOLDER):** folder top-level tests/ WAJIB selaras dgn menu sidebar
+  OrangeHRM: admin, pim, leave, time, recruitment, my-info, performance, dashboard, directory,
+  maintenance, claim, buzz. Yg bukan menu (login, sidebar-search, sweep, cross-module, infra, fixtures)
+  di tests/_global/. RUN COMMAND & "Path :" di header spec + docs ikut path baru. Scope matrix = 12
+  modul sidebar + Search (Login & header di luar matrix).
 - **URUTAN BARU (disetujui user 2026-11-15, pendekatan 2 LAPIS):** lapis 1 = alur inti + approval
   lintas role (ESS) + keamanan di SEMUA modul dulu; lapis 2 = edge case sisa SETELAH 4 modul punya
   lapis 1. Urutan: (1) P2.1 batch 2 ringkas -> (2) P2.2 Claim lapis 1 -> (3) P2.3 Leave lapis 1 ->
@@ -142,7 +147,7 @@
 - [x] P1.5 `src/utils/loginAs.ts`.
 - [x] P1.6 `src/utils/withConfigRestore.ts`.
 - [x] P1.7 `src/utils/networkEdge.ts` (diekstrak dari pola inline yg sudah ada di 4 modul lama).
-- [x] P1.8 `tests/infra/` INFRA-01/02/03 -- 3x run, 9/9 check x 3 = lolos semua.
+- [x] P1.8 `tests/_global/infra/` INFRA-01/02/03 -- 3x run, 9/9 check x 3 = lolos semua.
 - [x] TAMBAHAN BESAR (ditemukan saat kerjakan P1.1, tdk direncanakan tapi perlu): korupsi identitas
       empNumber=7 TERNYATA kambuh JAUH lebih sering dari dugaan P0.7 (dlm hitungan MENIT, bukan
       jam) -- dikonfirmasi berulang kali via API fresh selama sesi Fase 1 ini. Krn frekuensinya,
@@ -333,7 +338,7 @@ efek Holiday ke hitungan.
 
 ### P2.5 Lintas-modul 4 modul (~28): per modul CSRF, rate limit, headers, refresh pending, koneksi putus,
 unicode/RTL, API param negatif (offset/limit/sortField).
-- [x] Leave | [x] Claim | [x] Performance | [x] Time -- diwujudkan sbg 6 TC lintas modul di tests/xmod/
+- [x] Leave | [x] Claim | [x] Performance | [x] Time -- diwujudkan sbg 6 TC lintas modul di tests/_global/cross-module/
       (docs/TC-XMOD.txt), tiap check berlabel modul: XMOD-01 clickjacking (BUG BG-404, Medium) | XMOD-02
       CSRF dari halaman penyerang: JSON diblokir CORS, form simple POST tdk membuat data (SameSite=Lax);
       temuan: server tdk cek Origin/tanpa token | XMOD-03 param list invalid -> 422 | XMOD-04 Arab/CJK/
@@ -422,5 +427,6 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P2.2 lapis 2 | +6 TC Claim (CONFIG-EVENT-03/04, CONFIG-EXPTYPE-01/02, SUBMIT-03, APPROVAL-06), semua lolos run pertama; ASSIGN-08/13 ditulis ulang (data sendiri, bukan seed milik karyawan lain); full batch Claim 29 TC: 25 pass + 4 gagal sengaja; noise BG-384..387 diarsip; TC-Claim.txt 30 entri, README 542 | 1 commit
 - 2026-11-15 | P2.1 lapis 2 | +8 TC Performance (EVAL-10/16, KPI-11, TRACKER-03..07) + createEssReview.ts + PerformanceSelfEvaluatePage + PerformanceTrackerPage edit/delete/log; tanpa bug app baru (nama tracker duplikat = finding desain); full batch 38: 27 pass + 9 lolos serial (demo terdegradasi) + 2 gagal sengaja; createTestEmployee guard employeeId null; noise BG-388..399 diarsip; README 550 | 1 commit
 - 2026-11-15 | P2.4 lapis 2 | +5 TC Time (TIMESHEET-04/10/11, PROJECT-01/02); BUG baru BG-402 (total harian >24j lintas baris diterima, Medium); fix searchAndView (waitForURL); full batch 17: 16 pass + 1 gagal sengaja; noise BG-400/401/403 diarsip; README 555. LAPIS 2 FASE 2 TUNTAS | 1 commit
-- 2026-11-15 | P2.5 lintas-modul | 6 TC tests/xmod (XMOD-01..06) + docs/TC-XMOD.txt; 3 BUG baru: BG-404 clickjacking 4 modul (Medium), BG-405 emoji -> 500 di cek nama unik (Medium), BG-406 form macet spinner stlh koneksi putus (Low, BG-199); 3 pass (CSRF, param API, unicode). README 561. FASE 2 TUNTAS | 1 commit
+- 2026-11-15 | P2.5 lintas-modul | 6 TC tests/_global/cross-module (XMOD-01..06) + docs/TC-XMOD.txt; 3 BUG baru: BG-404 clickjacking 4 modul (Medium), BG-405 emoji -> 500 di cek nama unik (Medium), BG-406 form macet spinner stlh koneksi putus (Low, BG-199); 3 pass (CSRF, param API, unicode). README 561. FASE 2 TUNTAS | 1 commit
 - 2026-11-15 | FASE 4 (bagian 1) | date-drift 7 PO + 22 test; isVisible 110x di 105 file; regresi 97: 91 pass + 3 sengaja + 3 lingkungan (2 lolos ulang, BUZZ-15 ditulis ulang); ensureVacancy + VACANCY-19 (BG-409); STATUS-15 prasyarat mandiri; P4.0 coverage matrix 107 unit (23.5% -> 39.1%) + sweep PAGE-01/HDR-01 (BG-414; BG-404 app-wide) | 1 commit
+- 2026-11-15 | Struktur folder | tests/ diselaraskan dgn sidebar (12 folder modul; my-info/dashboard/directory/maintenance baru); login/infra/sweep/xmod->cross-module/fixtures pindah ke tests/_global/ (git mv); import depth 57 file, RUN COMMAND/Path 65 file; 567 test terdaftar, tsc bersih, matrix identik | 1 commit

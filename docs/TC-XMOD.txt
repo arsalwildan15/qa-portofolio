@@ -25,7 +25,7 @@ LEGEND SIMBOL SKENARIO
 
   FORMAT ID  : TC-XMOD-NN
   FILE       : TC-XMOD-NN-Verify-Name-In-English.spec.ts
-  FOLDER     : tests/xmod/
+  FOLDER     : tests/_global/cross-module/
 
 ================================================================================
   FUNGSI & ALASAN PENDEKATAN
@@ -195,4 +195,4 @@ LEGEND SIMBOL SKENARIO
   form terbuka.
 
   RUN COMMAND:
-    npx playwright test tests/xmod --project=chromium --workers=1
+    npx playwright test tests/_global/cross-module --project=chromium --workers=1

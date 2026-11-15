@@ -3,7 +3,7 @@ import { type Page } from '@playwright/test';
 /**
  * Registry of every navigable OrangeHRM menu unit, built from the LIVE menu inventory
  * (sidebar + top-nav clicked one by one, 2026-11-15) and used by the data-driven sweep TCs in
- * tests/sweep/. Unit ids match docs/Taxonomy-Coverage-Matrix.xlsx so every sweep check can be
+ * tests/_global/sweep/. Unit ids match docs/Taxonomy-Coverage-Matrix.xlsx so every sweep check can be
  * traced back to a matrix cell.
  *
  * access:

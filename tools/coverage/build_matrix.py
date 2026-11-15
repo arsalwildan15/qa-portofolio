@@ -69,14 +69,14 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'performance/tracker/TC-PERF-TRACKER-07', ['Performance > Tracker Logs', 'Performance > My Trackers']),
  (r'claim/config/TC-CLAIM-CONFIG-EVENT', ['Claim > Configuration > Events']),
  (r'claim/config/TC-CLAIM-CONFIG-EXPTYPE', ['Claim > Configuration > Expense Types']),
- (r'login/', ['Login > Login Page']),
+ (r'_global/login/', ['Login > Login Page']),
  (r'infra/TC-INFRA-01', ['PIM > Add Employee']), (r'infra/TC-INFRA-02', ['Admin > User Management > Users']), (r'infra/TC-INFRA-03', ['PIM > Employee > Report-to']),
- (r'xmod/TC-XMOD-01', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Timesheets > Employee Timesheets', 'Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Time > Project Info > Projects']),
- (r'xmod/TC-XMOD-0[24]', ['Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Performance > Configure > KPIs', 'Time > Project Info > Customers']),
- (r'xmod/TC-XMOD-03', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Project Info > Projects']),
+ (r'cross-module/TC-XMOD-01', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Timesheets > Employee Timesheets', 'Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Time > Project Info > Projects']),
+ (r'cross-module/TC-XMOD-0[24]', ['Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Performance > Configure > KPIs', 'Time > Project Info > Customers']),
+ (r'cross-module/TC-XMOD-03', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Project Info > Projects']),
  (r'sweep/TC-SWEEP-(PAGE|HDR)', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
                                   if u['id'] in SWEEP_UNITS]),
- (r'xmod/TC-XMOD-0[56]', ['Claim > Configuration > Events', 'Leave > Configure > Leave Types', 'Time > Project Info > Customers']),
+ (r'cross-module/TC-XMOD-0[56]', ['Claim > Configuration > Events', 'Leave > Configure > Leave Types', 'Time > Project Info > Customers']),
 ]
 URL_UNITS = sorted(((u['url'], uid) for uid, u in units.items() if u['url'] and '(' not in u['url'] and '<' not in u['url']), key=lambda x: -len(x[0]))
 
@@ -91,7 +91,7 @@ def spec_units(sp):
             if p.startswith('tests/' + d + '/'):
                 out |= {U(n) for n in names}; break
     low = (p + ' ' + sp['header']).lower()
-    if p.startswith('tests/login/'):
+    if p.startswith('tests/_global/login/'):
         if re.search(r'forgot|reset password|requestpasswordreset', low): out.add(U('Login > Forgot Password'))
         if re.search(r'logout|session', low): out.add(U('Login > Logout & Session'))
     if p.startswith('tests/pim/') and re.search(r'attachment', p.lower()): out.add(U('PIM > Employee > Attachments (all tabs)'))

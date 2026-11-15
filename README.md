@@ -34,13 +34,24 @@ qa-portofolio/
 │   ├── utils/          # testReport.ts, createTestEmployee.ts, createTestCandidate.ts, advanceCandidateStatus.ts
 │   └── reporters/
 │       └── bugListReporter.ts   # Custom Playwright reporter: appends failed TCs to docs/Bug-List.xlsx
-├── tests/
-│   ├── login/          # One module = one folder. Specs are named by test case ID.
-│   ├── admin/          # One subfolder per Admin sub-screen (~16 total, incl. Configuration's 8)
-│   ├── pim/             # One subfolder per PIM screen (incl. configuration/ and security/)
-│   └── recruitment/     # One subfolder per Recruitment screen (incl. security/)
+├── tests/              # Top-level folders mirror the OrangeHRM sidebar, one folder per menu
+│   ├── admin/          #   Admin        (one subfolder per Admin screen, incl. Configuration's 8)
+│   ├── pim/            #   PIM          (one subfolder per PIM screen / employee tab, incl. configuration/)
+│   ├── leave/          #   Leave
+│   ├── time/           #   Time
+│   ├── recruitment/    #   Recruitment
+│   ├── my-info/        #   My Info
+│   ├── performance/    #   Performance
+│   ├── dashboard/      #   Dashboard
+│   ├── directory/      #   Directory
+│   ├── maintenance/    #   Maintenance
+│   ├── claim/          #   Claim
+│   ├── buzz/           #   Buzz
+│   └── _global/        # Not a sidebar menu: login/, sidebar-search/, sweep/ (every menu at once),
+│                       #   cross-module/, infra/ (multi-role smoke tests), fixtures/
+├── tools/coverage/     # Rebuilds the taxonomy coverage matrix (see "Taxonomy coverage" below)
 ├── docs/                # Human-readable test case documentation, one file per module
-│   ├── TC-Login.txt / TC-Admin.txt / TC-PIM.txt / TC-Recruitment.txt
+│   ├── TC-<Module>.txt, TC-Sweep.txt, TC-XMOD.txt, Taxonomy-Coverage-Matrix.xlsx/.md
 │   ├── PIM-Findings-Summary.txt         # Digest of exploration findings across the whole PIM suite
 │   ├── TC-Regression-Allure-Guide.txt   # How to run a full regression and view the Allure HTML report
 │   └── Bug-List.xlsx                    # Auto-generated draft bug tracker (created on first test failure)
@@ -78,7 +89,7 @@ Each test uses the shared `TestReport` utility (`src/utils/testReport.ts`) inste
 Run a single TC with its own `RUN COMMAND`, e.g.:
 
 ```bash
-npx playwright test tests/login/TC-LOGIN-01-Verify-Valid-Credentials-Redirect-To-Dashboard.spec.ts --project=chromium --headed
+npx playwright test tests/_global/login/TC-LOGIN-01-Verify-Valid-Credentials-Redirect-To-Dashboard.spec.ts --project=chromium --headed
 ```
 
 > **Note:** custom reporters are registered in `playwright.config.ts`'s `reporter` array. The CLI flag `--reporter=<name>` replaces that whole array, so run a bare `npx playwright test` (no `--reporter` flag) to keep the bug list reporter active.
@@ -191,13 +202,13 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Time | 17 | [docs/TC-Time.txt](docs/TC-Time.txt) |
 | Cross-module (Leave/Claim/Performance/Time) | 6 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
 | Sweep, all menus (data-driven) | 2 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **564** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
+| **Total** | **564** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
-**Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
+**Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
 **Environment resilience:** the shared demo periodically resets and flips its global date format between `yyyy-dd-mm` and `yyyy-mm-dd`, and typed dates are parsed in whichever format is currently displayed. `src/utils/dateInput.ts` reads the live placeholder and converts values. That restored four Leave tests that had broken purely because of the drift, and the same helper now drives every date field in PIM and Recruitment too. Other users of the demo also delete shared data: it has been seen with no vacancies and an empty Buzz feed. Tests that need such data create it themselves (for example `src/utils/ensureVacancy.ts`) instead of relying on seed records.
 
-**Taxonomy coverage:** `docs/Taxonomy-Coverage-Matrix.xlsx` maps every menu unit of the 12 sidebar modules plus the sidebar Search (109 units, taken from a live click-through of the sidebar and top navigation plus pages and tabs the nav does not expose, such as the PIM and My Info employee tabs) against every item of `docs/Test-Case-Taxonomy.txt`. Each cell is COVERED (with the TC ids), N/A (with the reason, derived from what the page actually contains), or GAP. Tests whose only check is "ran without exception" are listed as weak and do not count. `docs/Taxonomy-Coverage-Matrix.md` summarizes coverage per module and the open gap backlog; `tools/coverage/` rebuilds both. Checks that apply identically to every page (security headers, console errors, failed requests, load time) run as data-driven sweeps over all units (`tests/sweep/`).
+**Taxonomy coverage:** `docs/Taxonomy-Coverage-Matrix.xlsx` maps every menu unit of the 12 sidebar modules plus the sidebar Search (109 units, taken from a live click-through of the sidebar and top navigation plus pages and tabs the nav does not expose, such as the PIM and My Info employee tabs) against every item of `docs/Test-Case-Taxonomy.txt`. Each cell is COVERED (with the TC ids), N/A (with the reason, derived from what the page actually contains), or GAP. Tests whose only check is "ran without exception" are listed as weak and do not count. `docs/Taxonomy-Coverage-Matrix.md` summarizes coverage per module and the open gap backlog; `tools/coverage/` rebuilds both. Checks that apply identically to every page (security headers, console errors, failed requests, load time) run as data-driven sweeps over all units (`tests/_global/sweep/`).
 
 **Cross-cutting edge cases (2026-11-12):** two scenarios that are easy to forget in test design, refreshing mid-submit and a dropped connection mid-submit, were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails because of a dropped network connection, the SPA throws an unhandled JS exception that reaches the console/global error handler instead of being caught at its source, reproduced identically (same exception name) in Admin, PIM, Recruitment, and Buzz. The app still shows the user a generic "Unexpected Error!" toast in all four cases, so this is a code-level error-handling defect, not a silent failure the user would never notice. Login is unaffected, since its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
 
@@ -205,7 +216,7 @@ A third scenario, rapid double-click on Save, was then extended to the two modul
 
 ### Login (46 TCs)
 
-Organized into `tests/login/positive/`, `negative/`, `boundary/`, `security/`, and `edge/`, one subfolder per scenario group, the same per-category structure used by the other modules.
+Organized into `tests/_global/login/positive/`, `negative/`, `boundary/`, `security/`, and `edge/`, one subfolder per scenario group, the same per-category structure used by the other modules.
 
 **Confirmed bugs:**
 - No rate limiting/lockout after repeated failed logins
