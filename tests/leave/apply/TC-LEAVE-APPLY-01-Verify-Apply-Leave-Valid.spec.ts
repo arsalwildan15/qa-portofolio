@@ -52,9 +52,17 @@ test('TC-LEAVE-APPLY-01: applying leave with valid data succeeds and deducts bal
     'US - Vacation',
     '500',
   );
+  // [BUG SCRIPT, diperbaiki] Perbandingan ini sebelumnya gagal terus-menerus utk employee
+  // dgn middleName KOSONG -- dikonfirmasi live: autocomplete Entitlement merender nama sbg
+  // "First  Last" (DUA spasi, krn selalu menyisipkan slot utk middleName walau kosong),
+  // sedangkan getLoggedInEmployeeName() membangun fullName via .filter(Boolean).join(' ')
+  // yg menghasilkan SATU spasi saat middleName kosong -- dua string valid, sama2 merujuk
+  // employee yg benar, cuma beda whitespace. Normalisasi spasi berurutan sebelum bandingkan.
+  const normalizeSpaces = (s: string) => s.replace(/\s+/g, ' ').trim();
   report.check(
     'Entitlement ter-assign ke employee yg BENAR (nama hasil pencarian cocok dgn employee yg login)',
-    employeeName.includes(me.fullName) || me.fullName.includes(employeeName),
+    normalizeSpaces(employeeName).includes(normalizeSpaces(me.fullName)) ||
+      normalizeSpaces(me.fullName).includes(normalizeSpaces(employeeName)),
     `logged-in="${me.fullName}" (empNumber=${me.empNumber}), matched="${employeeName}"`,
   );
   report.check(
