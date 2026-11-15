@@ -212,5 +212,23 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              krn list kosong -> tanpa id kontrol). [TEMUAN
                              POSITIF] lapisan API konsisten di semua menu.
 
+ 8   TC-SWEEP-LIST-01  [DONE]  TC-SWEEP-LIST-01-Verify-Pagination-Result-Counts-Sort-And-Empty-State-Per-Menu.spec.ts
+                             (B) 3.5 3.6 | (+) 1.6 | (!) 4.6
+                             Verify Pagination, Result Counts, Sort Order And
+                             Empty State On Every Menu List API
+                             -> Endpoint list per unit (registry API, 47 unit).
+                             [API VERIFICATION per unit]
+                             -> 3.6 limit=1 -> <=1 baris; meta.total angka.
+                             -> 3.5/4.6 offset di luar range -> data:[] kosong
+                                (array, bukan null/error).
+                             -> 3.5 offset=1 -> baris berbeda dari halaman 1
+                                (bila total > 1).
+                             -> 1.6 sortOrder ASC vs DESC -> baris pertama
+                                berbeda (bila total > 1 & endpoint ber-sort).
+                             HASIL 16 Nov 2026: 186/188 lolos. SENGAJA FAILED:
+                             U047 Leave > My Entitlements -> offset di luar range
+                             -> 500 (BUG BG-424, Low; endpoint lain kembalikan
+                             array kosong). Unit lain tanpa data cukup -> finding.
+
   RUN COMMAND:
     npx playwright test tests/_global/sweep --project=chromium --workers=1

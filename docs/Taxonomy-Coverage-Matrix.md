@@ -4,20 +4,20 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 
 | Module | COVERED | GAP | N/A | Coverage of applicable |
 |---|---:|---:|---:|---:|
-| Admin | 663 | 433 | 608 | 60.5% |
-| Buzz | 40 | 18 | 13 | 69.0% |
-| Claim | 204 | 106 | 187 | 65.8% |
+| Admin | 728 | 368 | 608 | 66.4% |
+| Buzz | 42 | 16 | 13 | 72.4% |
+| Claim | 220 | 90 | 187 | 71.0% |
 | Dashboard | 14 | 22 | 106 | 38.9% |
-| Directory | 18 | 8 | 45 | 69.2% |
-| Leave | 286 | 213 | 424 | 57.3% |
+| Directory | 23 | 3 | 45 | 88.5% |
+| Leave | 309 | 190 | 424 | 61.9% |
 | Maintenance | 48 | 49 | 116 | 49.5% |
 | My Info | 107 | 355 | 319 | 23.2% |
-| PIM | 482 | 444 | 494 | 52.1% |
-| Performance | 243 | 178 | 289 | 57.7% |
-| Recruitment | 144 | 72 | 68 | 66.7% |
+| PIM | 499 | 427 | 494 | 53.9% |
+| Performance | 269 | 152 | 289 | 63.9% |
+| Recruitment | 146 | 70 | 68 | 67.6% |
 | Sidebar | 0 | 24 | 47 | 0.0% |
-| Time | 264 | 218 | 370 | 54.8% |
-| **Total** | **2513** | **2140** | **3086** | **54.0%** |
+| Time | 288 | 194 | 370 | 59.8% |
+| **Total** | **2693** | **1960** | **3086** | **57.9%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -33,7 +33,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.3 | State transition valid | 6 |
 | 1.4 | Relasi antar-entity | 70 |
 | 1.5 | Permission/role positif | 13 |
-| 1.6 | Search/filter/sort valid | 62 |
+| 1.6 | Search/filter/sort valid | 28 |
 | 1.8 | Notifikasi/feedback UI | 77 |
 | 2.1 | Required field kosong | 45 |
 | 2.2 | Format salah | 3 |
@@ -45,14 +45,14 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 3.1 | Panjang karakter field | 8 |
 | 3.3 | Ukuran file upload | 7 |
 | 3.4 | Tanggal | 23 |
-| 3.5 | Pagination | 67 |
-| 3.6 | Jumlah hasil (0/1/limit) | 31 |
+| 3.5 | Pagination | 25 |
+| 3.6 | Jumlah hasil (0/1/limit) | 14 |
 | 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 79 |
 | 4.2 | Aksi ganda/cepat (double submit) | 77 |
 | 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 48 |
 | 4.4 | Race condition | 17 |
 | 4.5 | Session/koneksi terputus | 71 |
-| 4.6 | Data kosong/null (empty state) | 105 |
+| 4.6 | Data kosong/null (empty state) | 61 |
 | 4.7 | Konkurensi multi-user edit | 75 |
 | 4.8 | Behavior non-obvious terdokumentasi | 14 |
 | 5.1-SQLi | SQL Injection | 62 |
@@ -78,7 +78,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 6.2 | Response schema/contract | 54 |
 | 6.3 | Request method salah (405) | 59 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 62 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 102 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 59 |
 | 6.6 | Pagination & sorting param | 25 |
 | 6.7 | Idempotency | 51 |
 | 7.1 | JS console error | 4 |
