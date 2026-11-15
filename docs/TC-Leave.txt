@@ -349,11 +349,88 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              user (lihat Perilaku Penting no. 7). Fungsi
                              penolakannya benar, gap-nya ada di feedback.
 
+ 6   TC-LEAVE-APPLY-07  [DONE]  TC-LEAVE-APPLY-07-Verify-Half-Day-Deducts-Half-Balance.spec.ts
+                             (+/B) Verify A Half-Day Leave Deducts Exactly 0.5
+                             Day From The Balance
+                             -> Setup: createEssLeaveRequest(apply:false) ->
+                                akun ESS + entitlement 10 hari.
+                             -> [ESS UI] Apply Leave, US - Vacation, rentang
+                                1 hari, buka dropdown Duration, pilih
+                                "Half Day - Morning", Apply.
+                             [UI VERIFICATION]
+                             -> Dropdown Duration berisi 4 opsi: Full Day,
+                                Half Day - Morning, Half Day - Afternoon,
+                                Specify Time (hanya muncul utk rentang 1 hari).
+                             [API VERIFICATION]
+                             -> POST /api/v2/leave/leave-requests 200, payload
+                                duration {type:"half_day_morning"}.
+                             -> GET leave-balance/leave-type/1 (sesi ESS):
+                                10 -> 9.5.
+
+ 7   TC-LEAVE-APPLY-08  [DONE]  TC-LEAVE-APPLY-08-Verify-Specify-Time-Range-Boundary.spec.ts
+                             (B) Verify "Specify Time" Accepts A Valid Range
+                             And Rejects Reversed/Zero Ranges
+                             -> Setup: ESS + entitlement 10 hari.
+                             -> [ESS API] POST leave-requests duration
+                                {type:"specify_time", fromTime, toTime} utk
+                                13:00-09:00, lalu 09:00-09:00, lalu 09:00-13:00.
+                             [API VERIFICATION]
+                             -> Rentang terbalik -> 422 "Invalid Parameter"
+                                [duration]; rentang nol -> 422; saldo tetap 10.
+                             -> 09:00-13:00 (4 jam) -> 200; saldo 9.5
+                                (4 jam = 0.5 hari dari hari kerja 8 jam).
+
+ 8   TC-LEAVE-APPLY-09  [DONE]  TC-LEAVE-APPLY-09-Verify-Holiday-Or-Weekend-Only-Rejected.spec.ts
+                             (-/B) Verify A Leave Falling Only On A Holiday Or
+                             A Weekend Is Rejected
+                             -> Setup: ESS + entitlement 10 hari.
+                             -> [Admin API] GET /api/v2/leave/holidays?fromDate
+                                =..&toDate=.. -> pilih hari libur full-day
+                                mendatang yg jatuh Senin-Jumat (dinamis, mis.
+                                Christmas Day 2026-12-25).
+                             -> [ESS API] Apply 1 hari tepat pada hari libur
+                                itu, lalu 1 hari pada hari Sabtu.
+                             [API VERIFICATION]
+                             -> Keduanya 400 "Failed to Submit: No Working
+                                Days Selected"; saldo tetap 10.
+                             NOTE: kalender libur demo jg memuat Boxing Day
+                             (Canada) 2026-12-28 -> util isoWeekday() kini
+                             melewati 24-28 Des agar TC lain tidak gagal palsu.
+
+ 9   TC-LEAVE-APPLY-10  [DONE]  TC-LEAVE-APPLY-10-Verify-Overlapping-Request-Rejected.spec.ts
+                             (-) Verify A Request Overlapping An Existing One
+                             Is Rejected
+                             -> Setup: ESS + entitlement 10 hari.
+                             -> [ESS API] Request 1: half_day_morning tanggal X.
+                             -> [ESS API] Request 2: full_day tanggal X.
+                             -> [ESS API, observasi] Request 3:
+                                half_day_afternoon tanggal X.
+                             [API VERIFICATION]
+                             -> Request 1 -> 200, saldo 9.5.
+                             -> Request 2 -> 400 "Overlapping Leave Request
+                                Found", saldo tetap 9.5.
+                             NOTE [TEMUAN]: pagi + sore pada tanggal yg sama
+                             diterima (200, saldo 9) -- tidak bertabrakan
+                             jam, perilaku yg masuk akal.
+
+10   TC-LEAVE-APPLY-11  [DONE]  TC-LEAVE-APPLY-11-Verify-Past-Date-Leave-Accepted.spec.ts
+                             (!) Verify A Retroactive (Past-Date) Leave
+                             Request Is Accepted And Deducted
+                             -> Setup: ESS + entitlement 10 hari.
+                             -> [ESS API] Apply 1 hari kerja ~20 hari lalu
+                                (masih dlm periode cuti berjalan).
+                             [API VERIFICATION]
+                             -> 200, saldo 9.
+                             NOTE [TEMUAN DESAIN, bukan bug]: OrangeHRM
+                             mengizinkan pencatatan cuti yg sudah lewat;
+                             status awalnya "Pending Approval" dgn aksi
+                             CANCEL utk ESS. TC ini mengunci perilaku tsb.
+
 ================================================================================
   GROUP 2, ASSIGN LEAVE (Administratif)
 ================================================================================
 
- 6   TC-LEAVE-ASSIGN-01  [DONE]  TC-LEAVE-ASSIGN-01-Verify-Valid-Assign-Lands-Scheduled.spec.ts
+11   TC-LEAVE-ASSIGN-01  [DONE]  TC-LEAVE-ASSIGN-01-Verify-Valid-Assign-Lands-Scheduled.spec.ts
                              (+) Verify Valid Assign Leave Lands As
                              "Scheduled" (No Approval Step)
                              -> Pilih employee target via
@@ -378,7 +455,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              NOTE: sempat rusak oleh drift format tanggal,
                              pulih setelah fillDate()/rowByDate().
 
- 7   TC-LEAVE-ASSIGN-02  [DONE]  TC-LEAVE-ASSIGN-02-Verify-Insufficient-Balance-Override-Dialog.spec.ts
+12   TC-LEAVE-ASSIGN-02  [DONE]  TC-LEAVE-ASSIGN-02-Verify-Insufficient-Balance-Override-Dialog.spec.ts
                              (-) Verify Insufficient-Balance Override Dialog
                              (Cancel & Confirm Paths)
                              -> Set entitlement "US - FMLA" = 0 secara
@@ -415,7 +492,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              'visible'}). Sempat rusak oleh drift format
                              tanggal, pulih setelah rowByDate().
 
- 8   TC-LEAVE-ASSIGN-03  [DONE]  TC-LEAVE-ASSIGN-03-Verify-Required-Field-Validation.spec.ts
+13   TC-LEAVE-ASSIGN-03  [DONE]  TC-LEAVE-ASSIGN-03-Verify-Required-Field-Validation.spec.ts
                              (-) Verify Required Field Validation (No
                              Employee/Date Selected)
                              -> Buka Assign Leave, JANGAN isi apa pun,
@@ -428,7 +505,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                                 Employee Name).
                              -> URL tetap di /leave/assignLeave.
 
- 9   TC-LEAVE-ASSIGN-05  [DONE]  TC-LEAVE-ASSIGN-05-Verify-Leap-Year-Date-Boundary.spec.ts
+14   TC-LEAVE-ASSIGN-05  [DONE]  TC-LEAVE-ASSIGN-05-Verify-Leap-Year-Date-Boundary.spec.ts
                              (B) Verify Leap Year Date Boundary (29 Feb)
                              -> Assign Leave employee target, leave type
                                 "US - FMLA", isi 29 Feb 2028 (leap year,
@@ -446,7 +523,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              yyyy-dd-mm di spec, dikonversi fillDate() ke
                              format tampil.
 
-10   TC-LEAVE-ASSIGN-06  [DONE]  TC-LEAVE-ASSIGN-06-Verify-Leave-Period-Boundary.spec.ts
+15   TC-LEAVE-ASSIGN-06  [DONE]  TC-LEAVE-ASSIGN-06-Verify-Leave-Period-Boundary.spec.ts
                              (B) Verify Date Range Spanning The Leave Period
                              Boundary Is Handled Safely
                              -> [API] GET /api/v2/leave/leave-period,
@@ -469,7 +546,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
   GROUP 3, LEAVE LIST (Admin)
 ================================================================================
 
-11   TC-LEAVE-LIST-01  [DONE]  TC-LEAVE-LIST-01-Verify-Search-Filter-By-Status.spec.ts
+16   TC-LEAVE-LIST-01  [DONE]  TC-LEAVE-LIST-01-Verify-Search-Filter-By-Status.spec.ts
                              (+) Verify Search/Filter By Status Returns
                              Matching Records
                              -> Assign entitlement 500 hari, apply 1 hari
@@ -492,7 +569,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              tetap terfilter ke Pending. Sempat rusak oleh
                              drift format tanggal, pulih setelah rowByDate().
 
-12   TC-LEAVE-LIST-03  [DONE]  TC-LEAVE-LIST-03-Verify-Cancel-Leave-Restores-Balance.spec.ts
+17   TC-LEAVE-LIST-03  [DONE]  TC-LEAVE-LIST-03-Verify-Cancel-Leave-Restores-Balance.spec.ts
                              (+) Verify Cancel Leave Restores The Deducted
                              Balance
                              -> Assign entitlement, catat balance, apply 1
@@ -519,7 +596,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
   GROUP 4, APPROVAL (Cross-Role ESS / Admin)
 ================================================================================
 
-13   TC-LEAVE-APPROVAL-01  [DONE]  TC-LEAVE-APPROVAL-01-Verify-ESS-Apply-Admin-Approve.spec.ts
+18   TC-LEAVE-APPROVAL-01  [DONE]  TC-LEAVE-APPROVAL-01-Verify-ESS-Apply-Admin-Approve.spec.ts
                              (+) Verify An ESS Leave Request Can Be Approved
                              By Admin (Pending -> Scheduled)
                              -> Setup (createEssLeaveRequest, apply: false):
@@ -545,7 +622,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              NOTE: TC inilah bukti KOREKSI R4 -- Approve
                              BUKAN "N/A" (lihat Catatan Teknis).
 
-14   TC-LEAVE-APPROVAL-02  [DONE]  TC-LEAVE-APPROVAL-02-Verify-Reject-Restores-Balance.spec.ts
+19   TC-LEAVE-APPROVAL-02  [DONE]  TC-LEAVE-APPROVAL-02-Verify-Reject-Restores-Balance.spec.ts
                              (+) Verify Rejecting An ESS Leave Request
                              Restores Its Balance And Is Terminal
                              -> Setup: akun ESS + entitlement 10 hari + 1
@@ -565,7 +642,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              -> Tombol Reject tersedia & berfungsi di baris
                                 Leave List Admin.
 
-15   TC-LEAVE-APPROVAL-03  [DONE]  TC-LEAVE-APPROVAL-03-Verify-ESS-Cannot-Approve-Own-Leave.spec.ts
+20   TC-LEAVE-APPROVAL-03  [DONE]  TC-LEAVE-APPROVAL-03-Verify-ESS-Cannot-Approve-Own-Leave.spec.ts
                              (S) Verify An ESS Employee Cannot Approve Their
                              Own Leave Request (Segregation Of Duties /
                              BFLAC)
@@ -587,7 +664,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
   GROUP 5, MY LEAVE (ESS)
 ================================================================================
 
-16   TC-LEAVE-MY-01  [DONE]  TC-LEAVE-MY-01-Verify-ESS-Cancel-Own-Pending-Leave.spec.ts
+21   TC-LEAVE-MY-01  [DONE]  TC-LEAVE-MY-01-Verify-ESS-Cancel-Own-Pending-Leave.spec.ts
                              (+) Verify An ESS Employee Can See And Cancel
                              Their Own Pending Leave In My Leave
                              -> Setup: akun ESS + entitlement 10 hari + 1
@@ -613,7 +690,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
   GROUP 6, ENTITLEMENTS
 ================================================================================
 
-17   TC-LEAVE-ENT-01  [DONE]  TC-LEAVE-ENT-01-Verify-Add-Entitlement-Visible-To-ESS.spec.ts
+22   TC-LEAVE-ENT-01  [DONE]  TC-LEAVE-ENT-01-Verify-Add-Entitlement-Visible-To-ESS.spec.ts
                              (+) Verify An Entitlement Added By Admin Becomes
                              The ESS Employee's Visible Balance
                              -> Setup: akun ESS baru TANPA entitlement.
@@ -644,7 +721,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
   GROUP 7, SECURITY / IDOR
 ================================================================================
 
-18   TC-LEAVE-APPLY-06  [DONE]  TC-LEAVE-APPLY-06-Verify-XSS-SQLi-In-Comments.spec.ts
+23   TC-LEAVE-APPLY-06  [DONE]  TC-LEAVE-APPLY-06-Verify-XSS-SQLi-In-Comments.spec.ts
                              (S) Verify XSS/SQLi Payload In Apply Leave
                              Comments Does Not Execute Or Break The App
                              -> Assign entitlement, cari tanggal aman, isi
@@ -661,7 +738,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              -> Leave List masih render normal (ada baris
                                 ATAU "No Records Found"), tidak error.
 
-19   TC-LEAVE-ASSIGN-04  [DONE]  TC-LEAVE-ASSIGN-04-Verify-XSS-In-Comments.spec.ts
+24   TC-LEAVE-ASSIGN-04  [DONE]  TC-LEAVE-ASSIGN-04-Verify-XSS-In-Comments.spec.ts
                              (S) Verify XSS Payload In Assign Leave Comments
                              Does Not Execute
                              -> Employee target (pickLightlyUsedEmployee) +
@@ -676,7 +753,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              NOTE: jalur administratif, titik input terpisah
                              dari Apply Leave (TC-LEAVE-APPLY-06).
 
-20   TC-LEAVE-LIST-02  [DONE]  TC-LEAVE-LIST-02-Verify-IDOR-View-Leave-Request-Details.spec.ts
+25   TC-LEAVE-LIST-02  [DONE]  TC-LEAVE-LIST-02-Verify-IDOR-View-Leave-Request-Details.spec.ts
                              (S) Verify Access Control On Leave Request
                              Details (IDOR Check)
                              -> [API] GET /api/v2/leave/leave-requests/1,
@@ -695,7 +772,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              employee lain) belum di TC ini; kontrol akses
                              ESS diuji di TC-LEAVE-APPROVAL-03.
 
-21   TC-LEAVE-IDOR-01  [DONE]  TC-LEAVE-IDOR-01-Verify-Entitlements-Invalid-ID-Handled-Safely.spec.ts
+26   TC-LEAVE-IDOR-01  [DONE]  TC-LEAVE-IDOR-01-Verify-Entitlements-Invalid-ID-Handled-Safely.spec.ts
                              (S/-) Verify Invalid Employee/Entitlement IDs
                              Are Handled Safely On The Entitlements API
                              -> [API] GET employees/999999/entitlements,
@@ -714,10 +791,10 @@ No.  Test Case ID   Status   Skenario / Deskripsi
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
 
-  Total TC         : 21 (16 TC lama + 5 TC lapis 1 P2.3: APPROVAL-01/02/03,
-                     MY-01, ENT-01)
-  PASSED           : 21 (verifikasi gabungan 15 Nov 2026, seluruh suite
-                     Leave)
+  Total TC         : 26 (16 TC lama + 5 TC lapis 1 P2.3: APPROVAL-01/02/03,
+                     MY-01, ENT-01 + 5 TC lapis 2: APPLY-07..11)
+  PASSED           : 26 (21 di verifikasi gabungan 15 Nov 2026 + 5 TC lapis 2
+                     lolos di run pertamanya, 15 Nov 2026)
   FAILED           : 0
   Bug aplikasi baru: tidak ada. Temuan yang tercatat (bukan kegagalan TC):
     -> Override saldo di Assign Leave bisa membuat saldo negatif

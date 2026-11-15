@@ -5,11 +5,15 @@ import { loginAs } from './loginAs';
 
 const US_VACATION_LEAVE_TYPE_ID = 1;
 
-/** Next weekday (Mon-Fri) `daysFromNow` days ahead, as ISO yyyy-mm-dd. Skips Dec 24-26 (common holidays). */
+/**
+ * Next weekday (Mon-Fri) `daysFromNow` days ahead, as ISO yyyy-mm-dd. Skips Dec 24-28: the demo's
+ * holiday calendar has Christmas Day (12-25) and Boxing Day (Canada, observed 12-28 in 2026), and a
+ * request falling only on a holiday is rejected 400 "No Working Days Selected" (confirmed live).
+ */
 export function isoWeekday(daysFromNow: number): string {
   const d = new Date();
   d.setDate(d.getDate() + daysFromNow);
-  while (d.getDay() === 0 || d.getDay() === 6 || (d.getMonth() === 11 && d.getDate() >= 24 && d.getDate() <= 26)) {
+  while (d.getDay() === 0 || d.getDay() === 6 || (d.getMonth() === 11 && d.getDate() >= 24 && d.getDate() <= 28)) {
     d.setDate(d.getDate() + 1);
   }
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

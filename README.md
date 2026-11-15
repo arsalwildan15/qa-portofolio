@@ -187,9 +187,9 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Performance | 30 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 23 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
-| Leave | 21 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
+| Leave | 26 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
 | Time | 12 | [docs/TC-Time.txt](docs/TC-Time.txt) |
-| **Total** | **531** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
+| **Total** | **536** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -302,7 +302,7 @@ Admin-side Assign Claim (14: create, required fields, expenses incl. amount boun
 - After Approve, the detail page keeps showing a stale Reject button. Clicking it is correctly refused by the server (403, claim stays PAID), but the UI throws an unhandled exception and shows the user nothing (`TC-CLAIM-APPROVAL-05`, BG-374, another confirmation of the app-wide defect)
 - Earlier findings in this module remain open: unhandled exception on an amount-boundary 422 (BG-333) and attachment upload accepting a `.php` file renamed to `.jpg` (BG-338)
 
-### Leave (21 TCs)
+### Leave (26 TCs)
 
 Apply (6), Assign (6), Leave List incl. cancel-restores-balance and IDOR (3 + 1), and the cross-role flow added in Fase 2 (5): an ESS user applies, the Admin approves (Pending Approval → Scheduled, balance deducted once) or rejects (balance restored, terminal), the ESS user cancels their own request from My Leave, and an entitlement added by the Admin becomes the ESS user's visible balance. The full Leave suite passes, old and new tests alike. No new application bugs in this module this round.
 

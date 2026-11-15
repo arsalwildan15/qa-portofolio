@@ -17,7 +17,9 @@
   lama dipulihkan), Time 5 (modul Time 12/12 lolos). TC yg SENGAJA FAILED: REVIEW-10 (BG-356),
   EVAL-15 (BG-373), CLAIM-APPROVAL-05 (BG-374), CLAIM-SUBMIT-02 (BG-375).
 - **INSTRUKSI USER 2026-11-15:** begitu Fase 2 (lapis 1 keempat modul) selesai, LANGSUNG lanjut
-  otomatis ke Fase 3 (dokumentasi) tanpa menunggu konfirmasi.
+  otomatis ke Fase 3 (dokumentasi) tanpa menunggu konfirmasi. **DIPERLUAS:** lanjutkan SEMUA fase
+  berikutnya (lapis 2, P2.5, Fase 4-8) secara OTOMATIS tanpa konfirmasi user. (Tetap: aturan R1-R9
+  berlaku; R6 config global sudah disetujui dgn withConfigRestore.)
 - **URUTAN BARU (disetujui user 2026-11-15, pendekatan 2 LAPIS):** lapis 1 = alur inti + approval
   lintas role (ESS) + keamanan di SEMUA modul dulu; lapis 2 = edge case sisa SETELAH 4 modul punya
   lapis 1. Urutan: (1) P2.1 batch 2 ringkas -> (2) P2.2 Claim lapis 1 -> (3) P2.3 Leave lapis 1 ->
@@ -251,7 +253,12 @@ efek Holiday ke hitungan.
       APPROVAL-02 Reject -> saldo kembali, terminal | APPROVAL-03 ESS tdk bisa approve sendiri |
       MY-01 ESS cancel sendiri di My Leave -> saldo kembali, approve stlh cancel ditolak |
       ENT-01 entitlement Admin -> saldo ESS.
-- [ ] APPLY-07 Half Day/Specify Time | 08 Hari libur | 09 Overlap | 10 Tanggal lampau | 11 Unicode/RTL
+- [x] LAPIS 2 Apply (5 TC, lolos run pertama): APPLY-07 Half Day UI (duration half_day_morning, saldo
+      -0.5) | APPLY-08 Specify Time 09-13 diterima (-0.5), terbalik/nol 422 | APPLY-09 hari libur
+      (kalender GET leave/holidays, dinamis) & Sabtu -> 400 "No Working Days Selected" | APPLY-10
+      overlap -> 400 "Overlapping Leave Request Found" (pagi+sore tanggal sama sah, finding) |
+      APPLY-11 tanggal lampau diterima (desain), status Pending. isoWeekday() kini skip 24-28 Des.
+- [ ] (sisa rencana awal, dipetakan ke lapis 2 di atas) APPLY-07 Half Day/Specify Time | 08 Hari libur | 09 Overlap | 10 Tanggal lampau | 11 Unicode/RTL
       | 12 Panjang comments | 13 Double-click | 14 Refresh pending | 15 Koneksi putus
 - [ ] APPROVAL-01 Approve ESS | 02 Reject->balance kembali | 03 Per-hari multi-day | 04 Komentar
       | 05 Approve vs Cancel paralel | 06 ESS tak bisa approve sendiri
