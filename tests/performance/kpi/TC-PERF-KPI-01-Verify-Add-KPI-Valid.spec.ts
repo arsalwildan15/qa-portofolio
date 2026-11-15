@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-PERF-KPI-01: adding a KPI with valid data succeeds and appears in the list', async ({
@@ -44,7 +44,7 @@ test('TC-PERF-KPI-01: adding a KPI with valid data succeeds and appears in the l
   await performanceKpiPage.goto();
   await page.waitForLoadState('networkidle').catch(() => {});
   await page.waitForTimeout(1_500);
-  const found = await performanceKpiPage.tableRows.filter({ hasText: kpiName }).first().isVisible({ timeout: 10_000 }).catch(() => false);
+  const found = await isVisibleWithWait(performanceKpiPage.tableRows.filter({ hasText: kpiName }).first(), 10_000);
   report.check('KPI baru ditemukan di daftar KPI', found, `kpiName=${kpiName}`);
 
   report.print();

@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-EMPSTATUS-05: a newly created Employment Status can be deleted', async ({
@@ -42,14 +42,14 @@ test('TC-ADMIN-EMPSTATUS-05: a newly created Employment Status can be deleted', 
 
   report.step('Hapus Employment Status yang baru dibuat');
   const row = adminEmploymentStatusPage.rowByName(name).first();
-  report.check('Employment status muncul sebelum dihapus', await row.isVisible({ timeout: 5_000 }).catch(() => false));
+  report.check('Employment status muncul sebelum dihapus', await isVisibleWithWait(row, 5_000));
   await adminEmploymentStatusPage.deleteRow(row);
   await page.waitForTimeout(1200);
 
   report.step('Verify: employment status tidak lagi muncul di list');
   report.check(
     `Employment status "${name}" sudah terhapus`,
-    !(await adminEmploymentStatusPage.rowByName(name).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminEmploymentStatusPage.rowByName(name).first(), 3_000),
   );
 
   report.print();

@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-MEMBERSHIP-05: a newly created Membership can be deleted', async ({
@@ -42,14 +42,14 @@ test('TC-ADMIN-MEMBERSHIP-05: a newly created Membership can be deleted', async 
 
   report.step('Hapus Membership yang baru dibuat');
   const row = adminMembershipsListPage.rowByName(name).first();
-  report.check('Membership muncul sebelum dihapus', await row.isVisible({ timeout: 10_000 }).catch(() => false));
+  report.check('Membership muncul sebelum dihapus', await isVisibleWithWait(row, 10_000));
   await adminMembershipsListPage.deleteRow(row);
   await page.waitForTimeout(3000);
 
   report.step('Verify: membership tidak lagi muncul di list');
   report.check(
     `Membership "${name}" sudah terhapus`,
-    !(await adminMembershipsListPage.rowByName(name).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminMembershipsListPage.rowByName(name).first(), 3_000),
   );
 
   report.print();

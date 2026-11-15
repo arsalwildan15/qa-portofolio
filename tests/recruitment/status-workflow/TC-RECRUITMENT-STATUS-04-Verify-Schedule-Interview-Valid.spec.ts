@@ -24,6 +24,7 @@ import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { createTestCandidate } from '../../../src/utils/createTestCandidate';
 import { shortlistCandidate } from '../../../src/utils/advanceCandidateStatus';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-RECRUITMENT-STATUS-04: scheduling an interview for a Shortlisted candidate succeeds', async ({
   page,
@@ -45,7 +46,7 @@ test('TC-RECRUITMENT-STATUS-04: scheduling an interview for a Shortlisted candid
   report.step('Isi Interview Title, Interviewer, Date, klik Save');
   await candidatesPage.interviewTitleInput.fill('QA Automation Interview');
   await candidatesPage.selectFirstInterviewer();
-  await candidatesPage.interviewDateInput.fill('2026-15-11');
+  await fillDate(candidatesPage.interviewDateInput, '2026-15-11', 'yyyy-dd-mm');
   await page.waitForTimeout(500);
 
   const [resp] = await Promise.all([

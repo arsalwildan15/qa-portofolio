@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-JOBTITLE-05: clicking Cancel discards the Add Job Title form', async ({
@@ -40,7 +40,7 @@ test('TC-ADMIN-JOBTITLE-05: clicking Cancel discards the Add Job Title form', as
   report.check('Kembali ke list Job Titles', page.url().includes('JobTitleList') || page.url().includes('jobTitle'));
   report.check(
     `Job title "${jobTitle}" TIDAK muncul di list`,
-    !(await adminJobTitlesPage.rowByName(jobTitle).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminJobTitlesPage.rowByName(jobTitle).first(), 3_000),
   );
 
   report.print();

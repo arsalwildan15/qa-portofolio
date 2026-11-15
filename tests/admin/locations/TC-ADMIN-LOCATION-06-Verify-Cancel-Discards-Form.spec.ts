@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-LOCATION-06: clicking Cancel discards the Add Location form', async ({
@@ -41,7 +41,7 @@ test('TC-ADMIN-LOCATION-06: clicking Cancel discards the Add Location form', asy
   report.check('Kembali ke list Locations', page.url().includes('viewLocations'));
   report.check(
     `Location "${locationName}" TIDAK muncul di list`,
-    !(await adminLocationsPage.rowByName(locationName).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminLocationsPage.rowByName(locationName).first(), 3_000),
   );
 
   report.print();

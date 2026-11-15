@@ -25,7 +25,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, isHiddenWithWait } from '../../../src/utils/testReport';
 import { createLeaveEntitlement } from '../../../src/utils/createLeaveEntitlement';
 import { getLoggedInEmployeeName } from '../../../src/utils/getLoggedInEmployeeName';
 import { uniqueLeaveWeekday } from '../../../src/data/testData';
@@ -75,7 +75,7 @@ test('TC-LEAVE-APPLY-01: applying leave with valid data succeeds and deducts bal
   await applyLeavePage.goto();
   report.check(
     'Form Apply Leave tampil (BUKAN "No Leave Types with Leave Balance")',
-    !(await applyLeavePage.noLeaveTypesMessage.isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(applyLeavePage.noLeaveTypesMessage, 3_000),
   );
   await applyLeavePage.selectLeaveType('US - Vacation');
   const balanceBefore = await applyLeavePage.leaveBalanceText.textContent();
@@ -99,7 +99,7 @@ test('TC-LEAVE-APPLY-01: applying leave with valid data succeeds and deducts bal
   await applyLeavePage.fillDateRange(applyDate, applyDate);
   await applyLeavePage.fillComments('TC-LEAVE-APPLY-01 automated test');
   const { response: resp, errorToastText } = await applyLeavePage.submit();
-  const toastVisible = await page.getByText('Successfully Saved').isVisible({ timeout: 5_000 }).catch(() => false);
+  const toastVisible = await isVisibleWithWait(page.getByText('Successfully Saved'), 5_000);
 
   report.step('Verify response POST leave-requests, lalu verify detail via GET Leave List (leaveBreakdown/allowedActions)');
   report.check(

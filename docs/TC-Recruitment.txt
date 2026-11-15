@@ -1196,6 +1196,24 @@ LEGEND SIMBOL SKENARIO
                              dampak ke user minim krn tidak ada
                              kehilangan/korup data.
 
+19   TC-RECRUITMENT-VACANCY-19   [DONE -- BUG DIKONFIRMASI]   TC-RECRUITMENT-VACANCY-19-Verify-API-Null-Optional-Field-No-500.spec.ts
+                             (A) Verify Create Vacancy API Handles null In An
+                             Optional Field Without A 500 (taksonomi 6.1/6.5)
+                             -> [API] Kontrol: body persis spt form UI
+                                (description "") -> 200.
+                             -> [API] Kontrol: jobTitleId / employeeId tak
+                                eksis -> 422.
+                             -> [API] Body yang SAMA, hanya description null.
+                             [API VERIFICATION]
+                             -> Verify description null -> 200 atau 422,
+                                bukan 5xx; error tidak membocorkan detail
+                                server; tidak ada vacancy setengah-jadi.
+                             STATUS AKTUAL: GAGAL (BUG BG-409, Low) --
+                             description null -> 500 "Unexpected Error
+                             Occurred". Root cause dibuktikan 15 Nov 2026
+                             dgn isolasi satu variabel dari body UI yg
+                             sukses. UI tidak terdampak (selalu kirim "").
+
 17   TC-RECRUITMENT-CANDIDATE-17   [DONE]   TC-RECRUITMENT-CANDIDATE-17-Verify-List-Filters-Combination.spec.ts
                              (+) Verify List Filters Beyond Candidate Name, Individually and Combined
                              -> Buat candidate baru, Shortlist (agar ada data
@@ -1392,10 +1410,16 @@ LEGEND SIMBOL SKENARIO
 
 15   TC-RECRUITMENT-STATUS-15   [DONE -- BUG DIKONFIRMASI]   TC-RECRUITMENT-STATUS-15-Verify-Shortlist-Fails-Without-Hiring-Manager.spec.ts
                              (!) Verify Shortlist Fails Without Hiring Manager (Regresi BG-007)
-                             -> Buat candidate pada vacancy "Junior Account
-                                Assistant" (dikonfirmasi hiringManager=null),
-                                sengaja TIDAK pakai createTestCandidate()
-                                (yang sekarang menghindari vacancy ini).
+                             -> Setup (sejak 15 Nov 2026):
+                                createVacancyWithoutHiringManager() --
+                                vacancy dgn hiring manager karyawan sekali-
+                                pakai, lalu karyawan itu DIHAPUS dari PIM ->
+                                hiringManager vacancy jadi null (confirmed
+                                live). Seed "Junior Account Assistant" sudah
+                                hilang dari demo. Ini juga jalur realistis
+                                BG-007: manajer keluar & dihapus dari PIM.
+                             -> Buat candidate pada vacancy tsb (sengaja
+                                TIDAK pakai createTestCandidate()).
                              -> Klik Shortlist, klik Save.
                              [API VERIFICATION]
                              -> Verify response.status() === 200 (perilaku
@@ -1511,6 +1535,13 @@ LEGEND SIMBOL SKENARIO
   duplikat SUNGGUHAN tersimpan (data integrity nyata, bukan cosmetic).
   VACANCY-18 mengonfirmasi BUG BARU LAIN (BG-206, Severity Medium): double-
   click memicu TypeError di handler onSave app.
+
+  [UPDATE 2026-11-15, FASE 4] +1 TC baru (VACANCY-19, BUG BG-409: POST vacancies dgn
+  description null -> 500) -> total 60 TC. Demo publik sempat TANPA vacancy sama sekali ->
+  STATUS-04/13 timeout di setup; root cause dibuktikan (GET vacancies total 0), diperbaiki dgn
+  src/utils/ensureVacancy.ts: CandidatesPage.gotoAddForm() memastikan vacancy ber-hiring-
+  manager ada (dibuat via API bila kosong). STATUS-15 kini membangun prasyarat BG-007 sendiri.
+  Date-drift: CandidatesPage.interviewDateInput -> DATE_INPUT_SELECTOR + fillDate().
 
   [UPDATE 2026-11-12, TAHAP 3] +1 TC baru (STATUS-15, regresi khusus BG-007) -> total 59 TC.
   Root cause BG-007 (Shortlist 500) dipersempit jadi presisi: terjadi KHUSUS saat

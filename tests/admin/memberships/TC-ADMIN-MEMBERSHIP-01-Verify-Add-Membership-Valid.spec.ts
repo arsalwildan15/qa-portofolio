@@ -22,7 +22,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-MEMBERSHIP-01: adding a membership with valid data succeeds', async ({
@@ -48,7 +48,7 @@ test('TC-ADMIN-MEMBERSHIP-01: adding a membership with valid data succeeds', asy
   await page.waitForTimeout(1200);
   report.check(
     `Membership "${name}" muncul di list`,
-    await adminMembershipsListPage.rowByName(name).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(adminMembershipsListPage.rowByName(name).first(), 5_000),
   );
 
   report.print();

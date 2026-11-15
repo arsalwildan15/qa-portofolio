@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createLeaveEntitlement } from '../../../src/utils/createLeaveEntitlement';
 import { getLoggedInEmployeeName } from '../../../src/utils/getLoggedInEmployeeName';
 import { uniqueLeaveWeekday } from '../../../src/data/testData';
@@ -70,8 +70,8 @@ test('TC-LEAVE-APPLY-06: an XSS/SQLi payload in Comments does not execute and do
   // "Masih berfungsi normal" berarti halaman mencapai state yg DETERMINISTIK (ada baris data
   // ATAU "No Records Found" yg memang valid tergantung filter default), bukan stuck/error --
   // payload XSS/SQLi yg merusak app biasanya bikin halaman gagal render sama sekali.
-  const hasRows = await leaveListPage.tableRows.first().isVisible({ timeout: 15_000 }).catch(() => false);
-  const hasNoRecordsMsg = await leaveListPage.noRecordsFound.isVisible({ timeout: 3_000 }).catch(() => false);
+  const hasRows = await isVisibleWithWait(leaveListPage.tableRows.first(), 15_000);
+  const hasNoRecordsMsg = await isVisibleWithWait(leaveListPage.noRecordsFound, 3_000);
   report.check('Leave List masih berfungsi normal setelah payload XSS/SQLi tersimpan', hasRows || hasNoRecordsMsg, `hasRows=${hasRows}, hasNoRecordsMsg=${hasNoRecordsMsg}`);
 
   report.print();

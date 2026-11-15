@@ -21,6 +21,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueEmployeeName } from '../../../src/data/testData';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-PD-04: future Date of Birth is validated', async ({
   page,
@@ -39,7 +40,7 @@ test('TC-PIM-PD-04: future Date of Birth is validated', async ({
   await personalDetailsPage.waitUntilLoaded();
 
   report.step(`Fill Date of Birth = "${nextYear}-15-06" (tahun depan)`);
-  await personalDetailsPage.dateOfBirthInput.fill(`${nextYear}-15-06`);
+  await fillDate(personalDetailsPage.dateOfBirthInput, `${nextYear}-15-06`, 'yyyy-dd-mm');
   await personalDetailsPage.save();
 
   report.step('Verify apakah validasi muncul atau tersimpan begitu saja');

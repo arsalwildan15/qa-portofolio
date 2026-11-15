@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-LICENSE-03: a SQL injection payload in License Name does not break the app', async ({
@@ -44,7 +44,7 @@ test('TC-ADMIN-LICENSE-03: a SQL injection payload in License Name does not brea
   report.step('Verify: list masih berfungsi normal setelah payload (tidak ada server error)');
   await adminLicensesPage.goto();
   await page.waitForTimeout(3000);
-  const listStillWorks = await adminLicensesPage.tableRows.first().isVisible({ timeout: 10_000 }).catch(() => false);
+  const listStillWorks = await isVisibleWithWait(adminLicensesPage.tableRows.first(), 10_000);
   report.check('List Licenses masih berfungsi normal setelah payload SQLi', listStillWorks, `postStatus=${resp?.status() ?? 'tidak ada'}`);
 
   report.print();

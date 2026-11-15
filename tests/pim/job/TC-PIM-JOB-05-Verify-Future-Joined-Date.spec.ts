@@ -22,6 +22,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { uniqueEmployeeName } from '../../../src/data/testData';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-JOB-05: future joined date behavior is documented', async ({
   page,
@@ -43,7 +44,7 @@ test('TC-PIM-JOB-05: future joined date behavior is documented', async ({
   await jobPage.goto(empNumber);
 
   report.step('Fill Joined Date = "2099-01-01" (format valid, tapi jauh di masa depan), klik Save');
-  await jobPage.joinedDateInput.fill('2099-01-01');
+  await fillDate(jobPage.joinedDateInput, '2099-01-01', 'yyyy-dd-mm');
   const [resp] = await Promise.all([
     page.waitForResponse((r) => r.url().includes('/job-details') && r.request().method() === 'PUT').catch(() => null),
     jobPage.save(),

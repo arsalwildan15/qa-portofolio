@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-LICENSE-04: clicking Cancel discards the Add License form', async ({
@@ -40,7 +40,7 @@ test('TC-ADMIN-LICENSE-04: clicking Cancel discards the Add License form', async
   report.check('Kembali ke list Licenses', page.url().includes('Licenses'));
   report.check(
     `License "${name}" TIDAK muncul di list`,
-    !(await adminLicensesPage.rowByName(name).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminLicensesPage.rowByName(name).first(), 3_000),
   );
 
   report.print();

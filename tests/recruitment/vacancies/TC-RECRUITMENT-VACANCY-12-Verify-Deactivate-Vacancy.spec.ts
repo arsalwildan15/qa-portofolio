@@ -31,7 +31,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestVacancy } from '../../../src/utils/createTestVacancy';
 
 test('TC-RECRUITMENT-VACANCY-12: deactivating a vacancy removes it from the Add Candidate dropdown', async ({
@@ -80,7 +80,7 @@ test('TC-RECRUITMENT-VACANCY-12: deactivating a vacancy removes it from the Add 
   await vacanciesPage.goto();
   await page.waitForTimeout(1200);
   const row = vacanciesPage.rowByName(vacancyName).first();
-  report.check('Vacancy tetap muncul di Vacancies list (tidak terhapus)', await row.isVisible({ timeout: 5_000 }).catch(() => false));
+  report.check('Vacancy tetap muncul di Vacancies list (tidak terhapus)', await isVisibleWithWait(row, 5_000));
   const rowText = (await row.textContent().catch(() => '')) ?? '';
   report.check('Kolom Status di list menampilkan "Closed" setelah deactivate', rowText.includes('Closed'), `rowText=${rowText}`);
 

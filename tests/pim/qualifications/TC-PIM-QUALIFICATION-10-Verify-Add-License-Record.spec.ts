@@ -24,6 +24,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-QUALIFICATION-10: add license record succeeds', async ({
   page,
@@ -45,8 +46,8 @@ test('TC-PIM-QUALIFICATION-10: add license record succeeds', async ({
   const licenseTypeName = (await firstLicenseOption.textContent())?.trim();
   await firstLicenseOption.click();
   await qualificationsPage.licenseNumberInput.fill('LIC-12345');
-  await qualificationsPage.issuedDateInput.fill('2020-15-06');
-  await qualificationsPage.expiryDateInput.fill('2030-15-06');
+  await fillDate(qualificationsPage.issuedDateInput, '2020-15-06', 'yyyy-dd-mm');
+  await fillDate(qualificationsPage.expiryDateInput, '2030-15-06', 'yyyy-dd-mm');
   await qualificationsPage.save();
   await page.waitForTimeout(1500);
 

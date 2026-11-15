@@ -29,7 +29,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestCandidate } from '../../../src/utils/createTestCandidate';
 import {
   shortlistCandidate,
@@ -63,7 +63,7 @@ test('TC-RECRUITMENT-STATUS-12: Offer Job to Hired, full state machine chain', a
   const possibleActions = ['Reject', 'Offer Declined', 'Hire', 'Mark As Hired', 'Hired'];
   const availableFromOffered: string[] = [];
   for (const label of possibleActions) {
-    const visible = await candidatesPage.statusActionButton(label).isVisible({ timeout: 1_500 }).catch(() => false);
+    const visible = await isVisibleWithWait(candidatesPage.statusActionButton(label), 1_500);
     if (visible) availableFromOffered.push(label);
   }
   report.check('Ada minimal 1 aksi lanjutan dari "Job Offered"', availableFromOffered.length > 0, availableFromOffered.join(', '));
@@ -86,7 +86,7 @@ test('TC-RECRUITMENT-STATUS-12: Offer Job to Hired, full state machine chain', a
 
     const anyActionAfterHire: string[] = [];
     for (const label of ['Reject', 'Shortlist', 'Schedule Interview', 'Mark Interview Passed', 'Mark Interview Failed', 'Offer Job', 'Offer Declined', 'Hire']) {
-      const visible = await candidatesPage.statusActionButton(label).isVisible({ timeout: 1_000 }).catch(() => false);
+      const visible = await isVisibleWithWait(candidatesPage.statusActionButton(label), 1_000);
       if (visible) anyActionAfterHire.push(label);
     }
     report.check('Status setelah "Hire" bersifat TERMINAL (tidak ada tombol aksi lanjutan)', anyActionAfterHire.length === 0, anyActionAfterHire.join(', '));

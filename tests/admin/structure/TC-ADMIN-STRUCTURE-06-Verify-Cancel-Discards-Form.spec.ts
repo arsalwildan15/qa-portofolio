@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-STRUCTURE-06: clicking Cancel discards the Add Organization Unit dialog', async ({
@@ -42,7 +42,7 @@ test('TC-ADMIN-STRUCTURE-06: clicking Cancel discards the Add Organization Unit 
   report.check('Dialog "Add Organization Unit" tertutup (Save button tidak lagi ada)', (await page.getByRole('button', { name: 'Save' }).count()) === 0);
   report.check(
     `Unit "${unitName}" TIDAK muncul di tree`,
-    !(await adminStructurePage.nodeByName(unitName).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminStructurePage.nodeByName(unitName).first(), 3_000),
   );
 
   report.print();

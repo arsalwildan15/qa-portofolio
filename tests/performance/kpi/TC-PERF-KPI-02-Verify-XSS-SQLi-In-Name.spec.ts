@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-PERF-KPI-02: an XSS/SQLi payload in KPI name does not execute and does not break the app', async ({
@@ -50,7 +50,7 @@ test('TC-PERF-KPI-02: an XSS/SQLi payload in KPI name does not execute and does 
   await performanceKpiPage.goto();
   await page.waitForLoadState('networkidle').catch(() => {});
   await page.waitForTimeout(1_500);
-  const listStillWorks = await performanceKpiPage.tableRows.first().isVisible({ timeout: 10_000 }).catch(() => false);
+  const listStillWorks = await isVisibleWithWait(performanceKpiPage.tableRows.first(), 10_000);
   report.check('List KPI masih berfungsi normal setelah payload XSS/SQLi tersimpan', listStillWorks);
 
   report.print();

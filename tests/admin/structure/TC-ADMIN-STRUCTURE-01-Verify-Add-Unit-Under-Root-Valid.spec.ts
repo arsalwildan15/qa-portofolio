@@ -25,7 +25,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-STRUCTURE-01: adding an organization unit under root succeeds', async ({
@@ -53,12 +53,12 @@ test('TC-ADMIN-STRUCTURE-01: adding an organization unit under root succeeds', a
   await adminStructurePage.enableEdit();
   report.check(
     `Unit "${unitName}" muncul di tree`,
-    await adminStructurePage.nodeByName(unitName).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(adminStructurePage.nodeByName(unitName).first(), 5_000),
   );
 
   report.step('Cleanup: hapus unit yang baru dibuat');
   const node = adminStructurePage.nodeByName(unitName).first();
-  if (await node.isVisible({ timeout: 2_000 }).catch(() => false)) {
+  if (await isVisibleWithWait(node, 2_000)) {
     await adminStructurePage.deleteNode(node);
     await page.waitForTimeout(1000);
   }

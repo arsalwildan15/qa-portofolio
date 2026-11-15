@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-BUZZ-07: commenting on a post increments the comment counter', async ({ page, buzzPage }, testInfo) => {
@@ -55,7 +55,7 @@ test('TC-BUZZ-07: commenting on a post increments the comment counter', async ({
   );
   report.check(
     `Teks comment "${commentText}" terlihat di halaman`,
-    await page.getByText(commentText).first().isVisible({ timeout: 5000 }).catch(() => false),
+    await isVisibleWithWait(page.getByText(commentText).first(), 5000),
   );
 
   report.print();

@@ -21,6 +21,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-IMMIGRATION-01: add valid immigration record succeeds', async ({
   page,
@@ -39,8 +40,8 @@ test('TC-PIM-IMMIGRATION-01: add valid immigration record succeeds', async ({
   await immigrationPage.passportRadio.waitFor({ state: 'attached' });
   await immigrationPage.clickPassportRadio();
   await immigrationPage.numberInput.fill('A1234567');
-  await immigrationPage.issuedDateInput.fill('2020-01-15');
-  await immigrationPage.expiryDateInput.fill('2030-01-15');
+  await fillDate(immigrationPage.issuedDateInput, '2020-01-15', 'yyyy-mm-dd');
+  await fillDate(immigrationPage.expiryDateInput, '2030-01-15', 'yyyy-mm-dd');
   await immigrationPage.save();
   await page.waitForTimeout(1500);
 

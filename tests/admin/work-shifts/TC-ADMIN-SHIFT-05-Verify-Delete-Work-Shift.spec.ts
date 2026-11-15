@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-SHIFT-05: a newly created Work Shift can be deleted', async ({
@@ -44,14 +44,14 @@ test('TC-ADMIN-SHIFT-05: a newly created Work Shift can be deleted', async ({
 
   report.step('Hapus Work Shift yang baru dibuat');
   const row = adminWorkShiftsPage.rowByName(shiftName).first();
-  report.check('Work shift muncul sebelum dihapus', await row.isVisible({ timeout: 5_000 }).catch(() => false));
+  report.check('Work shift muncul sebelum dihapus', await isVisibleWithWait(row, 5_000));
   await adminWorkShiftsPage.deleteRow(row);
   await page.waitForTimeout(1200);
 
   report.step('Verify: work shift tidak lagi muncul di list');
   report.check(
     `Work shift "${shiftName}" sudah terhapus`,
-    !(await adminWorkShiftsPage.rowByName(shiftName).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminWorkShiftsPage.rowByName(shiftName).first(), 3_000),
   );
 
   report.print();

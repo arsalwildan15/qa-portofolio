@@ -21,7 +21,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createLeaveEntitlement } from '../../../src/utils/createLeaveEntitlement';
 import { getLoggedInEmployeeName } from '../../../src/utils/getLoggedInEmployeeName';
 import { uniqueLeaveWeekday } from '../../../src/data/testData';
@@ -72,7 +72,7 @@ test('TC-LEAVE-LIST-03: cancelling a Pending Approval leave request restores the
   await leaveListPage.selectEmployee(me.employeeId);
   await leaveListPage.search();
   const row = (await leaveListPage.rowByDate(applyDate, 'yyyy-dd-mm')).first();
-  const rowFound = await row.isVisible({ timeout: 5_000 }).catch(() => false);
+  const rowFound = await isVisibleWithWait(row, 5_000);
   report.check('Record yg baru dibuat ditemukan di Leave List', rowFound, `applyDate=${applyDate}`);
   const cancelResp = await leaveListPage.cancelLeave(row);
   report.check('[API] Cancel Leave berhasil (response bukan error)', cancelResp !== null, `response=${cancelResp ? cancelResp.status() : 'null'}`);

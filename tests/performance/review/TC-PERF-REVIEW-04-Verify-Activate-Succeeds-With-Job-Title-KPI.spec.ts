@@ -68,7 +68,7 @@ test('TC-PERF-REVIEW-04: Activate succeeds for an employee with Job Title+KPI, E
     const rowText = await row.innerText().catch(() => '');
     report.check('Status di daftar = "Activated"', rowText.includes('Activated'), `rowText=${rowText}`);
     const evaluateVisible = await isVisibleWithWait(row.locator('button[title="Evaluate"]'), 5_000);
-    const editVisible = await row.locator('button[title="Edit"]').isVisible({ timeout: 2_000 }).catch(() => false);
+    const editVisible = await isVisibleWithWait(row.locator('button[title="Edit"]'), 2_000);
     report.check('Tombol "Evaluate" muncul', evaluateVisible);
     report.check('Tombol "Edit" TIDAK lagi ada (review sudah Activated)', !editVisible);
   } else {

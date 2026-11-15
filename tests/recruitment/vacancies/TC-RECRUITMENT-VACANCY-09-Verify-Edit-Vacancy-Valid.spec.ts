@@ -23,7 +23,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestVacancy } from '../../../src/utils/createTestVacancy';
 import { uniqueName } from '../../../src/data/testData';
 
@@ -60,7 +60,7 @@ test('TC-RECRUITMENT-VACANCY-09: editing a vacancy with valid data persists', as
   await page.waitForTimeout(1200);
   report.check(
     `Vacancy "${newName}" muncul di list dengan nama baru`,
-    await vacanciesPage.rowByName(newName).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(vacanciesPage.rowByName(newName).first(), 5_000),
   );
 
   await vacanciesPage.gotoEditForm(vacancyId);

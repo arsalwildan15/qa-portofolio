@@ -26,7 +26,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestCandidate } from '../../../src/utils/createTestCandidate';
 import { shortlistCandidate } from '../../../src/utils/advanceCandidateStatus';
 
@@ -43,8 +43,8 @@ test('TC-RECRUITMENT-SECURITY-04: 2 concurrent status-transition PUT requests fo
 
   await candidatesPage.gotoDetail(candidateId);
   await page.waitForTimeout(5000);
-  const rejectAvailable = await candidatesPage.statusActionButton('Reject').isVisible({ timeout: 5_000 }).catch(() => false);
-  const scheduleAvailable = await candidatesPage.statusActionButton('Schedule Interview').isVisible({ timeout: 5_000 }).catch(() => false);
+  const rejectAvailable = await isVisibleWithWait(candidatesPage.statusActionButton('Reject'), 5_000);
+  const scheduleAvailable = await isVisibleWithWait(candidatesPage.statusActionButton('Schedule Interview'), 5_000);
   report.check('Candidate Shortlisted punya minimal 2 aksi valid tersedia (Reject + Schedule Interview)', rejectAvailable && scheduleAvailable);
 
   report.step('[API] Siapkan 2 request status-transition BERBEDA untuk candidate id yang SAMA (payload/method confirmed live via discovery)');

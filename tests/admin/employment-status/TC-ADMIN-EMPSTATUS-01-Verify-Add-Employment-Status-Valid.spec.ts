@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-EMPSTATUS-01: adding an employment status with valid data succeeds', async ({
@@ -46,7 +46,7 @@ test('TC-ADMIN-EMPSTATUS-01: adding an employment status with valid data succeed
   await page.waitForTimeout(3000);
   report.check(
     `Employment status "${name}" muncul di list`,
-    await adminEmploymentStatusPage.rowByName(name).first().isVisible({ timeout: 10_000 }).catch(() => false),
+    await isVisibleWithWait(adminEmploymentStatusPage.rowByName(name).first(), 10_000),
   );
 
   report.print();

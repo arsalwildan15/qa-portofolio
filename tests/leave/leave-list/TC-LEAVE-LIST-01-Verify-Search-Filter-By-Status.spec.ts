@@ -22,7 +22,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createLeaveEntitlement } from '../../../src/utils/createLeaveEntitlement';
 import { getLoggedInEmployeeName } from '../../../src/utils/getLoggedInEmployeeName';
 import { uniqueLeaveWeekday } from '../../../src/data/testData';
@@ -62,7 +62,7 @@ test('TC-LEAVE-LIST-01: filtering Leave List by Status shows matching records an
   await leaveListPage.selectEmployee(me.employeeId);
   await leaveListPage.search();
   const pendingRow = (await leaveListPage.rowByDate(applyDate, 'yyyy-dd-mm'));
-  const foundInPending = await pendingRow.first().isVisible({ timeout: 5_000 }).catch(() => false);
+  const foundInPending = await isVisibleWithWait(pendingRow.first(), 5_000);
   report.check('Record baru MUNCUL saat filter Status = "Pending Approval" (default)', foundInPending, `applyDate=${applyDate}`);
 
   report.step('Ganti filter Status jadi "Rejected" -> record baru (Pending Approval) HARUS TIDAK muncul');
@@ -73,7 +73,7 @@ test('TC-LEAVE-LIST-01: filtering Leave List by Status shows matching records an
   await leaveListPage.clearStatusChip();
   await leaveListPage.selectStatus('Rejected');
   await leaveListPage.search();
-  const foundInRejected = await (await leaveListPage.rowByDate(applyDate, 'yyyy-dd-mm')).first().isVisible({ timeout: 3_000 }).catch(() => false);
+  const foundInRejected = await isVisibleWithWait((await leaveListPage.rowByDate(applyDate, 'yyyy-dd-mm')).first(), 3_000);
   report.check('Record baru TIDAK muncul saat filter Status = "Rejected" (status tidak cocok)', foundInRejected === false);
 
   report.print();

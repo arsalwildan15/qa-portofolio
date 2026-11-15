@@ -39,7 +39,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-STRUCTURE-07: renaming a freshly-created organization unit via the edit icon', async ({
@@ -88,17 +88,17 @@ test('TC-ADMIN-STRUCTURE-07: renaming a freshly-created organization unit via th
   await adminStructurePage.enableEdit();
   report.check(
     `Unit dengan nama baru "${renamedName}" muncul di tree`,
-    await adminStructurePage.nodeByName(renamedName).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(adminStructurePage.nodeByName(renamedName).first(), 5_000),
   );
 
   report.step('Cleanup: hapus unit (apa pun nama yang tersisa, original atau renamed)');
   const cleanupNode = adminStructurePage.nodeByName(renamedName).first();
-  if (await cleanupNode.isVisible({ timeout: 2_000 }).catch(() => false)) {
+  if (await isVisibleWithWait(cleanupNode, 2_000)) {
     await adminStructurePage.deleteNode(cleanupNode);
     await page.waitForTimeout(1000);
   } else {
     const fallbackNode = adminStructurePage.nodeByName(originalName).first();
-    if (await fallbackNode.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    if (await isVisibleWithWait(fallbackNode, 2_000)) {
       await adminStructurePage.deleteNode(fallbackNode);
       await page.waitForTimeout(1000);
     }

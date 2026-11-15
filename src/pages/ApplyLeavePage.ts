@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
 import { DATE_INPUT_SELECTOR, fillDate } from '../utils/dateInput';
+import { isVisibleWithWait } from '../utils/testReport';
 
 /**
  * Leave > Apply. Confirmed live: without any Leave Type carrying a non-zero balance for the
@@ -165,7 +166,7 @@ export class ApplyLeavePage extends BasePage {
     // run first), and a prior isolated run surfaced a real but hard-to-reproduce confirm
     // dialog here. If one appears, confirm it rather than silently timing out.
     const dialog = this.page.locator('.oxd-dialog-container, [role="dialog"]');
-    if (await dialog.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    if (await isVisibleWithWait(dialog, 2_000)) {
       await dialog.getByRole('button', { name: /^(ok|yes|proceed|confirm)/i }).first().click().catch(() => {});
     }
     const response = await responsePromise;

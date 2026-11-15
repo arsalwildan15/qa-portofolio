@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestCandidate } from '../../../src/utils/createTestCandidate';
 
 test('TC-RECRUITMENT-STATUS-01: a new candidate starts at Application Initiated with Reject/Shortlist actions', async ({
@@ -38,8 +38,8 @@ test('TC-RECRUITMENT-STATUS-01: a new candidate starts at Application Initiated 
   report.step('Verify status awal "Application Initiated" dan tombol Reject/Shortlist tersedia');
   const statusText = await candidatesPage.statusText.textContent().catch(() => null);
   report.check('Status awal = "Application Initiated"', statusText?.includes('Application Initiated') ?? false, `statusText=${statusText}`);
-  report.check('Tombol "Reject" tersedia', await candidatesPage.statusActionButton('Reject').isVisible({ timeout: 3_000 }).catch(() => false));
-  report.check('Tombol "Shortlist" tersedia', await candidatesPage.statusActionButton('Shortlist').isVisible({ timeout: 3_000 }).catch(() => false));
+  report.check('Tombol "Reject" tersedia', await isVisibleWithWait(candidatesPage.statusActionButton('Reject'), 3_000));
+  report.check('Tombol "Shortlist" tersedia', await isVisibleWithWait(candidatesPage.statusActionButton('Shortlist'), 3_000));
 
   report.print();
 });

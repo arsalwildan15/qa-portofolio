@@ -21,6 +21,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { uniqueEmployeeName } from '../../../src/data/testData';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-PD-03: valid Date of Birth saves successfully', async ({
   page,
@@ -38,7 +39,7 @@ test('TC-PIM-PD-03: valid Date of Birth saves successfully', async ({
   await personalDetailsPage.waitUntilLoaded();
 
   report.step('Fill Date of Birth = "1990-15-06" (format yyyy-dd-mm)');
-  await personalDetailsPage.dateOfBirthInput.fill('1990-15-06');
+  await fillDate(personalDetailsPage.dateOfBirthInput, '1990-15-06', 'yyyy-dd-mm');
 
   report.step('Klik Save, verify berhasil (status 200)');
   const [resp] = await Promise.all([

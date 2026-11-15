@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-EDU-05: a newly created Education Level can be deleted', async ({
@@ -42,14 +42,14 @@ test('TC-ADMIN-EDU-05: a newly created Education Level can be deleted', async ({
 
   report.step('Hapus Education Level yang baru dibuat');
   const row = adminEducationPage.rowByName(level).first();
-  report.check('Level muncul sebelum dihapus', await row.isVisible({ timeout: 5_000 }).catch(() => false));
+  report.check('Level muncul sebelum dihapus', await isVisibleWithWait(row, 5_000));
   await adminEducationPage.deleteRow(row);
   await page.waitForTimeout(1200);
 
   report.step('Verify: level tidak lagi muncul di list');
   report.check(
     `Education Level "${level}" sudah terhapus`,
-    !(await adminEducationPage.rowByName(level).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminEducationPage.rowByName(level).first(), 3_000),
   );
 
   report.print();

@@ -24,7 +24,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 
 test('TC-RECRUITMENT-VACANCY-17: pagination and sorting on Vacancies list', async ({
   page,
@@ -36,7 +36,7 @@ test('TC-RECRUITMENT-VACANCY-17: pagination and sorting on Vacancies list', asyn
   report.step('Buka Vacancies list, cek apakah ada kontrol pagination');
   await vacanciesPage.goto();
   await page.waitForTimeout(3000);
-  const paginationVisible = await vacanciesPage.pagination().isVisible({ timeout: 2_000 }).catch(() => false);
+  const paginationVisible = await isVisibleWithWait(vacanciesPage.pagination(), 2_000);
   report.check('TC dijalankan tanpa exception', true);
 
   if (!paginationVisible) {
@@ -55,7 +55,7 @@ test('TC-RECRUITMENT-VACANCY-17: pagination and sorting on Vacancies list', asyn
   const columns = ['Vacancy', 'Job Title', 'Hiring Manager', 'Status'];
   const sortableColumns: string[] = [];
   for (const col of columns) {
-    const visible = await vacanciesPage.columnSortIcon(col).isVisible({ timeout: 3_000 }).catch(() => false);
+    const visible = await isVisibleWithWait(vacanciesPage.columnSortIcon(col), 3_000);
     if (visible) sortableColumns.push(col);
   }
   report.check('Minimal satu kolom punya sort icon', sortableColumns.length > 0, `kolom: ${sortableColumns.join(', ')}`);

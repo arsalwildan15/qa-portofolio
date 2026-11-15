@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createLeaveEntitlement } from '../../../src/utils/createLeaveEntitlement';
 import { getLoggedInEmployeeName } from '../../../src/utils/getLoggedInEmployeeName';
 import { uniqueLeaveWeekday } from '../../../src/data/testData';
@@ -56,11 +56,11 @@ test('TC-LEAVE-APPLY-04: a To Date earlier than From Date is rejected, not silen
   postStatus = response?.status();
 
   report.step('Verify: request TIDAK sukses dibuat dgn rentang terbalik ini (bukan 200, atau ada error client-side)');
-  const errorVisible = await applyLeavePage.fieldErrors.first().isVisible({ timeout: 2_000 }).catch(() => false);
-  const toastErrorVisible = await page
+  const errorVisible = await isVisibleWithWait(applyLeavePage.fieldErrors.first(), 2_000);
+  const toastErrorVisible = await isVisibleWithWait(page
     .locator('.oxd-toast-content, .oxd-text--toast-message')
     .first()
-    .isVisible({ timeout: 2_000 })
+    , 2_000)
     .catch(() => false);
   report.check(
     'Rentang terbalik (To < From) ditolak: bukan 200 ATAU ada error client/toast',

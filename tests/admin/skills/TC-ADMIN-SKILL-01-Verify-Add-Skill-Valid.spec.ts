@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-SKILL-01: adding a skill with valid Name + Description succeeds', async ({
@@ -48,7 +48,7 @@ test('TC-ADMIN-SKILL-01: adding a skill with valid Name + Description succeeds',
   await page.waitForTimeout(3000);
   report.check(
     `Skill "${name}" muncul di list`,
-    await adminSkillsPage.rowByName(name).first().isVisible({ timeout: 10_000 }).catch(() => false),
+    await isVisibleWithWait(adminSkillsPage.rowByName(name).first(), 10_000),
   );
 
   report.print();

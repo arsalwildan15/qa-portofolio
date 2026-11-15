@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-JOBTITLE-06: a newly created Job Title can be deleted', async ({
@@ -43,14 +43,14 @@ test('TC-ADMIN-JOBTITLE-06: a newly created Job Title can be deleted', async ({
 
   report.step('Hapus Job Title yang baru dibuat');
   const row = adminJobTitlesPage.rowByName(jobTitle).first();
-  report.check('Job title muncul sebelum dihapus', await row.isVisible({ timeout: 5_000 }).catch(() => false));
+  report.check('Job title muncul sebelum dihapus', await isVisibleWithWait(row, 5_000));
   await adminJobTitlesPage.deleteRow(row);
   await page.waitForTimeout(1200);
 
   report.step('Verify: job title tidak lagi muncul di list');
   report.check(
     `Job title "${jobTitle}" sudah terhapus`,
-    !(await adminJobTitlesPage.rowByName(jobTitle).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminJobTitlesPage.rowByName(jobTitle).first(), 3_000),
   );
 
   report.print();

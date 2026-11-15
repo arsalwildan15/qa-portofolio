@@ -30,7 +30,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createLeaveEntitlement } from '../../../src/utils/createLeaveEntitlement';
 import { uniqueLeaveWeekday } from '../../../src/data/testData';
 import { pickLightlyUsedEmployee } from '../../../src/utils/pickLightlyUsedEmployee';
@@ -93,7 +93,7 @@ test('TC-LEAVE-ASSIGN-01: assigning leave to an employee with sufficient balance
   // eksplisit: kalau usedDate kosong, lompati verifikasi list ini (check assign di atas yg
   // sudah gagal cukup utk menandai TC ini FAILED).
   const scheduledRow =
-    usedDate !== '' && (await (await leaveListPage.rowByDate(usedDate, 'yyyy-dd-mm')).first().isVisible({ timeout: 5_000 }).catch(() => false));
+    usedDate !== '' && (await isVisibleWithWait((await leaveListPage.rowByDate(usedDate, 'yyyy-dd-mm')).first(), 5_000));
   report.check(
     'Record baru muncul dgn status "Scheduled" saat Leave List difilter ke Scheduled',
     scheduledRow,

@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../../src/fixtures/pages.fixture';
 import { env } from '../../../../src/config/env';
-import { TestReport } from '../../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../../src/utils/testReport';
 import { uniqueEmployeeName } from '../../../../src/data/testData';
 
 const CSV_HEADER =
@@ -67,11 +67,11 @@ test('TC-PIM-DATAIMPORT-01: uploading a valid CSV succeeds', async ({
   await employeeListPage.goto();
   await employeeListPage.employeeNameFilter.fill(employee.firstName);
   const nameOption = page.getByRole('option').filter({ hasText: employee.firstName }).first();
-  const hasAutocompleteMatch = await nameOption.isVisible({ timeout: 5_000 }).catch(() => false);
+  const hasAutocompleteMatch = await isVisibleWithWait(nameOption, 5_000);
   if (hasAutocompleteMatch) {
     await nameOption.click();
     await employeeListPage.search();
-    const found = await employeeListPage.tableRows.first().isVisible({ timeout: 10_000 }).catch(() => false);
+    const found = await isVisibleWithWait(employeeListPage.tableRows.first(), 10_000);
     report.check('Employee hasil import ditemukan di Employee List', found);
   } else {
     report.finding('Pencarian employee hasil import via UI', 'Nama tidak muncul di autocomplete suggestion Employee List dalam 5s (meta.success di atas sudah konfirmasi import sukses di sisi API).');

@@ -21,7 +21,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 
 test('TC-ADMIN-USER-05: a SQL injection payload in the Username search filter does not break the list', async ({
   page,
@@ -39,7 +39,7 @@ test('TC-ADMIN-USER-05: a SQL injection payload in the Username search filter do
   await page.waitForTimeout(1500);
 
   report.step('Verify: halaman tetap berfungsi normal (tidak blank / tidak error server)');
-  const pageStillWorks = await page.locator('.oxd-table, .oxd-table-body, h5').first().isVisible({ timeout: 5_000 }).catch(() => false);
+  const pageStillWorks = await isVisibleWithWait(page.locator('.oxd-table, .oxd-table-body, h5').first(), 5_000);
   report.check('Halaman list Users masih berfungsi normal setelah payload SQLi', pageStillWorks);
 
   report.print();

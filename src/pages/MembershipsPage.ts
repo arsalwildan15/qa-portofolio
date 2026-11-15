@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR } from '../utils/dateInput';
 
 export class MembershipsPage extends BasePage {
   readonly addButton: Locator;
@@ -25,7 +26,7 @@ export class MembershipsPage extends BasePage {
       .locator('.oxd-input-group', { has: page.getByText('Subscription Amount', { exact: true }) })
       .locator('input');
     this.currencySelect = selectByLabel('Currency');
-    const dateInputs = page.locator('input[placeholder="yyyy-dd-mm"]');
+    const dateInputs = page.locator(DATE_INPUT_SELECTOR);
     this.commenceDateInput = dateInputs.nth(0);
     this.renewalDateInput = dateInputs.nth(1);
     this.saveButton = page.getByRole('button', { name: 'Save' });

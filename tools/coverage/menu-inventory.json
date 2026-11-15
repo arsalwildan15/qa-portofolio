@@ -1,0 +1,2493 @@
+{
+ "modules": [
+  {
+   "name": "Admin",
+   "href": "/web/index.php/admin/viewAdminModule"
+  },
+  {
+   "name": "PIM",
+   "href": "/web/index.php/pim/viewPimModule"
+  },
+  {
+   "name": "Leave",
+   "href": "/web/index.php/leave/viewLeaveModule"
+  },
+  {
+   "name": "Time",
+   "href": "/web/index.php/time/viewTimeModule"
+  },
+  {
+   "name": "Recruitment",
+   "href": "/web/index.php/recruitment/viewRecruitmentModule"
+  },
+  {
+   "name": "My Info",
+   "href": "/web/index.php/pim/viewMyDetails"
+  },
+  {
+   "name": "Performance",
+   "href": "/web/index.php/performance/viewPerformanceModule"
+  },
+  {
+   "name": "Dashboard",
+   "href": "/web/index.php/dashboard/index"
+  },
+  {
+   "name": "Directory",
+   "href": "/web/index.php/directory/viewDirectory"
+  },
+  {
+   "name": "Maintenance",
+   "href": "/web/index.php/maintenance/viewMaintenanceModule"
+  },
+  {
+   "name": "Claim",
+   "href": "/web/index.php/claim/viewClaimModule"
+  },
+  {
+   "name": "Buzz",
+   "href": "/web/index.php/buzz/viewBuzz"
+  }
+ ],
+ "units": [
+  {
+   "module": "Admin",
+   "path": "Admin",
+   "headings": [
+    "System Users"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Username",
+    "User Role",
+    "Employee Name",
+    "Status"
+   ],
+   "tabs": [],
+   "inputs": 1,
+   "selects": 2,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 1,
+   "pagination": 0,
+   "sortable": 4,
+   "trash": 1,
+   "pencil": 1,
+   "checkbox": 2,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers"
+  },
+  {
+   "module": "PIM",
+   "path": "PIM",
+   "headings": [
+    "Employee Information"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add",
+    "1",
+    "2",
+    "3"
+   ],
+   "labels": [
+    "Employee Name",
+    "Employee Id",
+    "Employment Status",
+    "Include",
+    "Supervisor Name",
+    "Job Title",
+    "Sub Unit"
+   ],
+   "tabs": [],
+   "inputs": 1,
+   "selects": 4,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 2,
+   "table": 1,
+   "rows": 50,
+   "pagination": 0,
+   "sortable": 7,
+   "trash": 49,
+   "pencil": 50,
+   "checkbox": 51,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/viewEmployeeList"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave",
+   "headings": [
+    "Leave List"
+   ],
+   "buttons": [
+    "Reset",
+    "Search"
+   ],
+   "labels": [
+    "From Date",
+    "To Date",
+    "Show Leave with Status",
+    "Leave Type",
+    "Employee Name",
+    "Sub Unit"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 3,
+   "textareas": 0,
+   "files": 0,
+   "dates": 2,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 1,
+   "switches": 1,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/viewLeaveList"
+  },
+  {
+   "module": "Time",
+   "path": "Time",
+   "headings": [
+    "Select Employee",
+    "Timesheets Pending Action"
+   ],
+   "buttons": [
+    "View"
+   ],
+   "labels": [
+    "Employee Name"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 11,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/time/viewEmployeeTimesheet"
+  },
+  {
+   "module": "Recruitment",
+   "path": "Recruitment",
+   "headings": [
+    "Candidates"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Job Title",
+    "Vacancy",
+    "Hiring Manager",
+    "Status",
+    "Candidate Name",
+    "Keywords",
+    "Date of Application",
+    "Method of Application"
+   ],
+   "tabs": [],
+   "inputs": 3,
+   "selects": 5,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 5,
+   "pagination": 0,
+   "sortable": 5,
+   "trash": 5,
+   "pencil": 0,
+   "checkbox": 6,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/recruitment/viewCandidates"
+  },
+  {
+   "module": "My Info",
+   "path": "My Info",
+   "headings": [
+    "John Doe",
+    "Personal Details",
+    "Custom Fields",
+    "Attachments"
+   ],
+   "buttons": [
+    "Save",
+    "Add"
+   ],
+   "labels": [
+    "Employee Full Name",
+    "Employee Id",
+    "Other Id",
+    "Driver's License Number",
+    "License Expiry Date",
+    "Nationality",
+    "Marital Status",
+    "Date of Birth",
+    "Gender",
+    "Blood Type",
+    "Test_Field"
+   ],
+   "tabs": [
+    "Personal Details",
+    "Contact Details",
+    "Emergency Contacts",
+    "Dependents",
+    "Immigration",
+    "Job",
+    "Salary",
+    "Report-to",
+    "Qualifications",
+    "Memberships"
+   ],
+   "inputs": 9,
+   "selects": 3,
+   "textareas": 0,
+   "files": 0,
+   "dates": 2,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 1,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 1,
+   "pencil": 1,
+   "checkbox": 2,
+   "switches": 0,
+   "radios": 2,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/viewPersonalDetails/empNumber/7"
+  },
+  {
+   "module": "Performance",
+   "path": "Performance",
+   "headings": [
+    "Employee Reviews"
+   ],
+   "buttons": [
+    "Reset",
+    "Search"
+   ],
+   "labels": [
+    "Employee Name",
+    "Job Title",
+    "Sub Unit",
+    "Include",
+    "Review Status",
+    "From Date",
+    "To Date"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 4,
+   "textareas": 0,
+   "files": 0,
+   "dates": 2,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 4,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/performance/searchEvaluatePerformanceReview"
+  },
+  {
+   "module": "Dashboard",
+   "path": "Dashboard",
+   "headings": [],
+   "buttons": [],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index"
+  },
+  {
+   "module": "Directory",
+   "path": "Directory",
+   "headings": [
+    "Directory"
+   ],
+   "buttons": [
+    "Reset",
+    "Search"
+   ],
+   "labels": [
+    "Employee Name",
+    "Job Title",
+    "Location"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 2,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/directory/viewDirectory"
+  },
+  {
+   "module": "Maintenance",
+   "path": "Maintenance",
+   "headings": [
+    "Administrator Access"
+   ],
+   "buttons": [
+    "Cancel",
+    "Confirm"
+   ],
+   "labels": [
+    "Username",
+    "Password"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/maintenance/purgeEmployee"
+  },
+  {
+   "module": "Claim",
+   "path": "Claim",
+   "headings": [
+    "Employee Claims"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Assign Claim",
+    "View Details"
+   ],
+   "labels": [
+    "Employee Name",
+    "Reference Id",
+    "Event Name",
+    "Status",
+    "From Date",
+    "To Date",
+    "Include"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 3,
+   "textareas": 0,
+   "files": 0,
+   "dates": 2,
+   "autocompletes": 2,
+   "table": 1,
+   "rows": 4,
+   "pagination": 0,
+   "sortable": 5,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/claim/viewAssignClaim"
+  },
+  {
+   "module": "Buzz",
+   "path": "Buzz",
+   "headings": [],
+   "buttons": [
+    "Post",
+    "Share Photos",
+    "Share Video",
+    "Most Recent Posts",
+    "Most Liked Posts",
+    "Most Commented Posts"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 1,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/buzz/viewBuzz"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Job > Job Titles",
+   "headings": [
+    "Job Titles"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 26,
+   "pagination": 0,
+   "sortable": 1,
+   "trash": 26,
+   "pencil": 26,
+   "checkbox": 27,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewJobTitleList"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Job > Pay Grades",
+   "headings": [
+    "Pay Grades"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 6,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 6,
+   "pencil": 6,
+   "checkbox": 7,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewPayGrades"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Job > Employment Status",
+   "headings": [
+    "Employment Status"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 7,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 7,
+   "pencil": 7,
+   "checkbox": 8,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/employmentStatus"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Job > Job Categories",
+   "headings": [
+    "Job Categories"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 10,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 10,
+   "pencil": 10,
+   "checkbox": 11,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/jobCategory"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Job > Work Shifts",
+   "headings": [
+    "Work Shifts"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 2,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 2,
+   "pencil": 2,
+   "checkbox": 3,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/workShift"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Organization > General Information",
+   "headings": [
+    "General Information"
+   ],
+   "buttons": [],
+   "labels": [
+    "Organization Name",
+    "Number of Employees",
+    "Registration Number",
+    "Tax ID",
+    "Phone",
+    "Fax",
+    "Email",
+    "Address Street 1",
+    "Address Street 2",
+    "City",
+    "State/Province",
+    "Zip/Postal Code",
+    "Country",
+    "Notes"
+   ],
+   "tabs": [],
+   "inputs": 11,
+   "selects": 1,
+   "textareas": 1,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 1,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewOrganizationGeneralInformation"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Organization > Locations",
+   "headings": [
+    "Locations"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Name",
+    "City",
+    "Country"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 1,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 5,
+   "pagination": 0,
+   "sortable": 5,
+   "trash": 5,
+   "pencil": 5,
+   "checkbox": 6,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewLocations"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Organization > Structure",
+   "headings": [
+    "Organization Structure"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 1,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewCompanyStructure"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Qualifications > Skills",
+   "headings": [
+    "Skills"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 22,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 22,
+   "pencil": 22,
+   "checkbox": 23,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSkills"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Qualifications > Education",
+   "headings": [
+    "Education"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 5,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 5,
+   "pencil": 5,
+   "checkbox": 6,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewEducation"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Qualifications > Licenses",
+   "headings": [
+    "Licenses"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 8,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 8,
+   "pencil": 8,
+   "checkbox": 9,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewLicenses"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Qualifications > Languages",
+   "headings": [
+    "Languages"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 7,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 7,
+   "pencil": 7,
+   "checkbox": 8,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewLanguages"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Qualifications > Memberships",
+   "headings": [
+    "Memberships"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 5,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 5,
+   "pencil": 5,
+   "checkbox": 6,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/membership"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Nationalities",
+   "headings": [
+    "Nationalities"
+   ],
+   "buttons": [
+    "Add",
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 50,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 50,
+   "pencil": 50,
+   "checkbox": 51,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/nationality"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Corporate Branding",
+   "headings": [
+    "Corporate Branding"
+   ],
+   "buttons": [
+    "Reset to Default",
+    "Preview",
+    "Publish"
+   ],
+   "labels": [
+    "Primary Color",
+    "Secondary Color",
+    "Primary Font Color",
+    "Secondary Font Color",
+    "Primary Gradient Color 1",
+    "Primary Gradient Color 2",
+    "Client Logo",
+    "Client Banner",
+    "Login Banner"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 3,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 1,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/addTheme"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Configuration > Email Configuration",
+   "headings": [
+    "Email Configuration"
+   ],
+   "buttons": [
+    "Reset",
+    "Save"
+   ],
+   "labels": [
+    "Mail Sent As",
+    "Sending Method",
+    "Path to Sendmail"
+   ],
+   "tabs": [],
+   "inputs": 1,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 1,
+   "radios": 3,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/listMailConfiguration"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Configuration > Email Subscriptions",
+   "headings": [
+    "Email Subscriptions"
+   ],
+   "buttons": [],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 5,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 5,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewEmailNotification"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Configuration > Localization",
+   "headings": [
+    "Localization"
+   ],
+   "buttons": [
+    "Save"
+   ],
+   "labels": [
+    "Language",
+    "Date Format"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 2,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/localization"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Configuration > Language Packages",
+   "headings": [
+    "Language Packages"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 9,
+   "pagination": 0,
+   "sortable": 1,
+   "trash": 9,
+   "pencil": 0,
+   "checkbox": 10,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/languagePackage"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Configuration > Modules",
+   "headings": [
+    "Module Configuration"
+   ],
+   "buttons": [
+    "Save"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 11,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewModules"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Configuration > Social Media Authentication",
+   "headings": [
+    "Provider List"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 1,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/openIdProvider"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Configuration > Register OAuth Client",
+   "headings": [
+    "OAuth Client List"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 1,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 1,
+   "pencil": 1,
+   "checkbox": 2,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/registerOAuthClient"
+  },
+  {
+   "module": "Admin",
+   "path": "Admin > Configuration > LDAP Configuration",
+   "headings": [
+    "LDAP Configuration"
+   ],
+   "buttons": [
+    "Test Connection",
+    "Save"
+   ],
+   "labels": [
+    "Host",
+    "Port",
+    "Encryption",
+    "LDAP Implementation",
+    "Distinguished Name",
+    "Password",
+    "Base Distinguished Name",
+    "Search Scope",
+    "User Name Attribute",
+    "User Search Filter",
+    "User Unique ID Attribute",
+    "Sync Interval (in Hours)"
+   ],
+   "tabs": [],
+   "inputs": 15,
+   "selects": 3,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 5,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/ldapConfiguration"
+  },
+  {
+   "module": "PIM",
+   "path": "PIM > Configuration > Optional Fields",
+   "headings": [
+    "Optional Fields",
+    "Show Deprecated Fields",
+    "Country Specific Information"
+   ],
+   "buttons": [
+    "Save"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 4,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/configurePim"
+  },
+  {
+   "module": "PIM",
+   "path": "PIM > Configuration > Custom Fields",
+   "headings": [
+    "Custom Fields"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 2,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 2,
+   "pencil": 2,
+   "checkbox": 3,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/listCustomFields"
+  },
+  {
+   "module": "PIM",
+   "path": "PIM > Configuration > Data Import",
+   "headings": [
+    "Data Import"
+   ],
+   "buttons": [
+    "Upload"
+   ],
+   "labels": [
+    "Select File"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 1,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/pimCsvImport"
+  },
+  {
+   "module": "PIM",
+   "path": "PIM > Configuration > Reporting Methods",
+   "headings": [
+    "Reporting Methods"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 3,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 3,
+   "pencil": 3,
+   "checkbox": 4,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/viewReportingMethods"
+  },
+  {
+   "module": "PIM",
+   "path": "PIM > Configuration > Termination Reasons",
+   "headings": [
+    "Termination Reasons"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 11,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 11,
+   "pencil": 11,
+   "checkbox": 12,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/viewTerminationReasons"
+  },
+  {
+   "module": "PIM",
+   "path": "PIM > Add Employee",
+   "headings": [
+    "Add Employee"
+   ],
+   "buttons": [
+    "Cancel",
+    "Save"
+   ],
+   "labels": [
+    "Employee Full Name",
+    "Employee Id"
+   ],
+   "tabs": [],
+   "inputs": 4,
+   "selects": 0,
+   "textareas": 0,
+   "files": 1,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 1,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/addEmployee"
+  },
+  {
+   "module": "PIM",
+   "path": "PIM > Reports",
+   "headings": [
+    "Employee Reports"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Report Name"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 4,
+   "pagination": 0,
+   "sortable": 1,
+   "trash": 4,
+   "pencil": 4,
+   "checkbox": 5,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/viewDefinedPredefinedReports"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Apply",
+   "headings": [
+    "Apply Leave"
+   ],
+   "buttons": [],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/applyLeave"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > My Leave",
+   "headings": [
+    "My Leave List"
+   ],
+   "buttons": [
+    "Reset",
+    "Search"
+   ],
+   "labels": [
+    "From Date",
+    "To Date",
+    "Show Leave with Status",
+    "Leave Type"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 2,
+   "textareas": 0,
+   "files": 0,
+   "dates": 2,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 1,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/viewMyLeaveList"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Entitlements > Add Entitlements",
+   "headings": [
+    "Add Leave Entitlement"
+   ],
+   "buttons": [
+    "Cancel",
+    "Save"
+   ],
+   "labels": [
+    "Add to",
+    "Employee Name",
+    "Leave Type",
+    "Leave Period",
+    "Entitlement"
+   ],
+   "tabs": [],
+   "inputs": 1,
+   "selects": 2,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 2,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/addLeaveEntitlement"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Entitlements > Employee Entitlements",
+   "headings": [
+    "Leave Entitlements"
+   ],
+   "buttons": [
+    "Search"
+   ],
+   "labels": [
+    "Employee Name",
+    "Leave Type",
+    "Leave Period"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 2,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/viewLeaveEntitlements"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Entitlements > My Entitlements",
+   "headings": [
+    "My Leave Entitlements"
+   ],
+   "buttons": [
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Leave Type",
+    "Leave Period"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 2,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 1,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/viewMyLeaveEntitlements"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Reports > Leave Entitlements and Usage Report",
+   "headings": [
+    "Leave Entitlements and Usage Report"
+   ],
+   "buttons": [
+    "Generate"
+   ],
+   "labels": [
+    "Generate For",
+    "Leave Type",
+    "Leave Period",
+    "Location",
+    "Sub Unit",
+    "Job Title"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 5,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 1,
+   "radios": 2,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/viewLeaveBalanceReport"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Reports > My Leave Entitlements and Usage Report",
+   "headings": [
+    "My Leave Entitlements and Usage Report"
+   ],
+   "buttons": [
+    "Generate"
+   ],
+   "labels": [
+    "Leave Period"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 1,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/viewMyLeaveBalanceReport"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Configure > Leave Period",
+   "headings": [
+    "Leave Period"
+   ],
+   "buttons": [
+    "Reset",
+    "Save"
+   ],
+   "labels": [
+    "Start Month",
+    "Start Date",
+    "End Date",
+    "Current Leave Period"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 2,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/defineLeavePeriod"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Configure > Leave Types",
+   "headings": [
+    "Leave Types"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 20,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 20,
+   "pencil": 20,
+   "checkbox": 21,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/leaveTypeList"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Configure > Work Week",
+   "headings": [
+    "Work Week"
+   ],
+   "buttons": [
+    "Save"
+   ],
+   "labels": [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 7,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/defineWorkWeek"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Configure > Holidays",
+   "headings": [
+    "Holidays"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "From",
+    "To"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 2,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 16,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 16,
+   "pencil": 16,
+   "checkbox": 17,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/viewHolidayList"
+  },
+  {
+   "module": "Leave",
+   "path": "Leave > Assign Leave",
+   "headings": [
+    "Assign Leave"
+   ],
+   "buttons": [
+    "Assign"
+   ],
+   "labels": [
+    "Employee Name",
+    "Leave Type",
+    "Leave Balance",
+    "From Date",
+    "To Date",
+    "Comments"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 1,
+   "textareas": 1,
+   "files": 0,
+   "dates": 2,
+   "autocompletes": 1,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/assignLeave"
+  },
+  {
+   "module": "Time",
+   "path": "Time > Timesheets > My Timesheets",
+   "headings": [
+    "My Timesheet"
+   ],
+   "buttons": [
+    "Edit",
+    "Submit"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 1,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 1,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/time/viewMyTimesheet"
+  },
+  {
+   "module": "Time",
+   "path": "Time > Attendance > My Records",
+   "headings": [
+    "My Attendance Records"
+   ],
+   "buttons": [
+    "View"
+   ],
+   "labels": [
+    "Date"
+   ],
+   "tabs": [],
+   "inputs": 1,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 1,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 1,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 1,
+   "pencil": 1,
+   "checkbox": 2,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/attendance/viewMyAttendanceRecord"
+  },
+  {
+   "module": "Time",
+   "path": "Time > Attendance > Punch In/Out",
+   "headings": [
+    "Punch In"
+   ],
+   "buttons": [
+    "In"
+   ],
+   "labels": [
+    "Date",
+    "Time",
+    "Note"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 0,
+   "textareas": 1,
+   "files": 0,
+   "dates": 1,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/attendance/punchIn"
+  },
+  {
+   "module": "Time",
+   "path": "Time > Attendance > Employee Records",
+   "headings": [
+    "Employee Attendance Records"
+   ],
+   "buttons": [
+    "View",
+    "1",
+    "2",
+    "3"
+   ],
+   "labels": [
+    "Employee Name",
+    "Date"
+   ],
+   "tabs": [],
+   "inputs": 1,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 1,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 50,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/attendance/viewAttendanceRecord"
+  },
+  {
+   "module": "Time",
+   "path": "Time > Attendance > Configuration",
+   "headings": [
+    "Attendance Configuration"
+   ],
+   "buttons": [
+    "Save"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 3,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/attendance/configure"
+  },
+  {
+   "module": "Time",
+   "path": "Time > Reports > Project Reports",
+   "headings": [
+    "Project Report"
+   ],
+   "buttons": [
+    "View"
+   ],
+   "labels": [
+    "Project Name",
+    "Project Date Range"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 1,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/time/displayProjectReportCriteria"
+  },
+  {
+   "module": "Time",
+   "path": "Time > Reports > Employee Reports",
+   "headings": [
+    "Employee Report"
+   ],
+   "buttons": [
+    "View"
+   ],
+   "labels": [
+    "Employee Name",
+    "Project Name",
+    "Activity Name",
+    "Project Date Range"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 1,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 2,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 1,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/time/displayEmployeeReportCriteria"
+  },
+  {
+   "module": "Time",
+   "path": "Time > Reports > Attendance Summary",
+   "headings": [
+    "Attendance Total Summary Report"
+   ],
+   "buttons": [
+    "View"
+   ],
+   "labels": [
+    "Employee Name",
+    "Job Title",
+    "Sub Unit",
+    "Employment Status",
+    "Date Range"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 3,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/time/displayAttendanceSummaryReportCriteria"
+  },
+  {
+   "module": "Time",
+   "path": "Time > Project Info > Customers",
+   "headings": [
+    "Customers"
+   ],
+   "buttons": [
+    "Add"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 23,
+   "pagination": 0,
+   "sortable": 1,
+   "trash": 23,
+   "pencil": 23,
+   "checkbox": 24,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/time/viewCustomers"
+  },
+  {
+   "module": "Time",
+   "path": "Time > Project Info > Projects",
+   "headings": [
+    "Projects"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Customer Name",
+    "Project",
+    "Project Admin"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 3,
+   "table": 1,
+   "rows": 16,
+   "pagination": 0,
+   "sortable": 2,
+   "trash": 16,
+   "pencil": 16,
+   "checkbox": 17,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/time/viewProjects"
+  },
+  {
+   "module": "Recruitment",
+   "path": "Recruitment > Vacancies",
+   "headings": [
+    "Vacancies"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Job Title",
+    "Vacancy",
+    "Hiring Manager",
+    "Status"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 4,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 7,
+   "pagination": 0,
+   "sortable": 4,
+   "trash": 7,
+   "pencil": 7,
+   "checkbox": 8,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/recruitment/viewJobVacancy"
+  },
+  {
+   "module": "Performance",
+   "path": "Performance > Configure > KPIs",
+   "headings": [
+    "Key Performance Indicators for Job Title"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add",
+    "1",
+    "2"
+   ],
+   "labels": [
+    "Job Title"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 1,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 50,
+   "pagination": 0,
+   "sortable": 2,
+   "trash": 45,
+   "pencil": 50,
+   "checkbox": 51,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/performance/searchKpi"
+  },
+  {
+   "module": "Performance",
+   "path": "Performance > Configure > Trackers",
+   "headings": [
+    "Performance Trackers"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Employee Name"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 1,
+   "pagination": 0,
+   "sortable": 4,
+   "trash": 1,
+   "pencil": 1,
+   "checkbox": 2,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/performance/viewPerformanceTracker"
+  },
+  {
+   "module": "Performance",
+   "path": "Performance > Manage Reviews > Manage Reviews",
+   "headings": [
+    "Manage Performance Reviews"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Employee Name",
+    "Job Title",
+    "Review Status",
+    "Include",
+    "Reviewer",
+    "From Date",
+    "To Date"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 3,
+   "textareas": 0,
+   "files": 0,
+   "dates": 2,
+   "autocompletes": 2,
+   "table": 1,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 6,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 1,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/performance/searchPerformanceReview"
+  },
+  {
+   "module": "Performance",
+   "path": "Performance > Manage Reviews > My Reviews",
+   "headings": [
+    "My Reviews"
+   ],
+   "buttons": [],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 1,
+   "pagination": 0,
+   "sortable": 4,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/performance/myPerformanceReview"
+  },
+  {
+   "module": "Performance",
+   "path": "Performance > My Trackers",
+   "headings": [
+    "My Performance Trackers"
+   ],
+   "buttons": [
+    "View"
+   ],
+   "labels": [],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 0,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 1,
+   "rows": 1,
+   "pagination": 0,
+   "sortable": 3,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/performance/viewMyPerformanceTrackerList"
+  },
+  {
+   "module": "Performance",
+   "path": "Performance > Employee Trackers",
+   "headings": [
+    "Employee Performance Trackers"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "View"
+   ],
+   "labels": [
+    "Employee Name",
+    "Include"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 1,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 1,
+   "pagination": 0,
+   "sortable": 4,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/performance/viewEmployeePerformanceTrackerList"
+  },
+  {
+   "module": "Claim",
+   "path": "Claim > Configuration > Events",
+   "headings": [
+    "Events"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Event Name",
+    "Status"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 1,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 13,
+   "pagination": 0,
+   "sortable": 2,
+   "trash": 13,
+   "pencil": 13,
+   "checkbox": 14,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/claim/viewEvents"
+  },
+  {
+   "module": "Claim",
+   "path": "Claim > Configuration > Expense Types",
+   "headings": [
+    "Expense Types"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Add"
+   ],
+   "labels": [
+    "Name",
+    "Status"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 1,
+   "textareas": 0,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 5,
+   "pagination": 0,
+   "sortable": 2,
+   "trash": 5,
+   "pencil": 5,
+   "checkbox": 6,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/claim/viewExpense"
+  },
+  {
+   "module": "Claim",
+   "path": "Claim > Submit Claim",
+   "headings": [
+    "Create Claim Request"
+   ],
+   "buttons": [
+    "Cancel",
+    "Create"
+   ],
+   "labels": [
+    "Event",
+    "Currency",
+    "Remarks"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 2,
+   "textareas": 1,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 0,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/claim/submitClaim"
+  },
+  {
+   "module": "Claim",
+   "path": "Claim > My Claims",
+   "headings": [
+    "My Claims"
+   ],
+   "buttons": [
+    "Reset",
+    "Search",
+    "Submit Claim",
+    "View Details"
+   ],
+   "labels": [
+    "Reference Id",
+    "Event Name",
+    "Status",
+    "From Date",
+    "To Date"
+   ],
+   "tabs": [],
+   "inputs": 2,
+   "selects": 2,
+   "textareas": 0,
+   "files": 0,
+   "dates": 2,
+   "autocompletes": 1,
+   "table": 1,
+   "rows": 4,
+   "pagination": 0,
+   "sortable": 4,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/claim/viewClaim"
+  },
+  {
+   "module": "Claim",
+   "path": "Claim > Assign Claim",
+   "headings": [
+    "Create Claim Request"
+   ],
+   "buttons": [
+    "Cancel",
+    "Create"
+   ],
+   "labels": [
+    "Employee Name",
+    "Event",
+    "Currency",
+    "Remarks"
+   ],
+   "tabs": [],
+   "inputs": 0,
+   "selects": 2,
+   "textareas": 1,
+   "files": 0,
+   "dates": 0,
+   "autocompletes": 1,
+   "table": 0,
+   "rows": 0,
+   "pagination": 0,
+   "sortable": 0,
+   "trash": 0,
+   "pencil": 0,
+   "checkbox": 0,
+   "switches": 0,
+   "radios": 0,
+   "url": "https://opensource-demo.orangehrmlive.com/web/index.php/claim/assignClaim"
+  }
+ ]
+}

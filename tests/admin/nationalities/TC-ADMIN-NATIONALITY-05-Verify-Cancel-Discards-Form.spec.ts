@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-NATIONALITY-05: clicking Cancel discards the Add Nationality form', async ({
@@ -40,7 +40,7 @@ test('TC-ADMIN-NATIONALITY-05: clicking Cancel discards the Add Nationality form
   report.check('Kembali ke list Nationalities', page.url().toLowerCase().includes('nationalit'));
   report.check(
     `Nationality "${name}" TIDAK muncul di list`,
-    !(await adminNationalitiesPage.rowByName(name).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminNationalitiesPage.rowByName(name).first(), 3_000),
   );
 
   report.print();

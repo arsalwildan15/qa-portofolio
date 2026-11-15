@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR, fillDate } from '../utils/dateInput';
 
 export class JobPage extends BasePage {
   readonly joinedDateInput: Locator;
@@ -17,7 +18,7 @@ export class JobPage extends BasePage {
     super(page);
     const selectByLabel = (label: string) =>
       page.locator('.oxd-input-group', { has: page.getByText(label, { exact: true }) }).locator('.oxd-select-text');
-    this.joinedDateInput = page.locator('input[placeholder="yyyy-dd-mm"]').first();
+    this.joinedDateInput = page.locator(DATE_INPUT_SELECTOR).first();
     this.jobTitleSelect = selectByLabel('Job Title');
     this.jobCategorySelect = selectByLabel('Job Category');
     this.subUnitSelect = selectByLabel('Sub Unit');
@@ -59,7 +60,9 @@ export class JobPage extends BasePage {
   async terminateEmployment(terminationDate: string, reasonText: string, note = ''): Promise<import('@playwright/test').Response | null> {
     await this.terminateButton.click();
     const dialog = this.page.getByRole('dialog');
-    await dialog.getByPlaceholder('yyyy-dd-mm').fill(terminationDate);
+    // terminationDate is written yyyy-dd-mm (suite convention); fillDate converts it to the
+    // format the demo currently displays (the global format drifts -- see dateInput.ts).
+    await fillDate(dialog.locator(DATE_INPUT_SELECTOR), terminationDate, 'yyyy-dd-mm');
     await dialog.locator('.oxd-select-text').click();
     const option = this.page.getByRole('option').filter({ hasText: reasonText }).first();
     await option.waitFor({ state: 'visible' });

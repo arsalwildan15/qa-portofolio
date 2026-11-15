@@ -21,6 +21,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { uniqueEmployeeName } from '../../../src/data/testData';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-JOB-03: valid joined date is saved successfully', async ({
   page,
@@ -42,7 +43,7 @@ test('TC-PIM-JOB-03: valid joined date is saved successfully', async ({
   await jobPage.goto(empNumber);
 
   report.step('Fill Joined Date = "2020-15-06" (format yyyy-dd-mm valid), klik Save');
-  await jobPage.joinedDateInput.fill('2020-15-06');
+  await fillDate(jobPage.joinedDateInput, '2020-15-06', 'yyyy-dd-mm');
   const [resp] = await Promise.all([
     page.waitForResponse((r) => r.url().includes('/job-details') && r.request().method() === 'PUT'),
     jobPage.save(),

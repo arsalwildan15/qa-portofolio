@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-RECRUITMENT-VACANCY-01: adding a vacancy with valid data succeeds', async ({
@@ -50,7 +50,7 @@ test('TC-RECRUITMENT-VACANCY-01: adding a vacancy with valid data succeeds', asy
   await page.waitForTimeout(1200);
   report.check(
     `Vacancy "${vacancyName}" muncul di list`,
-    await vacanciesPage.rowByName(vacancyName).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(vacanciesPage.rowByName(vacancyName).first(), 5_000),
   );
 
   report.print();

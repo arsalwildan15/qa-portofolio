@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR } from '../utils/dateInput';
 
 export class ImmigrationPage extends BasePage {
   readonly addButton: Locator;
@@ -32,7 +33,7 @@ export class ImmigrationPage extends BasePage {
     this.numberInput = page
       .locator('.oxd-input-group', { has: page.getByText('Number', { exact: true }) })
       .locator('input');
-    const dateInputs = page.locator('input[placeholder="yyyy-dd-mm"]');
+    const dateInputs = page.locator(DATE_INPUT_SELECTOR);
     this.issuedDateInput = dateInputs.nth(0);
     this.expiryDateInput = dateInputs.nth(1);
     this.eligibleReviewDateInput = dateInputs.nth(2);

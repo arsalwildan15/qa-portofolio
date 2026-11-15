@@ -1,5 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR } from '../utils/dateInput';
+import { ensureVacancyWithHiringManager } from '../utils/ensureVacancy';
 
 export class CandidatesPage extends BasePage {
   readonly addButton: Locator;
@@ -81,7 +83,7 @@ export class CandidatesPage extends BasePage {
     // triggers a "Searching...." placeholder option before real results
     // appear (see selectFirstInterviewer()).
     this.interviewerInput = page.getByPlaceholder('Type for hints...');
-    this.interviewDateInput = page.locator('input[placeholder="yyyy-dd-mm"]').first();
+    this.interviewDateInput = page.locator(DATE_INPUT_SELECTOR).first();
 
     this.historyRows = page.locator('.oxd-table-card');
 
@@ -113,7 +115,13 @@ export class CandidatesPage extends BasePage {
     await this.page.goto('/web/index.php/recruitment/viewCandidates');
   }
 
+  /**
+   * The Vacancy dropdown is populated when this page loads, so the "at least one usable vacancy"
+   * precondition is enforced BEFORE navigating (see ensureVacancyWithHiringManager: the shared
+   * demo was seen with zero vacancies on 2026-11-15).
+   */
   async gotoAddForm(): Promise<void> {
+    await ensureVacancyWithHiringManager(this.page);
     await this.page.goto('/web/index.php/recruitment/addCandidate');
   }
 
@@ -151,9 +159,8 @@ export class CandidatesPage extends BasePage {
    * trials -- and the dropdown's first option ("Junior Account Assistant") happens to be exactly
    * such a vacancy, which is why every status-workflow TC using selectFirstVacancy() hit this
    * bug. Queries the vacancies API directly (dynamic, not a hardcoded vacancy name) to find one
-   * with a hiring manager, then selects it by name in the UI dropdown. Falls back to
-   * selectFirstVacancy() if no such vacancy is found (keeps tests runnable, though they'll still
-   * hit BG-007 in that case).
+   * with a hiring manager, then selects it by name in the UI dropdown. gotoAddForm() guarantees
+   * one exists (ensureVacancy.ts), so the selectFirstVacancy() fallback is only a last resort.
    */
   async selectVacancyWithHiringManager(): Promise<string> {
     const listResp = await this.page.request.get('/web/index.php/api/v2/recruitment/vacancies?limit=50&offset=0&status=true');

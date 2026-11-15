@@ -20,6 +20,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-DEPENDENT-04: XSS payload in Name is not executed', async ({
   page,
@@ -44,7 +45,7 @@ test('TC-PIM-DEPENDENT-04: XSS payload in Name is not executed', async ({
   await dependentsPage.nameInput.waitFor({ state: 'visible' });
   await dependentsPage.nameInput.fill("<script>alert('xss')</script>");
   await dependentsPage.selectDropdownOption(dependentsPage.relationshipSelect, 'Child');
-  await dependentsPage.dateOfBirthInput.fill('2015-10-05');
+  await fillDate(dependentsPage.dateOfBirthInput, '2015-10-05', 'yyyy-dd-mm');
   await dependentsPage.save();
   await page.reload();
   await page.waitForTimeout(1500);

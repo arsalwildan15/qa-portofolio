@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-EMPSTATUS-03: a SQL injection payload in Employment Status Name does not break the app', async ({
@@ -44,7 +44,7 @@ test('TC-ADMIN-EMPSTATUS-03: a SQL injection payload in Employment Status Name d
   report.step('Verify: list masih berfungsi normal setelah payload (tidak ada server error)');
   await adminEmploymentStatusPage.goto();
   await page.waitForTimeout(3000);
-  const listStillWorks = await adminEmploymentStatusPage.tableRows.first().isVisible({ timeout: 10_000 }).catch(() => false);
+  const listStillWorks = await isVisibleWithWait(adminEmploymentStatusPage.tableRows.first(), 10_000);
   report.check('List Employment Status masih berfungsi normal setelah payload SQLi', listStillWorks, `postStatus=${resp?.status() ?? 'tidak ada'}`);
 
   report.print();

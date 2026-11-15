@@ -22,6 +22,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueEmployeeName } from '../../../src/data/testData';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-PD-09: Date of Birth 150 years ago is handled', async ({
   page,
@@ -40,7 +41,7 @@ test('TC-PIM-PD-09: Date of Birth 150 years ago is handled', async ({
   await personalDetailsPage.waitUntilLoaded();
 
   report.step(`Fill Date of Birth = "${extremeYear}-15-06" (150 tahun lalu)`);
-  await personalDetailsPage.dateOfBirthInput.fill(`${extremeYear}-15-06`);
+  await fillDate(personalDetailsPage.dateOfBirthInput, `${extremeYear}-15-06`, 'yyyy-dd-mm');
   await personalDetailsPage.save();
 
   report.step('Verify apakah ada validasi usia masuk akal, atau diterima tanpa batas');

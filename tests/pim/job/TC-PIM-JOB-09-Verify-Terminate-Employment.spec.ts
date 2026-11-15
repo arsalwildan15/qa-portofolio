@@ -46,7 +46,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
 
 test('TC-PIM-JOB-09: terminating an employee submits the termination and flips the button to Activate', async ({
@@ -89,7 +89,7 @@ test('TC-PIM-JOB-09: terminating an employee submits the termination and flips t
   await page.waitForLoadState('networkidle').catch(() => {});
   report.check(
     'Tombol "Activate Employment" terlihat setelah reload (toggle state berhasil)',
-    await jobPage.activateButton.isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(jobPage.activateButton, 5_000),
   );
   report.check(
     'Tombol "Terminate Employment" TIDAK terlihat lagi',

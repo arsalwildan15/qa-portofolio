@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-LOCATION-08: deleting a freshly-created location removes it from the list', async ({
@@ -56,7 +56,7 @@ test('TC-ADMIN-LOCATION-08: deleting a freshly-created location removes it from 
   await page.waitForTimeout(1000);
   report.check(
     `Location "${locationName}" TIDAK lagi muncul di list`,
-    !(await adminLocationsPage.rowByName(locationName).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminLocationsPage.rowByName(locationName).first(), 3_000),
   );
 
   report.print();

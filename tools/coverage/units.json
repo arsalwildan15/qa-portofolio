@@ -1,0 +1,1404 @@
+[
+ {
+  "path": "Admin > User Management > Users",
+  "url": "admin/viewSystemUsers",
+  "traits": {
+   "table": 1,
+   "inputs": 1,
+   "files": 0,
+   "dates": 0,
+   "trash": 1,
+   "pencil": 1,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 2
+  },
+  "id": "U001"
+ },
+ {
+  "path": "PIM > Employee List",
+  "url": "pim/viewEmployeeList",
+  "traits": {
+   "table": 1,
+   "inputs": 1,
+   "files": 0,
+   "dates": 0,
+   "trash": 49,
+   "pencil": 50,
+   "autocompletes": 2,
+   "textareas": 0,
+   "selects": 4
+  },
+  "id": "U002"
+ },
+ {
+  "path": "Leave > Leave List",
+  "url": "leave/viewLeaveList",
+  "traits": {
+   "table": 1,
+   "inputs": 2,
+   "files": 0,
+   "dates": 2,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 3
+  },
+  "id": "U003"
+ },
+ {
+  "path": "Time > Timesheets > Employee Timesheets",
+  "url": "time/viewEmployeeTimesheet",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U004"
+ },
+ {
+  "path": "Recruitment > Candidates",
+  "url": "recruitment/viewCandidates",
+  "traits": {
+   "table": 1,
+   "inputs": 3,
+   "files": 0,
+   "dates": 0,
+   "trash": 5,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 5
+  },
+  "id": "U005"
+ },
+ {
+  "path": "My Info > Personal Details",
+  "url": "pim/viewPersonalDetails/empNumber/7",
+  "traits": {
+   "table": 1,
+   "inputs": 9,
+   "files": 0,
+   "dates": 2,
+   "trash": 1,
+   "pencil": 1,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 3
+  },
+  "id": "U006"
+ },
+ {
+  "path": "Performance > Manage Reviews > Employee Reviews",
+  "url": "performance/searchEvaluatePerformanceReview",
+  "traits": {
+   "table": 1,
+   "inputs": 2,
+   "files": 0,
+   "dates": 2,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 4
+  },
+  "id": "U007"
+ },
+ {
+  "path": "Dashboard",
+  "url": "dashboard/index",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U008"
+ },
+ {
+  "path": "Directory",
+  "url": "directory/viewDirectory",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 2
+  },
+  "id": "U009"
+ },
+ {
+  "path": "Maintenance > Purge Records > Employee Records",
+  "url": "maintenance/purgeEmployee",
+  "traits": {
+   "table": 0,
+   "inputs": 2,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U010"
+ },
+ {
+  "path": "Claim > Employee Claims",
+  "url": "claim/viewAssignClaim",
+  "traits": {
+   "table": 1,
+   "inputs": 2,
+   "files": 0,
+   "dates": 2,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 2,
+   "textareas": 0,
+   "selects": 3
+  },
+  "id": "U011"
+ },
+ {
+  "path": "Buzz",
+  "url": "buzz/viewBuzz",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 1,
+   "selects": 0
+  },
+  "id": "U012"
+ },
+ {
+  "path": "Admin > Job > Job Titles",
+  "url": "admin/viewJobTitleList",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 26,
+   "pencil": 26,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U013"
+ },
+ {
+  "path": "Admin > Job > Pay Grades",
+  "url": "admin/viewPayGrades",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 6,
+   "pencil": 6,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U014"
+ },
+ {
+  "path": "Admin > Job > Employment Status",
+  "url": "admin/employmentStatus",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 7,
+   "pencil": 7,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U015"
+ },
+ {
+  "path": "Admin > Job > Job Categories",
+  "url": "admin/jobCategory",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 10,
+   "pencil": 10,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U016"
+ },
+ {
+  "path": "Admin > Job > Work Shifts",
+  "url": "admin/workShift",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 2,
+   "pencil": 2,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U017"
+ },
+ {
+  "path": "Admin > Organization > General Information",
+  "url": "admin/viewOrganizationGeneralInformation",
+  "traits": {
+   "table": 0,
+   "inputs": 11,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 1,
+   "selects": 1
+  },
+  "id": "U018"
+ },
+ {
+  "path": "Admin > Organization > Locations",
+  "url": "admin/viewLocations",
+  "traits": {
+   "table": 1,
+   "inputs": 2,
+   "files": 0,
+   "dates": 0,
+   "trash": 5,
+   "pencil": 5,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 1
+  },
+  "id": "U019"
+ },
+ {
+  "path": "Admin > Organization > Structure",
+  "url": "admin/viewCompanyStructure",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U020"
+ },
+ {
+  "path": "Admin > Qualifications > Skills",
+  "url": "admin/viewSkills",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 22,
+   "pencil": 22,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U021"
+ },
+ {
+  "path": "Admin > Qualifications > Education",
+  "url": "admin/viewEducation",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 5,
+   "pencil": 5,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U022"
+ },
+ {
+  "path": "Admin > Qualifications > Licenses",
+  "url": "admin/viewLicenses",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 8,
+   "pencil": 8,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U023"
+ },
+ {
+  "path": "Admin > Qualifications > Languages",
+  "url": "admin/viewLanguages",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 7,
+   "pencil": 7,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U024"
+ },
+ {
+  "path": "Admin > Qualifications > Memberships",
+  "url": "admin/membership",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 5,
+   "pencil": 5,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U025"
+ },
+ {
+  "path": "Admin > Nationalities",
+  "url": "admin/nationality",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 50,
+   "pencil": 50,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U026"
+ },
+ {
+  "path": "Admin > Corporate Branding",
+  "url": "admin/addTheme",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 3,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U027"
+ },
+ {
+  "path": "Admin > Configuration > Email Configuration",
+  "url": "admin/listMailConfiguration",
+  "traits": {
+   "table": 0,
+   "inputs": 1,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U028"
+ },
+ {
+  "path": "Admin > Configuration > Email Subscriptions",
+  "url": "admin/viewEmailNotification",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U029"
+ },
+ {
+  "path": "Admin > Configuration > Localization",
+  "url": "admin/localization",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 2
+  },
+  "id": "U030"
+ },
+ {
+  "path": "Admin > Configuration > Language Packages",
+  "url": "admin/languagePackage",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 9,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U031"
+ },
+ {
+  "path": "Admin > Configuration > Modules",
+  "url": "admin/viewModules",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U032"
+ },
+ {
+  "path": "Admin > Configuration > Social Media Authentication",
+  "url": "admin/openIdProvider",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U033"
+ },
+ {
+  "path": "Admin > Configuration > Register OAuth Client",
+  "url": "admin/registerOAuthClient",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 1,
+   "pencil": 1,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U034"
+ },
+ {
+  "path": "Admin > Configuration > LDAP Configuration",
+  "url": "admin/ldapConfiguration",
+  "traits": {
+   "table": 0,
+   "inputs": 15,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 3
+  },
+  "id": "U035"
+ },
+ {
+  "path": "PIM > Configuration > Optional Fields",
+  "url": "pim/configurePim",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U036"
+ },
+ {
+  "path": "PIM > Configuration > Custom Fields",
+  "url": "pim/listCustomFields",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 2,
+   "pencil": 2,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U037"
+ },
+ {
+  "path": "PIM > Configuration > Data Import",
+  "url": "pim/pimCsvImport",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 1,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U038"
+ },
+ {
+  "path": "PIM > Configuration > Reporting Methods",
+  "url": "pim/viewReportingMethods",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 3,
+   "pencil": 3,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U039"
+ },
+ {
+  "path": "PIM > Configuration > Termination Reasons",
+  "url": "pim/viewTerminationReasons",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 11,
+   "pencil": 11,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U040"
+ },
+ {
+  "path": "PIM > Add Employee",
+  "url": "pim/addEmployee",
+  "traits": {
+   "table": 0,
+   "inputs": 4,
+   "files": 1,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U041"
+ },
+ {
+  "path": "PIM > Reports",
+  "url": "pim/viewDefinedPredefinedReports",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 4,
+   "pencil": 4,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U042"
+ },
+ {
+  "path": "Leave > Apply",
+  "url": "leave/applyLeave",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U043"
+ },
+ {
+  "path": "Leave > My Leave",
+  "url": "leave/viewMyLeaveList",
+  "traits": {
+   "table": 1,
+   "inputs": 2,
+   "files": 0,
+   "dates": 2,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 2
+  },
+  "id": "U044"
+ },
+ {
+  "path": "Leave > Entitlements > Add Entitlements",
+  "url": "leave/addLeaveEntitlement",
+  "traits": {
+   "table": 0,
+   "inputs": 1,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 2
+  },
+  "id": "U045"
+ },
+ {
+  "path": "Leave > Entitlements > Employee Entitlements",
+  "url": "leave/viewLeaveEntitlements",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 2
+  },
+  "id": "U046"
+ },
+ {
+  "path": "Leave > Entitlements > My Entitlements",
+  "url": "leave/viewMyLeaveEntitlements",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 2
+  },
+  "id": "U047"
+ },
+ {
+  "path": "Leave > Reports > Leave Entitlements and Usage Report",
+  "url": "leave/viewLeaveBalanceReport",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 5
+  },
+  "id": "U048"
+ },
+ {
+  "path": "Leave > Reports > My Leave Entitlements and Usage Report",
+  "url": "leave/viewMyLeaveBalanceReport",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 1
+  },
+  "id": "U049"
+ },
+ {
+  "path": "Leave > Configure > Leave Period",
+  "url": "leave/defineLeavePeriod",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 2
+  },
+  "id": "U050"
+ },
+ {
+  "path": "Leave > Configure > Leave Types",
+  "url": "leave/leaveTypeList",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 20,
+   "pencil": 20,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U051"
+ },
+ {
+  "path": "Leave > Configure > Work Week",
+  "url": "leave/defineWorkWeek",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 7
+  },
+  "id": "U052"
+ },
+ {
+  "path": "Leave > Configure > Holidays",
+  "url": "leave/viewHolidayList",
+  "traits": {
+   "table": 1,
+   "inputs": 2,
+   "files": 0,
+   "dates": 2,
+   "trash": 16,
+   "pencil": 16,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U053"
+ },
+ {
+  "path": "Leave > Assign Leave",
+  "url": "leave/assignLeave",
+  "traits": {
+   "table": 0,
+   "inputs": 2,
+   "files": 0,
+   "dates": 2,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 1,
+   "selects": 1
+  },
+  "id": "U054"
+ },
+ {
+  "path": "Time > Timesheets > My Timesheets",
+  "url": "time/viewMyTimesheet",
+  "traits": {
+   "table": 0,
+   "inputs": 1,
+   "files": 0,
+   "dates": 1,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U055"
+ },
+ {
+  "path": "Time > Attendance > My Records",
+  "url": "attendance/viewMyAttendanceRecord",
+  "traits": {
+   "table": 1,
+   "inputs": 1,
+   "files": 0,
+   "dates": 1,
+   "trash": 1,
+   "pencil": 1,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U056"
+ },
+ {
+  "path": "Time > Attendance > Punch In/Out",
+  "url": "attendance/punchIn",
+  "traits": {
+   "table": 0,
+   "inputs": 2,
+   "files": 0,
+   "dates": 1,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 1,
+   "selects": 0
+  },
+  "id": "U057"
+ },
+ {
+  "path": "Time > Attendance > Employee Records",
+  "url": "attendance/viewAttendanceRecord",
+  "traits": {
+   "table": 1,
+   "inputs": 1,
+   "files": 0,
+   "dates": 1,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U058"
+ },
+ {
+  "path": "Time > Attendance > Configuration",
+  "url": "attendance/configure",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U059"
+ },
+ {
+  "path": "Time > Reports > Project Reports",
+  "url": "time/displayProjectReportCriteria",
+  "traits": {
+   "table": 0,
+   "inputs": 2,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U060"
+ },
+ {
+  "path": "Time > Reports > Employee Reports",
+  "url": "time/displayEmployeeReportCriteria",
+  "traits": {
+   "table": 0,
+   "inputs": 2,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 2,
+   "textareas": 0,
+   "selects": 1
+  },
+  "id": "U061"
+ },
+ {
+  "path": "Time > Reports > Attendance Summary",
+  "url": "time/displayAttendanceSummaryReportCriteria",
+  "traits": {
+   "table": 0,
+   "inputs": 2,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 3
+  },
+  "id": "U062"
+ },
+ {
+  "path": "Time > Project Info > Customers",
+  "url": "time/viewCustomers",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 23,
+   "pencil": 23,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U063"
+ },
+ {
+  "path": "Time > Project Info > Projects",
+  "url": "time/viewProjects",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 16,
+   "pencil": 16,
+   "autocompletes": 3,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U064"
+ },
+ {
+  "path": "Recruitment > Vacancies",
+  "url": "recruitment/viewJobVacancy",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 7,
+   "pencil": 7,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 4
+  },
+  "id": "U065"
+ },
+ {
+  "path": "Performance > Configure > KPIs",
+  "url": "performance/searchKpi",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 45,
+   "pencil": 50,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 1
+  },
+  "id": "U066"
+ },
+ {
+  "path": "Performance > Configure > Trackers",
+  "url": "performance/viewPerformanceTracker",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 1,
+   "pencil": 1,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U067"
+ },
+ {
+  "path": "Performance > Manage Reviews > Manage Reviews",
+  "url": "performance/searchPerformanceReview",
+  "traits": {
+   "table": 1,
+   "inputs": 2,
+   "files": 0,
+   "dates": 2,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 2,
+   "textareas": 0,
+   "selects": 3
+  },
+  "id": "U068"
+ },
+ {
+  "path": "Performance > Manage Reviews > My Reviews",
+  "url": "performance/myPerformanceReview",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U069"
+ },
+ {
+  "path": "Performance > My Trackers",
+  "url": "performance/viewMyPerformanceTrackerList",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 0,
+   "selects": 0
+  },
+  "id": "U070"
+ },
+ {
+  "path": "Performance > Employee Trackers",
+  "url": "performance/viewEmployeePerformanceTrackerList",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 1
+  },
+  "id": "U071"
+ },
+ {
+  "path": "Claim > Configuration > Events",
+  "url": "claim/viewEvents",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 13,
+   "pencil": 13,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 1
+  },
+  "id": "U072"
+ },
+ {
+  "path": "Claim > Configuration > Expense Types",
+  "url": "claim/viewExpense",
+  "traits": {
+   "table": 1,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 5,
+   "pencil": 5,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 1
+  },
+  "id": "U073"
+ },
+ {
+  "path": "Claim > Submit Claim",
+  "url": "claim/submitClaim",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 0,
+   "textareas": 1,
+   "selects": 2
+  },
+  "id": "U074"
+ },
+ {
+  "path": "Claim > My Claims",
+  "url": "claim/viewClaim",
+  "traits": {
+   "table": 1,
+   "inputs": 2,
+   "files": 0,
+   "dates": 2,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 0,
+   "selects": 2
+  },
+  "id": "U075"
+ },
+ {
+  "path": "Claim > Assign Claim",
+  "url": "claim/assignClaim",
+  "traits": {
+   "table": 0,
+   "inputs": 0,
+   "files": 0,
+   "dates": 0,
+   "trash": 0,
+   "pencil": 0,
+   "autocompletes": 1,
+   "textareas": 1,
+   "selects": 2
+  },
+  "id": "U076"
+ },
+ {
+  "path": "Login > Login Page",
+  "url": "auth/login",
+  "traits": {},
+  "id": "U077"
+ },
+ {
+  "path": "Login > Forgot Password",
+  "url": "auth/requestPasswordResetCode",
+  "traits": {},
+  "id": "U078"
+ },
+ {
+  "path": "Login > Logout & Session",
+  "url": "auth/logout",
+  "traits": {},
+  "id": "U079"
+ },
+ {
+  "path": "Header > About",
+  "url": "(user dropdown)",
+  "traits": {},
+  "id": "U080"
+ },
+ {
+  "path": "Header > Support",
+  "url": "help/support",
+  "traits": {},
+  "id": "U081"
+ },
+ {
+  "path": "Header > Change Password",
+  "url": "pim/updatePassword",
+  "traits": {},
+  "id": "U082"
+ },
+ {
+  "path": "Header > Help (?)",
+  "url": "(help link)",
+  "traits": {},
+  "id": "U083"
+ },
+ {
+  "path": "Header > Upgrade",
+  "url": "(external link)",
+  "traits": {},
+  "id": "U084"
+ },
+ {
+  "path": "Sidebar > Search & Collapse",
+  "url": "(sidebar)",
+  "traits": {},
+  "id": "U085"
+ },
+ {
+  "path": "Maintenance > Purge Records > Candidate Records",
+  "url": "maintenance/purgeCandidateData",
+  "traits": {},
+  "id": "U086"
+ },
+ {
+  "path": "Maintenance > Access Records",
+  "url": "maintenance/accessEmployeeData",
+  "traits": {},
+  "id": "U087"
+ },
+ {
+  "path": "PIM > Employee > Personal Details",
+  "url": "pim/viewPersonalDetails/empNumber/<id>",
+  "traits": {},
+  "id": "U088"
+ },
+ {
+  "path": "PIM > Employee > Contact Details",
+  "url": "pim/contactDetails/empNumber/<id>",
+  "traits": {},
+  "id": "U089"
+ },
+ {
+  "path": "PIM > Employee > Emergency Contacts",
+  "url": "pim/viewEmergencyContacts/empNumber/<id>",
+  "traits": {},
+  "id": "U090"
+ },
+ {
+  "path": "PIM > Employee > Dependents",
+  "url": "pim/viewDependents/empNumber/<id>",
+  "traits": {},
+  "id": "U091"
+ },
+ {
+  "path": "PIM > Employee > Immigration",
+  "url": "pim/viewImmigration/empNumber/<id>",
+  "traits": {},
+  "id": "U092"
+ },
+ {
+  "path": "PIM > Employee > Job",
+  "url": "pim/viewJobDetails/empNumber/<id>",
+  "traits": {},
+  "id": "U093"
+ },
+ {
+  "path": "PIM > Employee > Salary",
+  "url": "pim/viewSalaryList/empNumber/<id>",
+  "traits": {},
+  "id": "U094"
+ },
+ {
+  "path": "PIM > Employee > Report-to",
+  "url": "pim/viewReportToDetails/empNumber/<id>",
+  "traits": {},
+  "id": "U095"
+ },
+ {
+  "path": "PIM > Employee > Qualifications",
+  "url": "pim/viewQualifications/empNumber/<id>",
+  "traits": {},
+  "id": "U096"
+ },
+ {
+  "path": "PIM > Employee > Memberships",
+  "url": "pim/viewMemberships/empNumber/<id>",
+  "traits": {},
+  "id": "U097"
+ },
+ {
+  "path": "PIM > Employee > Attachments (all tabs)",
+  "url": "(attachment section per tab)",
+  "traits": {},
+  "id": "U098"
+ },
+ {
+  "path": "PIM > Employee > Profile Picture",
+  "url": "pim/viewPhotograph/empNumber/<id>",
+  "traits": {},
+  "id": "U099"
+ },
+ {
+  "path": "Recruitment > Candidate Detail & Status Workflow",
+  "url": "recruitment/addCandidate/<id>",
+  "traits": {},
+  "id": "U100"
+ },
+ {
+  "path": "Recruitment > Vacancy Detail & Attachments",
+  "url": "recruitment/addJobVacancy/<id>",
+  "traits": {},
+  "id": "U101"
+ },
+ {
+  "path": "Performance > Review Evaluation (Admin/Supervisor)",
+  "url": "performance/reviewEvaluateByAdmin/<id>",
+  "traits": {},
+  "id": "U102"
+ },
+ {
+  "path": "Performance > Self Evaluation (ESS)",
+  "url": "performance/reviewEvaluate/id/<id>",
+  "traits": {},
+  "id": "U103"
+ },
+ {
+  "path": "Performance > Tracker Logs",
+  "url": "performance/addPerformanceTrackerLog/trackId/<id>",
+  "traits": {},
+  "id": "U104"
+ },
+ {
+  "path": "Claim > Claim Detail (expenses, attachments, actions)",
+  "url": "claim/assignClaim/id/<id> | claim/submitClaim/id/<id>",
+  "traits": {},
+  "id": "U105"
+ },
+ {
+  "path": "Time > Timesheet Edit & Approval",
+  "url": "time/editTimesheet/<id> | time/viewTimesheet/employeeId/<emp>",
+  "traits": {},
+  "id": "U106"
+ },
+ {
+  "path": "Dashboard > Widgets (Time at Work, My Actions, Quick Launch, Buzz, Leave Today, Distribution charts)",
+  "url": "dashboard/index",
+  "traits": {},
+  "id": "U107"
+ }
+]

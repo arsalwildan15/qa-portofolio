@@ -21,6 +21,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-MEMBERSHIP-01: add valid membership succeeds', async ({
   page,
@@ -41,8 +42,8 @@ test('TC-PIM-MEMBERSHIP-01: add valid membership succeeds', async ({
   await membershipsPage.selectDropdownOption(membershipsPage.subscriptionPaidBySelect, 'Company');
   await membershipsPage.selectDropdownOption(membershipsPage.currencySelect, 'Euro');
   await membershipsPage.subscriptionAmountInput.fill('500000');
-  await membershipsPage.commenceDateInput.fill('2024-01-01');
-  await membershipsPage.renewalDateInput.fill('2025-01-01');
+  await fillDate(membershipsPage.commenceDateInput, '2024-01-01', 'yyyy-dd-mm');
+  await fillDate(membershipsPage.renewalDateInput, '2025-01-01', 'yyyy-dd-mm');
   await membershipsPage.save();
   await page.waitForTimeout(1500);
 

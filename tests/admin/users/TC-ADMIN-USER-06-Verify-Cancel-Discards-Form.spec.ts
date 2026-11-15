@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-USER-06: clicking Cancel discards the Add User form', async ({
@@ -40,7 +40,7 @@ test('TC-ADMIN-USER-06: clicking Cancel discards the Add User form', async ({
   report.check('Kembali ke list Users', page.url().includes('SystemUsers'));
   report.check(
     `Username "${username}" TIDAK muncul di list`,
-    !(await adminUsersPage.rowByUsername(username).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminUsersPage.rowByUsername(username).first(), 3_000),
   );
 
   report.print();

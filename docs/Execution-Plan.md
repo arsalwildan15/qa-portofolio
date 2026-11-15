@@ -20,16 +20,24 @@
   otomatis ke Fase 3 (dokumentasi) tanpa menunggu konfirmasi. **DIPERLUAS:** lanjutkan SEMUA fase
   berikutnya (lapis 2, P2.5, Fase 4-8) secara OTOMATIS tanpa konfirmasi user. (Tetap: aturan R1-R9
   berlaku; R6 config global sudah disetujui dgn withConfigRestore.)
+- **INSTRUKSI USER 2026-11-15 (STANDAR WAJIB, SEMUA MENU):** SEMUA menu OrangeHRM (Login, Dashboard,
+  Admin, PIM, Leave, Time, Recruitment, My Info, Performance, Directory, Maintenance, Claim, Buzz +
+  fitur global header/sidebar) WAJIB ter-cover 100% terhadap docs/Test-Case-Taxonomy.txt: setiap
+  kategori 1-8 & 13 poin checklist ringkas di-REVIEW per menu/sub-menu -> COVERED (ID TC + spec yg
+  benar2 memverifikasi) / N/A + alasan yg dibuktikan / GAP -> dibuatkan TC. Dicatat di
+  docs/Taxonomy-Coverage-Matrix.md (dibangun dari inventaris menu LIVE). Detail & teliti, root cause
+  setiap failure dibuktikan live. Pakai SEMUA skill relevan (test-master, playwright-expert,
+  typescript-pro, debugging-wizard, karpathy-guidelines, engineering:testing-strategy/code-review/
+  documentation, anthropic-skills:test-case-writing/automation-testing/xlsx, spec-miner).
 - **URUTAN BARU (disetujui user 2026-11-15, pendekatan 2 LAPIS):** lapis 1 = alur inti + approval
   lintas role (ESS) + keamanan di SEMUA modul dulu; lapis 2 = edge case sisa SETELAH 4 modul punya
   lapis 1. Urutan: (1) P2.1 batch 2 ringkas -> (2) P2.2 Claim lapis 1 -> (3) P2.3 Leave lapis 1 ->
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** FASE 2 TUNTAS (lapis 1 + lapis 2 + P2.5). Berikutnya FASE 4 (audit ulang modul lama):
-  mulai item WAJIB-duluan: drift format tanggal di 9 page object lama (pakai dateInput.ts), isVisible
-  tanpa tunggu di TC lama, setup Job Title via API (hindari 404 job-spec), lalu P4.1 access control ESS
-  di modul lama, P4.2-P4.5. Setelah itu Fase 5-8.
+- **NEXT ACTION:** FASE 4 berjalan. Selesai: date-drift, isVisible, VACANCY-19, P4.0 matrix (39.1%).
+  Lanjut P4.0 gelombang A-E (lihat checklist FASE 4) sampai semua sel GAP tertutup/N/A beralasan, lalu
+  P4.1-P4.7, Fase 5-8. Regenerasi matrix: tools/coverage/README.md.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -344,14 +352,26 @@ unicode/RTL, API param negatif (offset/limit/sortField).
       koreksi R4, sisa lapis 2)
 
 ## FASE 4 — Audit Ulang Modul Lama
-- [ ] (BARU dari Fase 2, WAJIB duluan) Drift format tanggal: 9 page object lama masih hardcode
-      placeholder "yyyy-dd-mm" -> CandidatesPage, DependentsPage, ImmigrationPage, JobPage (+dialog
-      terminate), MembershipsPage, PersonalDetailsPage, QualificationsPage, TimeAttendancePage
-      (TimeAttendancePage dikerjakan di P2.4). Pindahkan ke dateInput.ts + cek TC yg mencocokkan teks
-      tanggal di tabel (pakai pola rowByDate).
-- [ ] (BARU) `locator.isVisible({ timeout })` TIDAK menunggu (timeout diabaikan) -- TC lama yg memakainya
-      (mis. KPI-01/02) bisa false-fail (cek positif) atau false-PASS (cek negatif). Ganti ke
-      isVisibleWithWait/isHiddenWithWait (testReport.ts); cek negatif wajib tunggu elemen jangkar dulu.
+- [x] Drift format tanggal: 7 page object lama (Candidates, Dependents, Immigration, Job + dialog
+      terminate, Memberships, PersonalDetails, Qualifications) -> DATE_INPUT_SELECTOR; 22 file test -> fillDate()
+      dgn format literal masing2 (literal invalid sengaja tetap .fill()). 24 TC terkait: 22 pass; 2 gagal krn
+      DATA (demo tanpa vacancy, root cause dibuktikan) -> ensureVacancy.ts, lolos.
+- [x] isVisible({timeout}) tanpa tunggu: 110 pemakaian di 105 file -> isVisibleWithWait (positif/kondisional)
+      / isHiddenWithWait (cek negatif "hilang setelah hapus"). Regresi 97 spec: 91 pass + 3 gagal sengaja
+      (BG-025, BG-007, BG-409) + 3 gagal lingkungan -> STRUCTURE-05 & REVIEW-04 lolos ulang, BUZZ-15 feed demo
+      kosong (dibuktikan) -> ditulis ulang membangun post ESS sendiri, lolos.
+- [x] (BARU) TC-RECRUITMENT-VACANCY-19: POST vacancies dgn description null -> 500 = BUG BG-409 (Low);
+      STATUS-15 kini membangun vacancy tanpa hiring manager sendiri (hapus manajer dari PIM).
+- [x] (BARU, instruksi user) P4.0 Taxonomy Coverage Matrix: inventaris menu LIVE (107 unit), tools/coverage/,
+      docs/Taxonomy-Coverage-Matrix.xlsx/.md. Baseline 23.5% -> 39.1% stlh sweep PAGE-01 (1.5/7.x, 97 unit) &
+      HDR-01 (5.6). 23 TC lemah (cek "tanpa exception" saja) tdk dihitung -> wajib diperkuat. BUG BG-414 (tab
+      Job minta job-spec yg tak ada -> 404 tiap kunjungan, Low).
+- [ ] P4.0 lanjutan -- tutup GAP matrix per gelombang (konvensi: label check menyebut kode taksonomi):
+      A sweep halaman sisa (8.1 responsive, 8.3 a11y, 8.2 firefox/webkit, 7.4, 4.6 empty state, 1.6/3.5/3.6
+      list) | B sweep API (6.2 schema, 6.3 405, 6.4 tanpa sesi, 6.6 paging, 5.8 data sensitif, 2.6 id tak
+      eksis) | C sweep mutasi per unit CRUD via registry (2.1, 3.1, 4.1, 5.1, 5.2-MassAssign, 5.4, 5.5, 6.5,
+      6.7, 4.2, 4.5, 1.8, 2.3) | D lintas-role ESS (2.4, 5.2-BFLAC/IDOR/PrivEsc, 1.5 ESS) | E TC spesifik unit
+      (workflow, relasi, business logic, upload) + perkuat 23 TC lemah | regenerasi matrix tiap gelombang.
 - [ ] (BARU) TC lama yg set Job Title lewat halaman PIM Job memicu 404 job-titles/<id>/specification ->
       console-error check gagal palsu; pakai API job-details spt setupReviewableEmployee().
 - [ ] P4.1 Access control ESS (ganti klaim N/A single-role): Admin API (users, pay-grades) 403; PIM read
@@ -403,3 +423,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P2.1 lapis 2 | +8 TC Performance (EVAL-10/16, KPI-11, TRACKER-03..07) + createEssReview.ts + PerformanceSelfEvaluatePage + PerformanceTrackerPage edit/delete/log; tanpa bug app baru (nama tracker duplikat = finding desain); full batch 38: 27 pass + 9 lolos serial (demo terdegradasi) + 2 gagal sengaja; createTestEmployee guard employeeId null; noise BG-388..399 diarsip; README 550 | 1 commit
 - 2026-11-15 | P2.4 lapis 2 | +5 TC Time (TIMESHEET-04/10/11, PROJECT-01/02); BUG baru BG-402 (total harian >24j lintas baris diterima, Medium); fix searchAndView (waitForURL); full batch 17: 16 pass + 1 gagal sengaja; noise BG-400/401/403 diarsip; README 555. LAPIS 2 FASE 2 TUNTAS | 1 commit
 - 2026-11-15 | P2.5 lintas-modul | 6 TC tests/xmod (XMOD-01..06) + docs/TC-XMOD.txt; 3 BUG baru: BG-404 clickjacking 4 modul (Medium), BG-405 emoji -> 500 di cek nama unik (Medium), BG-406 form macet spinner stlh koneksi putus (Low, BG-199); 3 pass (CSRF, param API, unicode). README 561. FASE 2 TUNTAS | 1 commit
+- 2026-11-15 | FASE 4 (bagian 1) | date-drift 7 PO + 22 test; isVisible 110x di 105 file; regresi 97: 91 pass + 3 sengaja + 3 lingkungan (2 lolos ulang, BUZZ-15 ditulis ulang); ensureVacancy + VACANCY-19 (BG-409); STATUS-15 prasyarat mandiri; P4.0 coverage matrix 107 unit (23.5% -> 39.1%) + sweep PAGE-01/HDR-01 (BG-414; BG-404 app-wide) | 1 commit

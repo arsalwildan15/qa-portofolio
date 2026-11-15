@@ -21,7 +21,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-EDU-01: adding an Education Level with valid data succeeds', async ({
@@ -47,7 +47,7 @@ test('TC-ADMIN-EDU-01: adding an Education Level with valid data succeeds', asyn
   await page.waitForTimeout(1200);
   report.check(
     `Education Level "${level}" muncul di list`,
-    await adminEducationPage.rowByName(level).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(adminEducationPage.rowByName(level).first(), 5_000),
   );
 
   report.print();

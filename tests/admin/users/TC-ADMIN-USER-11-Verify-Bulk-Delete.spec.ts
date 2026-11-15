@@ -30,7 +30,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestUser } from '../../../src/utils/createTestUser';
 
 test('TC-ADMIN-USER-11: bulk-deleting 2 checked users sends one DELETE with both ids', async ({
@@ -52,7 +52,7 @@ test('TC-ADMIN-USER-11: bulk-deleting 2 checked users sends one DELETE with both
   await adminUsersPage.checkRow(userB.username);
   report.check(
     'Tombol "Delete Selected" terlihat setelah >=2 row dicentang',
-    await adminUsersPage.deleteSelectedButton.isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(adminUsersPage.deleteSelectedButton, 5_000),
   );
 
   report.step('Klik "Delete Selected", confirm "Yes, Delete", intercept request DELETE');

@@ -22,7 +22,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestVacancy } from '../../../src/utils/createTestVacancy';
 
 test('TC-RECRUITMENT-VACANCY-10: clearing Vacancy Name on edit blocks save', async ({
@@ -52,7 +52,7 @@ test('TC-RECRUITMENT-VACANCY-10: clearing Vacancy Name on edit blocks save', asy
 
   report.step('Verify: PUT tidak terkirim (sinyal utama validasi blocking), data lama tidak berubah');
   const errorCount = await vacanciesPage.fieldErrors.count();
-  const requiredTextVisible = await page.getByText('Required', { exact: true }).first().isVisible({ timeout: 2_000 }).catch(() => false);
+  const requiredTextVisible = await isVisibleWithWait(page.getByText('Required', { exact: true }).first(), 2_000);
   // [TEMUAN] Pesan error inline "Required" TIDAK SELALU konsisten terlihat
   // via locator pada form EDIT di dalam timing test ini (confirmed live:
   // kadang 0 error terlihat), tapi sinyal yang SEBENARNYA membuktikan
@@ -71,7 +71,7 @@ test('TC-RECRUITMENT-VACANCY-10: clearing Vacancy Name on edit blocks save', asy
   await page.waitForTimeout(1200);
   report.check(
     `Vacancy Name lama "${vacancyName}" tidak berubah (verifikasi via reload)`,
-    await vacanciesPage.rowByName(vacancyName).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(vacanciesPage.rowByName(vacancyName).first(), 5_000),
   );
 
   report.print();

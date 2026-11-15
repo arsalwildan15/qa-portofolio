@@ -23,6 +23,13 @@
  *   reproduce, supaya tidak hilang dari radar regresi hanya karena
  *   helper bersama sekarang menghindarinya.
  *
+ *   PRASYARAT DIBANGUN SENDIRI (2026-11-15): seed "Junior Account Assistant"
+ *   hilang dari demo (demo sempat tanpa vacancy sama sekali). TC kini membuat
+ *   vacancy dgn hiring manager karyawan sekali-pakai lalu MENGHAPUS karyawan
+ *   tsb di PIM -> hiringManager vacancy jadi null (confirmed live). Ini juga
+ *   jalur realistis BG-007 di produksi: manajer keluar & dihapus dari PIM,
+ *   vacancy-nya yatim, lalu Shortlist kandidat di vacancy itu -> 500.
+ *
  * RUN COMMAND:
  *   npx playwright test tests/recruitment/status-workflow/TC-RECRUITMENT-STATUS-15-Verify-Shortlist-Fails-Without-Hiring-Manager.spec.ts --project=chromium --headed
  * ================================================================================
@@ -32,21 +39,26 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
+import { createVacancyWithoutHiringManager } from '../../../src/utils/ensureVacancy';
 
 test('TC-RECRUITMENT-STATUS-15: shortlisting a candidate on a vacancy with no hiring manager still returns 500 (BG-007 regression)', async ({
   page,
   candidatesPage,
+  addEmployeePage,
 }, testInfo) => {
-  testInfo.setTimeout(45_000);
+  testInfo.setTimeout(90_000);
   const report = new TestReport('TC-RECRUITMENT-STATUS-15', 'Shortlist Fails Without Hiring Manager', env.baseURL, page);
 
-  report.step('Buat candidate pada vacancy "Junior Account Assistant" (dikonfirmasi hiringManager=null)');
+  report.step('Setup: vacancy yg hiring manager-nya sudah dihapus dari PIM (hiringManager=null)');
+  const vacancy = await createVacancyWithoutHiringManager(page, addEmployeePage);
+
+  report.step(`Buat candidate pada vacancy "${vacancy.name}"`);
   await candidatesPage.gotoAddForm();
   const firstName = uniqueName('QaNoHMRegression');
   await candidatesPage.fillName(firstName, 'Doe');
   await candidatesPage.emailInput.fill(`${firstName.toLowerCase()}@example.com`);
   await candidatesPage.vacancySelect.click();
-  await page.getByRole('option').filter({ hasText: 'Junior Account Assistant' }).first().click();
+  await page.getByRole('option').filter({ hasText: vacancy.name }).first().click();
 
   const [createResp] = await Promise.all([
     page.waitForResponse((r) => r.url().includes('/api/v2/recruitment/candidates') && r.request().method() === 'POST'),
@@ -56,8 +68,8 @@ test('TC-RECRUITMENT-STATUS-15: shortlisting a candidate on a vacancy with no hi
   const candidateId = body.data.id;
   const hiringManager = body.data.vacancy?.hiringManager;
   report.check(
-    'Vacancy "Junior Account Assistant" dikonfirmasi TIDAK punya hiring manager (prasyarat TC ini)',
-    hiringManager === null || hiringManager === undefined,
+    'Vacancy dikonfirmasi TIDAK punya hiring manager (prasyarat TC ini)',
+    hiringManager === null || hiringManager === undefined || hiringManager?.id == null,
     `hiringManager=${JSON.stringify(hiringManager)}`,
   );
 

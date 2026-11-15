@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-SHIFT-01: adding a work shift with valid From < To succeeds', async ({
@@ -48,7 +48,7 @@ test('TC-ADMIN-SHIFT-01: adding a work shift with valid From < To succeeds', asy
   await page.waitForTimeout(1200);
   report.check(
     `Work shift "${shiftName}" muncul di list`,
-    await adminWorkShiftsPage.rowByName(shiftName).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(adminWorkShiftsPage.rowByName(shiftName).first(), 5_000),
   );
 
   report.print();

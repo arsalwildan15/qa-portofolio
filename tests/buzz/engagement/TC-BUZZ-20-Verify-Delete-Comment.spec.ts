@@ -24,7 +24,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-BUZZ-20: deleting a comment removes it and decrements the comment counter', async ({
@@ -49,7 +49,7 @@ test('TC-BUZZ-20: deleting a comment removes it and decrements the comment count
   await page.waitForTimeout(1500);
   report.check(
     `Comment "${commentText}" terlihat sebelum delete`,
-    await page.getByText(commentText).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(page.getByText(commentText).first(), 5_000),
   );
   const statsBefore = await buzzPage.statsText(card).nth(1).innerText().catch(() => '?');
 

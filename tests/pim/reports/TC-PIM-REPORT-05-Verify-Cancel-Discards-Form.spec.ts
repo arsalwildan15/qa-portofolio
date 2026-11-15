@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-PIM-REPORT-05: clicking Cancel discards the form without saving', async ({
@@ -46,7 +46,7 @@ test('TC-PIM-REPORT-05: clicking Cancel discards the form without saving', async
   report.check('URL kembali ke Reports list', page.url().includes('viewDefinedPredefinedReports'), page.url());
   report.check('POST reports/defined TIDAK terkirim', saveRequestFired === false);
   const row = pimReportsPage.rowByName(reportName);
-  const notSaved = await row.isVisible({ timeout: 3_000 }).catch(() => false);
+  const notSaved = await isVisibleWithWait(row, 3_000);
   report.check('Report tidak muncul di list (tidak tersimpan)', notSaved === false);
 
   report.print();

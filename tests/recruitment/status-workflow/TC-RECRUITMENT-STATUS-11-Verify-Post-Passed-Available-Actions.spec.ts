@@ -25,7 +25,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestCandidate } from '../../../src/utils/createTestCandidate';
 import { shortlistCandidate, scheduleInterviewForCandidate } from '../../../src/utils/advanceCandidateStatus';
 
@@ -63,9 +63,9 @@ test('TC-RECRUITMENT-STATUS-11: available actions after Interview Passed [TEMUAN
   const actionButtonLabels = ['Reject', 'Shortlist', 'Schedule Interview', 'Mark Interview Passed', 'Mark Interview Failed', 'Offer Job'];
   const availableActions: string[] = [];
   for (const label of actionButtonLabels) {
-    const visible = await candidatesPage
+    const visible = await isVisibleWithWait(candidatesPage
       .statusActionButton(label)
-      .isVisible({ timeout: 1_000 })
+      , 1_000)
       .catch(() => false);
     if (visible) availableActions.push(label);
   }

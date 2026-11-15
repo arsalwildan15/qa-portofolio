@@ -27,7 +27,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueEmployeeName, uniqueEmail } from '../../../src/data/testData';
 
 const VALID_PDF_BUFFER = Buffer.from('%PDF-1.4 minimal valid-looking resume content');
@@ -66,15 +66,15 @@ test('TC-RECRUITMENT-CANDIDATE-09: deleting a candidate removes it from the list
   report.step('Verify candidate yang sudah dihapus tidak lagi bisa diakses via detail page');
   await candidatesPage.gotoDetail(candidateId);
   await page.waitForTimeout(1500);
-  const notFoundIndicator = await page
+  const notFoundIndicator = await isVisibleWithWait(page
     .getByText(/not found|no record|invalid/i)
     .first()
-    .isVisible({ timeout: 2_000 })
+    , 2_000)
     .catch(() => false);
-  const stillShowsName = await page
+  const stillShowsName = await isVisibleWithWait(page
     .getByText(`${firstName} ${lastName}`, { exact: false })
     .first()
-    .isVisible({ timeout: 2_000 })
+    , 2_000)
     .catch(() => false);
   report.check(
     'Candidate yang sudah dihapus tidak lagi tampil di detail page',

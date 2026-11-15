@@ -21,6 +21,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-QUALIFICATION-03: company with 300 characters does not crash the server', async ({
   page,
@@ -39,8 +40,8 @@ test('TC-PIM-QUALIFICATION-03: company with 300 characters does not crash the se
   await qualificationsPage.companyInput.waitFor({ state: 'visible' });
   await qualificationsPage.companyInput.fill('a'.repeat(300));
   await qualificationsPage.jobTitleInput.fill('QA Engineer');
-  await qualificationsPage.fromDateInput.fill('2018-01-01');
-  await qualificationsPage.toDateInput.fill('2020-01-01');
+  await fillDate(qualificationsPage.fromDateInput, '2018-01-01', 'yyyy-dd-mm');
+  await fillDate(qualificationsPage.toDateInput, '2020-01-01', 'yyyy-dd-mm');
   let serverErrorStatus: number | null = null;
   page.on('response', (r) => {
     if (r.status() >= 500) serverErrorStatus = r.status();

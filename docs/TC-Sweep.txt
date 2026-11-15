@@ -1,0 +1,74 @@
+================================================================================
+  DAFTAR TEST CASE, SWEEP SEMUA MENU (DATA-DRIVEN)
+  Modul    : Semua menu OrangeHRM (registry src/data/unitRegistry.ts)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [DONE]        = Test case selesai & script berjalan
+  [TODO]        = Belum dibuat
+
+  FORMAT ID  : TC-SWEEP-<ASPEK>-NN
+  FILE       : TC-SWEEP-<ASPEK>-NN-Verify-Name-In-English.spec.ts
+  FOLDER     : tests/sweep/
+
+================================================================================
+  FUNGSI & ALASAN PENDEKATAN
+================================================================================
+
+  Sebagian item docs/Test-Case-Taxonomy.txt berlaku untuk SETIAP menu dengan cara
+  pemeriksaan yang identik (contoh: header keamanan 5.6, console error 7.1, request
+  gagal 7.2, aset 404 7.3, waktu muat 7.5). Menulis satu file per menu untuk hal yang
+  sama akan menghasilkan ratusan file kembar. TC sweep membaca daftar unit menu dari
+  src/data/unitRegistry.ts (dibangun dari inventaris LIVE: setiap item sidebar & top-nav
+  diklik satu per satu, 15 Nov 2026) dan memeriksa setiap unit dalam satu run. Setiap
+  check diberi label [U### Path Menu], sehingga hasilnya tetap bukti PER MENU dan bisa
+  ditelusuri ke sel docs/Taxonomy-Coverage-Matrix.xlsx.
+
+  Unit yang URL-nya butuh ID record (halaman detail) me-resolve ID dari API secara
+  read-only saat run. Bila data demo sedang kosong, unit itu dicatat sbg finding
+  "dilewati" -- tidak dianggap lolos.
+
+================================================================================
+  DAFTAR TEST CASE
+================================================================================
+
+ 1   TC-SWEEP-PAGE-01  [DONE]  TC-SWEEP-PAGE-01-Verify-Every-Menu-Loads-Cleanly-For-Admin.spec.ts
+                             (+/7) Verify Every Menu Page Loads Cleanly For The
+                             Admin Role
+                             -> Per unit: buka URL (halaman Maintenance: isi
+                                konfirmasi password Admin -- alur resmi), tunggu
+                                networkidle, ukur waktu muat.
+                             [VERIFICATION per unit]
+                             -> 1.5 halaman termuat (bukan login /
+                                "Credential Required", area konten berisi).
+                             -> 7.1 tidak ada console error / uncaught exception.
+                             -> 7.2 tidak ada XHR/fetch 4xx/5xx.
+                             -> 7.3 tidak ada aset (script/style/image/font) 404.
+                             -> 7.5 waktu muat < 20 dtk (batas kewajaran; angka
+                                tiap unit dicatat sbg finding, tanpa SLA).
+                             -> 7.4 warning console dicatat sbg finding.
+                             HASIL 15 Nov 2026: 97 unit, 486 check, 484 lolos.
+                             Gagal: U093 PIM > Employee > Job (7.1 + 7.2) ->
+                             GET admin/job-titles/<id>/specification 404 di
+                             setiap kunjungan tab Job -> BUG BG-414 (Low).
+
+ 2   TC-SWEEP-HDR-01  [DONE]  TC-SWEEP-HDR-01-Verify-Security-Headers-On-Every-Menu.spec.ts
+                             (S) Verify Security Response Headers On Every Menu
+                             Page
+                             -> [API] GET setiap halaman unit dgn sesi Admin.
+                             [VERIFICATION per unit]
+                             -> 5.6 X-Frame-Options ATAU CSP frame-ancestors.
+                             -> 5.6 X-Content-Type-Options: nosniff, HSTS, CSP ada.
+                             -> Referrer-Policy & header "Server" dicatat sbg
+                                finding.
+                             HASIL 15 Nov 2026: nosniff, HSTS, CSP ada di SEMUA
+                             97 halaman; proteksi clickjacking TIDAK ada di satu
+                             pun -> konfirmasi app-wide BG-404 (baris duplikat
+                             BG-413 diarsip). Header Server membocorkan versi
+                             web server (finding).
+
+  RUN COMMAND:
+    npx playwright test tests/sweep --project=chromium --workers=1

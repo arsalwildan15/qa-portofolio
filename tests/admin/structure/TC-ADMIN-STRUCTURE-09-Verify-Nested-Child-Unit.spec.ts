@@ -36,7 +36,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-STRUCTURE-09: adding a child unit under a non-root unit nests it correctly', async ({
@@ -64,7 +64,7 @@ test('TC-ADMIN-STRUCTURE-09: adding a child unit under a non-root unit nests it 
   const parentNode = adminStructurePage.nodeByName(parentName).first();
   await parentNode.waitFor({ state: 'visible', timeout: 5_000 });
   await adminStructurePage.addChildUnder(parentNode);
-  const helperText = await page.getByText(`This unit will be added under ${parentName}`, { exact: false }).isVisible({ timeout: 3_000 }).catch(() => false);
+  const helperText = await isVisibleWithWait(page.getByText(`This unit will be added under ${parentName}`, { exact: false }), 3_000);
   report.check(`Dialog menyebut parent "${parentName}" sebagai induk`, helperText);
   await adminStructurePage.nameInput.fill(childName);
   const [resp] = await Promise.all([
@@ -81,27 +81,27 @@ test('TC-ADMIN-STRUCTURE-09: adding a child unit under a non-root unit nests it 
   await adminStructurePage.expandNode(parentNodeAfter);
 
   const childNode = adminStructurePage.nodeByName(childName).first();
-  report.check(`Child "${childName}" muncul di tree setelah parent di-expand`, await childNode.isVisible({ timeout: 5_000 }).catch(() => false));
+  report.check(`Child "${childName}" muncul di tree setelah parent di-expand`, await isVisibleWithWait(childNode, 5_000));
 
   const parentLi = parentNodeAfter.locator('xpath=ancestor::li[contains(@class,"oxd-tree-node")][1]');
-  const nestedUnderParent = await parentLi
+  const nestedUnderParent = await isVisibleWithWait(parentLi
     .locator('.oxd-tree-node-child')
     .filter({ hasText: childName })
     .first()
-    .isVisible({ timeout: 3_000 })
+    , 3_000)
     .catch(() => false);
   report.check('Child bersarang secara struktural DI DALAM li parent (bukan sejajar di bawah root)', nestedUnderParent);
 
   report.step('Cleanup: hapus child lalu parent');
   const childCleanup = adminStructurePage.nodeByName(childName).first();
-  if (await childCleanup.isVisible({ timeout: 2_000 }).catch(() => false)) {
+  if (await isVisibleWithWait(childCleanup, 2_000)) {
     await adminStructurePage.deleteNode(childCleanup);
     await page.waitForTimeout(1000);
   }
   await adminStructurePage.goto();
   await adminStructurePage.enableEdit();
   const parentCleanup = adminStructurePage.nodeByName(parentName).first();
-  if (await parentCleanup.isVisible({ timeout: 2_000 }).catch(() => false)) {
+  if (await isVisibleWithWait(parentCleanup, 2_000)) {
     await adminStructurePage.deleteNode(parentCleanup);
     await page.waitForTimeout(1000);
   }

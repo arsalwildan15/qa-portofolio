@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-USER-01: adding a system user with valid data succeeds', async ({
@@ -51,7 +51,7 @@ test('TC-ADMIN-USER-01: adding a system user with valid data succeeds', async ({
   await page.waitForTimeout(1200);
   report.check(
     `User "${username}" muncul di list`,
-    await adminUsersPage.rowByUsername(username).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(adminUsersPage.rowByUsername(username).first(), 5_000),
   );
 
   report.print();

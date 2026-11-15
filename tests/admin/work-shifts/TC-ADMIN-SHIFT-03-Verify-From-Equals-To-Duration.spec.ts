@@ -21,7 +21,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-SHIFT-03: a work shift with From equal to To is documented as-is', async ({
@@ -58,7 +58,7 @@ test('TC-ADMIN-SHIFT-03: a work shift with From equal to To is documented as-is'
     await adminWorkShiftsPage.goto();
     await page.waitForTimeout(1200);
     const row = adminWorkShiftsPage.rowByName(shiftName).first();
-    if (await row.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    if (await isVisibleWithWait(row, 3_000)) {
       await adminWorkShiftsPage.deleteRow(row);
     }
   }

@@ -21,7 +21,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 
 test('TC-ADMIN-CORPBRAND-01: the Corporate Branding form loads with 3 file inputs and the expected buttons', async ({
   page,
@@ -37,9 +37,9 @@ test('TC-ADMIN-CORPBRAND-01: the Corporate Branding form loads with 3 file input
   report.step('Verify: 3 file input dan tombol Reset to Default/Preview/Publish ada');
   const fileInputCount = await page.locator('input[type="file"]').count();
   report.check('Ada 3 file input (Client Logo, Client Banner, Login Banner)', fileInputCount === 3, `count=${fileInputCount}`);
-  report.check('Tombol "Reset to Default" ada', await adminCorporateBrandingPage.resetToDefaultButton.isVisible({ timeout: 5_000 }).catch(() => false));
-  report.check('Tombol "Preview" ada', await adminCorporateBrandingPage.previewButton.isVisible({ timeout: 5_000 }).catch(() => false));
-  report.check('Tombol "Publish" ada (bukan "Save")', await adminCorporateBrandingPage.publishButton.isVisible({ timeout: 5_000 }).catch(() => false));
+  report.check('Tombol "Reset to Default" ada', await isVisibleWithWait(adminCorporateBrandingPage.resetToDefaultButton, 5_000));
+  report.check('Tombol "Preview" ada', await isVisibleWithWait(adminCorporateBrandingPage.previewButton, 5_000));
+  report.check('Tombol "Publish" ada (bukan "Save")', await isVisibleWithWait(adminCorporateBrandingPage.publishButton, 5_000));
 
   report.print();
 });

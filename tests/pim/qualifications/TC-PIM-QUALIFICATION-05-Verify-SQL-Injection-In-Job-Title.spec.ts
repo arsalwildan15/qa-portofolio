@@ -21,6 +21,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-QUALIFICATION-05: SQL injection in Job Title does not crash the server', async ({
   page,
@@ -39,8 +40,8 @@ test('TC-PIM-QUALIFICATION-05: SQL injection in Job Title does not crash the ser
   await qualificationsPage.companyInput.waitFor({ state: 'visible' });
   await qualificationsPage.companyInput.fill('Acme Corp');
   await qualificationsPage.jobTitleInput.fill("' OR '1'='1");
-  await qualificationsPage.fromDateInput.fill('2018-01-01');
-  await qualificationsPage.toDateInput.fill('2020-01-01');
+  await fillDate(qualificationsPage.fromDateInput, '2018-01-01', 'yyyy-dd-mm');
+  await fillDate(qualificationsPage.toDateInput, '2020-01-01', 'yyyy-dd-mm');
   let serverErrorStatus: number | null = null;
   page.on('response', (r) => {
     if (r.status() >= 500) serverErrorStatus = r.status();

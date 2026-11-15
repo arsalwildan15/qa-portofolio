@@ -21,7 +21,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-SKILL-05: a SQL injection payload in Skill Description does not break the app', async ({
@@ -47,7 +47,7 @@ test('TC-ADMIN-SKILL-05: a SQL injection payload in Skill Description does not b
   report.step('Verify: list masih berfungsi normal setelah payload (tidak ada server error)');
   await adminSkillsPage.goto();
   await page.waitForTimeout(3000);
-  const listStillWorks = await adminSkillsPage.tableRows.first().isVisible({ timeout: 10_000 }).catch(() => false);
+  const listStillWorks = await isVisibleWithWait(adminSkillsPage.tableRows.first(), 10_000);
   report.check('List Skills masih berfungsi normal setelah payload SQLi', listStillWorks, `postStatus=${resp?.status() ?? 'tidak ada'}`);
 
   report.print();

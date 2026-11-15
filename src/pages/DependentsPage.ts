@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR } from '../utils/dateInput';
 
 export class DependentsPage extends BasePage {
   readonly addButton: Locator;
@@ -20,7 +21,7 @@ export class DependentsPage extends BasePage {
     this.relationshipSelect = page
       .locator('.oxd-input-group', { has: page.getByText('Relationship', { exact: true }) })
       .locator('.oxd-select-text');
-    this.dateOfBirthInput = page.locator('input[placeholder="yyyy-dd-mm"]').first();
+    this.dateOfBirthInput = page.locator(DATE_INPUT_SELECTOR).first();
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.cancelButton = page.getByRole('button', { name: 'Cancel' });
     this.fieldErrors = page.locator('.oxd-input-group .oxd-text--span');

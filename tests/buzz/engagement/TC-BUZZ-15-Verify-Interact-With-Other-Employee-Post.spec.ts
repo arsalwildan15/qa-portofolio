@@ -13,9 +13,13 @@
  *   interaksi pada post MILIK SENDIRI. Buzz adalah feed company-wide
  *   -- skenario paling umum sebenarnya adalah like/comment pada post
  *   milik KARYAWAN LAIN. TC ini memverifikasi hal itu berfungsi pada
- *   post seed data lain yang sudah ada di feed (bukan post buatan TC
- *   ini sendiri), read-only terhadap post itu sendiri (tidak
- *   menghapusnya) karena ini data shared demo milik orang lain.
+ *   post milik karyawan lain.
+ *
+ *   PRASYARAT DIBANGUN SENDIRI (2026-11-15): versi lama memakai post seed
+ *   di feed; demo sempat dikosongkan total (GET buzz/feed meta.total=0,
+ *   confirmed live) sehingga TC gagal "totalCards=0". Kini akun ESS
+ *   sungguhan dibuat & login di sesi terpisah, membuat post, lalu Admin
+ *   like + comment pada post tsb -> lintas user yg sebenarnya.
  *
  * RUN COMMAND:
  *   npx playwright test tests/buzz/engagement/TC-BUZZ-15-Verify-Interact-With-Other-Employee-Post.spec.ts --project=chromium --headed
@@ -24,31 +28,34 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
+import { BuzzPage } from '../../../src/pages';
+import { createEssAccount } from '../../../src/utils/createEssAccount';
+import { loginAs } from '../../../src/utils/loginAs';
 
 test('TC-BUZZ-15: liking and commenting on another employee\'s existing post works', async ({
   page,
+  browser,
   buzzPage,
+  addEmployeePage,
 }, testInfo) => {
-  testInfo.setTimeout(45_000);
+  testInfo.setTimeout(120_000);
   const report = new TestReport('TC-BUZZ-15', 'Interact With Other Employee Post', env.baseURL, page);
 
-  report.step('Buka Buzz, ambil post PALING LAMA (bukan buatan TC ini) dari feed seed data');
+  report.step('Setup: akun ESS (karyawan lain) membuat post teks di Buzz');
+  const marker = uniqueName('QaOtherEmpPost');
+  const ess = await createEssAccount(page, addEmployeePage, 'QaBuzzOther');
+  const { page: essPage, close } = await loginAs(browser, ess.username, ess.password);
+  const essBuzz = new BuzzPage(essPage);
+  await essBuzz.goto();
+  const created = await essBuzz.submitTextPost(marker);
+  report.check('[API] Post milik ESS tersimpan (200)', created?.status() === 200, `status=${created?.status()}`);
+
+  report.step('Admin membuka Buzz dan menemukan post milik ESS tsb');
   await buzzPage.goto();
-  await buzzPage.postCards.first().waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {});
-  const totalCards = await buzzPage.postCards.count();
-  report.check('Ada minimal 1 post lain di feed untuk dites', totalCards > 0, `totalCards=${totalCards}`);
-  if (totalCards === 0) {
-    report.print();
-    return;
-  }
-  // NOTE 2026-11-11: .last() picks whatever card happened to be loaded furthest down at that
-  // moment -- unstable as the shared demo accumulates more posts over many test runs (including
-  // security TCs that create dozens of posts), and far enough down to need heavy scrolling,
-  // which caused this TC to exceed its 45s budget. A card near the top (still never one this
-  // TC itself just created) is just as valid for "another employee's post" and far more stable.
-  const otherCard = buzzPage.postCards.nth(1);
+  const otherCard = buzzPage.cardByText(marker).first();
+  report.check('Post karyawan lain tampil di feed Admin', await isVisibleWithWait(otherCard, 15_000));
 
   report.step('Klik Like pada post tersebut, verify counter berubah');
   const statsBefore = await buzzPage.statsText(otherCard).first().innerText().catch(() => '?');
@@ -57,7 +64,7 @@ test('TC-BUZZ-15: liking and commenting on another employee\'s existing post wor
   const statsAfter = await buzzPage.statsText(otherCard).first().innerText().catch(() => '?');
   report.check(
     'Like pada post milik employee lain berhasil (counter berubah)',
-    statsBefore !== statsAfter,
+    statsBefore !== statsAfter && /\d/.test(statsAfter) && (parseInt(statsAfter, 10) || 0) > (parseInt(statsBefore, 10) || 0),
     `before="${statsBefore}" after="${statsAfter}"`,
   );
 
@@ -70,8 +77,9 @@ test('TC-BUZZ-15: liking and commenting on another employee\'s existing post wor
   await page.waitForTimeout(1500);
   report.check(
     `Comment "${commentText}" pada post employee lain terlihat di halaman`,
-    await page.getByText(commentText).first().isVisible({ timeout: 5000 }).catch(() => false),
+    await isVisibleWithWait(page.getByText(commentText).first(), 5000),
   );
 
+  await close();
   report.print();
 });

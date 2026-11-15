@@ -21,6 +21,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-DEPENDENT-01: add valid dependent succeeds', async ({
   page,
@@ -39,7 +40,7 @@ test('TC-PIM-DEPENDENT-01: add valid dependent succeeds', async ({
   await dependentsPage.nameInput.waitFor({ state: 'visible' });
   await dependentsPage.nameInput.fill('Little Doe');
   await dependentsPage.selectDropdownOption(dependentsPage.relationshipSelect, 'Child');
-  await dependentsPage.dateOfBirthInput.fill('2015-10-05');
+  await fillDate(dependentsPage.dateOfBirthInput, '2015-10-05', 'yyyy-dd-mm');
   await dependentsPage.save();
   await page.waitForTimeout(1500);
 

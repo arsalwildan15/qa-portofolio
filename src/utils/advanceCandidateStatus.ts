@@ -1,5 +1,6 @@
 import { type Page } from '@playwright/test';
 import { type CandidatesPage } from '../pages/CandidatesPage';
+import { fillDate } from './dateInput';
 
 /**
  * Clicks a status action button on the candidate detail page and saves the
@@ -67,7 +68,7 @@ export async function scheduleInterviewForCandidate(page: Page, candidatesPage: 
   await page.waitForTimeout(800);
   await candidatesPage.interviewTitleInput.fill('QA Automation Interview');
   await candidatesPage.selectFirstInterviewer();
-  await candidatesPage.interviewDateInput.fill('2026-15-11');
+  await fillDate(candidatesPage.interviewDateInput, '2026-15-11', 'yyyy-dd-mm');
   await page.waitForTimeout(500);
   await Promise.all([
     page.waitForResponse((r) => r.url().includes('shedule-interview') && r.request().method() !== 'GET', { timeout: 10_000 }),

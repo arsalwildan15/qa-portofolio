@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-LANG-05: a newly created Language can be deleted', async ({
@@ -42,14 +42,14 @@ test('TC-ADMIN-LANG-05: a newly created Language can be deleted', async ({
 
   report.step('Hapus Language yang baru dibuat');
   const row = adminLanguagesPage.rowByName(name).first();
-  report.check('Language muncul sebelum dihapus', await row.isVisible({ timeout: 5_000 }).catch(() => false));
+  report.check('Language muncul sebelum dihapus', await isVisibleWithWait(row, 5_000));
   await adminLanguagesPage.deleteRow(row);
   await page.waitForTimeout(1200);
 
   report.step('Verify: language tidak lagi muncul di list');
   report.check(
     `Language "${name}" sudah terhapus`,
-    !(await adminLanguagesPage.rowByName(name).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminLanguagesPage.rowByName(name).first(), 3_000),
   );
 
   report.print();

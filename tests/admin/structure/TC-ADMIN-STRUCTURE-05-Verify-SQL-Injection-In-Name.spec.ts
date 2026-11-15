@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 
 test('TC-ADMIN-STRUCTURE-05: a SQL injection payload in Organization Unit Name is handled safely', async ({
   page,
@@ -51,7 +51,7 @@ test('TC-ADMIN-STRUCTURE-05: a SQL injection payload in Organization Unit Name i
     await adminStructurePage.goto();
     await adminStructurePage.enableEdit();
     const node = adminStructurePage.nodeByName(sqlPayload).first();
-    if (await node.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    if (await isVisibleWithWait(node, 3_000)) {
       await adminStructurePage.deleteNode(node);
       await page.waitForTimeout(1000);
     }

@@ -32,7 +32,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestCandidate } from '../../../src/utils/createTestCandidate';
 
 test('TC-RECRUITMENT-CANDIDATE-18: uploaded resume can be downloaded intact from detail page', async ({
@@ -50,13 +50,13 @@ test('TC-RECRUITMENT-CANDIDATE-18: uploaded resume can be downloaded intact from
   await page.waitForTimeout(5000);
 
   const resumeFilenameText = page.locator('.orangehrm-file-name').first();
-  const filenameVisible = await resumeFilenameText.isVisible({ timeout: 5_000 }).catch(() => false);
+  const filenameVisible = await isVisibleWithWait(resumeFilenameText, 5_000);
   report.check('Nama file resume ("resume.pdf") ditampilkan di Candidate Profile', filenameVisible);
   const filenameTitle = await resumeFilenameText.getAttribute('title').catch(() => null);
   report.check('Nama file yang ditampilkan sesuai file yang diupload', filenameTitle === 'resume.pdf', `title=${filenameTitle}`);
 
   const downloadIcon = page.locator('.orangehrm-file-download').first();
-  const downloadIconVisible = await downloadIcon.isVisible({ timeout: 5_000 }).catch(() => false);
+  const downloadIconVisible = await isVisibleWithWait(downloadIcon, 5_000);
   report.check('Ikon download resume tersedia dan bisa diklik', downloadIconVisible);
 
   report.step('Klik ikon download, intersep event download browser, bandingkan dengan file asli yang diupload');

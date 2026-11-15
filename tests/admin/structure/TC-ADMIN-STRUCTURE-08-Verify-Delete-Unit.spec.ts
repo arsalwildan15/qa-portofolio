@@ -21,7 +21,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-STRUCTURE-08: deleting a freshly-created organization unit removes it from the tree', async ({
@@ -55,7 +55,7 @@ test('TC-ADMIN-STRUCTURE-08: deleting a freshly-created organization unit remove
   await adminStructurePage.enableEdit();
   report.check(
     `Unit "${unitName}" TIDAK lagi muncul di tree`,
-    !(await adminStructurePage.nodeByName(unitName).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminStructurePage.nodeByName(unitName).first(), 3_000),
   );
 
   report.print();

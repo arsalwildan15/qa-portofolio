@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-PAYGRADE-01: adding a pay grade with valid data succeeds', async ({
@@ -45,7 +45,7 @@ test('TC-ADMIN-PAYGRADE-01: adding a pay grade with valid data succeeds', async 
   await page.waitForTimeout(3000);
   report.check(
     `Pay grade "${name}" muncul di list`,
-    await adminPayGradesPage.rowByName(name).first().isVisible({ timeout: 10_000 }).catch(() => false),
+    await isVisibleWithWait(adminPayGradesPage.rowByName(name).first(), 10_000),
   );
 
   report.print();

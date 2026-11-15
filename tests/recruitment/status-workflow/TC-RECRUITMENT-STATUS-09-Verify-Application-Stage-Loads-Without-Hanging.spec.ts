@@ -34,7 +34,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 
 // A spread of existing candidate ids (seeded demo data + ones created during
 // this suite's own exploration), sampled rather than relying on one fixed id.
@@ -53,10 +53,10 @@ test('TC-RECRUITMENT-STATUS-09: Application Stage card finishes loading (or is d
     await candidatesPage.gotoDetail(id);
     await page.waitForTimeout(1500);
 
-    const spinnerStillVisible = await page
+    const spinnerStillVisible = await isVisibleWithWait(page
       .locator('.oxd-loading-spinner, .oxd-loading-spinner-container')
       .first()
-      .isVisible({ timeout: 8_000 })
+      , 8_000)
       .catch(() => false);
 
     if (spinnerStillVisible) {

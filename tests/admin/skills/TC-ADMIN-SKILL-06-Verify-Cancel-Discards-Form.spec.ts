@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-SKILL-06: clicking Cancel discards the Add Skill form', async ({
@@ -40,7 +40,7 @@ test('TC-ADMIN-SKILL-06: clicking Cancel discards the Add Skill form', async ({
   report.check('Kembali ke list Skills', page.url().includes('Skills'));
   report.check(
     `Skill "${name}" TIDAK muncul di list`,
-    !(await adminSkillsPage.rowByName(name).first().isVisible({ timeout: 3_000 }).catch(() => false)),
+    await isHiddenWithWait(adminSkillsPage.rowByName(name).first(), 3_000),
   );
 
   report.print();

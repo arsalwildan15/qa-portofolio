@@ -22,6 +22,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-DEPENDENT-07: future date of birth behavior is documented', async ({
   page,
@@ -40,7 +41,7 @@ test('TC-PIM-DEPENDENT-07: future date of birth behavior is documented', async (
   await dependentsPage.nameInput.waitFor({ state: 'visible' });
   await dependentsPage.nameInput.fill('Future Dependent');
   await dependentsPage.selectDropdownOption(dependentsPage.relationshipSelect, 'Child');
-  await dependentsPage.dateOfBirthInput.fill('2099-01-01');
+  await fillDate(dependentsPage.dateOfBirthInput, '2099-01-01', 'yyyy-dd-mm');
   let serverErrorStatus: number | null = null;
   page.on('response', (r) => {
     if (r.status() >= 500) serverErrorStatus = r.status();

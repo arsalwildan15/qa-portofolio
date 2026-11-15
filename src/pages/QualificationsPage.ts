@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR } from '../utils/dateInput';
 
 export class QualificationsPage extends BasePage {
   /** 6 "+ Add" buttons: Work Experience(0), Education(1), Skills(2), Languages(3), License(4), Attachments(5). */
@@ -37,7 +38,7 @@ export class QualificationsPage extends BasePage {
       page.locator('.oxd-input-group', { has: page.getByText(label, { exact: true }) }).locator('input');
     this.companyInput = byLabel('Company');
     this.jobTitleInput = byLabel('Job Title');
-    const dateInputs = page.locator('input[placeholder="yyyy-dd-mm"]');
+    const dateInputs = page.locator(DATE_INPUT_SELECTOR);
     this.fromDateInput = dateInputs.nth(0);
     this.toDateInput = dateInputs.nth(1);
     this.commentInput = page.locator('textarea');

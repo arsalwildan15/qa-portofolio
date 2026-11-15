@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
 import { DATE_INPUT_SELECTOR, type DateFormat } from '../utils/dateInput';
+import { isVisibleWithWait } from '../utils/testReport';
 
 /**
  * Leave > Leave List. Confirmed live: default filter has a sticky "Pending Approval" status
@@ -153,7 +154,7 @@ export class LeaveListPage extends BasePage {
       .catch(() => null);
     await this.page.getByText('Cancel Leave').click();
     const yesButton = this.page.getByRole('button', { name: /Yes/i });
-    if (await yesButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    if (await isVisibleWithWait(yesButton, 2_000)) {
       await yesButton.click();
     }
     return responsePromise;

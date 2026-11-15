@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR } from '../utils/dateInput';
 
 export class PersonalDetailsPage extends BasePage {
   readonly firstNameInput: Locator;
@@ -7,7 +8,7 @@ export class PersonalDetailsPage extends BasePage {
   readonly lastNameInput: Locator;
   readonly employeeIdInput: Locator;
   readonly driversLicenseInput: Locator;
-  /** yyyy-dd-mm date input, DOM order: License Expiry Date first, then Date of Birth. */
+  /** Date input (format drifts, see dateInput.ts), DOM order: License Expiry Date first, then Date of Birth. */
   readonly licenseExpiryDateInput: Locator;
   readonly dateOfBirthInput: Locator;
   readonly nationalitySelect: Locator;
@@ -35,7 +36,7 @@ export class PersonalDetailsPage extends BasePage {
     this.driversLicenseInput = page
       .locator('.oxd-input-group', { has: page.getByText("Driver's License Number", { exact: true }) })
       .locator('input');
-    const dateInputs = page.locator('input[placeholder="yyyy-dd-mm"]');
+    const dateInputs = page.locator(DATE_INPUT_SELECTOR);
     this.licenseExpiryDateInput = dateInputs.nth(0);
     this.dateOfBirthInput = dateInputs.nth(1);
     this.nationalitySelect = page.locator('.oxd-select-text').nth(0);

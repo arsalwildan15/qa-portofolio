@@ -20,6 +20,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-QUALIFICATION-04: XSS payload in Company is not executed', async ({
   page,
@@ -44,8 +45,8 @@ test('TC-PIM-QUALIFICATION-04: XSS payload in Company is not executed', async ({
   await qualificationsPage.companyInput.waitFor({ state: 'visible' });
   await qualificationsPage.companyInput.fill("<script>alert('xss')</script>");
   await qualificationsPage.jobTitleInput.fill('QA Engineer');
-  await qualificationsPage.fromDateInput.fill('2018-01-01');
-  await qualificationsPage.toDateInput.fill('2020-01-01');
+  await fillDate(qualificationsPage.fromDateInput, '2018-01-01', 'yyyy-dd-mm');
+  await fillDate(qualificationsPage.toDateInput, '2020-01-01', 'yyyy-dd-mm');
   await qualificationsPage.save();
   await page.reload();
   await page.waitForTimeout(1500);

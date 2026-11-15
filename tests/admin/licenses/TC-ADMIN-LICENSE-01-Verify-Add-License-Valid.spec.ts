@@ -19,7 +19,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-LICENSE-01: adding a license with valid data succeeds', async ({
@@ -45,7 +45,7 @@ test('TC-ADMIN-LICENSE-01: adding a license with valid data succeeds', async ({
   await page.waitForTimeout(1200);
   report.check(
     `License "${name}" muncul di list`,
-    await adminLicensesPage.rowByName(name).first().isVisible({ timeout: 5_000 }).catch(() => false),
+    await isVisibleWithWait(adminLicensesPage.rowByName(name).first(), 5_000),
   );
 
   report.print();

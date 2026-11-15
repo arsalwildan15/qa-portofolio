@@ -21,6 +21,7 @@ import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-PIM-DEPENDENT-05: SQL injection in Name does not crash the server', async ({
   page,
@@ -39,7 +40,7 @@ test('TC-PIM-DEPENDENT-05: SQL injection in Name does not crash the server', asy
   await dependentsPage.nameInput.waitFor({ state: 'visible' });
   await dependentsPage.nameInput.fill("' OR '1'='1");
   await dependentsPage.selectDropdownOption(dependentsPage.relationshipSelect, 'Child');
-  await dependentsPage.dateOfBirthInput.fill('2015-10-05');
+  await fillDate(dependentsPage.dateOfBirthInput, '2015-10-05', 'yyyy-dd-mm');
   let serverErrorStatus: number | null = null;
   page.on('response', (r) => {
     if (r.status() >= 500) serverErrorStatus = r.status();

@@ -183,18 +183,21 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Login | 46 | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | Admin | 144 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 164 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
-| Recruitment | 59 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
+| Recruitment | 60 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Performance | 38 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 26 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
 | Time | 17 | [docs/TC-Time.txt](docs/TC-Time.txt) |
 | Cross-module (Leave/Claim/Performance/Time) | 6 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
-| **Total** | **561** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
+| Sweep, all menus (data-driven) | 2 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
+| **Total** | **564** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
-**Environment resilience:** the shared demo periodically resets and flips its global date format between `yyyy-dd-mm` and `yyyy-mm-dd`, and typed dates are parsed in whichever format is currently displayed. `src/utils/dateInput.ts` reads the live placeholder and converts values, which restored four Leave tests that had broken purely because of this drift.
+**Environment resilience:** the shared demo periodically resets and flips its global date format between `yyyy-dd-mm` and `yyyy-mm-dd`, and typed dates are parsed in whichever format is currently displayed. `src/utils/dateInput.ts` reads the live placeholder and converts values. That restored four Leave tests that had broken purely because of the drift, and the same helper now drives every date field in PIM and Recruitment too. Other users of the demo also delete shared data: it has been seen with no vacancies and an empty Buzz feed. Tests that need such data create it themselves (for example `src/utils/ensureVacancy.ts`) instead of relying on seed records.
+
+**Taxonomy coverage:** `docs/Taxonomy-Coverage-Matrix.xlsx` maps every menu unit (107, taken from a live click-through of the sidebar and top navigation plus pages the nav does not expose) against every item of `docs/Test-Case-Taxonomy.txt`. Each cell is COVERED (with the TC ids), N/A (with the reason, derived from what the page actually contains), or GAP. Tests whose only check is "ran without exception" are listed as weak and do not count. `docs/Taxonomy-Coverage-Matrix.md` summarizes coverage per module and the open gap backlog; `tools/coverage/` rebuilds both. Checks that apply identically to every page (security headers, console errors, failed requests, load time) run as data-driven sweeps over all units (`tests/sweep/`).
 
 **Cross-cutting edge cases (2026-11-12):** two scenarios that are easy to forget in test design, refreshing mid-submit and a dropped connection mid-submit, were added to the main create/save flow of every module (Login, Admin, PIM, Recruitment, Buzz). This surfaced an app-wide bug: when a create/save request fails because of a dropped network connection, the SPA throws an unhandled JS exception that reaches the console/global error handler instead of being caught at its source, reproduced identically (same exception name) in Admin, PIM, Recruitment, and Buzz. The app still shows the user a generic "Unexpected Error!" toast in all four cases, so this is a code-level error-handling defect, not a silent failure the user would never notice. Login is unaffected, since its login form submits via a real top-level HTML form POST rather than fetch/XHR, so a dropped connection there replaces the whole page with the browser's native error screen instead. See the Admin, PIM, Recruitment, and Buzz sections below for each module's confirmed-bug entry.
 

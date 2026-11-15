@@ -35,7 +35,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { pickLightlyUsedEmployee } from '../../../src/utils/pickLightlyUsedEmployee';
 import { createLeaveEntitlement } from '../../../src/utils/createLeaveEntitlement';
 
@@ -86,7 +86,7 @@ test('TC-LEAVE-ASSIGN-02: insufficient balance shows an override dialog; Cancel 
   await leaveListPage.clearStatusChip();
   await leaveListPage.selectStatus('Scheduled');
   await leaveListPage.search();
-  const foundAfterCancel = await (await leaveListPage.rowByDate(cancelDate, 'yyyy-dd-mm')).first().isVisible({ timeout: 3_000 }).catch(() => false);
+  const foundAfterCancel = await isVisibleWithWait((await leaveListPage.rowByDate(cancelDate, 'yyyy-dd-mm')).first(), 3_000);
   report.check('[Cancel path] TIDAK ada record "Scheduled" tercipta utk tanggal ini', foundAfterCancel === false, `cancelDate=${cancelDate}`);
 
   report.step('[Confirm path] Assign leave 1 hari dgn balance "US - FMLA" = 0, KLIK OK/CONFIRM pada dialog override');

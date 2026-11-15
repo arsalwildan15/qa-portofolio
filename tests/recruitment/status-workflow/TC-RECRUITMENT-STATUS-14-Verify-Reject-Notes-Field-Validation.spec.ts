@@ -24,7 +24,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestCandidate } from '../../../src/utils/createTestCandidate';
 
 test('TC-RECRUITMENT-STATUS-14: Reject form Notes field -- optional, boundary long text', async ({
@@ -38,13 +38,13 @@ test('TC-RECRUITMENT-STATUS-14: Reject form Notes field -- optional, boundary lo
   const candidateA = await createTestCandidate(page, candidatesPage, 'QaRejectEmptyNotes');
   await candidatesPage.gotoDetail(candidateA.candidateId);
   await page.waitForTimeout(3000);
-  const rejectVisible = await candidatesPage.statusActionButton('Reject').isVisible({ timeout: 5_000 }).catch(() => false);
+  const rejectVisible = await isVisibleWithWait(candidatesPage.statusActionButton('Reject'), 5_000);
   report.check('Tombol "Reject" tersedia pada candidate Application Initiated', rejectVisible);
 
   if (rejectVisible) {
     await candidatesPage.statusActionButton('Reject').click();
     await page.waitForTimeout(800);
-    const notesVisible = await candidatesPage.notesTextarea.isVisible({ timeout: 3_000 }).catch(() => false);
+    const notesVisible = await isVisibleWithWait(candidatesPage.notesTextarea, 3_000);
     report.check('Field "Notes" ada di form Reject (dikonfirmasi live, bukan diasumsikan)', notesVisible);
 
     report.step('Case 1: Save dengan Notes KOSONG (field diduga optional)');
@@ -82,7 +82,7 @@ test('TC-RECRUITMENT-STATUS-14: Reject form Notes field -- optional, boundary lo
         `Response status=${resp2.status()}. ${resp2.status() === 200 ? 'Server menerima teks sangat panjang tanpa truncation error.' : 'Server menolak/memvalidasi panjang Notes.'}`,
       );
     } else {
-      const clientSideError = await candidatesPage.fieldErrors.first().isVisible({ timeout: 1_000 }).catch(() => false);
+      const clientSideError = await isVisibleWithWait(candidatesPage.fieldErrors.first(), 1_000);
       report.check('TC dijalankan tanpa exception', true);
       report.finding(
         'Save dengan Notes 5000 karakter tidak memicu request network dalam 15s',

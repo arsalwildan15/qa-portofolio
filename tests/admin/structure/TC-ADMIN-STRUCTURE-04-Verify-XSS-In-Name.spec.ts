@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-ADMIN-STRUCTURE-04: an XSS payload in Organization Unit Name does not execute', async ({
@@ -53,7 +53,7 @@ test('TC-ADMIN-STRUCTURE-04: an XSS payload in Organization Unit Name does not e
     await adminStructurePage.goto();
     await adminStructurePage.enableEdit();
     const node = adminStructurePage.nodeByName(payload.slice(0, 20)).first();
-    if (await node.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    if (await isVisibleWithWait(node, 3_000)) {
       await adminStructurePage.deleteNode(node);
       await page.waitForTimeout(1000);
     }

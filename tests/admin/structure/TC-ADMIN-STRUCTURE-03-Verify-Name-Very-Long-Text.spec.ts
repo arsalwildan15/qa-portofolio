@@ -22,7 +22,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 
 test('TC-ADMIN-STRUCTURE-03: a 300-character unit Name is documented as-is', async ({
   page,
@@ -60,7 +60,7 @@ test('TC-ADMIN-STRUCTURE-03: a 300-character unit Name is documented as-is', asy
     await adminStructurePage.goto();
     await adminStructurePage.enableEdit();
     const node = adminStructurePage.nodeByName(longName.slice(0, 50)).first();
-    if (await node.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    if (await isVisibleWithWait(node, 3_000)) {
       await adminStructurePage.deleteNode(node);
       await page.waitForTimeout(1000);
     }

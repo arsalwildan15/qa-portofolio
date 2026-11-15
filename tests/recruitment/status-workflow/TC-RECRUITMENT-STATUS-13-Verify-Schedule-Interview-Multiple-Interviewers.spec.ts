@@ -22,9 +22,10 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestCandidate } from '../../../src/utils/createTestCandidate';
 import { shortlistCandidate } from '../../../src/utils/advanceCandidateStatus';
+import { fillDate } from '../../../src/utils/dateInput';
 
 test('TC-RECRUITMENT-STATUS-13: Schedule Interview with multiple interviewers via "+ Add Another"', async ({
   page,
@@ -46,12 +47,12 @@ test('TC-RECRUITMENT-STATUS-13: Schedule Interview with multiple interviewers vi
   await candidatesPage.selectFirstInterviewer();
 
   report.step('Klik "+ Add Another", isi Interviewer kedua yang berbeda dari yang pertama');
-  const addAnotherVisible = await candidatesPage.addAnotherInterviewerButton.isVisible({ timeout: 3_000 }).catch(() => false);
+  const addAnotherVisible = await isVisibleWithWait(candidatesPage.addAnotherInterviewerButton, 3_000);
   report.check('Tombol "+ Add Another" tersedia di form Schedule Interview', addAnotherVisible);
 
   if (addAnotherVisible) {
     await candidatesPage.addAnotherInterviewer();
-    await candidatesPage.interviewDateInput.fill('2026-20-11');
+    await fillDate(candidatesPage.interviewDateInput, '2026-20-11', 'yyyy-dd-mm');
     await page.waitForTimeout(500);
 
     report.step('Save, verifikasi response 200');

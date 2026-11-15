@@ -229,10 +229,16 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              Post
                              -> Semua TC like/comment lain hanya menguji post
                                 MILIK SENDIRI. TC ini menguji like+comment pada
-                                post seed data lain yang SUDAH ADA di feed
-                                (bukan buatan TC ini sendiri).
-                             Verify: like & comment keduanya berhasil pada
-                             post milik employee lain.
+                                post milik KARYAWAN LAIN.
+                             -> Setup (sejak 15 Nov 2026): akun ESS sungguhan
+                                dibuat & login di sesi terpisah, membuat post
+                                teks (versi lama memakai post seed; demo sempat
+                                dikosongkan total -> GET buzz/feed total 0 ->
+                                TC gagal "totalCards=0").
+                             -> Admin membuka Buzz, Like + Comment post tsb.
+                             Verify: post ESS tersimpan (200) & tampil di
+                             feed Admin; counter Like BERTAMBAH (0 -> 1);
+                             comment tampil.
 
 ================================================================================
   GROUP 2, NEGATIVE / UNEXPECTED / EDGE CASES
