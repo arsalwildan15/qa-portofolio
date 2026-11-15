@@ -49,6 +49,7 @@ export { PerformanceEvaluatePage } from './PerformanceEvaluatePage';
 export { PerformanceTrackerPage } from './PerformanceTrackerPage';
 export { SubmitClaimPage } from './SubmitClaimPage';
 export { ClaimEventsPage } from './ClaimEventsPage';
+export { EmployeeTimesheetPage } from './EmployeeTimesheetPage';
 export { AssignClaimPage } from './AssignClaimPage';
 export { MyTimesheetPage } from './MyTimesheetPage';
 export { AdminAttendanceRecordsPage } from './AdminAttendanceRecordsPage';

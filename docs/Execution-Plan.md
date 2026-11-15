@@ -13,8 +13,9 @@
 - **Fase aktif:** 2 -- P2.1 Performance lapis 1 TUNTAS (24 TC; sengaja FAILED: REVIEW-10=BG-356,
   EVAL-15=BG-373); P2.2 Claim lapis 1 TUNTAS (9 TC; sengaja FAILED: SUBMIT-02=BG-375,
   APPROVAL-05=BG-374)
-- **Task terakhir selesai:** P2.3 Leave lapis 1 (5 TC baru + fix lingkungan tanggal; verifikasi gabungan
-  54 TC: 50 pass, 4 gagal = persis 4 TC bug yg sengaja FAILED; suite Leave lama+baru 100% lolos)
+- **Task terakhir selesai:** FASE 2 LAPIS 1 TUNTAS (4 modul): Performance 24 TC, Claim 9, Leave 5 (+4 TC
+  lama dipulihkan), Time 5 (modul Time 12/12 lolos). TC yg SENGAJA FAILED: REVIEW-10 (BG-356),
+  EVAL-15 (BG-373), CLAIM-APPROVAL-05 (BG-374), CLAIM-SUBMIT-02 (BG-375).
 - **INSTRUKSI USER 2026-11-15:** begitu Fase 2 (lapis 1 keempat modul) selesai, LANGSUNG lanjut
   otomatis ke Fase 3 (dokumentasi) tanpa menunggu konfirmasi.
 - **URUTAN BARU (disetujui user 2026-11-15, pendekatan 2 LAPIS):** lapis 1 = alur inti + approval
@@ -23,11 +24,11 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** P2.4 Time LAPIS 1 -- probe live: ESS buat+isi+Submit timesheet (My Timesheet) ->
-  Admin Employee Timesheets -> View -> Approve / Reject (komentar wajib?) ; tangkap endpoint API
-  (time/...) -> TC TS-SUBMIT-01, TS-APPROVAL-01 Approve, 02 Reject, 03 ESS tdk bisa approve sendiri,
-  04 approve timesheet belum Submitted via API. TimeAttendancePage: pindahkan ke dateInput.ts dulu.
-  SETELAH Time lapis 1 -> LANGSUNG Fase 3 (instruksi user).
+- **NEXT ACTION:** FASE 3 -- tulis docs/TC-Performance.txt, TC-Claim.txt, TC-Leave.txt, TC-Time.txt
+  (format = TC-Buzz.txt / memory feedback_tc_doc_format: banner, legend, fungsi&impact, catatan teknis
+  locator+API terkonfirmasi, grup per kategori, entri bernomor dgn ->langkah, [API VERIFICATION],
+  [UI VERIFICATION], NOTE). Mencakup SEMUA TC modul (lama+baru), status [DONE]/[BLOCKED-BUG?] sesuai
+  hasil run terakhir, rujuk BG-ID. 4 agent paralel (hanya baca spec + tulis doc), lalu saya review.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -265,7 +266,20 @@ efek Holiday ke hitungan.
 
 ### P2.4 Time (~40) — eksplor: toggle Attendance Config, komentar per sel, aturan duplikat row,
 3 timesheet Pending Action.
-- [ ] Eksplorasi P2.4
+- [x] Eksplorasi P2.4 (lapis 1). FAKTA LIVE: ESS GET time/timesheets/default (minggu berjalan) --
+      utk employee BARU id:null sampai halaman time/viewMyTimesheet dibuka sekali (page load yg
+      membuat timesheet, tdk ada API create); Save = PUT timesheets/<id>/entries {entries:[{projectId,
+      activityId,dates:{yyyy-mm-dd:{duration:"hh:mm"}}}]}; Submit = PUT timesheets/<id> {action:SUBMIT};
+      status id: "NOT SUBMITTED" (PAKAI SPASI) / SUBMITTED / APPROVED / REJECTED. Admin: time/
+      viewEmployeeTimesheet ("Timesheets Pending Action") -> View -> viewTimesheet/employeeId/<emp>
+      (Edit/Reject/Approve + textarea komentar) -> PUT time/employees/<emp>/timesheets/<id> {action}.
+      Reject TANPA komentar diterima (finding, bukan bug). Reject TIDAK terminal (ESS bisa Submit ulang).
+      Seed: project ACME Ltd id 2, activity Administration id 11.
+- [x] Lapis 1 (5 TC, util `createEssTimesheet()`/`getEssTimesheetStatus()`, page object
+      `EmployeeTimesheetPage`; TimeAttendancePage -> DATE_INPUT_SELECTOR): TS-SUBMIT-01 ESS isi+Submit
+      (UI) -> muncul di Pending Action | TS-APPROVAL-01 Approve+komentar -> APPROVED, Submit hilang,
+      keluar dari Pending | TS-APPROVAL-02 Reject+komentar -> ESS resubmit | TS-APPROVAL-03 ESS tdk bisa
+      approve sendiri | TS-APPROVAL-04 approve timesheet belum disubmit via API ditolak (400).
 - [ ] TIMESHEET-03 Submit | 04 Multi-row | 05 Hapus row | 06 Duplikat row | 07 Komentar sel | 08 Navigasi
       minggu | 09 Reset | 10 XSS komentar | 11 Total >24j/hari lintas row (B)
 - [ ] TS-APPROVAL-01 Approve | 02 Reject+komentar | 03 Reject tanpa komentar | 04 ESS tak bisa approve
@@ -339,3 +353,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P2.1 batch 2 | +7 TC (EVAL-11..15, TRACKER-01/02) + PerformanceEvaluatePage/TrackerPage + createReview(); BG-373 baru (rating non-angka -> 0 diam-diam); KOREKSI BG-356 (console 404 di TC Activate = setup job-spec 404, setup kini via API); fix race searchByEmployeeName + pilih opsi by lastName. Full batch Performance 24 TC: 22 pass, 2 gagal sengaja (REVIEW-10, EVAL-15) | 1 commit
 - 2026-11-15 | P2.2 lapis 1 | 9 TC Claim (SUBMIT-01/02, APPROVAL-01..05, CONFIG-EVENT-01/02) + createEssClaim + SubmitClaimPage + ClaimEventsPage + AssignClaimPage.clickAction; 2 bug baru: BG-375 (klaim kosong bisa submit->PAID), BG-374 (Reject basi -> uncaught exception, instans BG-199). Run: 7 pass, 2 gagal sengaja | 1 commit
 - 2026-11-15 | P2.3 lapis 1 | 5 TC Leave (APPROVAL-01..03, MY-01, ENT-01) + createEssLeaveRequest; fix lingkungan: dateInput.ts (format tanggal drift) di Apply/AssignLeavePage + Performance, LeaveListPage.rowByDate/actOnRow, LeaveEntitlementPage.save tunggu dialog; koreksi R4 klaim "Approve/Reject N/A"; fix isVisible-tanpa-tunggu di 11 TC baru. Verifikasi gabungan 54 TC: 50 pass + 4 gagal sengaja | 1 commit
+- 2026-11-15 | P2.4 lapis 1 | 5 TC Time (TS-SUBMIT-01, TS-APPROVAL-01..04) + createEssTimesheet + EmployeeTimesheetPage; TimeAttendancePage -> DATE_INPUT_SELECTOR; fakta: timesheet employee baru dibuat saat page load, status id "NOT SUBMITTED". Full batch Time 12/12 lolos. FASE 2 LAPIS 1 TUNTAS | 1 commit

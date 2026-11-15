@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR } from '../utils/dateInput';
 
 /**
  * Time > Attendance > Punch In/Out. A single form that toggles between "Punch In" (button
@@ -15,7 +16,7 @@ export class TimeAttendancePage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.dateInput = page.locator('input[placeholder="yyyy-dd-mm"]').first();
+    this.dateInput = page.locator(DATE_INPUT_SELECTOR).first();
     this.timeInput = page.locator('input[placeholder="hh:mm"]').first();
     this.noteInput = page.locator('textarea');
     this.submitButton = page.locator('button[type="submit"]');
