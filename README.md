@@ -186,10 +186,10 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Recruitment | 59 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Performance | 30 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
-| Claim | 23 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
+| Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 26 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
 | Time | 12 | [docs/TC-Time.txt](docs/TC-Time.txt) |
-| **Total** | **536** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
+| **Total** | **542** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -293,9 +293,9 @@ Notable confirmed behaviors: a review can only name a "Supervisor Reviewer" who 
 - Re-opening the edit page of an already-activated review: the app's own data fetch returns 404, which throws an unhandled JS exception and leaves the form blank (another instance of the app-wide unhandled-exception defect). No data risk, since the server rejects edits to an activated review with 422 (`TC-PERF-REVIEW-10`, BG-356)
 - The evaluation API accepts a non-numeric rating (`"abc"`) with HTTP 200 and silently stores it as `0.00`. Numeric validation exists only in the browser, even though the same endpoint correctly rejects out-of-range and negative ratings (`TC-PERF-EVAL-15`, BG-373)
 
-### Claim (23 TCs)
+### Claim (29 TCs)
 
-Admin-side Assign Claim (14: create, required fields, expenses incl. amount boundary, attachments incl. renamed-executable upload, XSS/SQL injection, cancel, mass assignment, double-submit, concurrent cancel, back/forward, IDOR, segregation of duties) plus ESS-side Submit Claim, the approval state machine and event configuration (9). Approve moves a claim straight to PAID (there is no separate "Pay" step); PAID, REJECTED and CANCELLED are terminal, and any further action is refused with 403. An ESS user only ever gets `CANCEL` on their own submitted claim.
+Admin-side Assign Claim (14: create, required fields, expenses incl. amount boundary, attachments incl. renamed-executable upload, XSS/SQL injection, cancel, mass assignment, double-submit, concurrent cancel, back/forward, IDOR, segregation of duties) plus ESS-side Submit Claim and the My Claims status filter, the approval state machine (including Approve and Reject fired at the same instant: exactly one wins, and the final status always matches the winner), and Events / Expense Types configuration (15): new entries reach the ESS forms, inactive ones are hidden, duplicate names are refused by the server (422), and a stored-XSS event name renders as text for both Admin and ESS. Approve moves a claim straight to PAID (there is no separate "Pay" step); PAID, REJECTED and CANCELLED are terminal, and any further action is refused with 403. An ESS user only ever gets `CANCEL` on their own submitted claim.
 
 **Confirmed bugs:**
 - A claim with zero expenses can be submitted and then approved to PAID with a total of 0. This may be a product decision, so it's logged as Low and flagged for product-owner confirmation (`TC-CLAIM-SUBMIT-02`, BG-375)

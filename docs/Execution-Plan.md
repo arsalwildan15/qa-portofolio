@@ -26,10 +26,11 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** (6) LAPIS 2 Fase 2 sesuai urutan disetujui -- mulai P2.3 Leave lapis 2 (APPLY-07 Half
-  Day/Specify Time, hari libur, overlap, tgl lampau) & P2.2 Claim Expense Types; lalu Performance/Time
-  lapis 2, lalu P2.5 lintas-modul. Setiap TC baru: verifikasi per file, full batch per modul, docs/TC-*.txt
-  ikut diperbarui (status FASE 3 sudah ada, cukup tambah entri).
+- **NEXT ACTION:** (6) LAPIS 2 Fase 2 -- Leave lapis 2 (APPLY-07..11) [x], Claim lapis 2 (6 TC) [x].
+  Berikutnya: P2.1 Performance lapis 2 (EVAL-10 self-eval ESS, KPI-11 pagination/sort, TRACKER-03..08),
+  lalu Time lapis 2 (multi-row, komentar sel, Customer/Project), lalu P2.5 lintas-modul, lalu Fase 4-8.
+  Setiap TC baru: verifikasi per file, full batch per modul (--workers=1 utk modul dgn setup ESS),
+  docs/TC-*.txt ikut diperbarui.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -226,8 +227,18 @@ submit tanpa expense.
       stlh Approve (server 403 benar, tapi UI "Uncaught exception: fe" = BUG BG-374, instans BG-199) |
       CONFIG-EVENT-01 event baru tersedia di dropdown ESS | CONFIG-EVENT-02 Required + event non-aktif
       disembunyikan. Run pertama: 7 pass, 2 gagal SENGAJA (SUBMIT-02, APPROVAL-05).
-- [ ] LAPIS 2: CONFIG-EVENT duplikat/XSS/delete dipakai | CONFIG-EXPTYPE-01..06 | SUBMIT-03 My Claims
-      filter | APPROVAL Approve vs Reject paralel | cross-admin concurrency
+- [x] LAPIS 2 (6 TC, semua lolos run pertama): CONFIG-EVENT-03 duplikat (server 422 [name] + form
+      "Already exists", tetap 1 event) | CONFIG-EVENT-04 XSS nama event tampil sbg teks di Admin & ESS |
+      CONFIG-EXPTYPE-01 expense type baru (POST claim/expenses/types) muncul di dialog Add Expense ESS |
+      CONFIG-EXPTYPE-02 duplikat diblok tanpa POST + type non-aktif disembunyikan dari ESS | SUBMIT-03
+      My Claims filter Status (param status=X) | APPROVAL-06 Approve vs Reject paralel: tepat 1 menang
+      (pemenang tdk deterministik), status akhir konsisten. FIX: ASSIGN-08/13 lama ambil klaim SUBMITTED
+      dari employees/requests (SEMUA karyawan) -> kena klaim milik ESS -> tombol Cancel tidak ada ->
+      timeout; ditulis ulang pakai createEssClaim + dibatalkan pemilik. Full batch Claim 29 TC: 25 pass
+      + 4 gagal sengaja (ASSIGN-06 BG-333, ASSIGN-10 BG-338, SUBMIT-02 BG-375, APPROVAL-05 BG-374).
+      --workers=2 memicu noise createEssAccount (BG-384..387 diarsip) -> jalankan Claim --workers=1.
+- [ ] (backlog lapis 2) delete event/expense type terpakai | cross-admin concurrency | CONFIG-EXPTYPE
+      edit/delete
 - [ ] ASSIGN-16 Assign+Submit->PAID (aturan bisnis) | 17 Edit/delete expense | 18 Delete attachment
       | 19 Attachment 1MB tepat/>1MB (B) | 20 Double extension + nama file berbahaya (S) | 21 IDOR scoped+ESS
 - [ ] LIST-01 Filter Employee Claims | 02 Pagination/sort | 03 Kombinasi filter
@@ -366,3 +377,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P2.3 lapis 1 | 5 TC Leave (APPROVAL-01..03, MY-01, ENT-01) + createEssLeaveRequest; fix lingkungan: dateInput.ts (format tanggal drift) di Apply/AssignLeavePage + Performance, LeaveListPage.rowByDate/actOnRow, LeaveEntitlementPage.save tunggu dialog; koreksi R4 klaim "Approve/Reject N/A"; fix isVisible-tanpa-tunggu di 11 TC baru. Verifikasi gabungan 54 TC: 50 pass + 4 gagal sengaja | 1 commit
 - 2026-11-15 | P2.4 lapis 1 | 5 TC Time (TS-SUBMIT-01, TS-APPROVAL-01..04) + createEssTimesheet + EmployeeTimesheetPage; TimeAttendancePage -> DATE_INPUT_SELECTOR; fakta: timesheet employee baru dibuat saat page load, status id "NOT SUBMITTED". Full batch Time 12/12 lolos. FASE 2 LAPIS 1 TUNTAS | 1 commit
 - 2026-11-15 | FASE 3 | docs/TC-Performance/Claim/Leave/Time.txt (86 TC + 1 CANCEL) via 4 agent + review manual; README coverage 531 + 4 subsection; QA-Review-Progress status final; 2 label spec usang diperbaiki | 1 commit
+- 2026-11-15 | P2.2 lapis 2 | +6 TC Claim (CONFIG-EVENT-03/04, CONFIG-EXPTYPE-01/02, SUBMIT-03, APPROVAL-06), semua lolos run pertama; ASSIGN-08/13 ditulis ulang (data sendiri, bukan seed milik karyawan lain); full batch Claim 29 TC: 25 pass + 4 gagal sengaja; noise BG-384..387 diarsip; TC-Claim.txt 30 entri, README 542 | 1 commit
