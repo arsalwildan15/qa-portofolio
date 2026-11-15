@@ -21,7 +21,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { SubmitClaimPage } from '../../../src/pages';
 import { createEssClaim } from '../../../src/utils/createEssClaim';
 
@@ -39,7 +39,9 @@ test('TC-CLAIM-APPROVAL-03: an ESS employee cannot approve their own claim (UI o
   report.step('[ESS UI] Detail klaim sendiri: tidak ada tombol Approve');
   const submitClaimPage = new SubmitClaimPage(essPage);
   await submitClaimPage.gotoDetail(claimId);
-  const approveVisible = await essPage.getByRole('button', { name: 'Approve', exact: true }).isVisible({ timeout: 3_000 }).catch(() => false);
+  // Anchor: wait until the detail page's action bar has rendered (Back button) before a NEGATIVE check.
+  report.check('Halaman detail klaim selesai dirender', await isVisibleWithWait(essPage.getByRole('button', { name: 'Back', exact: true }), 15_000));
+  const approveVisible = await essPage.getByRole('button', { name: 'Approve', exact: true }).isVisible();
   report.check('Tombol Approve TIDAK tampil utk ESS', !approveVisible);
 
   report.step('[ESS API] PUT action APPROVE pd klaim sendiri');

@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR, fillDate } from '../utils/dateInput';
 
 /**
  * Leave > Apply. Confirmed live: without any Leave Type carrying a non-zero balance for the
@@ -26,8 +27,8 @@ export class ApplyLeavePage extends BasePage {
     super(page);
     this.leaveTypeSelect = page.locator('.oxd-select-text').first();
     this.leaveBalanceText = page.getByText(/Day\(s\)/);
-    this.fromDateInput = page.locator('input[placeholder="yyyy-dd-mm"]').first();
-    this.toDateInput = page.locator('input[placeholder="yyyy-dd-mm"]').last();
+    this.fromDateInput = page.locator(DATE_INPUT_SELECTOR).first();
+    this.toDateInput = page.locator(DATE_INPUT_SELECTOR).last();
     this.commentsInput = page.locator('textarea');
     this.applyButton = page.getByRole('button', { name: 'Apply' });
     this.fieldErrors = page.locator('.oxd-input-group .oxd-text--span');
@@ -77,10 +78,8 @@ export class ApplyLeavePage extends BasePage {
 
   /** date format is yyyy-dd-mm, matching this app's convention everywhere else. Clears first: a bare .fill() on this input APPENDS instead of replacing (confirmed live), a script bug to avoid. */
   async fillDateRange(fromDate: string, toDate: string): Promise<void> {
-    await this.fromDateInput.fill('');
-    await this.fromDateInput.fill(fromDate);
-    await this.toDateInput.fill('');
-    await this.toDateInput.fill(toDate);
+    await fillDate(this.fromDateInput, fromDate, 'yyyy-dd-mm');
+    await fillDate(this.toDateInput, toDate, 'yyyy-dd-mm');
   }
 
   async fillComments(text: string): Promise<void> {

@@ -86,8 +86,15 @@ export class LeaveEntitlementPage extends BasePage {
       )
       .catch(() => null);
     await this.saveButton.click();
-    await this.page.waitForTimeout(600);
-    if (await this.confirmButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    // The "Updating Entitlement" confirm dialog (shown even when the existing value is 0.00)
+    // only appears after the app's own pre-check GET returns, which can take well over the
+    // old fixed 2.6s on the slow demo -- confirmed live: the dialog was left open, no POST sent.
+    // Wait for whichever comes first: the dialog, or the POST going straight out.
+    const dialogShown = await Promise.race([
+      this.confirmButton.waitFor({ state: 'visible', timeout: 20_000 }).then(() => true).catch(() => false),
+      responsePromise.then(() => false),
+    ]);
+    if (dialogShown) {
       await this.confirmButton.click();
     }
     return responsePromise;

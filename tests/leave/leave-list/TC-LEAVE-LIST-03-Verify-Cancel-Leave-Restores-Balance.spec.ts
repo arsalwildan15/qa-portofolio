@@ -71,7 +71,7 @@ test('TC-LEAVE-LIST-03: cancelling a Pending Approval leave request restores the
   await leaveListPage.goto();
   await leaveListPage.selectEmployee(me.employeeId);
   await leaveListPage.search();
-  const row = leaveListPage.rowByText(applyDate).first();
+  const row = (await leaveListPage.rowByDate(applyDate, 'yyyy-dd-mm')).first();
   const rowFound = await row.isVisible({ timeout: 5_000 }).catch(() => false);
   report.check('Record yg baru dibuat ditemukan di Leave List', rowFound, `applyDate=${applyDate}`);
   const cancelResp = await leaveListPage.cancelLeave(row);

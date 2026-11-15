@@ -93,7 +93,7 @@ test('TC-LEAVE-ASSIGN-01: assigning leave to an employee with sufficient balance
   // eksplisit: kalau usedDate kosong, lompati verifikasi list ini (check assign di atas yg
   // sudah gagal cukup utk menandai TC ini FAILED).
   const scheduledRow =
-    usedDate !== '' && (await leaveListPage.rowByText(usedDate).first().isVisible({ timeout: 5_000 }).catch(() => false));
+    usedDate !== '' && (await (await leaveListPage.rowByDate(usedDate, 'yyyy-dd-mm')).first().isVisible({ timeout: 5_000 }).catch(() => false));
   report.check(
     'Record baru muncul dgn status "Scheduled" saat Leave List difilter ke Scheduled',
     scheduledRow,

@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR, type DateFormat } from '../utils/dateInput';
 
 /**
  * Leave > Leave List. Confirmed live: default filter has a sticky "Pending Approval" status
@@ -7,16 +8,12 @@ import { BasePage } from './BasePage';
  * search for a record in any other status (Scheduled, Taken, Rejected, Cancelled) returns
  * "No Records Found" unless that chip is explicitly removed or the Status dropdown is used.
  *
- * [TEMUAN -- dikonfirmasi via API, bukan dugaan UI] Response GET
- * /api/v2/leave/employees/leave-requests carries an `allowedActions` array per record,
- * reflecting what the CURRENT logged-in user is actually permitted to do with that specific
- * record server-side. With only the single "Admin" account available in this demo,
- * `allowedActions` is ALWAYS `[{"action":"CANCEL"}]` only, for both the admin's own
- * "Pending Approval" request and an admin-assigned-to-another-employee "Scheduled" one.
- * Approve/Reject is therefore NOT reachable for testing in this environment: it requires a
- * configured supervisor-subordinate relationship this demo's single test account doesn't
- * have, not a missing locator. Documented as N/A, consistent with this project's established
- * pattern for role-gated features that need a second account this demo doesn't provide.
+ * Response GET /api/v2/leave/employees/leave-requests carries an `allowedActions` array per
+ * record (what the CURRENT user may do server-side). [KOREKSI 2026-11-15, menggantikan klaim
+ * "Approve/Reject N/A" lama -- R4] The old N/A came from only testing the Admin's OWN request and
+ * an Admin-ASSIGNED one (lands Scheduled). For a "Pending Approval" request APPLIED BY an ESS
+ * account (createEssAccount + loginAs, Fase 1), the Admin row DOES show Approve / Reject and
+ * they work: PUT /api/v2/leave/employees/leave-requests/<id> {action: APPROVE|REJECT}.
  */
 export class LeaveListPage extends BasePage {
   readonly employeeNameInput: Locator;
@@ -105,6 +102,28 @@ export class LeaveListPage extends BasePage {
 
   rowByText(text: string): Locator {
     return this.tableRows.filter({ hasText: text });
+  }
+
+  /**
+   * Rows showing `date` (given in `valueFormat`), converted to the format the list currently
+   * DISPLAYS (read from the page's date-input placeholder -- it flips with Admin > Localization,
+   * see dateInput.ts). Not a "match either ordering" regex: 2026-12-07 vs 2026-07-12 are
+   * different days and would false-match.
+   */
+  async rowByDate(date: string, valueFormat: DateFormat): Promise<Locator> {
+    const displayFormat = (await this.page.locator(DATE_INPUT_SELECTOR).first().getAttribute('placeholder').catch(() => null)) as DateFormat | null;
+    const [yyyy, a, b] = date.split('-');
+    const displayed = displayFormat && displayFormat !== valueFormat ? `${yyyy}-${b}-${a}` : date;
+    return this.tableRows.filter({ hasText: displayed });
+  }
+
+  /** Clicks the row's inline Approve / Reject button; returns the PUT employees/leave-requests/<id> response. */
+  async actOnRow(row: Locator, action: 'Approve' | 'Reject'): Promise<import('@playwright/test').Response | null> {
+    const responsePromise = this.page
+      .waitForResponse((r) => /\/api\/v2\/leave\/employees\/leave-requests\/\d+$/.test(r.url()) && r.request().method() === 'PUT', { timeout: 15_000 })
+      .catch(() => null);
+    await row.getByRole('button', { name: action, exact: true }).click();
+    return responsePromise;
   }
 
   /** Opens the row's kebab menu and clicks "View Leave Details", landing on viewLeaveRequest/<id>. */

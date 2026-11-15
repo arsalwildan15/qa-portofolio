@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, isHiddenWithWait } from '../../../src/utils/testReport';
 import { setupReviewableEmployee } from '../../../src/utils/setupReviewableEmployee';
 
 test('TC-PERF-REVIEW-09: delete confirmation dialog — Cancel keeps the review, Confirm deletes it', async ({
@@ -47,12 +47,12 @@ test('TC-PERF-REVIEW-09: delete confirmation dialog — Cancel keeps the review,
   const row = performanceManageReviewsPage.rowFor(emp.firstName);
   await performanceManageReviewsPage.clickDelete(row);
   const dialog = performanceManageReviewsPage.confirmDeleteDialog();
-  const dialogVisible = await dialog.isVisible({ timeout: 5_000 }).catch(() => false);
+  const dialogVisible = await isVisibleWithWait(dialog, 5_000);
   report.check('Modal konfirmasi "Are you Sure?" muncul', dialogVisible);
   await dialog.getByRole('button', { name: 'No, Cancel' }).click();
   await dialog.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
   await page.waitForTimeout(800);
-  const stillThere = await performanceManageReviewsPage.rowFor(emp.firstName).isVisible({ timeout: 5_000 }).catch(() => false);
+  const stillThere = await isVisibleWithWait(performanceManageReviewsPage.rowFor(emp.firstName), 5_000);
   report.check('Setelah "No, Cancel", review masih ada di daftar', stillThere);
 
   report.step('Klik trash lagi -> klik "Yes, Delete" -> review HILANG dari daftar');
@@ -62,10 +62,8 @@ test('TC-PERF-REVIEW-09: delete confirmation dialog — Cancel keeps the review,
   await performanceManageReviewsPage.clickDelete(performanceManageReviewsPage.rowFor(emp.firstName));
   const delResp = await performanceManageReviewsPage.confirmDelete();
   report.check('[API] DELETE review berhasil (200)', delResp?.status() === 200, `status=${delResp?.status()}`);
-  await page.waitForLoadState('networkidle').catch(() => {});
-  await page.waitForTimeout(1_000);
-  const goneNow = await performanceManageReviewsPage.rowFor(emp.firstName).isVisible({ timeout: 3_000 }).catch(() => false);
-  report.check('Setelah "Yes, Delete", review TIDAK lagi ada di daftar', !goneNow);
+  const gone = await isHiddenWithWait(performanceManageReviewsPage.rowFor(emp.firstName), 10_000);
+  report.check('Setelah "Yes, Delete", review TIDAK lagi ada di daftar', gone);
 
   report.print();
 });

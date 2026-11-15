@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR, fillDate } from '../utils/dateInput';
 
 /**
  * Leave > Assign Leave. An admin directly books leave FOR an employee -- confirmed live,
@@ -29,8 +30,8 @@ export class AssignLeavePage extends BasePage {
     super(page);
     this.employeeNameInput = page.getByPlaceholder('Type for hints...');
     this.leaveTypeSelect = page.locator('.oxd-select-text').first();
-    this.fromDateInput = page.locator('input[placeholder="yyyy-dd-mm"]').first();
-    this.toDateInput = page.locator('input[placeholder="yyyy-dd-mm"]').last();
+    this.fromDateInput = page.locator(DATE_INPUT_SELECTOR).first();
+    this.toDateInput = page.locator(DATE_INPUT_SELECTOR).last();
     this.commentsInput = page.locator('textarea');
     this.assignButton = page.getByRole('button', { name: 'Assign' });
     // [BUG SCRIPT, diperbaiki] Tanpa .first(), locator ini ambigu kalau ada LEBIH dari satu
@@ -104,10 +105,8 @@ export class AssignLeavePage extends BasePage {
   }
 
   async fillDateRange(fromDate: string, toDate: string): Promise<void> {
-    await this.fromDateInput.fill('');
-    await this.fromDateInput.fill(fromDate);
-    await this.toDateInput.fill('');
-    await this.toDateInput.fill(toDate);
+    await fillDate(this.fromDateInput, fromDate, 'yyyy-dd-mm');
+    await fillDate(this.toDateInput, toDate, 'yyyy-dd-mm');
   }
 
   /**

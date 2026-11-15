@@ -13,17 +13,21 @@
 - **Fase aktif:** 2 -- P2.1 Performance lapis 1 TUNTAS (24 TC; sengaja FAILED: REVIEW-10=BG-356,
   EVAL-15=BG-373); P2.2 Claim lapis 1 TUNTAS (9 TC; sengaja FAILED: SUBMIT-02=BG-375,
   APPROVAL-05=BG-374)
-- **Task terakhir selesai:** P2.2 Claim lapis 1 (lihat checklist P2.2 + LOG)
+- **Task terakhir selesai:** P2.3 Leave lapis 1 (5 TC baru + fix lingkungan tanggal; verifikasi gabungan
+  54 TC: 50 pass, 4 gagal = persis 4 TC bug yg sengaja FAILED; suite Leave lama+baru 100% lolos)
+- **INSTRUKSI USER 2026-11-15:** begitu Fase 2 (lapis 1 keempat modul) selesai, LANGSUNG lanjut
+  otomatis ke Fase 3 (dokumentasi) tanpa menunggu konfirmasi.
 - **URUTAN BARU (disetujui user 2026-11-15, pendekatan 2 LAPIS):** lapis 1 = alur inti + approval
   lintas role (ESS) + keamanan di SEMUA modul dulu; lapis 2 = edge case sisa SETELAH 4 modul punya
   lapis 1. Urutan: (1) P2.1 batch 2 ringkas -> (2) P2.2 Claim lapis 1 -> (3) P2.3 Leave lapis 1 ->
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** P2.3 Leave LAPIS 1 -- eksplor live alur approval leave milik ESS: entitlement utk
-  ESS -> ESS Apply -> Admin/supervisor Approve/Reject (balance kembali saat Reject?) -> My Leave +
-  Cancel oleh ESS; Entitlement CRUD dasar. Pakai createEssAccount+loginAs+assignSupervisor+
-  createLeaveEntitlement (util lama, cek dulu signature-nya).
+- **NEXT ACTION:** P2.4 Time LAPIS 1 -- probe live: ESS buat+isi+Submit timesheet (My Timesheet) ->
+  Admin Employee Timesheets -> View -> Approve / Reject (komentar wajib?) ; tangkap endpoint API
+  (time/...) -> TC TS-SUBMIT-01, TS-APPROVAL-01 Approve, 02 Reject, 03 ESS tdk bisa approve sendiri,
+  04 approve timesheet belum Submitted via API. TimeAttendancePage: pindahkan ke dateInput.ts dulu.
+  SETELAH Time lapis 1 -> LANGSUNG Fase 3 (instruksi user).
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -229,7 +233,24 @@ submit tanpa expense.
 
 ### P2.3 Leave (~45) — eksplor: opsi Duration, field "Add to", halaman Reports, flag situational,
 efek Holiday ke hitungan.
-- [ ] Eksplorasi P2.3
+- [x] Eksplorasi P2.3 (lapis 1). FAKTA LIVE: entitlement POST leave/leave-entitlements {empNumber,
+      leaveTypeId,fromDate,toDate,entitlement}; ESS apply POST leave/leave-requests {leaveTypeId,fromDate,
+      toDate,comment,duration:{type}}; ESS list GET leave/leave-requests (status di leaveBreakdown[0].name,
+      allowedActions); saldo GET leave-balance/leave-type/<id> (Pending SUDAH memotong saldo); Admin
+      approve/reject PUT leave/employees/leave-requests/<id> {action}. KOREKSI R4: klaim lama di
+      LeaveListPage "Approve/Reject N/A" SALAH -- utk request yg diajukan akun ESS, Admin bisa Approve/
+      Reject. Dialog "Updating Entitlement ... 0.00 -> X" muncul juga utk employee tanpa entitlement dan
+      bisa telat >2.6s (fix: LeaveEntitlementPage.save tunggu dialog ATAU POST).
+- [x] LINGKUNGAN (kritis, lintas modul): format tanggal demo kini "yyyy-mm-dd" (suite lama dibangun di
+      "yyyy-dd-mm"); nilai ketik DITAFSIRKAN sesuai format tampil. Fix: util `dateInput.ts`
+      (DATE_INPUT_SELECTOR + fillDate(value, valueFormat)) dipakai ApplyLeavePage, AssignLeavePage,
+      PerformanceManageReviewsPage, PerformanceEvaluatePage; LeaveListPage.rowByDate() utk cari baris by
+      tanggal sesuai format tampil. 4 TC Leave lama (ASSIGN-01/02, LIST-01/03) yg rusak krn ini -> lolos.
+- [x] Lapis 1 (5 TC, util `createEssLeaveRequest()`/`getEssLeaveRequest()`/`isoWeekday()`,
+      LeaveListPage.actOnRow()): APPROVAL-01 ESS apply (UI) -> Admin Approve -> Scheduled, saldo tdk dobel |
+      APPROVAL-02 Reject -> saldo kembali, terminal | APPROVAL-03 ESS tdk bisa approve sendiri |
+      MY-01 ESS cancel sendiri di My Leave -> saldo kembali, approve stlh cancel ditolak |
+      ENT-01 entitlement Admin -> saldo ESS.
 - [ ] APPLY-07 Half Day/Specify Time | 08 Hari libur | 09 Overlap | 10 Tanggal lampau | 11 Unicode/RTL
       | 12 Panjang comments | 13 Double-click | 14 Refresh pending | 15 Koneksi putus
 - [ ] APPROVAL-01 Approve ESS | 02 Reject->balance kembali | 03 Per-hari multi-day | 04 Komentar
@@ -265,6 +286,16 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - [ ] QA-Review-Progress.md status final 4 modul
 
 ## FASE 4 — Audit Ulang Modul Lama
+- [ ] (BARU dari Fase 2, WAJIB duluan) Drift format tanggal: 9 page object lama masih hardcode
+      placeholder "yyyy-dd-mm" -> CandidatesPage, DependentsPage, ImmigrationPage, JobPage (+dialog
+      terminate), MembershipsPage, PersonalDetailsPage, QualificationsPage, TimeAttendancePage
+      (TimeAttendancePage dikerjakan di P2.4). Pindahkan ke dateInput.ts + cek TC yg mencocokkan teks
+      tanggal di tabel (pakai pola rowByDate).
+- [ ] (BARU) `locator.isVisible({ timeout })` TIDAK menunggu (timeout diabaikan) -- TC lama yg memakainya
+      (mis. KPI-01/02) bisa false-fail (cek positif) atau false-PASS (cek negatif). Ganti ke
+      isVisibleWithWait/isHiddenWithWait (testReport.ts); cek negatif wajib tunggu elemen jangkar dulu.
+- [ ] (BARU) TC lama yg set Job Title lewat halaman PIM Job memicu 404 job-titles/<id>/specification ->
+      console-error check gagal palsu; pakai API job-details spt setupReviewableEmployee().
 - [ ] P4.1 Access control ESS (ganti klaim N/A single-role): Admin API (users, pay-grades) 403; PIM read
       personal/salary orang lain, edit Job/Salary sendiri; Recruitment candidates; Buzz delete post orang
       lain; privilege escalation role sendiri (~15)
@@ -307,3 +338,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P2.1 batch 1 | 13 TC Review + 4 TC KPI + PerformanceManageReviewsPage + setupReviewableEmployee + TestReport pageerror-whitelist fix; BG-356 (404+exception pasca-Activate) ditemukan & dicatat (R3: tdk di-whitelist, REVIEW-10 sengaja FAILED). Run akhir 17 TC: 8 pass; 7 gagal HANYA console-check (BG-356, semua check fungsional lolos); KPI-09 & REVIEW-01 gagal tanpa ringkasan di batch tapi 6/6 & 7/7 lolos terisolasi (flaky-under-load, pola P0.7) | 1 commit
 - 2026-11-15 | P2.1 batch 2 | +7 TC (EVAL-11..15, TRACKER-01/02) + PerformanceEvaluatePage/TrackerPage + createReview(); BG-373 baru (rating non-angka -> 0 diam-diam); KOREKSI BG-356 (console 404 di TC Activate = setup job-spec 404, setup kini via API); fix race searchByEmployeeName + pilih opsi by lastName. Full batch Performance 24 TC: 22 pass, 2 gagal sengaja (REVIEW-10, EVAL-15) | 1 commit
 - 2026-11-15 | P2.2 lapis 1 | 9 TC Claim (SUBMIT-01/02, APPROVAL-01..05, CONFIG-EVENT-01/02) + createEssClaim + SubmitClaimPage + ClaimEventsPage + AssignClaimPage.clickAction; 2 bug baru: BG-375 (klaim kosong bisa submit->PAID), BG-374 (Reject basi -> uncaught exception, instans BG-199). Run: 7 pass, 2 gagal sengaja | 1 commit
+- 2026-11-15 | P2.3 lapis 1 | 5 TC Leave (APPROVAL-01..03, MY-01, ENT-01) + createEssLeaveRequest; fix lingkungan: dateInput.ts (format tanggal drift) di Apply/AssignLeavePage + Performance, LeaveListPage.rowByDate/actOnRow, LeaveEntitlementPage.save tunggu dialog; koreksi R4 klaim "Approve/Reject N/A"; fix isVisible-tanpa-tunggu di 11 TC baru. Verifikasi gabungan 54 TC: 50 pass + 4 gagal sengaja | 1 commit

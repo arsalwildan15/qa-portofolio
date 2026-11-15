@@ -22,7 +22,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { setupReviewableEmployee } from '../../../src/utils/setupReviewableEmployee';
 
 test('TC-PERF-REVIEW-01: creating a review with valid data succeeds, initial status is Inactive', async ({
@@ -54,7 +54,7 @@ test('TC-PERF-REVIEW-01: creating a review with valid data succeeds, initial sta
   report.step('Verify: review baru muncul di daftar Manage Reviews');
   // employeeId (unik), BUKAN firstName -- lihat catatan di TC-PERF-REVIEW-04.
   await performanceManageReviewsPage.searchByEmployeeName(emp.employeeId, emp.lastName);
-  const found = await performanceManageReviewsPage.rowFor(emp.firstName).isVisible({ timeout: 10_000 }).catch(() => false);
+  const found = await isVisibleWithWait(performanceManageReviewsPage.rowFor(emp.firstName), 10_000);
   report.check('Review baru ditemukan di daftar', found, `employee=${emp.firstName}`);
 
   report.print();

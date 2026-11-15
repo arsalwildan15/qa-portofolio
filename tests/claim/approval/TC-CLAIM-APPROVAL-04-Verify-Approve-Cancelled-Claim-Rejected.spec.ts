@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createEssClaim } from '../../../src/utils/createEssClaim';
 
 test('TC-CLAIM-APPROVAL-04: a claim cancelled by its owner cannot be approved via API', async ({
@@ -40,7 +40,9 @@ test('TC-CLAIM-APPROVAL-04: a claim cancelled by its owner cannot be approved vi
 
   report.step('[Admin UI] Detail klaim CANCELLED: tidak ada tombol Approve');
   await assignClaimPage.gotoDetail(claimId);
-  const approveVisible = await page.getByRole('button', { name: 'Approve', exact: true }).isVisible({ timeout: 3_000 }).catch(() => false);
+  // Anchor: wait until the detail page's action bar has rendered (Back button) before a NEGATIVE check.
+  report.check('Halaman detail klaim selesai dirender', await isVisibleWithWait(page.getByRole('button', { name: 'Back', exact: true }), 15_000));
+  const approveVisible = await page.getByRole('button', { name: 'Approve', exact: true }).isVisible();
   report.check('Tombol Approve TIDAK tampil utk klaim CANCELLED', !approveVisible);
 
   report.step('[Admin API] APPROVE klaim CANCELLED');

@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createTestEmployee } from '../../../src/utils/createTestEmployee';
 import { getLoggedInEmployeeName } from '../../../src/utils/getLoggedInEmployeeName';
 
@@ -51,7 +51,7 @@ test('TC-PERF-TRACKER-01: adding a tracker with valid data succeeds and appears 
 
   report.step('Verify: tracker muncul di daftar Performance Trackers');
   await performanceTrackerPage.goto();
-  const found = await performanceTrackerPage.tableRows.filter({ hasText: trackerName }).first().isVisible({ timeout: 10_000 }).catch(() => false);
+  const found = await isVisibleWithWait(performanceTrackerPage.tableRows.filter({ hasText: trackerName }).first(), 10_000);
   report.check('Tracker baru ada di daftar', found, `trackerName=${trackerName}`);
 
   report.print();

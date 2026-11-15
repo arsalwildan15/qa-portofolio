@@ -86,7 +86,7 @@ test('TC-LEAVE-ASSIGN-02: insufficient balance shows an override dialog; Cancel 
   await leaveListPage.clearStatusChip();
   await leaveListPage.selectStatus('Scheduled');
   await leaveListPage.search();
-  const foundAfterCancel = await leaveListPage.rowByText(cancelDate).first().isVisible({ timeout: 3_000 }).catch(() => false);
+  const foundAfterCancel = await (await leaveListPage.rowByDate(cancelDate, 'yyyy-dd-mm')).first().isVisible({ timeout: 3_000 }).catch(() => false);
   report.check('[Cancel path] TIDAK ada record "Scheduled" tercipta utk tanggal ini', foundAfterCancel === false, `cancelDate=${cancelDate}`);
 
   report.step('[Confirm path] Assign leave 1 hari dgn balance "US - FMLA" = 0, KLIK OK/CONFIRM pada dialog override');
@@ -108,8 +108,7 @@ test('TC-LEAVE-ASSIGN-02: insufficient balance shows an override dialog; Cancel 
   await leaveListPage.clearStatusChip();
   await leaveListPage.selectStatus('Scheduled');
   await leaveListPage.search();
-  const foundAfterConfirm = await leaveListPage
-    .rowByText(confirmDate)
+  const foundAfterConfirm = await (await leaveListPage.rowByDate(confirmDate, 'yyyy-dd-mm'))
     .first()
     .waitFor({ state: 'visible', timeout: 8_000 })
     .then(() => true)

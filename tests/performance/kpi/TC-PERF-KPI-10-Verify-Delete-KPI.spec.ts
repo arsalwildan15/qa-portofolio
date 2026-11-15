@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait, isHiddenWithWait } from '../../../src/utils/testReport';
 import { uniqueName } from '../../../src/data/testData';
 
 test('TC-PERF-KPI-10: deleting a KPI removes it from the list', async ({
@@ -46,7 +46,7 @@ test('TC-PERF-KPI-10: deleting a KPI removes it from the list', async ({
   const row = performanceKpiPage.tableRows.filter({ hasText: kpiName }).first();
   await row.locator('.bi-trash').click();
   const dialog = page.getByRole('dialog');
-  const dialogVisible = await dialog.isVisible({ timeout: 5_000 }).catch(() => false);
+  const dialogVisible = await isVisibleWithWait(dialog, 5_000);
   report.check('Modal konfirmasi delete muncul', dialogVisible);
 
   const deleteResponsePromise = page.waitForResponse(
@@ -61,8 +61,8 @@ test('TC-PERF-KPI-10: deleting a KPI removes it from the list', async ({
   await performanceKpiPage.goto();
   await page.waitForLoadState('networkidle').catch(() => {});
   await page.waitForTimeout(1_000);
-  const stillThere = await performanceKpiPage.tableRows.filter({ hasText: kpiName }).first().isVisible({ timeout: 3_000 }).catch(() => false);
-  report.check('KPI TIDAK lagi muncul di daftar', !stillThere);
+  const gone = await isHiddenWithWait(performanceKpiPage.tableRows.filter({ hasText: kpiName }).first(), 5_000);
+  report.check('KPI TIDAK lagi muncul di daftar', gone);
 
   report.print();
 });

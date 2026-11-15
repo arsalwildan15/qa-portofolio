@@ -1,5 +1,6 @@
 import { type Page, type Locator, type Response } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR, fillDate } from '../utils/dateInput';
 
 /**
  * Performance > Manage Reviews > Evaluate (reviewEvaluateByAdmin/<id>), confirmed live:
@@ -11,8 +12,8 @@ import { BasePage } from './BasePage';
  *   PUT reviews/<id>/evaluation/final with complete:false -> status "In Progress".
  * - Complete opens a "Confirm Review Submission" dialog (Cancel / Ok); Ok sends complete:true
  *   -> status "Completed" (read-only).
- * - The Date of Completion input is interpreted in the CURRENTLY displayed format (yyyy-dd-mm or
- *   yyyy-mm-dd flips between sessions) -- use dates whose day == month to stay unambiguous.
+ * - The Date of Completion input is parsed in the CURRENTLY displayed format -- filled via
+ *   fillDate() (dateInput.ts) from an ISO value.
  */
 export class PerformanceEvaluatePage extends BasePage {
   readonly ratingInputs: Locator;
@@ -30,7 +31,7 @@ export class PerformanceEvaluatePage extends BasePage {
     this.finalRatingInput = this.ratingInputs.last();
     this.gridCommentTextareas = page.locator('textarea.orangehrm-evaluation-grid-comment');
     this.finalCommentTextarea = page.locator('textarea:not(.orangehrm-evaluation-grid-comment)');
-    this.completionDateInput = page.locator('input[placeholder="yyyy-dd-mm"], input[placeholder="yyyy-mm-dd"]');
+    this.completionDateInput = page.locator(DATE_INPUT_SELECTOR);
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.completeButton = page.getByRole('button', { name: 'Complete' });
     this.fieldErrors = page.locator('.oxd-input-field-error-message');
@@ -59,7 +60,7 @@ export class PerformanceEvaluatePage extends BasePage {
   async fillFinalization(finalRating: string, finalComment: string, completionDate: string): Promise<void> {
     await this.finalRatingInput.fill(finalRating);
     await this.finalCommentTextarea.fill(finalComment);
-    await this.completionDateInput.fill(completionDate);
+    await fillDate(this.completionDateInput, completionDate, 'yyyy-mm-dd');
     await this.page.keyboard.press('Escape');
   }
 

@@ -61,7 +61,7 @@ test('TC-LEAVE-LIST-01: filtering Leave List by Status shows matching records an
   await leaveListPage.goto();
   await leaveListPage.selectEmployee(me.employeeId);
   await leaveListPage.search();
-  const pendingRow = leaveListPage.rowByText(applyDate);
+  const pendingRow = (await leaveListPage.rowByDate(applyDate, 'yyyy-dd-mm'));
   const foundInPending = await pendingRow.first().isVisible({ timeout: 5_000 }).catch(() => false);
   report.check('Record baru MUNCUL saat filter Status = "Pending Approval" (default)', foundInPending, `applyDate=${applyDate}`);
 
@@ -73,7 +73,7 @@ test('TC-LEAVE-LIST-01: filtering Leave List by Status shows matching records an
   await leaveListPage.clearStatusChip();
   await leaveListPage.selectStatus('Rejected');
   await leaveListPage.search();
-  const foundInRejected = await leaveListPage.rowByText(applyDate).first().isVisible({ timeout: 3_000 }).catch(() => false);
+  const foundInRejected = await (await leaveListPage.rowByDate(applyDate, 'yyyy-dd-mm')).first().isVisible({ timeout: 3_000 }).catch(() => false);
   report.check('Record baru TIDAK muncul saat filter Status = "Rejected" (status tidak cocok)', foundInRejected === false);
 
   report.print();

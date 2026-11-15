@@ -20,7 +20,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { ClaimEventsPage, SubmitClaimPage } from '../../../src/pages';
 import { createEssAccount } from '../../../src/utils/createEssAccount';
 import { loginAs } from '../../../src/utils/loginAs';
@@ -45,7 +45,7 @@ test('TC-CLAIM-CONFIG-EVENT-01: a new active event is saved and offered in the E
 
   report.step('[Admin] Event muncul di daftar Events');
   await eventsPage.goto();
-  const inList = await eventsPage.tableRows.filter({ hasText: eventName }).first().isVisible({ timeout: 10_000 }).catch(() => false);
+  const inList = await isVisibleWithWait(eventsPage.tableRows.filter({ hasText: eventName }).first(), 10_000);
   report.check('Event baru ada di daftar', inList);
 
   report.step('[ESS] Event baru tersedia di dropdown Submit Claim');

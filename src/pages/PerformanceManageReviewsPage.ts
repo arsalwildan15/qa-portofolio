@@ -1,5 +1,6 @@
 import { type Page, type Locator, type Response } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { DATE_INPUT_SELECTOR, fillDate } from '../utils/dateInput';
 
 /**
  * Performance > Manage Reviews. Covers the search/filter list, the Add/Edit review form
@@ -36,11 +37,7 @@ export class PerformanceManageReviewsPage extends BasePage {
     this.fieldErrors = page.locator('.oxd-input-group .oxd-text--span');
 
     this.hintInputs = page.getByPlaceholder('Type for hints...');
-    // The site-wide date placeholder has been observed to flip between "yyyy-dd-mm" and
-    // "yyyy-mm-dd" (Admin > Localization date format) across sessions on the shared public
-    // demo -- same drift pattern as the already-documented identity-corruption resets. Match
-    // both so this page object doesn't break when it flips again.
-    this.dateInputs = page.locator('input[placeholder="yyyy-dd-mm"], input[placeholder="yyyy-mm-dd"]');
+    this.dateInputs = page.locator(DATE_INPUT_SELECTOR);
     this.cancelButton = page.getByRole('button', { name: 'Cancel' });
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.activateButton = page.getByRole('button', { name: 'Activate' });
@@ -97,10 +94,11 @@ export class PerformanceManageReviewsPage extends BasePage {
     return options;
   }
 
+  /** Dates in ISO yyyy-mm-dd; converted to the currently displayed format (see dateInput.ts). */
   async fillReviewPeriod(startDate: string, endDate: string, dueDate: string): Promise<void> {
-    await this.dateInputs.nth(0).fill(startDate);
-    await this.dateInputs.nth(1).fill(endDate);
-    await this.dateInputs.nth(2).fill(dueDate);
+    await fillDate(this.dateInputs.nth(0), startDate, 'yyyy-mm-dd');
+    await fillDate(this.dateInputs.nth(1), endDate, 'yyyy-mm-dd');
+    await fillDate(this.dateInputs.nth(2), dueDate, 'yyyy-mm-dd');
     await this.page.keyboard.press('Escape');
   }
 

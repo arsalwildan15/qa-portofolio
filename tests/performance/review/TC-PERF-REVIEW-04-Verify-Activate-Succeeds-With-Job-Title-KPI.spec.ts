@@ -27,7 +27,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { setupReviewableEmployee } from '../../../src/utils/setupReviewableEmployee';
 
 test('TC-PERF-REVIEW-04: Activate succeeds for an employee with Job Title+KPI, Evaluate action appears', async ({
@@ -67,7 +67,7 @@ test('TC-PERF-REVIEW-04: Activate succeeds for an employee with Job Title+KPI, E
     const row = performanceManageReviewsPage.rowFor(emp.firstName);
     const rowText = await row.innerText().catch(() => '');
     report.check('Status di daftar = "Activated"', rowText.includes('Activated'), `rowText=${rowText}`);
-    const evaluateVisible = await row.locator('button[title="Evaluate"]').isVisible({ timeout: 5_000 }).catch(() => false);
+    const evaluateVisible = await isVisibleWithWait(row.locator('button[title="Evaluate"]'), 5_000);
     const editVisible = await row.locator('button[title="Edit"]').isVisible({ timeout: 2_000 }).catch(() => false);
     report.check('Tombol "Evaluate" muncul', evaluateVisible);
     report.check('Tombol "Edit" TIDAK lagi ada (review sudah Activated)', !editVisible);

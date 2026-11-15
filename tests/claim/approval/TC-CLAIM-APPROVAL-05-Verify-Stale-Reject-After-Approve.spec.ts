@@ -21,7 +21,7 @@
 
 import { authenticatedTest as test } from '../../../src/fixtures/pages.fixture';
 import { env } from '../../../src/config/env';
-import { TestReport } from '../../../src/utils/testReport';
+import { TestReport, isVisibleWithWait } from '../../../src/utils/testReport';
 import { createEssClaim } from '../../../src/utils/createEssClaim';
 
 test('TC-CLAIM-APPROVAL-05: clicking a stale Reject button after Approve cannot undo a PAID claim', async ({
@@ -45,7 +45,7 @@ test('TC-CLAIM-APPROVAL-05: clicking a stale Reject button after Approve cannot 
 
   report.step('[Admin] Klik tombol Reject yg masih tampil (basi)');
   const rejectButton = page.getByRole('button', { name: 'Reject', exact: true });
-  const staleVisible = await rejectButton.isVisible({ timeout: 3_000 }).catch(() => false);
+  const staleVisible = await isVisibleWithWait(rejectButton, 3_000);
   report.finding('Tombol Reject masih tampil setelah Approve (UI tidak refresh)', `visible=${staleVisible}`);
   if (staleVisible) {
     const reject = await assignClaimPage.clickAction('Reject');
