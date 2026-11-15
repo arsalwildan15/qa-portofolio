@@ -4,20 +4,20 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 
 | Module | COVERED | GAP | N/A | Coverage of applicable |
 |---|---:|---:|---:|---:|
-| Admin | 440 | 656 | 608 | 40.1% |
-| Buzz | 32 | 26 | 13 | 55.2% |
-| Claim | 153 | 157 | 187 | 49.4% |
+| Admin | 502 | 594 | 608 | 45.8% |
+| Buzz | 33 | 25 | 13 | 56.9% |
+| Claim | 163 | 147 | 187 | 52.6% |
 | Dashboard | 11 | 25 | 106 | 30.6% |
 | Directory | 10 | 16 | 45 | 38.5% |
-| Leave | 185 | 314 | 424 | 37.1% |
-| Maintenance | 30 | 67 | 116 | 30.9% |
-| My Info | 11 | 451 | 319 | 2.4% |
-| PIM | 352 | 574 | 494 | 38.0% |
-| Performance | 171 | 250 | 289 | 40.6% |
-| Recruitment | 114 | 102 | 68 | 52.8% |
+| Leave | 216 | 283 | 424 | 43.3% |
+| Maintenance | 36 | 61 | 116 | 37.1% |
+| My Info | 14 | 448 | 319 | 3.0% |
+| PIM | 396 | 530 | 494 | 42.8% |
+| Performance | 186 | 235 | 289 | 44.2% |
+| Recruitment | 124 | 92 | 68 | 57.4% |
 | Sidebar | 0 | 24 | 47 | 0.0% |
-| Time | 170 | 312 | 370 | 35.3% |
-| **Total** | **1679** | **2974** | **3086** | **36.1%** |
+| Time | 197 | 285 | 370 | 40.9% |
+| **Total** | **1888** | **2765** | **3086** | **40.6%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -37,14 +37,14 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.7 | Upload file valid | 1 |
 | 1.8 | Notifikasi/feedback UI | 83 |
 | 2.1 | Required field kosong | 49 |
-| 2.2 | Format salah | 22 |
+| 2.2 | Format salah | 8 |
 | 2.3 | Duplicate/unique conflict | 14 |
-| 2.4 | Aksi tanpa permission (UI/API) | 82 |
+| 2.4 | Aksi tanpa permission (UI/API) | 8 |
 | 2.5 | State transition invalid | 13 |
 | 2.6 | Operasi pada record invalid/tak eksis | 78 |
 | 2.8 | Reject/cancel tanpa alasan | 6 |
 | 3.1 | Panjang karakter field | 8 |
-| 3.2 | Nilai numerik | 2 |
+| 3.2 | Nilai numerik | 1 |
 | 3.3 | Ukuran file upload | 7 |
 | 3.4 | Tanggal | 26 |
 | 3.5 | Pagination | 67 |
@@ -62,8 +62,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.1-XSS-Reflected | Reflected XSS | 22 |
 | 5.1-CmdPath | Command/Path injection | 14 |
 | 5.1-SSRF | SSRF | 5 |
-| 5.2-IDOR | IDOR | 70 |
-| 5.2-BFLAC | Broken function level access control | 62 |
+| 5.2-IDOR | IDOR | 12 |
 | 5.2-PrivEsc | Privilege escalation | 29 |
 | 5.2-MassAssign | Mass assignment | 82 |
 | 5.3-BadExt | Upload ekstensi terlarang | 4 |

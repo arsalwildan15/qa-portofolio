@@ -10,6 +10,11 @@ LEGEND STATUS
   [DONE]        = Test case selesai & script berjalan
   [TODO]        = Belum dibuat
 
+LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
+  (+) Positive  (-) Negative  (B) Boundary  (!) Edge Case  (S) Security  (A) API
+  Setiap entri juga mencantumkan KODE item taksonomi yg diverifikasi (mis. 1.5, 5.2-IDOR, 7.1),
+  dan setiap check di script diberi label [U### Menu] + kode tsb.
+
   FORMAT ID  : TC-SWEEP-<ASPEK>-NN
   FILE       : TC-SWEEP-<ASPEK>-NN-Verify-Name-In-English.spec.ts
   FOLDER     : tests/_global/sweep/
@@ -36,7 +41,8 @@ LEGEND STATUS
 ================================================================================
 
  1   TC-SWEEP-PAGE-01  [DONE]  TC-SWEEP-PAGE-01-Verify-Every-Menu-Loads-Cleanly-For-Admin.spec.ts
-                             (+/7) Verify Every Menu Page Loads Cleanly For The
+                             (+) 1.5 | 7.1 7.2 7.3 7.4 7.5
+                             Verify Every Menu Page Loads Cleanly For The
                              Admin Role
                              -> Per unit: buka URL (halaman Maintenance: isi
                                 konfirmasi password Admin -- alur resmi), tunggu
@@ -56,7 +62,8 @@ LEGEND STATUS
                              setiap kunjungan tab Job -> BUG BG-414 (Low).
 
  2   TC-SWEEP-HDR-01  [DONE]  TC-SWEEP-HDR-01-Verify-Security-Headers-On-Every-Menu.spec.ts
-                             (S) Verify Security Response Headers On Every Menu
+                             (S) 5.6 (+ 5.8 finding)
+                             Verify Security Response Headers On Every Menu
                              Page
                              -> [API] GET setiap halaman unit dgn sesi Admin.
                              [VERIFICATION per unit]
@@ -69,6 +76,36 @@ LEGEND STATUS
                              pun -> konfirmasi app-wide BG-404 (baris duplikat
                              BG-413 diarsip). Header Server membocorkan versi
                              web server (finding).
+
+ 3   TC-SWEEP-ROLE-01  [DONE]  TC-SWEEP-ROLE-01-Verify-ESS-Menu-Access-Per-Unit.spec.ts
+                             (+) 1.5 | (-) 2.4 | (S) 5.2-BFLAC 5.2-IDOR | 7.1
+                             Verify An ESS Employee Reaches Every Employee Menu
+                             And Is Refused Every Admin-Only Menu
+                             -> Setup: akun ESS sungguhan (createEssAccount),
+                                login di sesi terpisah (loginAs).
+                             -> URL detail admin (kandidat, vacancy, review,
+                                tracker, klaim, tab PIM karyawan lain) di-
+                                resolve dgn sesi Admin, lalu DIBUKA oleh ESS.
+                             -> Per unit, ESS membuka URL secara langsung
+                                (bukan lewat menu yg disembunyikan).
+                             [VERIFICATION per unit]
+                             -> Menu karyawan: 1.5 termuat & berisi, 7.1 tanpa
+                                console error.
+                             -> Menu admin-only: 2.4 / 5.2-BFLAC ditolak
+                                (dialihkan / "Credential Required"), dan utk URL
+                                ber-ID: 5.2-IDOR tidak ada respons API 200 yg
+                                memuat record tsb.
+                             HASIL 15 Nov 2026: 130/130 lolos. 67 menu admin-
+                             only -> "Credential Required"; 11 tab PIM karyawan
+                             lain -> kerangka halaman kosong "No Records Found"
+                             tanpa data. ROOT CAUSE run pertama (11 gagal):
+                             kriteria TC terlalu sempit (menganggap "tidak
+                             dialihkan" = bocor). Dibuktikan via API sbg ESS:
+                             pim/employees/<orang lain>/* -> 422 "Invalid
+                             Parameter", PUT -> 404, data sendiri -> 200.
+                             [TEMUAN] penolakan PIM memakai 422, bukan 403 spt
+                             modul lain (taksonomi 6.1) & tanpa pesan "akses
+                             ditolak" di UI -> dicatat finding, bukan bug.
 
   RUN COMMAND:
     npx playwright test tests/_global/sweep --project=chromium --workers=1
