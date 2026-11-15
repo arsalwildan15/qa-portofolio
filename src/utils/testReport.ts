@@ -105,7 +105,10 @@ export class TestReport {
         }
       });
       page.on('pageerror', (error) => {
-        this.consoleErrors.push({ text: `Uncaught exception: ${error.message}` });
+        const text = `Uncaught exception: ${error.message}`;
+        if (!this.expectedConsoleErrorPatterns.some((p) => p.test(text))) {
+          this.consoleErrors.push({ text });
+        }
       });
     }
   }

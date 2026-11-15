@@ -11,6 +11,11 @@ export class PerformanceKpiPage extends BasePage {
   readonly saveButton: Locator;
   readonly fieldErrors: Locator;
   readonly tableRows: Locator;
+  /** "Make Default Scale" toggle on the Add KPI form. Confirmed live: not mutually-exclusive at
+   * the UI/validation level -- saving a 2nd KPI as default for the SAME Job Title is accepted
+   * (200) and silently un-defaults the previous one (only one row shows "Yes" afterward). */
+  readonly defaultScaleToggle: Locator;
+  readonly searchButton: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -22,6 +27,8 @@ export class PerformanceKpiPage extends BasePage {
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.fieldErrors = page.locator('.oxd-input-group .oxd-text--span');
     this.tableRows = page.locator('.oxd-table-card');
+    this.defaultScaleToggle = page.locator('.oxd-switch-input');
+    this.searchButton = page.getByRole('button', { name: 'Search' });
   }
 
   async goto(): Promise<void> {

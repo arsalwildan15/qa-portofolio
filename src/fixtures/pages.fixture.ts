@@ -46,6 +46,7 @@ import {
   AssignLeavePage,
   TimeAttendancePage,
   PerformanceKpiPage,
+  PerformanceManageReviewsPage,
   AssignClaimPage,
   MyTimesheetPage,
   AdminAttendanceRecordsPage,
@@ -106,6 +107,7 @@ interface Pages {
   assignLeavePage: AssignLeavePage;
   timeAttendancePage: TimeAttendancePage;
   performanceKpiPage: PerformanceKpiPage;
+  performanceManageReviewsPage: PerformanceManageReviewsPage;
   assignClaimPage: AssignClaimPage;
   myTimesheetPage: MyTimesheetPage;
   adminAttendanceRecordsPage: AdminAttendanceRecordsPage;
@@ -271,6 +273,9 @@ export const test = base.extend<Pages>({
   },
   performanceKpiPage: async ({ page }, use) => {
     await use(new PerformanceKpiPage(page));
+  },
+  performanceManageReviewsPage: async ({ page }, use) => {
+    await use(new PerformanceManageReviewsPage(page));
   },
   assignClaimPage: async ({ page }, use) => {
     await use(new AssignClaimPage(page));

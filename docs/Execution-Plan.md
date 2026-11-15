@@ -10,11 +10,15 @@
 > Ditetapkan user 2026-11-15. Sumber rencana: laporan coverage gap (sesi 2026-11-15).
 
 ## STATUS
-- **Fase aktif:** 1 TUNTAS -> siap lanjut Fase 2 (Performance dulu, sesuai urutan di rencana)
-- **Task terakhir selesai:** P1.8 (FASE 1 TUNTAS, termasuk self-heal getLoggedInEmployeeName())
-- **NEXT ACTION:** P2.1 Eksplorasi Performance (siklus status review, KPI<->Job Title, Trackers
-  config, review utk employee tanpa KPI) -> page objects -> TC REVIEW-01..16, KPI-07..11,
-  TRACKER-01..08.
+- **Fase aktif:** 2 (P2.1 Performance batch 1 TUNTAS: 13 TC Review + 4 TC KPI, BG-356 ditemukan)
+- **Task terakhir selesai:** P2.1 batch 1 (lihat checklist P2.1 + LOG)
+- **NEXT ACTION:** P2.1 BATCH 2 -- probe widget Rating per-KPI di reviewEvaluateByAdmin/<id> (input
+  tanpa type/placeholder) -> EVAL-11 finalize positif, EVAL-12 rating min/max, EVAL-13 XSS komentar,
+  EVAL-14 eval Inactive via API, EVAL-10 self-eval ESS, KPI-11, lalu eksplor+TC TRACKER-01..08.
+  Setelah itu docs/TC-Performance.txt, baru P2.2 Claim.
+- **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). REVIEW-10 SENGAJA FAILED (BG-356);
+  REVIEW-04/05/06/08/11/12 boleh gagal INTERMITEN HANYA di console-check (BG-356) -- gagal di check
+  lain = regresi baru, investigasi.
 - **Blocker:** —
 - **Perlu persetujuan user (antrian):** — (identity self-heal otomatis sejak Fase 1, TIDAK perlu
   tanya ulang lagi kalau kambuh -- itulah tujuan fix-nya. Kalau POLA korupsinya beda dari yg
@@ -126,17 +130,49 @@
 ## FASE 2 — Melengkapi 4 Modul
 ### P2.1 Performance (~30) — eksplor dulu: siklus status review, KPI per Job Title -> form evaluasi,
 halaman Trackers config, review utk employee tanpa KPI.
-- [ ] Eksplorasi P2.1
-- [ ] Page objects: PerformanceReviewPage, PerformanceTrackerPage (+ fixture)
-- [ ] REVIEW-01 Add+Save Inactive (+) | 02 Add+Activate -> muncul di My Reviews ESS (+) | 03 Required (-)
-      | 04 End<Start, Due<End (B) | 05 Employee tanpa KPI (!) | 06 Edit inactive (+) | 07 Delete+cancel (+)
-      | 08 Filter (+) | 09 Double-click Activate (!)
-- [ ] EVAL-10 Self-eval ESS draft->complete | 11 Reviewer eval->finalize | 12 Rating luar min/max (B)
-      | 13 XSS komentar (S) | 14 Evaluasi review Inactive via API (-)
-- [ ] ACCESS-15 IDOR review orang lain (S) | 16 ESS POST create review (S-BFLAC)
-- [ ] KPI-07 Edit | 08 Delete UI | 09 Default Scale | 10 Filter Job Title | 11 Pagination/sort
-- [ ] TRACKER-01 Add | 02 Required | 03 Duplikat | 04 Edit/Delete | 05 Add Log +/- | 06 XSS log | 07 ESS My
-      Trackers | 08 IDOR tracker
+- [x] Eksplorasi P2.1 (batch 1: Manage Reviews + Evaluate + KPI). FAKTA LIVE yg ditemukan:
+      - Supervisor Reviewer HANYA menawarkan supervisor yg sudah ter-link via PIM > Report-to (employee
+        tanpa supervisor -> "No Records Found", Save diblokir client-side "Invalid").
+      - Save TIDAK pindah halaman (form direset + toast). Status awal "Inactive"; selfReviewStatus terpisah.
+      - Activate ditolak 400 "Cannot activate review for employees who doesn't have a Job Title with KPI"
+        kalau Job Title employee kosong/tanpa KPI. Dgn Job Title ber-KPI -> 200, status "Activated", ikon
+        baris berganti Edit -> Evaluate. Halaman evaluasi: reviewEvaluateByAdmin/<id>, API
+        reviews/<id>/kpis + evaluation/{employee,supervisor,final}; KPI = persis set KPI Job Title-nya.
+      - Complete tanpa Review Finalization -> 3x "Required" client-side. End<Start -> 2 pesan client-side.
+      - DELETE review = `DELETE /api/v2/performance/manage/reviews` TANPA id di path (id di body).
+      - Filter "Employee Name" di list = autocomplete yg SAMA dgn form Add (fill saja tdk mem-bind nilai;
+        harus pilih suggestion, kalau tidak Search jalan TANPA filter nama -> semua review muncul).
+      - KPI "Make Default Scale" eksklusif per Job Title secara DIAM-DIAM (KPI B default -> KPI A
+        otomatis un-default, 200 keduanya). Baris KPI tdk punya title="Edit"; ikon via class bi-pencil-fill/bi-trash.
+      - "Configure > Trackers" & "My/Employee Trackers" = fitur jurnal/catatan per employee, BUKAN
+        konfigurasi KPI/review (koreksi asumsi audit lama).
+      - LINGKUNGAN: placeholder tanggal site-wide berganti "yyyy-dd-mm" <-> "yyyy-mm-dd" antar sesi (pola
+        reset demo yg sama dgn korupsi identitas) -> locator tanggal baru WAJIB match keduanya.
+- [x] Page objects: `PerformanceManageReviewsPage` (+fixture) + `PerformanceKpiPage` (+defaultScaleToggle,
+      +searchButton) + util `setupReviewableEmployee()`. PerformanceTrackerPage -> belum (batch 2).
+- [x] REVIEW (file -> ID rencana): 01 Create valid (=plan 01) | 02 Supervisor wajib ter-link (baru, (-)) |
+      03 Activate tanpa Job Title+KPI 400 (=plan 05) | 04 Activate sukses + Evaluate (=plan 02 sisi Admin) |
+      05 KPI evaluasi = KPI Job Title (baru) | 06 Complete tanpa finalisasi (=EVAL-11 sisi negatif) |
+      07 End<Start (=plan 04) | 08 Filter nama+status (=plan 08) | 09 Delete+cancel (=plan 07) |
+      10 Edit pasca-Activate: PUT 422 (baru) | 11 Double-click Activate (=plan 09)
+- [x] ACCESS: REVIEW-12 IDOR ESS baca review orang lain (=ACCESS-15) | REVIEW-13 ESS POST/PUT review
+      via API (=ACCESS-16 BFLAC) -- keduanya pakai infra Fase 1 (createEssAccount+loginAs), lolos.
+- [x] KPI (file -> ID rencana): 07 Default Scale eksklusif (=plan 09) | 08 Filter Job Title (=plan 10) |
+      09 Edit (=plan 07) | 10 Delete (=plan 08)
+- [x] BUG NYATA: BG-356 -- setelah Activate, GET manage/reviews/<id> 404 -> uncaught exception "fe"
+      (signature sama BG-333), form edit kosong; frekuensi naik seiring jumlah review. TIDAK ada risiko
+      data (PUT field inti ke review Activated selalu 422). Sesuai R3: TIDAK di-whitelist; REVIEW-10 =
+      reproducer konsisten yg SENGAJA FAILED (jaga BG-356 Open); REVIEW-04/05/06/08/11/12 bisa gagal
+      INTERMITEN di console-check krn bug ini (+report.finding) -> pengecualian R3 "3x bersih" yg sah
+      sampai bug diperbaiki dev. Baris duplikat otomatis dari script2 itu -> tutup "Duplicate of BG-356".
+- [x] Perbaikan infra selama P2.1: `TestReport` pageerror kini ikut expectedConsoleErrorPatterns (dulu cuma
+      console 'error'; dicek: whitelist lama di repo tdk ada yg match "Uncaught exception"). Memory baru:
+      JANGAN `--reporter=list` utk TC asli (override bugListReporter) -- sesuai R8.
+- [ ] P2.1 BATCH 2 (sisa, BELUM dikerjakan): eksplor dulu widget Rating per-KPI (input tanpa type/
+      placeholder, 6 utk KPI + 1 Final Rating) -> EVAL-11 finalize positif (isi rating+komentar+tanggal ->
+      Complete -> status Completed) | EVAL-12 Rating luar min/max (KPI "targeted new customer" 50-90) |
+      EVAL-13 XSS komentar | EVAL-14 evaluasi review Inactive via API (-) | EVAL-10 self-eval ESS
+      (lintas role) | KPI-11 Pagination/sort | TRACKER-01..08 (fitur jurnal, perlu eksplor + page object)
 - [ ] Regresi modul + docs/TC-Performance.txt + commit
 
 ### P2.2 Claim (~30) — eksplor: aksi admin pada klaim SUBMITTED milik ESS, Event inactive vs dropdown,
@@ -229,3 +265,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P0.6 | baseline 32/43 pass; 9 fail = 1 root cause (empNumber=7 identity corruption); user approved repair; PersonalDetailsPage PUT 200 -> QA Admin/QAADMIN07 | data repair, no code commit
 - 2026-11-15 | P0.7 | 5/9 fixed by repair; 3/9 flaky-under-load (pass isolated); 1/9 real script bug (whitespace) fixed+3x stable; identity RE-corrupted identik -> repaired lagi, didokumentasikan sbg risiko berulang lintas 11 file/4 area | 1 commit
 - 2026-11-15 | P1.1-P1.8 | 7 util baru (createEssAccount/createSecondAdmin/assignSupervisor/loginAs/withConfigRestore/networkEdge + getLoggedInEmployeeName self-heal) + AdminUsersPage.selectEmployee() + createTestEmployee+employeeId + 3 TC infra, 9/9 check x3 run; self-heal TERBUKTI jalan live (korupsi kambuh di tengah run, INFRA-02 tetap lolos) | 1 commit
+- 2026-11-15 | P2.1 batch 1 | 13 TC Review + 4 TC KPI + PerformanceManageReviewsPage + setupReviewableEmployee + TestReport pageerror-whitelist fix; BG-356 (404+exception pasca-Activate) ditemukan & dicatat (R3: tdk di-whitelist, REVIEW-10 sengaja FAILED). Run akhir 17 TC: 8 pass; 7 gagal HANYA console-check (BG-356, semua check fungsional lolos); KPI-09 & REVIEW-01 gagal tanpa ringkasan di batch tapi 6/6 & 7/7 lolos terisolasi (flaky-under-load, pola P0.7) | 1 commit
