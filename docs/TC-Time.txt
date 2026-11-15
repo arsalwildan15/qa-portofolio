@@ -509,9 +509,147 @@ No.  Test Case ID              Status   Skenario / Deskripsi
                              data.
 
 ================================================================================
+  GROUP 5, LAPIS 2: TIMESHEET MULTI-ROW & KOMENTAR, PROJECT INFO
+================================================================================
+
+  Fakta live 15 Nov 2026 yg dipakai lapis 2:
+    -> PUT timesheets/<id>/entries bersifat UPSERT per (projectId,
+       activityId): mengirim baris yg sudah ada MENIMPA durasinya, bukan
+       membuat baris duplikat. Hapus baris = deletedEntries [{projectId,
+       activityId}].
+    -> Activity per project: GET/POST/DELETE time/project/<id>/activities
+       (path "project" TUNGGAL); Project: POST time/projects {name,
+       customerId, description (null, BUKAN "" -> 422), projectAdmins-
+       EmpNumbers}; Customer: POST time/customers {name, description}.
+    -> Komentar sel: ikon chat (orangehrm-timesheet-icon-comment) disembunyi-
+       kan sampai sel di-hover/fokus; simpan = PUT timesheets/<id>/entries/
+       comment {date, comment, projectId, activityId}; dialog memuat via GET
+       entries/<entryId>/comment dan menampilkan komentar di textarea.
+    -> Halaman Edit Timesheet tidak pernah "networkidle" -- tunggu elemen,
+       bukan waitForLoadState('networkidle').
+    -> Util baru: getEssTimesheetEntries(), otherSeedActivityId(); konstanta
+       PROJECT_ID/ACTIVITY_ID diekspor dari createEssTimesheet.ts.
+
+13   TC-TIME-TIMESHEET-04  [DONE]  TC-TIME-TIMESHEET-04-Verify-Multi-Row-Totals.spec.ts
+                             (+) Verify Day And Week Totals Add Up Across
+                             Multiple Timesheet Rows
+                             -> Setup: createEssTimesheet({submit:false})
+                                (baris 1: Sen 08:00, Sel 07:30).
+                             -> [ESS API] Tambah baris 2 (activity lain,
+                                Sen 02:00).
+                             -> [ESS UI] Buka My Timesheet.
+                             -> [ESS API] Hapus baris 2 (deletedEntries),
+                                buka My Timesheet lagi.
+                             [API VERIFICATION]
+                             -> Verify 2 baris, total Senin 10:00
+                                (meta.columns), total minggu 17:30
+                                (meta.sum).
+                             -> Verify setelah hapus: 1 baris, total 15:30.
+                             [UI VERIFICATION]
+                             -> Verify 2 baris proyek tampil; baris Total:
+                                Senin 10:00, Selasa 07:30, total 17:30.
+                             -> Verify setelah hapus: 1 baris, total 15:30.
+                             NOTE: [BUG SCRIPT diperbaiki] baris footer
+                             "Total" memakai class body-row yg sama ->
+                             dikecualikan dari hitungan baris.
+
+14   TC-TIME-TIMESHEET-10  [DONE]  TC-TIME-TIMESHEET-10-Verify-XSS-In-Cell-Comment-Not-Executed.spec.ts
+                             (S) Verify An XSS Payload In A Timesheet Cell
+                             Comment Renders As Text
+                             -> Setup: createEssTimesheet({submit:false}).
+                             -> [ESS API] PUT entries/comment sel Senin
+                                dengan `<img src=x onerror=...>`.
+                             -> [ESS UI] My Timesheet -> hover sel 08:00 ->
+                                ikon komentar -> dialog.
+                             -> [ESS API] Submit; [Admin UI] viewTimesheet/
+                                employeeId/<emp>?startDate=<senin> -> dialog
+                                komentar sel yg sama.
+                             [API VERIFICATION]
+                             -> Verify PUT 200, komentar tersimpan apa
+                                adanya.
+                             [UI VERIFICATION]
+                             -> Verify textarea dialog berisi payload utuh
+                                sbg teks, flag window.__tsXss tidak ter-set,
+                                tidak ada img[src="x"] -- di ESS DAN Admin.
+                             NOTE: [TEMUAN POSITIF] output di-escape.
+
+15   TC-TIME-TIMESHEET-11  [DONE]  TC-TIME-TIMESHEET-11-Verify-Day-Total-Over-24h-Across-Rows-Rejected.spec.ts
+                             (B) Verify A Day Cannot Total More Than 24
+                             Hours Across Timesheet Rows
+                             -> Setup: createEssTimesheet({submit:false})
+                                (baris 1: Senin 08:00).
+                             -> [ESS API] Kontrol: satu sel 25:00.
+                             -> [ESS API] Baris 2 Senin 20:00 (total
+                                hari = 28:00).
+                             -> [ESS UI] Buka My Timesheet.
+                             [API VERIFICATION]
+                             -> Verify sel tunggal 25:00 -> 422 (aturan 24
+                                jam ADA).
+                             -> Verify total harian > 24 jam ditolak 4xx
+                                dan total Senin <= 24:00.
+                             [UI VERIFICATION]
+                             -> Verify teks "28:00" TIDAK tampil.
+                             NOTE: [BUG BG-402, Medium] DITERIMA 200, total
+                             Senin tersimpan & tampil 28:00 -- validasi 24
+                             jam hanya per sel, tidak per hari. TC SENGAJA
+                             FAILED (R3). Belum diverifikasi apakah form
+                             Edit di browser memvalidasi sebelum mengirim.
+
+16   TC-TIME-PROJECT-01  [DONE]  TC-TIME-PROJECT-01-Verify-Customer-Project-Activity-Unique-And-Usable.spec.ts
+                             (+/-) Verify A New Customer -> Project ->
+                             Activity Chain Is Usable By ESS And Names Are
+                             Unique
+                             -> [Admin API] POST customer, project (milik
+                                customer tsb), activity.
+                             -> [Admin API] POST ulang dgn nama yg sama di
+                                tiap level.
+                             -> [ESS API] Catat 01:00 ke project+activity
+                                baru; coba POST customers & projects.
+                             [API VERIFICATION]
+                             -> Verify ketiga POST 200; project terhubung
+                                ke customer.
+                             -> Verify duplikat customer / project (customer
+                                sama) / activity (project sama) -> 422
+                                [name].
+                             -> Verify ESS bisa mencatat jam ke project
+                                baru (200).
+                             -> Verify ESS POST customers & projects -> 403.
+
+17   TC-TIME-PROJECT-02  [DONE]  TC-TIME-PROJECT-02-Verify-Delete-Blocked-When-Time-Logged.spec.ts
+                             (-) Verify Activities, Projects And Customers
+                             With Logged Time Cannot Be Deleted
+                             -> Setup: customer -> project -> 2 activity
+                                (via API); ESS mencatat 01:00 ke activity
+                                pertama.
+                             -> [Admin API] DELETE activity terpakai,
+                                project, customer.
+                             -> [Admin API] Kontrol: DELETE activity yg
+                                belum dipakai.
+                             [API VERIFICATION]
+                             -> Verify ketiganya 400 dgn pesan "...Time
+                                Logged Against...".
+                             -> Verify activity tak terpakai -> 200 (bukti
+                                penolakan karena jam tercatat).
+                             -> Verify baris timesheet karyawan tetap utuh
+                                (01:00).
+                             NOTE: [TEMUAN POSITIF] integritas referensial
+                             ditegakkan di server dgn pesan yg jelas.
+
+================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
 
+  Full batch Time 15 Nov 2026 SETELAH lapis 2 (17 TC, --workers=1, 6.6 m):
+  PASSED           : 15 di batch + ADMIN-ATTENDANCE-01 lolos 2x setelah
+                     fix script = 16
+  FAILED (BUG, sengaja) : 1 -> TC-TIME-TIMESHEET-11 (BG-402, Medium, total
+                     harian > 24 jam lintas baris diterima)
+  Bug script diperbaiki: AdminAttendanceRecordsPage.searchAndView membaca URL
+    setelah sleep 1 detik tetap -> saat demo lambat URL belum berubah
+    ("could not read employeeId"); kini waitForURL(/employeeId=\d+/).
+    Noise BG-400, 401, 403 diarsip.
+
+  Riwayat lapis 1:
   Total TC         : 12 (7 TC lama + 5 TC baru Fase 2 lapis 1 P2.4:
                      TS-SUBMIT-01, TS-APPROVAL-01, -02, -03, -04)
   PASSED           : 12 / 12 (full batch modul Time)
@@ -543,11 +681,10 @@ No.  Test Case ID              Status   Skenario / Deskripsi
                                    semua terdokumentasi di Catatan Teknis &
                                    NOTE per TC di atas)
 
-  BELUM DICAKUP (rencana lapis 2, lihat docs/Execution-Plan.md P2.4):
-    TIMESHEET-03..11 (multi-row, hapus/duplikat row, komentar sel, navigasi
-    minggu, reset, XSS komentar, total >24 jam/hari lintas row), Reject
-    tanpa komentar sbg TC tersendiri, PUNCH-03..05, ADMIN-ATTENDANCE-03/04,
-    REPORTS-02..05, Customer & Project (Time > Project Info).
+  BELUM DICAKUP (backlog, lihat docs/Execution-Plan.md P2.4):
+    TIMESHEET navigasi minggu & Reset (UI), Reject tanpa komentar sbg TC
+    tersendiri, PUNCH-03..05, ADMIN-ATTENDANCE-03/04, REPORTS-02..05,
+    Customer/Project lewat UI (lapis 2 mencakupnya via API).
 
   RUN COMMAND (semua TC):
     npx playwright test tests/time --project=chromium --workers=1

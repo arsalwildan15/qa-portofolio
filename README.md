@@ -188,8 +188,8 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Performance | 38 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 26 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
-| Time | 12 | [docs/TC-Time.txt](docs/TC-Time.txt) |
-| **Total** | **550** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
+| Time | 17 | [docs/TC-Time.txt](docs/TC-Time.txt) |
+| **Total** | **555** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -306,9 +306,11 @@ Admin-side Assign Claim (14: create, required fields, expenses incl. amount boun
 
 Apply (11), Assign (6), Leave List incl. cancel-restores-balance and IDOR (3 + 1), and the cross-role flow added in Fase 2 (5): an ESS user applies, the Admin approves (Pending Approval → Scheduled, balance deducted once) or rejects (balance restored, terminal), the ESS user cancels their own request from My Leave, and an entitlement added by the Admin becomes the ESS user's visible balance. Layer 2 added duration and calendar rules: a half day deducts 0.5, "Specify Time" deducts by hours and rejects reversed or zero-length ranges (422), a request falling only on a holiday (read live from the holiday calendar) or only on a weekend is rejected with "No Working Days Selected", overlapping requests are rejected, and retroactive (past-date) leave is accepted by design. The full Leave suite passes, old and new tests alike. No new application bugs in this module this round.
 
-### Time (12 TCs)
+### Time (17 TCs)
 
-Attendance punch in/out incl. XSS in notes, Admin proxy punch-in, invalid-id handling, the employee report, timesheet hour entry and duration validation, and the cross-role timesheet flow added in Fase 2 (5): an ESS user fills and submits a weekly timesheet, the Admin approves it with a comment (APPROVED, no longer editable) or rejects it (the employee can correct and resubmit, so Reject is not terminal), self-approval through the API is refused, and approving a timesheet that was never submitted is refused (400). All 12 pass. Finding, not logged as a bug: a timesheet can be rejected without any comment.
+Attendance punch in/out incl. XSS in notes, Admin proxy punch-in, invalid-id handling, the employee report, timesheet hour entry and duration validation, and the cross-role timesheet flow added in Fase 2 (5): an ESS user fills and submits a weekly timesheet, the Admin approves it with a comment (APPROVED, no longer editable) or rejects it (the employee can correct and resubmit, so Reject is not terminal), self-approval through the API is refused, and approving a timesheet that was never submitted is refused (400). Layer 2 (5) adds day/week totals across several rows (and removing a row), stored XSS in a cell comment viewed by both the employee and the Admin, and Project Info: customer → project → activity names are unique at every level, an employee can log time to a new project but cannot create customers or projects (403), and nothing with time logged against it can be deleted.
+
+Bug found: the 24-hour limit is checked per cell only. One cell of 25:00 is refused, but two rows on the same day (08:00 + 20:00) are accepted and the day shows 28:00 (BG-402, Medium; TC-TIME-TIMESHEET-11 stays FAILED on purpose). Finding, not logged as a bug: a timesheet can be rejected without any comment.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

@@ -26,10 +26,9 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** (6) LAPIS 2 Fase 2 -- Leave [x], Claim [x], Performance (8 TC) [x].
-  Berikutnya: Time lapis 2 (multi-row total, duplikat row, >24j/hari lintas row, navigasi minggu,
-  komentar sel/XSS, Customer & Project CRUD + delete activity terpakai, punch out < in), lalu P2.5
-  lintas-modul, lalu Fase 4-8.
+- **NEXT ACTION:** (6) LAPIS 2 Fase 2 TUNTAS (Leave, Claim, Performance, Time). Berikutnya: P2.5
+  lintas-modul (per modul: CSRF, header keamanan, API param negatif offset/limit/sortField, unicode/
+  RTL, refresh saat pending, koneksi putus), lalu Fase 4-8.
   Setiap TC baru: verifikasi per file, full batch per modul (--workers=1 utk modul dgn setup ESS),
   docs/TC-*.txt ikut diperbarui.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
@@ -307,8 +306,16 @@ efek Holiday ke hitungan.
       (UI) -> muncul di Pending Action | TS-APPROVAL-01 Approve+komentar -> APPROVED, Submit hilang,
       keluar dari Pending | TS-APPROVAL-02 Reject+komentar -> ESS resubmit | TS-APPROVAL-03 ESS tdk bisa
       approve sendiri | TS-APPROVAL-04 approve timesheet belum disubmit via API ditolak (400).
-- [ ] TIMESHEET-03 Submit | 04 Multi-row | 05 Hapus row | 06 Duplikat row | 07 Komentar sel | 08 Navigasi
-      minggu | 09 Reset | 10 XSS komentar | 11 Total >24j/hari lintas row (B)
+- [x] LAPIS 2 (5 TC, util getEssTimesheetEntries/otherSeedActivityId): TIMESHEET-04 multi-row total
+      (+hapus baris via deletedEntries) | TIMESHEET-10 XSS komentar sel aman (ESS & Admin) |
+      TIMESHEET-11 total harian >24j lintas baris DITERIMA = BUG BG-402 (Medium, sengaja FAILED; sel
+      tunggal 25:00 ditolak 422) | PROJECT-01 customer->project->activity unik per level (422 [name]),
+      ESS bisa pakai project baru tapi POST customers/projects 403 | PROJECT-02 delete activity/
+      project/customer yg ada jam tercatat -> 400 + pesan jelas. FAKTA: PUT entries = upsert per
+      (project, activity) -> "duplikat row" tidak mungkin via API (TIMESHEET-06 gugur); halaman Edit
+      Timesheet tdk pernah networkidle. Full batch Time 17: 16 pass (ADMIN-ATTENDANCE-01 setelah fix
+      waitForURL) + 1 gagal sengaja.
+- [ ] (backlog) TIMESHEET-08 Navigasi minggu | 09 Reset (UI) | Customer/Project via UI
 - [ ] TS-APPROVAL-01 Approve | 02 Reject+komentar | 03 Reject tanpa komentar | 04 ESS tak bisa approve
       sendiri | 05 Approve belum Submitted via API (-)
 - [ ] PUNCH-03 Out<In | 04 Overlap | 05 Masa depan | ADMIN-ATTENDANCE-03 Edit | 04 Delete | MY-01
@@ -389,3 +396,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | FASE 3 | docs/TC-Performance/Claim/Leave/Time.txt (86 TC + 1 CANCEL) via 4 agent + review manual; README coverage 531 + 4 subsection; QA-Review-Progress status final; 2 label spec usang diperbaiki | 1 commit
 - 2026-11-15 | P2.2 lapis 2 | +6 TC Claim (CONFIG-EVENT-03/04, CONFIG-EXPTYPE-01/02, SUBMIT-03, APPROVAL-06), semua lolos run pertama; ASSIGN-08/13 ditulis ulang (data sendiri, bukan seed milik karyawan lain); full batch Claim 29 TC: 25 pass + 4 gagal sengaja; noise BG-384..387 diarsip; TC-Claim.txt 30 entri, README 542 | 1 commit
 - 2026-11-15 | P2.1 lapis 2 | +8 TC Performance (EVAL-10/16, KPI-11, TRACKER-03..07) + createEssReview.ts + PerformanceSelfEvaluatePage + PerformanceTrackerPage edit/delete/log; tanpa bug app baru (nama tracker duplikat = finding desain); full batch 38: 27 pass + 9 lolos serial (demo terdegradasi) + 2 gagal sengaja; createTestEmployee guard employeeId null; noise BG-388..399 diarsip; README 550 | 1 commit
+- 2026-11-15 | P2.4 lapis 2 | +5 TC Time (TIMESHEET-04/10/11, PROJECT-01/02); BUG baru BG-402 (total harian >24j lintas baris diterima, Medium); fix searchAndView (waitForURL); full batch 17: 16 pass + 1 gagal sengaja; noise BG-400/401/403 diarsip; README 555. LAPIS 2 FASE 2 TUNTAS | 1 commit

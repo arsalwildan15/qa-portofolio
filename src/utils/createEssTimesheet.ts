@@ -6,8 +6,8 @@ import { loginAs } from './loginAs';
 // Seed data of the demo (confirmed live 2026-11-15): project "ACME Ltd" id 2, activity
 // "Administration" id 11. If a demo reset ever renumbers these, the entries PUT below fails
 // loudly instead of silently creating a wrong timesheet.
-const PROJECT_ID = 2;
-const ACTIVITY_ID = 11;
+export const PROJECT_ID = 2;
+export const ACTIVITY_ID = 11;
 
 function addDays(iso: string, days: number): string {
   const d = new Date(`${iso}T00:00:00`);
@@ -66,4 +66,20 @@ export async function createEssTimesheet(
 export async function getEssTimesheetStatus(essPage: Page): Promise<string | undefined> {
   const body = await (await essPage.request.get('/web/index.php/api/v2/time/timesheets/default')).json().catch(() => null);
   return body?.data?.status?.id;
+}
+
+/** GET time/timesheets/<id>/entries as the ESS sees it: rows (project/activity/dates/total) + meta.columns/meta.sum. */
+export async function getEssTimesheetEntries(essPage: Page, timesheetId: number): Promise<{
+  data: Array<{ project: { id: number; name: string }; activity: { id: number; name: string }; total: { label: string }; dates: Record<string, { id: number; duration: string; comment: string | null }> }>;
+  meta: { sum: { label: string }; columns: Record<string, { total: { label: string } }> };
+} | null> {
+  return (await essPage.request.get(`/web/index.php/api/v2/time/timesheets/${timesheetId}/entries`)).json().catch(() => null);
+}
+
+/** Second seed activity of the ACME Ltd project (any id other than ACTIVITY_ID), via GET time/project/<id>/activities (singular "project" -- confirmed live). */
+export async function otherSeedActivityId(page: Page): Promise<number> {
+  const body = await (await page.request.get(`/web/index.php/api/v2/time/project/${PROJECT_ID}/activities?limit=0`)).json().catch(() => null);
+  const id = ((body?.data ?? []) as Array<{ id: number }>).find((a) => a.id !== ACTIVITY_ID)?.id;
+  if (!id) throw new Error('otherSeedActivityId: ACME Ltd has no second activity');
+  return id;
 }

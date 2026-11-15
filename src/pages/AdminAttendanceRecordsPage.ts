@@ -73,8 +73,9 @@ export class AdminAttendanceRecordsPage extends BasePage {
     }
     if (!matched) throw new Error(`searchAndView: no autocomplete options at all for firstName "${firstName}"`);
     await this.searchViewButton.click();
-    await this.page.waitForLoadState('networkidle').catch(() => {});
-    await this.page.waitForTimeout(1_000);
+    // Wait for the navigation itself -- a fixed 1 s sleep read the URL before it changed when
+    // the demo was slow (seen 2026-11-15: URL still .../viewAttendanceRecord).
+    await this.page.waitForURL(/employeeId=\d+/, { timeout: 20_000 }).catch(() => {});
     const empNumberMatch = this.page.url().match(/employeeId=(\d+)/);
     if (!empNumberMatch) throw new Error(`searchAndView: could not read employeeId from URL ${this.page.url()}`);
     return Number(empNumberMatch[1]);
