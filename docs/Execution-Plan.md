@@ -26,9 +26,10 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** (6) LAPIS 2 Fase 2 -- Leave lapis 2 (APPLY-07..11) [x], Claim lapis 2 (6 TC) [x].
-  Berikutnya: P2.1 Performance lapis 2 (EVAL-10 self-eval ESS, KPI-11 pagination/sort, TRACKER-03..08),
-  lalu Time lapis 2 (multi-row, komentar sel, Customer/Project), lalu P2.5 lintas-modul, lalu Fase 4-8.
+- **NEXT ACTION:** (6) LAPIS 2 Fase 2 -- Leave [x], Claim [x], Performance (8 TC) [x].
+  Berikutnya: Time lapis 2 (multi-row total, duplikat row, >24j/hari lintas row, navigasi minggu,
+  komentar sel/XSS, Customer & Project CRUD + delete activity terpakai, punch out < in), lalu P2.5
+  lintas-modul, lalu Fase 4-8.
   Setiap TC baru: verifikasi per file, full batch per modul (--workers=1 utk modul dgn setup ESS),
   docs/TC-*.txt ikut diperbarui.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
@@ -207,8 +208,17 @@ halaman Trackers config, review utk employee tanpa KPI.
       autocomplete yg memuat lastName unik, bukan opsi pertama (id 4-digit "0421" bisa match lastName
       acak "QA204213" employee lain); (c) REVIEW-04 cek ikon Evaluate/Edit dikembalikan jadi hard check
       (flaky-nya ternyata akibat race (a)).
-- [ ] LAPIS 2 (ditunda sesuai urutan baru): EVAL-10 self-eval ESS | KPI-11 Pagination/sort |
-      TRACKER-03..08 (duplikat, edit/delete, log, XSS log, ESS My Trackers, IDOR)
+- [x] LAPIS 2 (8 TC, util `createEssReview.ts` (setupEssReviewee/createEssReview/createEssTracker,
+      semua via API), page object `PerformanceSelfEvaluatePage`, PerformanceTrackerPage +clickEdit/
+      saveEdit/deleteRow/gotoLogs/addLog): EVAL-10 self-eval ESS (Complete -> selfReviewStatus Completed,
+      overall In Progress, read-only, PUT ulang 403) | EVAL-16 ESS PUT evaluation/supervisor & final 403,
+      rating di luar rentang 422 | KPI-11 sort DESC + pagination 50/hlm | TRACKER-03 nama duplikat
+      DIIZINKAN (finding desain) | TRACKER-04 rename + delete walau ada log (GET 404) | TRACKER-05 log ESS
+      <-> reviewer (achievement 1/2) | TRACKER-06 XSS log/comment aman | TRACKER-07 IDOR ESS lain 403 +
+      "Credential Required". FAKTA: form self-eval mengisi ulang field setelah GET evaluation/employee
+      (tunggu dulu sebelum isi); GET evaluation/supervisor = baris placeholder rating null. Full batch 38:
+      27 pass + 9 lolos serial (demo terdegradasi) + 2 gagal sengaja (REVIEW-10, EVAL-15).
+      TRACKER-08 (ESS My Trackers) tercakup di TRACKER-05.
 - [ ] Regresi modul + docs/TC-Performance.txt + commit
 
 ### P2.2 Claim (~30) — eksplor: aksi admin pada klaim SUBMITTED milik ESS, Event inactive vs dropdown,
@@ -378,3 +388,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-15 | P2.4 lapis 1 | 5 TC Time (TS-SUBMIT-01, TS-APPROVAL-01..04) + createEssTimesheet + EmployeeTimesheetPage; TimeAttendancePage -> DATE_INPUT_SELECTOR; fakta: timesheet employee baru dibuat saat page load, status id "NOT SUBMITTED". Full batch Time 12/12 lolos. FASE 2 LAPIS 1 TUNTAS | 1 commit
 - 2026-11-15 | FASE 3 | docs/TC-Performance/Claim/Leave/Time.txt (86 TC + 1 CANCEL) via 4 agent + review manual; README coverage 531 + 4 subsection; QA-Review-Progress status final; 2 label spec usang diperbaiki | 1 commit
 - 2026-11-15 | P2.2 lapis 2 | +6 TC Claim (CONFIG-EVENT-03/04, CONFIG-EXPTYPE-01/02, SUBMIT-03, APPROVAL-06), semua lolos run pertama; ASSIGN-08/13 ditulis ulang (data sendiri, bukan seed milik karyawan lain); full batch Claim 29 TC: 25 pass + 4 gagal sengaja; noise BG-384..387 diarsip; TC-Claim.txt 30 entri, README 542 | 1 commit
+- 2026-11-15 | P2.1 lapis 2 | +8 TC Performance (EVAL-10/16, KPI-11, TRACKER-03..07) + createEssReview.ts + PerformanceSelfEvaluatePage + PerformanceTrackerPage edit/delete/log; tanpa bug app baru (nama tracker duplikat = finding desain); full batch 38: 27 pass + 9 lolos serial (demo terdegradasi) + 2 gagal sengaja; createTestEmployee guard employeeId null; noise BG-388..399 diarsip; README 550 | 1 commit

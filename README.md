@@ -185,11 +185,11 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | PIM | 164 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 59 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
-| Performance | 30 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
+| Performance | 38 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 26 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
 | Time | 12 | [docs/TC-Time.txt](docs/TC-Time.txt) |
-| **Total** | **542** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
+| **Total** | **550** | (+3 multi-role infrastructure smoke tests in `tests/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -283,9 +283,9 @@ Three more TCs close out previously-untested features: editing an own post, dele
 
 Cross-origin mutation (CSRF) on vacancy creation is confirmed **blocked by CORS** (no bug). There's also a documented intermittent client-side rendering bug where Application Stage/Candidate History cards occasionally get stuck loading forever with no underlying API error.
 
-### Performance (30 TCs)
+### Performance (38 TCs)
 
-Configure > KPIs (10: add/edit/delete, required fields, rating boundary, duplicate names, default-scale behavior, filter by Job Title, injection, invalid id), Manage Reviews (13: create, the supervisor-link prerequisite, activation rules, KPI scoping, completion validation, date order, list filters, delete, edit lock after activation, double-click activate, IDOR and broken function-level access control using real ESS accounts), the evaluation page (5: full save → In Progress → Complete → read-only, per-KPI rating min/max on both UI and API, stored XSS in comments, evaluating an Inactive review via API, non-numeric ratings), and Trackers (2).
+Configure > KPIs (11: add/edit/delete, required fields, rating boundary, duplicate names, default-scale behavior, filter by Job Title, sort + pagination, injection, invalid id), Manage Reviews (13: create, the supervisor-link prerequisite, activation rules, KPI scoping, completion validation, date order, list filters, delete, edit lock after activation, double-click activate, IDOR and broken function-level access control using real ESS accounts), evaluation (7: the reviewer's full save → In Progress → Complete → read-only, per-KPI rating min/max on both UI and API, stored XSS in comments, evaluating an Inactive review via API, non-numeric ratings; plus the employee's own self-evaluation from My Reviews, and proof that an employee cannot write the supervisor or final evaluation of their own review), and Trackers (7: add, required fields, duplicate names, rename/delete with logs, employee ↔ reviewer log visibility, stored XSS in logs, and cross-employee IDOR).
 
 Notable confirmed behaviors: a review can only name a "Supervisor Reviewer" who is already linked to the employee in PIM > Report-to; activation is refused (HTTP 400) unless the employee's Job Title has KPIs; marking a second KPI as "default scale" silently un-defaults the first one for that Job Title.
 

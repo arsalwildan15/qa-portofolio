@@ -932,10 +932,218 @@ No.  Test Case ID         Status   Skenario / Deskripsi
                                    konsisten.
 
 ================================================================================
+  GROUP 5, LAPIS 2: SELF-EVALUATION (ESS), KPI LIST, TRACKER LOGS
+================================================================================
+
+  Setup lapis 2 memakai util src/utils/createEssReview.ts (semua via API,
+  shape dikonfirmasi live 15 Nov 2026):
+    setupEssReviewee() -> akun ESS + atasan Direct = Admin (POST
+      pim/employees/<emp>/supervisors) + Job Title "QA Engineer" (PUT
+      job-details).
+    createEssReview()  -> + POST performance/manage/reviews {empNumber,
+      reviewerEmpNumber, startDate, endDate, dueDate, activate:true} ->
+      langsung "Activated", lalu login sebagai ESS.
+    createEssTracker() -> akun ESS + POST performance/config/trackers
+      (reviewer = Admin), lalu login sebagai ESS.
+
+31   TC-PERF-EVAL-10      [DONE]   TC-PERF-EVAL-10-Verify-ESS-Self-Evaluation-Complete.spec.ts
+                                   (+) Verify An Employee Can Complete Their
+                                   Self-Evaluation And It Becomes Read-Only
+                                   -> Setup: createEssReview().
+                                   -> [ESS UI] My Reviews -> ikon aksi baris
+                                      -> performance/reviewEvaluate/id/<id>.
+                                   -> Isi rating tiap KPI (70, dijepit ke
+                                      min/max KPI) + General Comment.
+                                   -> Klik Complete (konfirmasi Ok bila
+                                      dialog muncul).
+                                   -> [ESS] Buka ulang halaman, lalu coba PUT
+                                      evaluation/employee lagi via API.
+                                   [API VERIFICATION]
+                                   -> Verify PUT reviews/<id>/evaluation/
+                                      employee 200 dgn complete:true dan body
+                                      membawa rating yg diisi (bukan null).
+                                   -> Verify selfReviewStatus "Completed",
+                                      overallStatus "In Progress".
+                                   -> Verify Admin (reviewer) GET evaluation/
+                                      employee: rating tiap KPI & General
+                                      Comment sesuai input.
+                                   -> Verify PUT ulang setelah Complete -> 403.
+                                   [UI VERIFICATION]
+                                   -> Verify semua input rating disabled,
+                                      tombol Save & Complete hilang.
+                                   NOTE: [BUG SCRIPT ditemukan & diperbaiki]
+                                   form merender input SEBELUM GET
+                                   evaluation/employee selesai; respons itu
+                                   lalu mengisi ulang semua field, menghapus
+                                   ketikan -> rating terkirim null.
+                                   PerformanceSelfEvaluatePage kini menunggu
+                                   GET tsb sebelum mengisi.
+
+32   TC-PERF-EVAL-16      [DONE]   TC-PERF-EVAL-16-Verify-ESS-Cannot-Write-Supervisor-Or-Final-Evaluation.spec.ts
+                                   (S/B) Verify An Employee Cannot Write The
+                                   Supervisor Or Final Evaluation Of Their
+                                   Own Review
+                                   -> Setup: createEssReview().
+                                   -> [ESS API] PUT evaluation/supervisor
+                                      (rating max semua KPI).
+                                   -> [ESS API] PUT evaluation/final
+                                      (complete:true, finalRating 100).
+                                   -> [ESS API] PUT evaluation/employee dgn
+                                      rating max+10.
+                                   [API VERIFICATION]
+                                   -> Verify supervisor -> 403, final -> 403.
+                                   -> Verify rating di luar rentang -> 422
+                                      invalidParamKeys ["ratings"].
+                                   -> Verify (Admin) evaluasi supervisor masih
+                                      kosong (semua rating null) dan status
+                                      review tetap "Activated".
+                                   NOTE: [TEMUAN POSITIF] tidak ada eskalasi
+                                   hak: karyawan tidak bisa menilai/
+                                   menyelesaikan review sendiri. Catatan:
+                                   GET evaluation/supervisor mengembalikan
+                                   baris placeholder per KPI (rating null),
+                                   bukan array kosong.
+
+33   TC-PERF-KPI-11       [DONE]   TC-PERF-KPI-11-Verify-Sort-And-Pagination.spec.ts
+                                   (+) Verify The KPI List Sorts By Name And
+                                   Paginates At 50 Rows
+                                   -> Buka performance/searchKpi.
+                                   -> Kolom "Key Performance Indicator" ->
+                                      ikon sort -> Descending.
+                                   -> Bila meta.total > 50: klik halaman 2.
+                                   [API VERIFICATION]
+                                   -> Verify GET kpis?...sortField=kpi.title&
+                                      sortOrder=DESC; halaman 2 offset=50
+                                      dgn sort tetap DESC.
+                                   [UI VERIFICATION]
+                                   -> Verify urutan baris UI = urutan respons
+                                      server, dan judul pertama >= judul
+                                      terakhir (case-insensitive).
+                                   -> Verify halaman 1 = min(50, total) baris,
+                                      "(N) Records Found" = meta.total;
+                                      halaman 2 = min(50, total-50) baris.
+                                   NOTE: angka dihitung dari meta.total
+                                   (data demo publik berubah); bila total
+                                   <= 50 pagination dicatat sbg finding.
+                                   Setiap kolom sortable punya dropdown
+                                   sendiri di DOM -> locator di-scope ke
+                                   header kolom.
+
+34   TC-PERF-TRACKER-03   [DONE]   TC-PERF-TRACKER-03-Verify-Duplicate-Tracker-Name-Same-Employee.spec.ts
+                                   (!) Verify Behaviour When Two Trackers With
+                                   The Same Name Are Created For One Employee
+                                   -> Setup: createEssTracker().
+                                   -> [Admin API] POST config/trackers lagi
+                                      dgn nama & karyawan yg sama.
+                                   -> [ESS API] POST log ke tracker pertama.
+                                   [API VERIFICATION]
+                                   -> Verify respons terdefinisi: 4xx ATAU 200
+                                      dgn id berbeda.
+                                   -> Bila 200: kedua tracker ada di My
+                                      Trackers ESS; log tracker pertama TIDAK
+                                      bocor ke tracker kedua.
+                                   NOTE: [TEMUAN DESAIN] nama duplikat
+                                   DIIZINKAN (200, id berbeda), sejalan dgn
+                                   KPI-05. Dicatat sbg finding, bukan bug.
+
+35   TC-PERF-TRACKER-04   [DONE]   TC-PERF-TRACKER-04-Verify-Edit-And-Delete-Tracker.spec.ts
+                                   (+) Verify A Tracker Can Be Renamed And
+                                   Then Deleted (Including Its Logs)
+                                   -> Setup: createEssTracker() + 1 log ESS.
+                                   -> [Admin UI] Ikon pensil ->
+                                      addPerformanceTracker/<id> (form
+                                      terisi), ganti nama, Save.
+                                   -> [Admin UI] Ikon trash -> dialog "Are
+                                      you Sure?" -> Yes, Delete.
+                                   [API VERIFICATION]
+                                   -> Verify PUT config/trackers/<id> 200 dgn
+                                      trackerName baru.
+                                   -> Verify DELETE config/trackers 200 walau
+                                      tracker sudah punya log; GET
+                                      employees/trackers/<id> -> 404.
+                                   -> Verify tracker hilang dari My Trackers
+                                      ESS.
+                                   [UI VERIFICATION]
+                                   -> Verify form edit terisi nama lama, nama
+                                      baru tampil di daftar, baris hilang
+                                      setelah hapus.
+
+36   TC-PERF-TRACKER-05   [DONE]   TC-PERF-TRACKER-05-Verify-ESS-Adds-Log-Visible-To-Reviewer.spec.ts
+                                   (+) Verify An Employee's Tracker Log Is
+                                   Saved And Visible To The Reviewer
+                                   -> Setup: createEssTracker().
+                                   -> [ESS UI] My Trackers -> View ->
+                                      addPerformanceTrackerLog/trackId/<id>
+                                      ?mode=my -> Add Log (Log, Comment,
+                                      Positive) -> Save.
+                                   -> [Admin UI] Buka tracker yg sama, Add
+                                      Log (Negative).
+                                   [API VERIFICATION]
+                                   -> Verify POST trackers/<id>/logs 200,
+                                      achievement 1 (Positive) / 2
+                                      (Negative).
+                                   -> Verify ESS melihat kedua log via API.
+                                   [UI VERIFICATION]
+                                   -> Verify log tampil di halaman ESS dan
+                                      terlihat oleh reviewer.
+
+37   TC-PERF-TRACKER-06   [DONE]   TC-PERF-TRACKER-06-Verify-XSS-In-Tracker-Log-Not-Executed.spec.ts
+                                   (S) Verify XSS Payloads In A Tracker Log
+                                   Render As Text For Employee And Reviewer
+                                   -> Setup: createEssTracker().
+                                   -> [ESS UI] Add Log dgn `<img src=x
+                                      onerror=...>` di Log dan `<svg
+                                      onload=...>` di Comment.
+                                   -> [Admin UI] Reviewer membuka tracker.
+                                   [API VERIFICATION]
+                                   -> Verify log tersimpan 200.
+                                   [UI VERIFICATION]
+                                   -> Verify payload tampil sbg teks, flag
+                                      window.__trkXss tidak ter-set, tidak
+                                      ada img[src="x"] / svg[onload], di
+                                      KEDUA role.
+                                   NOTE: [TEMUAN POSITIF] output di-escape.
+
+38   TC-PERF-TRACKER-07   [DONE]   TC-PERF-TRACKER-07-Verify-IDOR-Other-Employee-Tracker.spec.ts
+                                   (S) Verify An Employee Cannot Read Or Write
+                                   Another Employee's Tracker
+                                   -> Setup: createEssTracker() (pemilik) +
+                                      createEssAccount() (ESS lain).
+                                   -> [ESS lain API] GET employees/trackers/
+                                      <id>, GET trackers/<id>/logs, POST
+                                      trackers/<id>/logs.
+                                   -> [ESS lain UI] Buka URL tracker ?mode=my.
+                                   [API VERIFICATION]
+                                   -> Verify ketiganya 403.
+                                   -> Verify pemilik tetap bisa GET log (200)
+                                      dan log penyerang TIDAK tersimpan.
+                                   [UI VERIFICATION]
+                                   -> Verify halaman menampilkan "Credential
+                                      Required".
+                                   NOTE: [TEMUAN POSITIF] tidak ada IDOR.
+
+================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
 
-  Total TC modul   : 30 (KPI 10, REVIEW 13, EVAL 5, TRACKER 2)
+  Total TC modul   : 38 (KPI 11, REVIEW 13, EVAL 7, TRACKER 7)
+
+  Full batch Performance 15 Nov 2026 SETELAH lapis 2 (38 TC, --workers=1,
+  20 menit):
+  PASSED           : 27 di batch + 9 lolos saat diulang serial = 36
+  FAILED (BUG, sengaja) : 2 -> TC-PERF-REVIEW-10 (BG-356), TC-PERF-EVAL-15
+                     (BG-373)
+  Gagal di batch lalu lolos serial (9): KPI-05/06/07/08, REVIEW-05,
+    TRACKER-04..07 -- demo publik terdegradasi di menit-menit akhir run
+    (net::ERR_CONNECTION_CLOSED, timeout 60 s saat setup, Add Employee 422
+    / tanpa respons, satu respons 200 dgn employeeId null). Noise BG-391..399
+    diarsip. createTestEmployee kini gagal dgn pesan jelas bila employeeId
+    null (sebelumnya muncul sbg "locator.fill: expected string, got object").
+  Lapis 2 (8 TC baru: EVAL-10, EVAL-16, KPI-11, TRACKER-03..07): semua
+    PASS; tidak ada bug aplikasi baru. Bug SCRIPT selama pengembangan
+    (BG-388..390, diarsip): lihat NOTE di EVAL-10, EVAL-16, KPI-11.
+
+  Riwayat batch sebelum lapis 2:
   Dijalankan       : 24 (full batch Performance: REVIEW-01..13,
                      EVAL-11..15, TRACKER-01..02, KPI-07..10)
                      KPI-01..06 TIDAK termasuk batch ini (TC lama, terakhir

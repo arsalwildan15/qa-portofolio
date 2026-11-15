@@ -36,6 +36,12 @@ export async function createTestEmployee(
     if (resp && resp.status() === 200) {
       const body = await resp.json().catch(() => null);
       if (body?.data?.empNumber) {
+        // Seen live 2026-11-15 while the shared demo was degraded: 200 with employeeId null.
+        // Callers search autocompletes by employeeId, so fail here with the real cause instead of
+        // letting a later locator.fill(null) throw "expected string, got object".
+        if (typeof body.data.employeeId !== 'string' || body.data.employeeId === '') {
+          throw new Error(`createTestEmployee: employee ${body.data.empNumber} saved without an employeeId (got ${JSON.stringify(body.data.employeeId)})`);
+        }
         return {
           empNumber: body.data.empNumber,
           employeeId: body.data.employeeId,

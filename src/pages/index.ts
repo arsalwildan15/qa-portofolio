@@ -47,6 +47,7 @@ export { PerformanceKpiPage } from './PerformanceKpiPage';
 export { PerformanceManageReviewsPage } from './PerformanceManageReviewsPage';
 export { PerformanceEvaluatePage } from './PerformanceEvaluatePage';
 export { PerformanceTrackerPage } from './PerformanceTrackerPage';
+export { PerformanceSelfEvaluatePage } from './PerformanceSelfEvaluatePage';
 export { SubmitClaimPage } from './SubmitClaimPage';
 export { ClaimEventsPage } from './ClaimEventsPage';
 export { EmployeeTimesheetPage } from './EmployeeTimesheetPage';
