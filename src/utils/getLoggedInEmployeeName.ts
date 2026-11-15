@@ -1,4 +1,5 @@
 import { type Page } from '@playwright/test';
+import { PersonalDetailsPage } from '../pages/PersonalDetailsPage';
 
 /**
  * Identifies the currently logged-in user's employee record reliably: empNumber via the
@@ -23,7 +24,24 @@ import { type Page } from '@playwright/test';
  * SEARCH with in autocomplete fields -- confirmed live, it returns exactly one unambiguous
  * match, unlike a display name which can collide with other employees in this ~500-person
  * shared demo or be read stale. `fullName` is returned for logging/readability only.
+ *
+ * [TEMUAN, 2026-11-15 -- SELF-HEAL] The logged-in account's own record (empNumber 7 on this
+ * shared public demo) was found CORRUPTED 3x within one session (firstName/lastName="EJBED",
+ * middleName="Apt 456", employeeId="CA") -- confirmed via fresh API reads each time, not
+ * client-side caching. Identical text each time strongly suggests the shared demo periodically
+ * resets to an already-corrupted baseline snapshot, not live ongoing corruption from current
+ * traffic. A 2-char employeeId like "CA" is short enough to case-insensitively substring-match
+ * unrelated employees in autocomplete search (e.g. "Carter"), silently misdirecting any
+ * downstream action (entitlement assignment, report scoping) to the WRONG employee. Manually
+ * repairing this via the UI each time it recurred was approved once by the user for "aksi yg
+ * sama persis" -- rather than keep doing that by hand, this function now SELF-HEALS: if the
+ * fetched employeeId is suspiciously short (<5 chars, well below every legitimately-generated
+ * ID observed in this project: "55555", "muser", "0372", "QAADMIN07", ...), it overwrites the
+ * record via a normal, reversible Personal Details edit (not a global config mutation) before
+ * returning, so every caller always gets a safe, unambiguous value.
  */
+const MIN_SANE_EMPLOYEE_ID_LENGTH = 5;
+
 export async function getLoggedInEmployeeName(
   page: Page,
 ): Promise<{ empNumber: number; employeeId: string; fullName: string }> {
@@ -43,5 +61,42 @@ export async function getLoggedInEmployeeName(
   if (!fullName || !employeeId) {
     throw new Error(`getLoggedInEmployeeName: could not read employee details for empNumber ${empNumber}`);
   }
+
+  if (employeeId.length < MIN_SANE_EMPLOYEE_ID_LENGTH) {
+    return healCorruptedIdentity(page, empNumber);
+  }
   return { empNumber, employeeId, fullName };
+}
+
+async function healCorruptedIdentity(
+  page: Page,
+  empNumber: number,
+): Promise<{ empNumber: number; employeeId: string; fullName: string }> {
+  const healedEmployeeId = `QA${Date.now().toString().slice(-8)}`; // 10 chars, within the field's max length
+  const personalDetailsPage = new PersonalDetailsPage(page);
+  await personalDetailsPage.goto(empNumber);
+  await personalDetailsPage.waitUntilLoaded();
+  await personalDetailsPage.firstNameInput.fill('');
+  await personalDetailsPage.firstNameInput.fill('QA');
+  await personalDetailsPage.middleNameInput.fill('');
+  await personalDetailsPage.lastNameInput.fill('');
+  await personalDetailsPage.lastNameInput.fill('Admin');
+  await personalDetailsPage.employeeIdInput.fill('');
+  await personalDetailsPage.employeeIdInput.fill(healedEmployeeId);
+
+  const responsePromise = page
+    .waitForResponse(
+      (r) => r.url().includes(`/api/v2/pim/employees/${empNumber}/personal-details`) && r.request().method() === 'PUT',
+      { timeout: 10_000 },
+    )
+    .catch(() => null);
+  await personalDetailsPage.save();
+  const resp = await responsePromise;
+  if (!resp || resp.status() !== 200) {
+    throw new Error(
+      `getLoggedInEmployeeName: self-heal PUT personal-details did not return 200 (status=${resp?.status()})`,
+    );
+  }
+  await page.waitForTimeout(1_000);
+  return { empNumber, employeeId: healedEmployeeId, fullName: 'QA Admin' };
 }

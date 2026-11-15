@@ -18,7 +18,7 @@ export async function createTestEmployee(
   page: Page,
   addEmployeePage: AddEmployeePage,
   namePrefix: string,
-): Promise<{ empNumber: number; firstName: string; lastName: string }> {
+): Promise<{ empNumber: number; employeeId: string; firstName: string; lastName: string }> {
   const employee = uniqueEmployeeName(namePrefix);
   await addEmployeePage.goto();
   await addEmployeePage.fillName(employee.firstName, employee.lastName);
@@ -36,7 +36,12 @@ export async function createTestEmployee(
     if (resp && resp.status() === 200) {
       const body = await resp.json().catch(() => null);
       if (body?.data?.empNumber) {
-        return { empNumber: body.data.empNumber, firstName: employee.firstName, lastName: employee.lastName };
+        return {
+          empNumber: body.data.empNumber,
+          employeeId: body.data.employeeId,
+          firstName: employee.firstName,
+          lastName: employee.lastName,
+        };
       }
     }
 

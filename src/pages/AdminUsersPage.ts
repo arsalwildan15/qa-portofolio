@@ -77,6 +77,19 @@ export class AdminUsersPage extends BasePage {
     if ((await options.count()) > 0) await options.first().click();
   }
 
+  /**
+   * Searches for and selects a SPECIFIC employee by name (unlike fillFirstEmployeeName(), which
+   * blindly takes whichever employee happens to match "a" first). Needed when the caller must
+   * link the new user to an employee it just created itself, not an arbitrary existing one.
+   */
+  async selectEmployee(searchTerm: string): Promise<void> {
+    await this.employeeNameInput.fill(searchTerm);
+    await this.page.getByText('Searching....').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+    const option = this.page.locator('.oxd-autocomplete-option').first();
+    await option.waitFor({ state: 'visible', timeout: 10_000 });
+    await option.click();
+  }
+
   async save(): Promise<void> {
     await this.saveButton.click();
   }
