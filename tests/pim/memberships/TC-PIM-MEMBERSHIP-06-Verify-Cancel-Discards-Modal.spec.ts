@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-MEMBERSHIP-06 — Verify Cancel Discards Modal
  * Modul    : PIM - Memberships
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-MEMBERSHIP-06-Verify-Cancel-Discards-Modal.spec.ts
  * Path     : tests/pim/memberships/

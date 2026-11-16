@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-PD-12 — Verify Save Personal Details API Endpoint
  * Modul    : PIM - Personal Details
- * Kategori : Positive (+) [API VERIFICATION]
+ * Kategori : API (A) 6.1 6.2 [API VERIFICATION]
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-PD-12-Verify-Save-Personal-Details-API-Endpoint.spec.ts
  * Path     : tests/pim/personal-details/

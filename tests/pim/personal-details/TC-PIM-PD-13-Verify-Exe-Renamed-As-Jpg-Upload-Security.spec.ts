@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-PD-13: Verify Exe Renamed As Jpg Upload Security
  * Modul    : PIM - Personal Details
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-Rename
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-PD-13-Verify-Exe-Renamed-As-Jpg-Upload-Security.spec.ts
  * Path     : tests/pim/personal-details/

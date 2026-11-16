@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-JOB-08 — Verify Save Triggers Two API Endpoints
  * Modul    : PIM - Job
- * Kategori : Positive (+) [API VERIFICATION]
+ * Kategori : API (A) 6.1 [API VERIFICATION]
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-JOB-08-Verify-Save-Triggers-Two-API-Endpoints.spec.ts
  * Path     : tests/pim/job/

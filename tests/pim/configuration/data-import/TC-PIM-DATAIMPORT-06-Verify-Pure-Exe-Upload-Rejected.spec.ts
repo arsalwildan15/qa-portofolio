@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DATAIMPORT-06: Verify Pure Exe Upload Rejected
  * Modul    : PIM - Configuration - Data Import
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-BadExt
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DATAIMPORT-06-Verify-Pure-Exe-Upload-Rejected.spec.ts
  * Path     : tests/pim/configuration/data-import/

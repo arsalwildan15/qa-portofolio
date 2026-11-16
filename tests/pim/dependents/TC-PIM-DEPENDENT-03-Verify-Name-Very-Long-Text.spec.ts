@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DEPENDENT-03 — Verify Name Very Long Text
  * Modul    : PIM - Dependents
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DEPENDENT-03-Verify-Name-Very-Long-Text.spec.ts
  * Path     : tests/pim/dependents/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DEPENDENT-01 — Verify Add Valid Dependent
  * Modul    : PIM - Dependents
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DEPENDENT-01-Verify-Add-Valid-Dependent.spec.ts
  * Path     : tests/pim/dependents/

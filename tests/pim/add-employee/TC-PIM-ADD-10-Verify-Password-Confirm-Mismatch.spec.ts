@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-10 — Verify Password Confirm Mismatch
  * Modul    : PIM - Add Employee
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.2
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-10-Verify-Password-Confirm-Mismatch.spec.ts
  * Path     : tests/pim/add-employee/

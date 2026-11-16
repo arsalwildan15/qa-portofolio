@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-SECURITY-02: Verify Clickjacking Protection Header on PIM Pages
  * Modul    : PIM - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.6
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-SECURITY-02-Verify-Clickjacking-Protection-Header.spec.ts
  * Path     : tests/pim/security/

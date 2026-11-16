@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-24 — Verify RTL Arabic In First Name
  * Modul    : PIM - Add Employee
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.1 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-24-Verify-RTL-Arabic-In-First-Name.spec.ts
  * Path     : tests/pim/add-employee/

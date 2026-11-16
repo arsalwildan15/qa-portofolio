@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-REPORT-01: Verify Search Existing Report
  * Modul    : PIM - Reports
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-REPORT-01-Verify-Search-Existing-Report.spec.ts
  * Path     : tests/pim/reports/

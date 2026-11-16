@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CUSTOMFIELD-03: Verify Delete Custom Field
  * Modul    : PIM - Configuration - Custom Fields
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CUSTOMFIELD-03-Verify-Delete-Custom-Field.spec.ts
  * Path     : tests/pim/configuration/custom-fields/

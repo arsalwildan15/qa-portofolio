@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-PD-08 — Verify Gender Radio Mutually Exclusive
  * Modul    : PIM - Personal Details
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-PD-08-Verify-Gender-Radio-Mutually-Exclusive.spec.ts
  * Path     : tests/pim/personal-details/

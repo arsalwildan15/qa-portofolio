@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-SALARY-06 — Verify Cancel Discards Modal
  * Modul    : PIM - Salary
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-SALARY-06-Verify-Cancel-Discards-Modal.spec.ts
  * Path     : tests/pim/salary/

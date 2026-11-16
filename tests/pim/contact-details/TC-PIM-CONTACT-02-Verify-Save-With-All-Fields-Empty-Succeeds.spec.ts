@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CONTACT-02 — Verify Save With All Fields Empty Succeeds
  * Modul    : PIM - Contact Details
- * Kategori : Edge Case (!) [TEMUAN]
+ * Kategori : Positive (+) 1.2 | API (A) 6.1 [TEMUAN]
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CONTACT-02-Verify-Save-With-All-Fields-Empty-Succeeds.spec.ts
  * Path     : tests/pim/contact-details/

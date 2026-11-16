@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-08 — Verify Duplicate Employee Id Shows Error [TEMUAN]
  * Modul    : PIM - Add Employee
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.3
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-08-Verify-Duplicate-Employee-Id-Shows-Error.spec.ts
  * Path     : tests/pim/add-employee/

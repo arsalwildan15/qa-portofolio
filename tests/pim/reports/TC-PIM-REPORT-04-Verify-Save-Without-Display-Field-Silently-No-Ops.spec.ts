@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-REPORT-04: Verify Save Without Display Field Silently No-Ops
  * Modul    : PIM - Reports
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1 | Edge Case (!) 4.8
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-REPORT-04-Verify-Save-Without-Display-Field-Silently-No-Ops.spec.ts
  * Path     : tests/pim/reports/

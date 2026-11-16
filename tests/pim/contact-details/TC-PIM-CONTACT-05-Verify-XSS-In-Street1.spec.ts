@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CONTACT-05 — Verify XSS In Street1
  * Modul    : PIM - Contact Details
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CONTACT-05-Verify-XSS-In-Street1.spec.ts
  * Path     : tests/pim/contact-details/

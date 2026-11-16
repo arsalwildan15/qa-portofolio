@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DEPENDENT-07 — Verify Future Date Of Birth
  * Modul    : PIM - Dependents
- * Kategori : Edge Case (!)
+ * Kategori : Boundary (B) 3.4
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DEPENDENT-07-Verify-Future-Date-Of-Birth.spec.ts
  * Path     : tests/pim/dependents/

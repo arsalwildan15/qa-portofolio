@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-QUALIFICATION-06 — Verify Cancel Discards Modal
  * Modul    : PIM - Qualifications
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-QUALIFICATION-06-Verify-Cancel-Discards-Modal.spec.ts
  * Path     : tests/pim/qualifications/

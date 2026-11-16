@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-MEMBERSHIP-01 — Verify Add Valid Membership
  * Modul    : PIM - Memberships
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-MEMBERSHIP-01-Verify-Add-Valid-Membership.spec.ts
  * Path     : tests/pim/memberships/

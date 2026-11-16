@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-IMMIGRATION-02 — Verify Empty Submit Validation
  * Modul    : PIM - Immigration
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-IMMIGRATION-02-Verify-Empty-Submit-Validation.spec.ts
  * Path     : tests/pim/immigration/

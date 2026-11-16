@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-EMERGENCY-06 — Verify SQL Injection In Relationship
  * Modul    : PIM - Emergency Contacts
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-SQLi
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-EMERGENCY-06-Verify-SQL-Injection-In-Relationship.spec.ts
  * Path     : tests/pim/emergency-contacts/

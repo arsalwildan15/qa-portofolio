@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DATAIMPORT-04: Verify Submit Without File Validation
  * Modul    : PIM - Configuration - Data Import
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DATAIMPORT-04-Verify-Submit-Without-File-Validation.spec.ts
  * Path     : tests/pim/configuration/data-import/

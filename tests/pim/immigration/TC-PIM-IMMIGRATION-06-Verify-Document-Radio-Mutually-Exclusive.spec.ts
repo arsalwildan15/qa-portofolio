@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-IMMIGRATION-06 — Verify Document Radio Mutually Exclusive
  * Modul    : PIM - Immigration
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-IMMIGRATION-06-Verify-Document-Radio-Mutually-Exclusive.spec.ts
  * Path     : tests/pim/immigration/

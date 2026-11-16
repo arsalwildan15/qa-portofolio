@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-MEMBERSHIP-07 — Verify Save API Endpoint
  * Modul    : PIM - Memberships
- * Kategori : Positive (+) [API VERIFICATION]
+ * Kategori : API (A) 6.1 [API VERIFICATION]
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-MEMBERSHIP-07-Verify-Save-API-Endpoint.spec.ts
  * Path     : tests/pim/memberships/

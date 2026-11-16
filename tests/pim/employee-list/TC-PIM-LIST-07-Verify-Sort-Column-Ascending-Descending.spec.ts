@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-07 — Verify Sort Column Ascending Descending
  * Modul    : PIM - Employee List
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6 | API (A) 6.6
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-07-Verify-Sort-Column-Ascending-Descending.spec.ts
  * Path     : tests/pim/employee-list/

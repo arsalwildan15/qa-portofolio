@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-TERMREASON-01: Verify Add Valid Termination Reason
  * Modul    : PIM - Configuration - Termination Reasons
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-TERMREASON-01-Verify-Add-Valid-Termination-Reason.spec.ts
  * Path     : tests/pim/configuration/termination-reasons/

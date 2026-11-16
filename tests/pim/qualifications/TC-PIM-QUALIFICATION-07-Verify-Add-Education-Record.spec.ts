@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-QUALIFICATION-07 — Verify Add Education Record
  * Modul    : PIM - Qualifications
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-QUALIFICATION-07-Verify-Add-Education-Record.spec.ts
  * Path     : tests/pim/qualifications/

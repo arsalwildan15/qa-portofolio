@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-06 — Verify Combined Multi Filter
  * Modul    : PIM - Employee List
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-06-Verify-Combined-Multi-Filter.spec.ts
  * Path     : tests/pim/employee-list/

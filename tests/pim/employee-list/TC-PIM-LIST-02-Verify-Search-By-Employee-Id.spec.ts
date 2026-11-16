@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-02 — Verify Search By Employee Id
  * Modul    : PIM - Employee List
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-02-Verify-Search-By-Employee-Id.spec.ts
  * Path     : tests/pim/employee-list/

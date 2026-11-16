@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-08 — Verify Pagination Next Page
  * Modul    : PIM - Employee List
- * Kategori : Positive (+)
+ * Kategori : Boundary (B) 3.5 | API (A) 6.1 6.6
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-08-Verify-Pagination-Next-Page.spec.ts
  * Path     : tests/pim/employee-list/

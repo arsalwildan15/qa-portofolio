@@ -23,6 +23,8 @@ Keyword tags are a first pass and are audited by sampling; a rule change must be
 
 Explicit codes win (since 2026-11-16): when at least 80% of a spec's `report.check` labels name their taxonomy code (`"1.1-C / 6.1 POST valid -> 200"`, `"[U013 ...] 4.4 ..."`), the spec is tagged with those codes only and the keyword pass is skipped for it. The audit that introduced this found keyword misfires on such labels (e.g. "Content-Type" header -> 5.3-ContentType upload, "hapus query" -> 1.1-D, "sesi" -> 5.7) that had inflated coverage by about 5 points. A code a TC genuinely verifies must therefore be written in its label.
 
+Older specs get their codes from a curated header instead: `apply_codes.py <codes.json>` writes the codes each spec really verifies into its `Kategori :` line (e.g. `Negative (-) 2.1 | Boundary (B) 3.1`, or `kode: -` when no taxonomy item applies), and build_matrix reads that line in explicit mode. The script is idempotent; `pim_codes.json` holds the PIM curation (2026-11-17), derived from each spec's title and check labels. Weak specs are left uncoded until strengthened.
+
 Flag `NOAPI` marks a unit that sends no server request (proven by a TC check); server-response items (5.6, 5.8, 6.1-6.5) are N/A for it. The sidebar-search folder is mapped only to the Sidebar unit: the Dashboard it stands on is the host page, not the subject.
 
 Before every commit that adds, moves or renames specs:

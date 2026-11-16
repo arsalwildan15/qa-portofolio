@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-OPTFIELD-02: Verify Nickname Toggle Affects Personal Details
  * Modul    : PIM - Configuration - Optional Fields
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.4 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-OPTFIELD-02-Verify-Nickname-Toggle-Affects-Personal-Details.spec.ts
  * Path     : tests/pim/configuration/optional-fields/

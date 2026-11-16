@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CUSTOMFIELD-04: Verify Duplicate Field Name
  * Modul    : PIM - Configuration - Custom Fields
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.3
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CUSTOMFIELD-04-Verify-Duplicate-Field-Name.spec.ts
  * Path     : tests/pim/configuration/custom-fields/

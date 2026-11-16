@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-10 — Verify Reset Restores Default Filters
  * Modul    : PIM - Employee List
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-10-Verify-Reset-Restores-Default-Filters.spec.ts
  * Path     : tests/pim/employee-list/

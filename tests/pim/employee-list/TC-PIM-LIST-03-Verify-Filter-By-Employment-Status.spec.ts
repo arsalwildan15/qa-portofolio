@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-03 — Verify Filter By Employment Status
  * Modul    : PIM - Employee List
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-03-Verify-Filter-By-Employment-Status.spec.ts
  * Path     : tests/pim/employee-list/

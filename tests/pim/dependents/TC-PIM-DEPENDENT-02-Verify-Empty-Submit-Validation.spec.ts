@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DEPENDENT-02 — Verify Empty Submit Validation
  * Modul    : PIM - Dependents
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DEPENDENT-02-Verify-Empty-Submit-Validation.spec.ts
  * Path     : tests/pim/dependents/

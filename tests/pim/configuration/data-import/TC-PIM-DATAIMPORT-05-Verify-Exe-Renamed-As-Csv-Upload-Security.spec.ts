@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DATAIMPORT-05: Verify Exe Renamed As Csv Upload Security
  * Modul    : PIM - Configuration - Data Import
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-Rename
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DATAIMPORT-05-Verify-Exe-Renamed-As-Csv-Upload-Security.spec.ts
  * Path     : tests/pim/configuration/data-import/

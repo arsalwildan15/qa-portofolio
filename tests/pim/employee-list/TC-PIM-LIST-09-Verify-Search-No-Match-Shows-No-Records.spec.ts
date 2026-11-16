@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-09 — Verify Search No Match Shows No Records
  * Modul    : PIM - Employee List
- * Kategori : Negative (-)
+ * Kategori : Boundary (B) 3.6 | Edge Case (!) 4.6 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-09-Verify-Search-No-Match-Shows-No-Records.spec.ts
  * Path     : tests/pim/employee-list/

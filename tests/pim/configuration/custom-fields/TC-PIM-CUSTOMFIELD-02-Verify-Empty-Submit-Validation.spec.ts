@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CUSTOMFIELD-02: Verify Empty Submit Validation
  * Modul    : PIM - Configuration - Custom Fields
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CUSTOMFIELD-02-Verify-Empty-Submit-Validation.spec.ts
  * Path     : tests/pim/configuration/custom-fields/

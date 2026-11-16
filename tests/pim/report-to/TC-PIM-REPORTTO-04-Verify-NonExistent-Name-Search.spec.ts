@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-REPORTTO-04 — Verify NonExistent Name Search
  * Modul    : PIM - Report-to
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1 | Boundary (B) 3.6
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-REPORTTO-04-Verify-NonExistent-Name-Search.spec.ts
  * Path     : tests/pim/report-to/

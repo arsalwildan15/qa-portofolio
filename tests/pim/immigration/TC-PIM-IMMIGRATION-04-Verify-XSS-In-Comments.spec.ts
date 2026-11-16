@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-IMMIGRATION-04 — Verify XSS In Comments
  * Modul    : PIM - Immigration
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-IMMIGRATION-04-Verify-XSS-In-Comments.spec.ts
  * Path     : tests/pim/immigration/

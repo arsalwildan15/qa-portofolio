@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-PD-03 — Verify Valid Date Of Birth
  * Modul    : PIM - Personal Details
- * Kategori : Positive (+)
+ * Kategori : Boundary (B) 3.4 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-PD-03-Verify-Valid-Date-Of-Birth.spec.ts
  * Path     : tests/pim/personal-details/

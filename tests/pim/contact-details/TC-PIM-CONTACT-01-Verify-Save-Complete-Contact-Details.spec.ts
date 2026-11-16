@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CONTACT-01 — Verify Save Complete Contact Details
  * Modul    : PIM - Contact Details
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-U | API (A) 6.1 6.2
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CONTACT-01-Verify-Save-Complete-Contact-Details.spec.ts
  * Path     : tests/pim/contact-details/

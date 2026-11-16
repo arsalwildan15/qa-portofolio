@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-11 — Verify XSS In Search Box
  * Modul    : PIM - Employee List
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Reflected
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-11-Verify-XSS-In-Search-Box.spec.ts
  * Path     : tests/pim/employee-list/

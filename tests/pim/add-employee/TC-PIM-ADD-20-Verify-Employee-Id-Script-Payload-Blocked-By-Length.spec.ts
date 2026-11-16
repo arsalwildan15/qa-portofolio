@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-20 — Verify Employee Id Script Payload Blocked By Length [TEMUAN]
  * Modul    : PIM - Add Employee
- * Kategori : Security (S)
+ * Kategori : Boundary (B) 3.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-20-Verify-Employee-Id-Script-Payload-Blocked-By-Length.spec.ts
  * Path     : tests/pim/add-employee/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-REPORTMETHOD-02: Verify Empty Submit Validation
  * Modul    : PIM - Configuration - Reporting Methods
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-REPORTMETHOD-02-Verify-Empty-Submit-Validation.spec.ts
  * Path     : tests/pim/configuration/reporting-methods/

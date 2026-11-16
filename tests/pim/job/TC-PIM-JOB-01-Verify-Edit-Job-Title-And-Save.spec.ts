@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-JOB-01 — Verify Edit Job Title And Save
  * Modul    : PIM - Job
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-U | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-JOB-01-Verify-Edit-Job-Title-And-Save.spec.ts
  * Path     : tests/pim/job/

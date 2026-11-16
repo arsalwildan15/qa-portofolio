@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-TERMREASON-03: Verify Duplicate Name
  * Modul    : PIM - Configuration - Termination Reasons
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.3
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-TERMREASON-03-Verify-Duplicate-Name.spec.ts
  * Path     : tests/pim/configuration/termination-reasons/

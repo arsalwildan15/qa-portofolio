@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-TERMREASON-04: Verify Delete Termination Reason
  * Modul    : PIM - Configuration - Termination Reasons
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-TERMREASON-04-Verify-Delete-Termination-Reason.spec.ts
  * Path     : tests/pim/configuration/termination-reasons/

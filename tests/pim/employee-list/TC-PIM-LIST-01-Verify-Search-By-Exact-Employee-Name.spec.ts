@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-01 — Verify Search By Exact Employee Name
  * Modul    : PIM - Employee List
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-01-Verify-Search-By-Exact-Employee-Name.spec.ts
  * Path     : tests/pim/employee-list/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-04 — Verify Upload Valid Photo
  * Modul    : PIM - Add Employee
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.7 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-04-Verify-Upload-Valid-Photo.spec.ts
  * Path     : tests/pim/add-employee/

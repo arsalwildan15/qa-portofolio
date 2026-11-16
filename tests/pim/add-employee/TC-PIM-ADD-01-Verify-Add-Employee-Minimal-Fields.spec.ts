@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-01 — Verify Add Employee Minimal Fields
  * Modul    : PIM - Add Employee
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-01-Verify-Add-Employee-Minimal-Fields.spec.ts
  * Path     : tests/pim/add-employee/

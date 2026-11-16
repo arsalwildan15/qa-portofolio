@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-QUALIFICATION-03 — Verify Company Very Long Text
  * Modul    : PIM - Qualifications
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-QUALIFICATION-03-Verify-Company-Very-Long-Text.spec.ts
  * Path     : tests/pim/qualifications/

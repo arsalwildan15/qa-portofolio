@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-04 — Verify Filter By Sub Unit
  * Modul    : PIM - Employee List
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-04-Verify-Filter-By-Sub-Unit.spec.ts
  * Path     : tests/pim/employee-list/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-PD-01 — Verify Fields Prefilled After Add
  * Modul    : PIM - Personal Details
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-R
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-PD-01-Verify-Fields-Prefilled-After-Add.spec.ts
  * Path     : tests/pim/personal-details/

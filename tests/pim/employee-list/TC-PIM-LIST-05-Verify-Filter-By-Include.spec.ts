@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-05 — Verify Filter By Include
  * Modul    : PIM - Employee List
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-05-Verify-Filter-By-Include.spec.ts
  * Path     : tests/pim/employee-list/

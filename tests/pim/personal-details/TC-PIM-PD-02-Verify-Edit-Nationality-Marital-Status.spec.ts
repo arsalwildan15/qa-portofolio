@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-PD-02 — Verify Edit Nationality Marital Status
  * Modul    : PIM - Personal Details
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-U | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-PD-02-Verify-Edit-Nationality-Marital-Status.spec.ts
  * Path     : tests/pim/personal-details/

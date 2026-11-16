@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CONTACT-08 — Verify Attachment Upload
  * Modul    : PIM - Contact Details
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.7
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CONTACT-08-Verify-Attachment-Upload.spec.ts
  * Path     : tests/pim/contact-details/

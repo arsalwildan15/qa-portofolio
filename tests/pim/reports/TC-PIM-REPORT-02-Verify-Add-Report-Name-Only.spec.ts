@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-REPORT-02: Verify Add Report With Required Fields
  * Modul    : PIM - Reports
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-REPORT-02-Verify-Add-Report-Name-Only.spec.ts
  * Path     : tests/pim/reports/

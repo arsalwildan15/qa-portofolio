@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-18 — Verify XSS In First Name
  * Modul    : PIM - Add Employee
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-18-Verify-XSS-In-First-Name.spec.ts
  * Path     : tests/pim/add-employee/

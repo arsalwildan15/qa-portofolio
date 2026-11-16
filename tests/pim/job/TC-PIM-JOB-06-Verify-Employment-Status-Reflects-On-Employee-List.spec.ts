@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-JOB-06 — Verify Employment Status Reflects On Employee List
  * Modul    : PIM - Job
- * Kategori : Edge Case (!)
+ * Kategori : Positive (+) 1.4
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-JOB-06-Verify-Employment-Status-Reflects-On-Employee-List.spec.ts
  * Path     : tests/pim/job/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-IMMIGRATION-01 — Verify Add Valid Record
  * Modul    : PIM - Immigration
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-IMMIGRATION-01-Verify-Add-Valid-Record.spec.ts
  * Path     : tests/pim/immigration/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CUSTOMFIELD-06: Verify XSS In Field Name
  * Modul    : PIM - Configuration - Custom Fields
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CUSTOMFIELD-06-Verify-XSS-In-Field-Name.spec.ts
  * Path     : tests/pim/configuration/custom-fields/

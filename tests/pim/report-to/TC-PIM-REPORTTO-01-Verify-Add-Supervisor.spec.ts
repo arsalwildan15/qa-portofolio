@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-REPORTTO-01 — Verify Add Supervisor
  * Modul    : PIM - Report-to
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.4
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-REPORTTO-01-Verify-Add-Supervisor.spec.ts
  * Path     : tests/pim/report-to/

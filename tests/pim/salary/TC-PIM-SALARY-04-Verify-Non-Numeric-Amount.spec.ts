@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-SALARY-04 — Verify Non Numeric Amount
  * Modul    : PIM - Salary
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.2
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-SALARY-04-Verify-Non-Numeric-Amount.spec.ts
  * Path     : tests/pim/salary/

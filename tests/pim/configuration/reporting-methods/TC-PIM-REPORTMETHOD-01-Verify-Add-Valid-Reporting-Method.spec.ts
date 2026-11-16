@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-REPORTMETHOD-01: Verify Add Valid Reporting Method
  * Modul    : PIM - Configuration - Reporting Methods
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-REPORTMETHOD-01-Verify-Add-Valid-Reporting-Method.spec.ts
  * Path     : tests/pim/configuration/reporting-methods/

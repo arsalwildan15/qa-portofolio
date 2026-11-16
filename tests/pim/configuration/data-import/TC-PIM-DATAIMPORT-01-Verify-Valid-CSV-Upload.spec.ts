@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DATAIMPORT-01: Verify Valid CSV Upload
  * Modul    : PIM - Configuration - Data Import
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.4 1.7 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DATAIMPORT-01-Verify-Valid-CSV-Upload.spec.ts
  * Path     : tests/pim/configuration/data-import/

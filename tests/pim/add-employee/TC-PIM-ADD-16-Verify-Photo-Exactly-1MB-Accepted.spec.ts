@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-16 — Verify Photo Exactly 1MB Accepted
  * Modul    : PIM - Add Employee
- * Kategori : Boundary (B)
+ * Kategori : Positive (+) 1.7 | Boundary (B) 3.3 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-16-Verify-Photo-Exactly-1MB-Accepted.spec.ts
  * Path     : tests/pim/add-employee/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-REPORT-06: Verify Delete Report
  * Modul    : PIM - Reports
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-REPORT-06-Verify-Delete-Report.spec.ts
  * Path     : tests/pim/reports/

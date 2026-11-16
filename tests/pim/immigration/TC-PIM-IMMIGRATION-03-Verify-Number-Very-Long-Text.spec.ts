@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-IMMIGRATION-03 — Verify Number Very Long Text
  * Modul    : PIM - Immigration
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-IMMIGRATION-03-Verify-Number-Very-Long-Text.spec.ts
  * Path     : tests/pim/immigration/

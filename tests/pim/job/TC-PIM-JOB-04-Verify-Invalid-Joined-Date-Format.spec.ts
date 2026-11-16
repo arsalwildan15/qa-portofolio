@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-JOB-04 — Verify Invalid Joined Date Format
  * Modul    : PIM - Job
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.2
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-JOB-04-Verify-Invalid-Joined-Date-Format.spec.ts
  * Path     : tests/pim/job/

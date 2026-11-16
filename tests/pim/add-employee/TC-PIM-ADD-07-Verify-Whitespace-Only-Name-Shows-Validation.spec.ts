@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-07 — Verify Whitespace Only Name Shows Validation
  * Modul    : PIM - Add Employee
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1 | Edge Case (!) 4.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-07-Verify-Whitespace-Only-Name-Shows-Validation.spec.ts
  * Path     : tests/pim/add-employee/

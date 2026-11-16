@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-REPORTMETHOD-04: Verify Delete Reporting Method
  * Modul    : PIM - Configuration - Reporting Methods
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-REPORTMETHOD-04-Verify-Delete-Reporting-Method.spec.ts
  * Path     : tests/pim/configuration/reporting-methods/

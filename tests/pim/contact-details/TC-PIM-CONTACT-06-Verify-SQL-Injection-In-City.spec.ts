@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CONTACT-06 — Verify SQL Injection In City
  * Modul    : PIM - Contact Details
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-SQLi
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CONTACT-06-Verify-SQL-Injection-In-City.spec.ts
  * Path     : tests/pim/contact-details/

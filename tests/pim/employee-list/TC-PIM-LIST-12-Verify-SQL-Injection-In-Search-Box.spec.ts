@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-12 — Verify SQL Injection In Search Box
  * Modul    : PIM - Employee List
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-SQLi
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-12-Verify-SQL-Injection-In-Search-Box.spec.ts
  * Path     : tests/pim/employee-list/

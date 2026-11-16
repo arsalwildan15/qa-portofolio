@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DATAIMPORT-03: Verify Wrong File Type Rejected
  * Modul    : PIM - Configuration - Data Import
- * Kategori : Negative (-)
+ * Kategori : Security (S) 5.3-BadExt
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DATAIMPORT-03-Verify-Wrong-File-Type-Rejected.spec.ts
  * Path     : tests/pim/configuration/data-import/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-SALARY-05 — Verify XSS In Comments
  * Modul    : PIM - Salary
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-SALARY-05-Verify-XSS-In-Comments.spec.ts
  * Path     : tests/pim/salary/

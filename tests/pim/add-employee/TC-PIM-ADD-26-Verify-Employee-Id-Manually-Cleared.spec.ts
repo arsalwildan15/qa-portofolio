@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-26 — Verify Employee Id Manually Cleared
  * Modul    : PIM - Add Employee
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.8
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-26-Verify-Employee-Id-Manually-Cleared.spec.ts
  * Path     : tests/pim/add-employee/

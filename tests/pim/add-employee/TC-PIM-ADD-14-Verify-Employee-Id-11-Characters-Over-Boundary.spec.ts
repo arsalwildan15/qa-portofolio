@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-14 — Verify Employee Id 11 Characters Over Boundary [TEMUAN]
  * Modul    : PIM - Add Employee
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-14-Verify-Employee-Id-11-Characters-Over-Boundary.spec.ts
  * Path     : tests/pim/add-employee/

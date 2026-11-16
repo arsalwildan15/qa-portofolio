@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-MEMBERSHIP-05 — Verify Renewal Date Before Commence Date
  * Modul    : PIM - Memberships
- * Kategori : Edge Case (!)
+ * Kategori : Boundary (B) 3.4
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-MEMBERSHIP-05-Verify-Renewal-Date-Before-Commence-Date.spec.ts
  * Path     : tests/pim/memberships/

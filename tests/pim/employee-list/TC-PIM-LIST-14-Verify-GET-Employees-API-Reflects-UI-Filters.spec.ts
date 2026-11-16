@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-14 — Verify GET Employees API Reflects UI Filters
  * Modul    : PIM - Employee List
- * Kategori : Positive (+) [API VERIFICATION]
+ * Kategori : Positive (+) 1.6 | API (A) 6.1 6.2 [API VERIFICATION]
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-14-Verify-GET-Employees-API-Reflects-UI-Filters.spec.ts
  * Path     : tests/pim/employee-list/

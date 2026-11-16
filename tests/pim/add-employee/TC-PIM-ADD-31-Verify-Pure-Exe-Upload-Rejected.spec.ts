@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-31: Verify Pure Exe Upload Rejected
  * Modul    : PIM - Add Employee
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-BadExt
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-31-Verify-Pure-Exe-Upload-Rejected.spec.ts
  * Path     : tests/pim/add-employee/

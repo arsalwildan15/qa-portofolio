@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-REPORTTO-06 — Verify Both Lists Render Independently
  * Modul    : PIM - Report-to
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.4
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-REPORTTO-06-Verify-Both-Lists-Render-Independently.spec.ts
  * Path     : tests/pim/report-to/

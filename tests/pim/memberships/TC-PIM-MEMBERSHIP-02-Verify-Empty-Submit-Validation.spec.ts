@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-MEMBERSHIP-02 — Verify Empty Submit Validation
  * Modul    : PIM - Memberships
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-MEMBERSHIP-02-Verify-Empty-Submit-Validation.spec.ts
  * Path     : tests/pim/memberships/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-29: Verify Apk Renamed As Jpg Upload Security
  * Modul    : PIM - Add Employee
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-Rename
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-29-Verify-Apk-Renamed-As-Jpg-Upload-Security.spec.ts
  * Path     : tests/pim/add-employee/

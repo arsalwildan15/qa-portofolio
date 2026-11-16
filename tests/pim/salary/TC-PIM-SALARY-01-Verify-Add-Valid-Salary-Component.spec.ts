@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-SALARY-01 — Verify Add Valid Salary Component
  * Modul    : PIM - Salary
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-SALARY-01-Verify-Add-Valid-Salary-Component.spec.ts
  * Path     : tests/pim/salary/

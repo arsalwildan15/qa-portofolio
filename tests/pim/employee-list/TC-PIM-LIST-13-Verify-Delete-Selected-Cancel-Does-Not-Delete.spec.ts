@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-LIST-13 — Verify Delete Selected Cancel Does Not Delete
  * Modul    : PIM - Employee List
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-LIST-13-Verify-Delete-Selected-Cancel-Does-Not-Delete.spec.ts
  * Path     : tests/pim/employee-list/

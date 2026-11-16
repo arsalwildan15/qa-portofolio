@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-SALARY-07 — Verify Multiple Components Can Be Added
  * Modul    : PIM - Salary
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-SALARY-07-Verify-Multiple-Components-Can-Be-Added.spec.ts
  * Path     : tests/pim/salary/

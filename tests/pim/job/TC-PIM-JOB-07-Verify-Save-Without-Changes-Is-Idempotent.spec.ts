@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-JOB-07 — Verify Save Without Changes Is Idempotent
  * Modul    : PIM - Job
- * Kategori : Edge Case (!)
+ * Kategori : API (A) 6.1 6.7
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-JOB-07-Verify-Save-Without-Changes-Is-Idempotent.spec.ts
  * Path     : tests/pim/job/

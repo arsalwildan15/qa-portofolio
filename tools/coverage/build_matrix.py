@@ -76,6 +76,12 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'cross-module/TC-XMOD-01', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Timesheets > Employee Timesheets', 'Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Time > Project Info > Projects']),
  (r'cross-module/TC-XMOD-0[24]', ['Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Performance > Configure > KPIs', 'Time > Project Info > Customers']),
  (r'cross-module/TC-XMOD-03', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Project Info > Projects']),
+ (r'pim/security/TC-PIM-API-', ['PIM > Employee > Personal Details', 'PIM > Employee > Contact Details', 'PIM > Employee > Emergency Contacts',
+                               'PIM > Employee > Dependents', 'PIM > Employee > Immigration', 'PIM > Employee > Job', 'PIM > Employee > Salary',
+                               'PIM > Employee > Report-to', 'PIM > Employee > Qualifications', 'PIM > Employee > Memberships',
+                               'PIM > Employee > Attachments (all tabs)']),
+ (r'pim/security/TC-PIM-MUT-', ['PIM > Employee > Emergency Contacts', 'PIM > Employee > Dependents', 'PIM > Employee > Immigration',
+                               'PIM > Employee > Salary', 'PIM > Employee > Qualifications', 'PIM > Employee > Memberships']),
  (r'my-info/.*/TC-MYINFO-IMMIGRATION-', ['My Info > Immigration']),
  (r'my-info/.*/TC-MYINFO-QUALIFICATION-', ['My Info > Qualifications']),
  (r'my-info/personal-details', ['My Info > Personal Details']),
@@ -209,7 +215,12 @@ def spec_codes(sp):
     # ONLY with those codes: keyword rules misfire on plain words such as "hapus query" (-> 1.1-D) or
     # "sesi" (-> 5.7) in such labels. Older specs keep the keyword pass.
     explicit = [c for c in sp['checks'] if EXPLICIT_RX.search(c)]
-    codes = set() if sp['checks'] and len(explicit) >= 0.8 * len(sp['checks']) else {c for c, rx in R if re.search(rx, text)}
+    # A curated header (tools/coverage/apply_codes.py) also switches the spec to explicit mode: its
+    # 'Kategori' line names the codes ("Negative (-) 2.1 | Boundary (B) 3.1") or "kode: -" for none.
+    kat_codes = set(EXPLICIT_RX.findall(sp['kategori']))
+    kat_explicit = bool(kat_codes) or 'kode: -' in sp['kategori']
+    labels_explicit = bool(sp['checks']) and len(explicit) >= 0.8 * len(sp['checks'])
+    codes = set(kat_codes) if (kat_explicit or labels_explicit) else {c for c, rx in R if re.search(rx, text)}
     # Explicit convention (sweep TCs and every TC written from now on): a check/finding label that
     # names its taxonomy code, e.g. "[U093 ...] 7.2 ..." or "5.2-IDOR ...", is tagged with it directly.
     for label in sp['checks'] + sp['findings']:

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-EMERGENCY-03 — Verify Name Without Phone
  * Modul    : PIM - Emergency Contacts
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-EMERGENCY-03-Verify-Name-Without-Phone.spec.ts
  * Path     : tests/pim/emergency-contacts/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-17 — Verify Photo Dimension Far From Recommended
  * Modul    : PIM - Add Employee
- * Kategori : Edge Case (!)
+ * Kategori : Positive (+) 1.7
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-17-Verify-Photo-Dimension-Far-From-Recommended.spec.ts
  * Path     : tests/pim/add-employee/

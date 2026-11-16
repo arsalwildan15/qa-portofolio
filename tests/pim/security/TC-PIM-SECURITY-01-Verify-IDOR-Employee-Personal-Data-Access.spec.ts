@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-SECURITY-01: Verify IDOR on Employee Personal Data Access
  * Modul    : PIM - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.2-IDOR
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-SECURITY-01-Verify-IDOR-Employee-Personal-Data-Access.spec.ts
  * Path     : tests/pim/security/

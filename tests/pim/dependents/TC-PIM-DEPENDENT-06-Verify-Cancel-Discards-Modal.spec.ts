@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DEPENDENT-06 — Verify Cancel Discards Modal
  * Modul    : PIM - Dependents
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DEPENDENT-06-Verify-Cancel-Discards-Modal.spec.ts
  * Path     : tests/pim/dependents/

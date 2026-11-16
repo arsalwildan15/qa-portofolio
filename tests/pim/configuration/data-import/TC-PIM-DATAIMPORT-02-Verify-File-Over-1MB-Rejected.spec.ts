@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-DATAIMPORT-02: Verify File Over 1MB Rejected
  * Modul    : PIM - Configuration - Data Import
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.3 | Security (S) 5.3-Oversize
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-DATAIMPORT-02-Verify-File-Over-1MB-Rejected.spec.ts
  * Path     : tests/pim/configuration/data-import/

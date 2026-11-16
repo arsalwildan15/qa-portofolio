@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-30: Verify Double Extension Upload Security
  * Modul    : PIM - Add Employee
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-DoubleExt
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-30-Verify-Double-Extension-Upload-Security.spec.ts
  * Path     : tests/pim/add-employee/

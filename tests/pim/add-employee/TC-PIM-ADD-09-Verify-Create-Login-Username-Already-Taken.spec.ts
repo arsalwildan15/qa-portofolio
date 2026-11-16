@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-09 — Verify Create Login Username Already Taken
  * Modul    : PIM - Add Employee
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.3
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-09-Verify-Create-Login-Username-Already-Taken.spec.ts
  * Path     : tests/pim/add-employee/

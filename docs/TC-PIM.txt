@@ -1758,6 +1758,25 @@ No.  Test Case ID      Status   Kategori           Skenario
   kalau ingin dituntaskan (lihat riwayat lengkap di
   docs/QA-Review-Progress.md, bagian BATCH 3, PIM).
 
+114   TC-PIM-REPORTTO-08  [DONE -- BUG]  TC-PIM-REPORTTO-08-Verify-Employee-Cannot-Report-To-Themselves-Or-Form-A-Reporting-Loop.spec.ts
+                             (+) 1.4 | (S) 5.9 | (A) 6.1
+                             Verify An Employee Cannot Be Their Own Supervisor And
+                             Two Employees Cannot Supervise Each Other
+                             -> 2 karyawan uji A & B dibuat lewat API (dihapus
+                                di akhir).
+                             [API VERIFICATION]
+                             -> 1.4 kontrol: B jadi supervisor A -> 200, tampil
+                                di Supervisors A & Subordinates B.
+                             -> 5.9 A jadi supervisor dirinya sendiri -> 4xx.
+                             -> 5.9 B (supervisor A) jadi subordinate A -> 4xx.
+                             -> 5.9 daftar Report-to A tanpa A sendiri & tanpa
+                                B di kedua daftar.
+                             HASIL 17 Nov 2026: 2/6 lolos. SENGAJA FAILED: kedua
+                             hubungan tidak masuk akal diterima 200 & tampil di
+                             halaman Report-to (BUG BG-438, Medium; rantai
+                             supervisor dipakai approval Leave/Claim/Timesheet/
+                             Performance).
+
 ================================================================================
   FASE 2 - GROUP 8: QUALIFICATIONS (10 TC)
   Folder: tests/pim/qualifications/
@@ -2365,12 +2384,59 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    APP-WIDE level nginx/web-server, bukan 3
                                    kasus terisolasi per-modul.
 
+115   TC-PIM-API-01  [DONE]  TC-PIM-API-01-Verify-Every-Employee-Tab-API-Contract-Paging-Methods-Session-Unknown-Ids-And-ESS-Limits.spec.ts
+                             (-) 2.6 | (B) 3.5 3.6 | (!) 4.6 | (S) 5.2-PrivEsc 5.8 |
+                             (A) 6.1 6.2 6.3 6.4 6.6
+                             Verify The API Behind Every PIM Employee Tab: Contract,
+                             Paging, Wrong Method, No Session, Unknown Employee,
+                             Sensitive Data And What An ESS User May Not Change
+                             -> Sesi Admin atas karyawan uji (API, dihapus di
+                                akhir), 12 endpoint tab (U088-U098).
+                             [API VERIFICATION per endpoint]
+                             -> 6.1 GET 200; 6.2 kontrak list/objek; 5.8 tanpa
+                                field sensitif; 6.6 limit=-1 422; 3.6 limit=1;
+                                3.5/4.6 offset=9999 -> []; 6.3 PATCH 405; 6.4
+                                tanpa sesi 401; 2.6 karyawan 999999 -> 4xx.
+                             -> 5.2-PrivEsc ESS pada record sendiri: ubah Job,
+                                tambah Salary/Supervisor/Subordinate -> 403 &
+                                data tidak berubah.
+                             HASIL 17 Nov 2026: 108/108 lolos.
+
+116   TC-PIM-MUT-01  [DONE -- BUG]  TC-PIM-MUT-01-Verify-Create-Update-Delete-Validation-Injection-And-Mass-Assignment-On-Employee-Tabs.spec.ts
+                             (+) 1.1-C 1.1-R 1.1-U 1.1-D | (-) 2.6 | (B) 3.1 |
+                             (!) 4.1 | (S) 5.1-SQLi 5.2-MassAssign 5.5 | (A) 6.5 6.7
+                             Verify Create/Update/Delete On The Writable PIM
+                             Employee Tabs: Contract, Server-Side Validation,
+                             Unicode, Injection, Mass Assignment, Unknown Ids,
+                             Repeats
+                             -> Sesi Admin, 6 tab: Emergency Contacts,
+                                Dependents, Immigration, Salary, Work
+                                Experience, Memberships (body direkam live).
+                             [API VERIFICATION per tab]
+                             -> 1.1-C/R/U/D; 6.5 null & tipe salah -> 4xx; 3.1
+                                300 karakter -> 4xx; 4.1 Arab/CJK & 5.1-SQLi
+                                tersimpan identik; 5.2-MassAssign empNumber lain
+                                diabaikan; 2.6 PUT/DELETE 999999 -> 4xx; 6.7 &
+                                5.5 dicatat.
+                             HASIL 17 Nov 2026: 67/69 lolos. SENGAJA FAILED:
+                             Work Experience -> tanggal tidak valid & PUT id tak
+                             ada -> 500 (BUG BG-439, Low). [TEMUAN] POST identik
+                             2x = 2 baris di semua tab; burst tanpa rate limit.
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 164 (160 fungsional + 2 security
-  + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12)
+  Total Test Cases (semua fase + security) : 167 (160 fungsional + 2 security
+  + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
+  API-01, MUT-01 ditambahkan 2026-11-17)
+
+  UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
+  taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,
+  data di tools/coverage/pim_codes.json, ditulis oleh apply_codes.py). Matrix
+  coverage membaca kode itu, bukan tebakan kata kunci. 8 TC lemah (hanya
+  "tanpa exception") sengaja tanpa kode sampai diperkuat; TC Cancel/radio
+  bertanda "kode: -" (tidak ada item taksonomi yang cocok).
 
   UPDATE 2026-11-12 (tambahan): TC-PIM-JOB-09 (Verify Terminate Employment)
   ditambahkan -- fitur yang sebelumnya belum pernah diuji sama sekali.

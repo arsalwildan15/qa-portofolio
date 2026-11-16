@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-22 — Verify Double Click Save Does Not Duplicate
  * Modul    : PIM - Add Employee
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.2
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-22-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
  * Path     : tests/pim/add-employee/

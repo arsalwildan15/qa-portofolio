@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-SALARY-03 — Verify Negative Amount
  * Modul    : PIM - Salary
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.2
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-SALARY-03-Verify-Negative-Amount.spec.ts
  * Path     : tests/pim/salary/

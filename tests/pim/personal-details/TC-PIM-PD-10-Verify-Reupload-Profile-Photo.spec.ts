@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-PD-10 — Verify Reupload Profile Photo
  * Modul    : PIM - Personal Details
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.7 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-PD-10-Verify-Reupload-Profile-Photo.spec.ts
  * Path     : tests/pim/personal-details/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CONTACT-09: Verify Exe Attachment Upload Security
  * Modul    : PIM - Contact Details
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-BadExt
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CONTACT-09-Verify-Exe-Attachment-Upload-Security.spec.ts
  * Path     : tests/pim/contact-details/

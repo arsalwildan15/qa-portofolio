@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-IMMIGRATION-05 — Verify SQL Injection In Comments
  * Modul    : PIM - Immigration
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-SQLi
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-IMMIGRATION-05-Verify-SQL-Injection-In-Comments.spec.ts
  * Path     : tests/pim/immigration/

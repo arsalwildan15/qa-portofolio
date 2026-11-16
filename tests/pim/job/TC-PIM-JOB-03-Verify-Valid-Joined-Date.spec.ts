@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-JOB-03 — Verify Valid Joined Date
  * Modul    : PIM - Job
- * Kategori : Positive (+)
+ * Kategori : Boundary (B) 3.4 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-JOB-03-Verify-Valid-Joined-Date.spec.ts
  * Path     : tests/pim/job/

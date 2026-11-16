@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CONTACT-03 — Verify Invalid Email Format Not Validated
  * Modul    : PIM - Contact Details
- * Kategori : Negative (-) [TEMUAN]
+ * Kategori : Negative (-) 2.2 | Edge Case (!) 4.8 [TEMUAN]
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CONTACT-03-Verify-Invalid-Email-Format-Not-Validated.spec.ts
  * Path     : tests/pim/contact-details/

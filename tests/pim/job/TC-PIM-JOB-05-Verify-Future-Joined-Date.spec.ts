@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-JOB-05 — Verify Future Joined Date
  * Modul    : PIM - Job
- * Kategori : Edge Case (!)
+ * Kategori : Boundary (B) 3.4
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-JOB-05-Verify-Future-Joined-Date.spec.ts
  * Path     : tests/pim/job/

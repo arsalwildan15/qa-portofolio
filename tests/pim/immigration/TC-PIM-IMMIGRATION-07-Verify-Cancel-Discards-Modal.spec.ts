@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-IMMIGRATION-07 — Verify Cancel Discards Modal
  * Modul    : PIM - Immigration
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-IMMIGRATION-07-Verify-Cancel-Discards-Modal.spec.ts
  * Path     : tests/pim/immigration/

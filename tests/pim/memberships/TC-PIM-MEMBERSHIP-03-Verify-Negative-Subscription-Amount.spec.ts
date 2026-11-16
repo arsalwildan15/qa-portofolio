@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-MEMBERSHIP-03 — Verify Negative Subscription Amount
  * Modul    : PIM - Memberships
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.2
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-MEMBERSHIP-03-Verify-Negative-Subscription-Amount.spec.ts
  * Path     : tests/pim/memberships/

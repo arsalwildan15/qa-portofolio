@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-EMERGENCY-01 — Verify Add Valid Contact
  * Modul    : PIM - Emergency Contacts
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-EMERGENCY-01-Verify-Add-Valid-Contact.spec.ts
  * Path     : tests/pim/emergency-contacts/

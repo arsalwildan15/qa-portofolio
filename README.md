@@ -193,7 +193,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 |--------|----:|------|
 | Login | 46 | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | Admin | 144 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
-| PIM | 164 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| PIM | 167 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 60 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Performance | 38 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
@@ -205,7 +205,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Dashboard | 3 | [docs/TC-Dashboard.txt](docs/TC-Dashboard.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **594** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **597** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 

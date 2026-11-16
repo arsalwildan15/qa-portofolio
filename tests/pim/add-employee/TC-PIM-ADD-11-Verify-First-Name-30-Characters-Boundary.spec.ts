@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-11 — Verify First Name 30 Characters Boundary
  * Modul    : PIM - Add Employee
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.1 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-11-Verify-First-Name-30-Characters-Boundary.spec.ts
  * Path     : tests/pim/add-employee/

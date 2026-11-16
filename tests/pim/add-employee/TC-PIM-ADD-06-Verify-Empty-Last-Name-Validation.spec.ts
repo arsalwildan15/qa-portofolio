@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-06 — Verify Empty Last Name Validation
  * Modul    : PIM - Add Employee
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-06-Verify-Empty-Last-Name-Validation.spec.ts
  * Path     : tests/pim/add-employee/

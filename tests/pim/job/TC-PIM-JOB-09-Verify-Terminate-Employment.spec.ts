@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-JOB-09 — Verify Terminate Employment
  * Modul    : PIM - Job
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.3 | API (A) 6.1 6.2
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-JOB-09-Verify-Terminate-Employment.spec.ts
  * Path     : tests/pim/job/

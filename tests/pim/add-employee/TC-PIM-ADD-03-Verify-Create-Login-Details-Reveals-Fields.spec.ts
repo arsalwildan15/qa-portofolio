@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-03 — Verify Create Login Details Reveals Fields
  * Modul    : PIM - Add Employee
- * Kategori : Positive (+)
+ * Kategori : Positive (+) | kode: -
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-03-Verify-Create-Login-Details-Reveals-Fields.spec.ts
  * Path     : tests/pim/add-employee/

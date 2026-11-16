@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-32: Verify Refresh During Pending Save Request
  * Modul    : PIM - Add Employee
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.3
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-32-Verify-Refresh-During-Pending-Save-Request.spec.ts
  * Path     : tests/pim/add-employee/

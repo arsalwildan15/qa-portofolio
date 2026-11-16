@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-ADD-33: Verify Connection Dropped During Save Request
  * Modul    : PIM - Add Employee
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-PIM-ADD-33-Verify-Connection-Dropped-During-Save-Request.spec.ts
  * Path     : tests/pim/add-employee/

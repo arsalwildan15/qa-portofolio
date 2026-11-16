@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PIM-CONTACT-04 — Verify Street1 Very Long Text
  * Modul    : PIM - Contact Details
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PIM-CONTACT-04-Verify-Street1-Very-Long-Text.spec.ts
  * Path     : tests/pim/contact-details/
