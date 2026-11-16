@@ -8,7 +8,14 @@ import { env } from '../config/env';
  */
 export async function passAdminAccessGate(page: Page): Promise<boolean> {
   const prompt = page.getByText('Administrator Access');
-  if (!(await prompt.isVisible().catch(() => false))) return false;
+  // isVisible() does not wait: right after goto the prompt is not rendered yet and the gate was
+  // wrongly reported absent (seen live 2026-11-17). Wait for whichever appears first: the prompt,
+  // or the real page's sidebar (the prompt page has none).
+  const which = await Promise.race([
+    prompt.waitFor({ state: 'visible', timeout: 30_000 }).then(() => 'gate' as const),
+    page.locator('.oxd-main-menu-item').first().waitFor({ state: 'visible', timeout: 30_000 }).then(() => 'page' as const),
+  ]).catch(() => 'none' as const);
+  if (which !== 'gate') return false;
   await page.locator('input[type="password"]').fill(env.password);
   await page.getByRole('button', { name: 'Confirm' }).click();
   // networkidle arrives BEFORE the SPA renders the target page (seen live: 24-node blank DOM right

@@ -1,0 +1,114 @@
+================================================================================
+  DAFTAR TEST CASE, MAINTENANCE
+  Modul    : Maintenance > Purge Records (Employee U010, Candidate U086), Access Records (U087)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/maintenance/*
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [DONE]        = Test case selesai & script berjalan
+  [TODO]        = Belum dibuat
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug
+
+LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
+  (+) Positive  (-) Negative  (B) Boundary  (!) Edge Case  (S) Security  (A) API
+  Tiap entri mencantumkan KODE item taksonomi yg diverifikasi; tiap check di
+  script diberi label kode tsb.
+
+  FORMAT ID  : TC-MAINT-<FITUR>-NN
+  FOLDER     : tests/maintenance/purge-records/ | access-records/ | security/
+  HELPER     : src/utils/maintenanceData.ts (createPastEmployee,
+               createVacancyWithCandidate, openMaintenance, suggestions,
+               selectedEmployeeText); src/utils/adminAccessGate.ts
+
+================================================================================
+  FUNGSI, KESELAMATAN DATA & PERILAKU YANG DIBUKTIKAN LIVE (17 Nov 2026)
+================================================================================
+
+  Setiap menu Maintenance meminta password Admin lagi ("Administrator Access",
+  POST auth/adminVerify) sebelum halaman tampil.
+    Purge Employee   : DELETE api/v2/maintenance/purge {empNumber} -- hanya
+                       karyawan yang sudah di-terminate (Past Employee).
+    Purge Candidate  : GET api/v2/maintenance/candidates?vacancyId= lalu
+                       DELETE api/v2/maintenance/candidates/purge {vacancyId}.
+    Access Records   : GET maintenance/accessEmployeeData/<empNumber> -> file
+                       "<Nama Karyawan>.json" berisi data pribadi.
+  Purge TIDAK bisa dibatalkan, jadi TC hanya mem-purge data yang ia buat
+  sendiri (karyawan uji yg di-terminate lewat API, lowongan & kandidat uji).
+
+  PERBAIKAN UTIL: passAdminAccessGate() memakai isVisible() yang tidak menunggu,
+  sehingga prompt yg belum dirender dianggap tidak ada. Kini menunggu prompt
+  ATAU sidebar halaman sungguhan, mana yang muncul lebih dulu.
+
+================================================================================
+  DAFTAR TEST CASE
+================================================================================
+
+ 1   TC-MAINT-PURGE-EMP-01  [DONE]  TC-MAINT-PURGE-EMP-01-Verify-Purging-A-Past-Employee-UI-And-API.spec.ts
+                             (+) 1.1-D 1.1-R 1.3 1.8 | (-) 2.5 2.6 | (B) 3.6 |
+                             (!) 4.1 4.4 4.6 4.8 | (S) 5.1-SQLi 5.1-XSS-Reflected
+                             5.2-BFLAC 5.9 | (A) 6.2 6.3 6.4 6.5
+                             Verify Purging A Past Employee: Only Past Employees
+                             Are Offered, Cancel Keeps Them, Purge Removes Them,
+                             And The API Enforces The Rules
+                             [UI VERIFICATION]
+                             -> autocomplete hanya menawarkan Past Employee
+                                (karyawan aktif tidak); nama tak ada -> kosong;
+                                Arab/SQLi/XSS di kotak cari aman.
+                             -> Search -> Selected Employee; dialog "cannot be
+                                undone"; No, Cancel -> masih ada; Yes, Purge ->
+                                200 + toast + data hilang (GET 422).
+                             [API VERIFICATION]
+                             -> karyawan aktif -> 400 "Employee Cannot Be
+                                Purged"; body tidak valid -> 422; purge ulang
+                                -> 4xx; 2 purge paralel -> tepat satu 200;
+                                PATCH/GET 405; tanpa sesi 401; ESS 403.
+                             HASIL 17 Nov 2026: 24/24 lolos.
+
+ 2   TC-MAINT-PURGE-CAND-01  [DONE]  TC-MAINT-PURGE-CAND-01-Verify-Purging-The-Candidates-Of-A-Vacancy-UI-And-API.spec.ts
+                             (+) 1.1-D 1.1-R 1.6 1.8 | (-) 2.6 | (B) 3.6 |
+                             (!) 4.1 4.6 4.8 | (S) 5.1-SQLi 5.1-XSS-Reflected
+                             5.2-BFLAC | (A) 6.2 6.3 6.4 6.5
+                             Verify Purging The Candidates Of A Vacancy: List,
+                             Empty Vacancy, Cancel, Purge All, And The API Rules
+                             [UI VERIFICATION]
+                             -> autocomplete Vacancy; input tidak biasa aman;
+                                lowongan kosong -> "No Records Found" tanpa
+                                Purge All; "(1) Record Found"; Cancel -> masih
+                                ada; Purge All -> 200 + toast + kandidat 404.
+                             [API VERIFICATION]
+                             -> kontrak list & purge; body tidak valid 422;
+                                PATCH 405; tanpa sesi 401; ESS 403.
+                             HASIL 17 Nov 2026: 21/21 lolos.
+
+ 3   TC-MAINT-ACCESS-01  [DONE]  TC-MAINT-ACCESS-01-Verify-Downloading-An-Employees-Personal-Data-Record.spec.ts
+                             (+) 1.1-R 1.6 | (B) 3.6 | (!) 4.1 4.6 4.8 |
+                             (S) 5.1-CmdPath 5.1-SQLi 5.1-XSS-Reflected 5.2-BFLAC
+                             5.8 | (A) 6.2 6.4
+                             Verify Downloading An Employee's Personal Data
+                             Record: Search, File Name, Content, No Secrets, And
+                             Who May Download
+                             -> Search -> Download file .json; isi Employee[0]
+                                = karyawan uji; tanpa password/hash/token.
+                             -> 5.1-CmdPath karyawan "Qa../../evil" -> nama
+                                file "Qa.._.._evil <nama>.json" (garis miring
+                                disanitasi).
+                             -> tanpa sesi -> 302 tanpa data; ESS -> tanpa data.
+                             HASIL 17 Nov 2026: 13/13 lolos.
+
+ 4   TC-MAINT-SECURITY-01  [DONE -- BUG]  TC-MAINT-SECURITY-01-Verify-The-Administrator-Access-Password-Prompt-Is-Enforced-By-The-Server.spec.ts
+                             (!) 4.8 | (S) 5.9 | (A) 6.1
+                             Verify The "Administrator Access" Password Prompt
+                             Protects Purge And Data Download On The Server, Not
+                             Only In The UI
+                             -> sesi Admin BARU yg belum melewati prompt.
+                             -> kontrol: halaman Purge menampilkan prompt.
+                             -> purge karyawan, purge kandidat, unduh data
+                                pribadi langsung lewat API -> harus ditolak.
+                             HASIL 17 Nov 2026: 2/5 lolos. SENGAJA FAILED:
+                             ketiganya 200 tanpa password -> data ter-purge &
+                             terunduh (BUG BG-440, High).
+
+  RUN COMMAND:
+    npx playwright test tests/maintenance --project=chromium --workers=1
