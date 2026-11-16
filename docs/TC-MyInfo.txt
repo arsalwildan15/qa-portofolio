@@ -208,19 +208,111 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              antar-karyawan ditegakkan.
 
 ================================================================================
+  GROUP 5, IMMIGRATION & QUALIFICATIONS
+================================================================================
+
+ 10  TC-MYINFO-IMMIGRATION-01  [DONE -- BUG]  TC-MYINFO-IMMIGRATION-01-Verify-Employee-Manages-Own-Immigration-Records-With-Validation.spec.ts
+                             (+) 1.1-C 1.1-R 1.1-U 1.1-D 1.8 | (-) 2.1 | (B) 3.1 3.4 |
+                             (!) 4.2 | (S) 5.1-XSS-Stored | (8) 8.4
+                             Verify An Employee Manages Their Own Immigration
+                             Records, With Required, Length, Date-Range, Stored-XSS
+                             And Double-Submit Checks
+                             -> Folder: tests/my-info/records/. Sesi ESS baru.
+                             [UI VERIFICATION]
+                             -> 2.1 kosong -> "Required", tanpa POST; 3.1 Number
+                                31 -> "Should not exceed 30 characters", Comments
+                                251 -> "... 250 characters"; 3.4 Expiry < Issued
+                                -> "Expiry date should be after issued date".
+                             -> 1.1-C POST 200 + 1.8 toast; 1.1-R di tabel;
+                                1.1-U PUT 200 (tunggu GET hidrasi form edit);
+                                1.1-D DELETE 200 & hilang.
+                             -> 5.1-XSS-Stored Number <img onerror> literal.
+                             -> 4.2 double-click Save -> 1 record.
+                             HASIL 16 Nov 2026: 15/16 lolos. SENGAJA FAILED: 4.2
+                             double-click -> 2 record (BUG BG-431, Medium).
+
+ 11  TC-MYINFO-IMMIGRATION-02  [DONE -- BUG]  TC-MYINFO-IMMIGRATION-02-Verify-Immigration-API-Validation-Mass-Assignment-Injection-And-Auth.spec.ts
+                             (-) 2.1 2.6 | (B) 3.1 3.4 | (S) 5.1-SQLi
+                             5.2-MassAssign | (A) 6.1 6.2 6.3 6.4 6.5
+                             Verify The Immigration API Of An Employee's Own
+                             Record: Server-Side Validation, Mass Assignment,
+                             Injection, Wrong Method And No Session
+                             -> Folder: tests/my-info/security/.
+                             [API VERIFICATION]
+                             -> 6.1/6.2 POST valid 200 & kontrak; 3.4 expiry <
+                                issued -> 4xx; 3.1 number 31 -> 4xx; 2.1/6.5
+                                kosong/null/type 0,3,99/tanggal invalid -> 4xx.
+                             -> 5.1-SQLi literal; 5.2-MassAssign empNumber lain
+                                diabaikan, id dari klien ditolak/diabaikan.
+                             -> 2.6 PUT 999999 4xx; 6.3 PATCH 405; 6.4 401.
+                             HASIL 16 Nov 2026: 14/17 lolos. SENGAJA FAILED:
+                             expiry < issued diterima & type 0/3 diterima lalu
+                             tampil "VISA" (BUG BG-433, Low; validasi hanya di
+                             form, pola BG-420).
+
+ 12  TC-MYINFO-QUALIFICATION-01  [DONE -- BUG]  TC-MYINFO-QUALIFICATION-01-Verify-Employee-Manages-Own-Work-Experience-And-Skills-With-Validation.spec.ts
+                             (+) 1.1-C 1.1-R 1.1-U 1.1-D 1.8 | (-) 2.1 2.2 |
+                             (B) 3.1 3.2 3.4 | (!) 4.2 | (S) 5.1-XSS-Stored | (8) 8.4
+                             Verify An Employee Manages Their Own Work Experience
+                             And Skills, With Required, Length, Date-Range, Number
+                             And Stored-XSS Checks
+                             -> Folder: tests/my-info/records/. Sesi ESS baru.
+                             [UI VERIFICATION]
+                             -> Work Experience: 2.1 Required; 3.1 Company 101
+                                -> "Should not exceed 100 characters"; 3.4 To <
+                                From -> "To date should be after from date";
+                                1.1-C/1.8/1.1-R; 5.1-XSS-Stored Company literal;
+                                1.1-U PUT; 4.2 double-click; 1.1-D DELETE.
+                             -> Skills: 2.1 Required; 2.2 "abc"/"-3" -> "Should
+                                be a number"; 3.2 100 -> "Should be less than
+                                100", 99 diterima -> POST 200.
+                             HASIL 16 Nov 2026: 20/21 lolos. SENGAJA FAILED: 4.2
+                             double-click Work Experience -> 2 record (BUG BG-432,
+                             Medium).
+
+ 13  TC-MYINFO-QUALIFICATION-02  [DONE -- BUG]  TC-MYINFO-QUALIFICATION-02-Verify-Qualification-APIs-Validation-Mass-Assignment-Injection-And-Auth.spec.ts
+                             (-) 2.1 2.6 | (B) 3.1 3.2 3.4 | (S) 5.1-SQLi
+                             5.2-MassAssign | (A) 6.1 6.2 6.3 6.4 6.5 6.7
+                             Verify The Five Qualification APIs Of An Employee's
+                             Own Record: Contract, Server-Side Validation,
+                             Duplicates, Mass Assignment, Injection, Wrong Method
+                             And No Session
+                             -> Folder: tests/my-info/security/. Endpoint
+                                work-experiences, educations, skills, languages,
+                                licenses (id master dibaca sesi Admin).
+                             [API VERIFICATION]
+                             -> 6.1/6.2 POST valid 200 per endpoint; 3.4 rentang
+                                terbalik (WE, Education, License) -> 4xx; 3.1/3.2
+                                panjang & years 100/150 -> 4xx; 2.1/6.5 null & id
+                                master tak ada -> 4xx; 6.7 skill duplikat tetap 1
+                                baris (upsert, finding); 5.1-SQLi; 5.2-MassAssign;
+                                2.6 PUT 999999; 6.3 405; 6.4 401.
+                             HASIL 16 Nov 2026: 22/26 lolos. SENGAJA FAILED: id
+                             tak ada -> 500 di POST skills/licenses/educations &
+                             PUT work-experiences/999999 (BUG BG-434, Low).
+
+================================================================================
   RINGKASAN
 ================================================================================
 
-  Total TC         : 9 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, DEPENDENT 1,
-                     MEMBERSHIP 1, ATTACHMENT 1, IDOR 1)
+  Total TC         : 13 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, DEPENDENT 1,
+                     MEMBERSHIP 1, ATTACHMENT 1, IDOR 1, IMMIGRATION 2,
+                     QUALIFICATION 2)
   PASSED           : 7
-  FAILED (BUG, sengaja) : 2
+  FAILED (BUG, sengaja) : 6
     -> TC-MYINFO-PD-02 (BG-420, High, field terkunci Personal Details bisa
        diubah karyawan lewat API)
     -> TC-MYINFO-ATTACHMENT-01 (BG-422, High, executable di-rename .pdf
        diterima sbg attachment karyawan; keluarga BG-003)
-  BELUM DICAKUP (backlog): Immigration & Qualifications CRUD; Profile Picture
-    upload/remove.
+    -> TC-MYINFO-IMMIGRATION-01 (BG-431, Medium, double submit -> 2 record)
+    -> TC-MYINFO-QUALIFICATION-01 (BG-432, Medium, double submit Work
+       Experience -> 2 record)
+    -> TC-MYINFO-IMMIGRATION-02 (BG-433, Low, expiry < issued & jenis
+       dokumen 0/3 diterima server)
+    -> TC-MYINFO-QUALIFICATION-02 (BG-434, Low, id master/record tak ada ->
+       500)
+  BELUM DICAKUP (backlog): Profile Picture upload/remove; Languages & License
+    via UI.
 
   RUN COMMAND (semua TC My Info):
     npx playwright test tests/my-info --project=chromium --workers=1

@@ -1,4 +1,4 @@
-import { type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { type AddEmployeePage } from '../pages/AddEmployeePage';
 import { uniqueEmployeeName, uniqueName } from '../data/testData';
 
@@ -21,6 +21,11 @@ export async function createEssAccount(
 
   await addEmployeePage.goto();
   await addEmployeePage.fillName(employee.firstName, employee.lastName);
+  // The form pre-fills the "next" Employee Id, but on the shared demo that id is sometimes already
+  // taken (POST -> 422 invalidParamKeys ["employeeId"], seen live 2026-11-16). Wait for the pre-fill
+  // (so it cannot overwrite us afterwards), then use our own collision-free id (max length 10).
+  await expect(addEmployeePage.employeeIdInput).not.toHaveValue('', { timeout: 15_000 }).catch(() => {});
+  await addEmployeePage.employeeIdInput.fill(`Q${Date.now().toString().slice(-8)}${Math.floor(Math.random() * 10)}`);
   await addEmployeePage.toggleCreateLoginDetails();
   await addEmployeePage.usernameInput.fill(username);
   await addEmployeePage.passwordInput.fill(password);

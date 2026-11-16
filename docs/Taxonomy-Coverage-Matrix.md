@@ -11,13 +11,13 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Directory | 21 | 5 | 45 | 80.8% |
 | Leave | 290 | 209 | 424 | 58.1% |
 | Maintenance | 42 | 55 | 116 | 43.3% |
-| My Info | 85 | 377 | 319 | 18.4% |
+| My Info | 150 | 312 | 319 | 32.5% |
 | PIM | 480 | 446 | 494 | 51.8% |
 | Performance | 261 | 160 | 289 | 62.0% |
 | Recruitment | 136 | 80 | 68 | 63.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 265 | 217 | 370 | 55.0% |
-| **Total** | **2724** | **1922** | **3093** | **58.6%** |
+| **Total** | **2789** | **1857** | **3093** | **60.0%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -25,46 +25,46 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
 | Item | Taxonomy | Units with GAP |
 |---|---|---:|
-| 1.1-C | Create valid | 8 |
-| 1.1-R | Read / list | 38 |
-| 1.1-U | Update valid | 44 |
-| 1.1-D | Delete valid | 21 |
+| 1.1-C | Create valid | 6 |
+| 1.1-R | Read / list | 33 |
+| 1.1-U | Update valid | 42 |
+| 1.1-D | Delete valid | 19 |
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 81 |
 | 1.3 | State transition valid | 6 |
 | 1.4 | Relasi antar-entity | 70 |
 | 1.5 | Permission/role positif | 11 |
 | 1.6 | Search/filter/sort valid | 27 |
 | 1.7 | Upload file valid | 2 |
-| 1.8 | Notifikasi/feedback UI | 58 |
-| 2.1 | Required field kosong | 40 |
-| 2.2 | Format salah | 20 |
+| 1.8 | Notifikasi/feedback UI | 56 |
+| 2.1 | Required field kosong | 38 |
+| 2.2 | Format salah | 19 |
 | 2.3 | Duplicate/unique conflict | 6 |
-| 2.4 | Aksi tanpa permission (UI/API) | 6 |
+| 2.4 | Aksi tanpa permission (UI/API) | 1 |
 | 2.5 | State transition invalid | 13 |
-| 2.6 | Operasi pada record invalid/tak eksis | 35 |
+| 2.6 | Operasi pada record invalid/tak eksis | 33 |
 | 2.8 | Reject/cancel tanpa alasan | 6 |
-| 3.1 | Panjang karakter field | 44 |
+| 3.1 | Panjang karakter field | 42 |
 | 3.2 | Nilai numerik | 1 |
 | 3.3 | Ukuran file upload | 7 |
-| 3.4 | Tanggal | 24 |
+| 3.4 | Tanggal | 22 |
 | 3.5 | Pagination | 25 |
 | 3.6 | Jumlah hasil (0/1/limit) | 20 |
 | 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 63 |
-| 4.2 | Aksi ganda/cepat (double submit) | 59 |
+| 4.2 | Aksi ganda/cepat (double submit) | 57 |
 | 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 37 |
 | 4.4 | Race condition | 17 |
 | 4.5 | Session/koneksi terputus | 56 |
 | 4.6 | Data kosong/null (empty state) | 58 |
 | 4.7 | Konkurensi multi-user edit | 56 |
 | 4.8 | Behavior non-obvious terdokumentasi | 96 |
-| 5.1-SQLi | SQL Injection | 48 |
-| 5.1-XSS-Stored | Stored XSS | 26 |
+| 5.1-SQLi | SQL Injection | 46 |
+| 5.1-XSS-Stored | Stored XSS | 24 |
 | 5.1-XSS-Reflected | Reflected XSS | 21 |
 | 5.1-CmdPath | Command/Path injection | 14 |
 | 5.1-SSRF | SSRF | 5 |
-| 5.2-IDOR | IDOR | 10 |
+| 5.2-IDOR | IDOR | 2 |
 | 5.2-PrivEsc | Privilege escalation | 25 |
-| 5.2-MassAssign | Mass assignment | 63 |
+| 5.2-MassAssign | Mass assignment | 61 |
 | 5.3-BadExt | Upload ekstensi terlarang | 4 |
 | 5.3-Rename | Upload file di-rename | 5 |
 | 5.3-ContentType | Content-Type spoofing | 11 |
@@ -76,19 +76,15 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.6 | Security headers | 12 |
 | 5.8 | Sensitive data exposure | 12 |
 | 5.9 | Business logic abuse | 20 |
-| 6.1 | Status code benar | 5 |
-| 6.2 | Response schema/contract | 51 |
-| 6.3 | Request method salah (405) | 56 |
-| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 59 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 82 |
+| 6.2 | Response schema/contract | 49 |
+| 6.3 | Request method salah (405) | 54 |
+| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 57 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 80 |
 | 6.6 | Pagination & sorting param | 25 |
-| 6.7 | Idempotency | 36 |
-| 7.1 | JS console error | 2 |
-| 7.2 | Network anomali | 2 |
-| 7.3 | Resource 404 | 2 |
+| 6.7 | Idempotency | 35 |
 | 7.4 | Warning log | 12 |
 | 7.5 | Performance dasar | 12 |
 | 8.1 | Responsive/layout | 12 |
 | 8.2 | Cross-browser | 12 |
 | 8.3 | Accessibility dasar | 12 |
-| 8.4 | Konsistensi pesan | 64 |
+| 8.4 | Konsistensi pesan | 62 |

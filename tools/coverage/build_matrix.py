@@ -76,10 +76,17 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'cross-module/TC-XMOD-01', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Timesheets > Employee Timesheets', 'Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Time > Project Info > Projects']),
  (r'cross-module/TC-XMOD-0[24]', ['Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Performance > Configure > KPIs', 'Time > Project Info > Customers']),
  (r'cross-module/TC-XMOD-03', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Project Info > Projects']),
+ (r'my-info/.*/TC-MYINFO-IMMIGRATION-', ['My Info > Immigration']),
+ (r'my-info/.*/TC-MYINFO-QUALIFICATION-', ['My Info > Qualifications']),
  (r'my-info/personal-details', ['My Info > Personal Details']),
  (r'my-info/contact-details', ['My Info > Contact Details']),
  (r'my-info/job-salary-report-to', ['My Info > Job', 'My Info > Salary', 'My Info > Report-to']),
  (r'my-info/records', ['My Info > Emergency Contacts', 'My Info > Dependents', 'My Info > Memberships', 'My Info > Attachments & Profile Picture']),
+ # IDOR-01 requests the victim's data on 12 tabs (personal, contact, emergency, dependents, immigration, job,
+ # salary, supervisors, skills, memberships, custom fields, attachments) -- each one is a 5.2-IDOR check.
+ (r'my-info/security/TC-MYINFO-IDOR-', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts', 'My Info > Dependents',
+                                      'My Info > Immigration', 'My Info > Job', 'My Info > Salary', 'My Info > Report-to', 'My Info > Qualifications',
+                                      'My Info > Memberships', 'My Info > Attachments & Profile Picture']),
  (r'my-info/security', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts']),
  (r'sweep/TC-SWEEP-LIST', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8')) if u['id'] in set(json.load(open(S + '/api_units.json')))]),
  (r'sweep/TC-SWEEP-(UIMUT|MUT|CONC)-', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
