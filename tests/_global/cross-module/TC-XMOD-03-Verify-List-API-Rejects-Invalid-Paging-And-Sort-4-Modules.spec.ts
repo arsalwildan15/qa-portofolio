@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-XMOD-03 — Verify List APIs Reject Invalid Paging And Sort Parameters Cleanly (4 Modules)
  * Modul    : Lintas modul (Leave / Claim / Performance / Time) - API
- * Kategori : Negative (-) / Security (S) - input validation
+ * Kategori : Boundary (B) 3.5 | API (A) 6.6
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-XMOD-03-Verify-List-API-Rejects-Invalid-Paging-And-Sort-4-Modules.spec.ts
  * Path     : tests/_global/cross-module/

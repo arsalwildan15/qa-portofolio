@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-REPORTS-01 — Verify Employee Report Shows Hours Logged Via My Timesheet
  * Modul    : Time - Reports (Employee Reports)
- * Kategori : Positive (+) / End-to-end cross-check
+ * Kategori : Positive (+) 1.4 1.6 | API (A) 6.1 -- End-to-end cross-check
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-REPORTS-01-Verify-Employee-Report-Shows-Logged-Hours.spec.ts
  * Path     : tests/time/attendance/

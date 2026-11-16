@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-01: Verify Add Text Post Valid
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-01-Verify-Add-Text-Post-Valid.spec.ts
  * Path     : tests/buzz/posts/

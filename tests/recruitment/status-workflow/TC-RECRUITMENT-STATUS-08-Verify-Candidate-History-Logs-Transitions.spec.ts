@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-STATUS-08: Verify Candidate History Logs Transitions
  * Modul    : Recruitment - Status Workflow
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.3 1.4
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-STATUS-08-Verify-Candidate-History-Logs-Transitions.spec.ts
  * Path     : tests/recruitment/status-workflow/

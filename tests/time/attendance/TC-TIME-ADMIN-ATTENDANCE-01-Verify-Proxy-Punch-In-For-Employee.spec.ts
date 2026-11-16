@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-ADMIN-ATTENDANCE-01 — Verify Admin Can Proxy Punch In On Behalf Of An Employee
  * Modul    : Time - Attendance (Employee Records, admin view)
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.4 1.8 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-ADMIN-ATTENDANCE-01-Verify-Proxy-Punch-In-For-Employee.spec.ts
  * Path     : tests/time/attendance/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-SECURITY-10: Verify Cross-Origin Mutation Request (CSRF) Blocked
  * Modul    : Buzz - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.4
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-SECURITY-10-Verify-Cross-Origin-Mutation-Blocked.spec.ts
  * Path     : tests/buzz/security/

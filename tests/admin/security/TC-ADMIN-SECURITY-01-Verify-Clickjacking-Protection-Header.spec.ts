@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-SECURITY-01: Verify Clickjacking Protection Header on Admin Pages
  * Modul    : Admin - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.6
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-SECURITY-01-Verify-Clickjacking-Protection-Header.spec.ts
  * Path     : tests/admin/security/

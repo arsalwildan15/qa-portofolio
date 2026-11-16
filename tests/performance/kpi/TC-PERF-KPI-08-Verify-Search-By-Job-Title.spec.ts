@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-KPI-08 — Verify KPI List Search By Job Title Filters Correctly
  * Modul    : Performance - Configure - KPIs
- * Kategori : Positive (+) / UI
+ * Kategori : Positive (+) 1.6 -- UI
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-KPI-08-Verify-Search-By-Job-Title.spec.ts
  * Path     : tests/performance/kpi/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMAILCONFIG-01: Verify Form Loads
  * Modul    : Admin - Configuration - Email Configuration
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-R
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMAILCONFIG-01-Verify-Form-Loads.spec.ts
  * Path     : tests/admin/email-configuration/

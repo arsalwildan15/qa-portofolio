@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-STATUS-14: Verify Reject Notes Field Validation
  * Modul    : Recruitment - Status Workflow
- * Kategori : Negative / Boundary (-)
+ * Kategori : Positive (+) 1.3 | Negative (-) 2.8 | Boundary (B) 3.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-STATUS-14-Verify-Reject-Notes-Field-Validation.spec.ts
  * Path     : tests/recruitment/status-workflow/

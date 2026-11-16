@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-TRACKER-05 — Verify An Employee's Tracker Log Is Saved And Visible To The Reviewer
  * Modul    : Performance - My Trackers (ESS) / Employee Trackers (reviewer)
- * Kategori : Positive (+) / Cross-Role
+ * Kategori : Positive (+) 1.1-C 1.4 1.5 | API (A) 6.1 -- Cross-Role
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-TRACKER-05-Verify-ESS-Adds-Log-Visible-To-Reviewer.spec.ts
  * Path     : tests/performance/tracker/

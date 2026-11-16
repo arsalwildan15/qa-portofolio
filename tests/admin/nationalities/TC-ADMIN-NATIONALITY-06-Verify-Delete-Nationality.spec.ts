@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-NATIONALITY-06: Verify Delete Nationality
  * Modul    : Admin - Nationalities
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-NATIONALITY-06-Verify-Delete-Nationality.spec.ts
  * Path     : tests/admin/nationalities/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-SECURITY-06: Verify Clickjacking Protection Header
  * Modul    : Buzz - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.6
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-SECURITY-06-Verify-Clickjacking-Protection-Header.spec.ts
  * Path     : tests/buzz/security/

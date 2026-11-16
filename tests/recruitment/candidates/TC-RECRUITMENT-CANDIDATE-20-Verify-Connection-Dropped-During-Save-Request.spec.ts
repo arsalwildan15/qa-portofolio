@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-20: Verify Connection Dropped During Save Request
  * Modul    : Recruitment - Candidates
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-20-Verify-Connection-Dropped-During-Save-Request.spec.ts
  * Path     : tests/recruitment/candidates/

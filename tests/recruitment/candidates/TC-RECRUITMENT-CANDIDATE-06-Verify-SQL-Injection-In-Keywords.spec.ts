@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-06: Verify SQL Injection In Keywords
  * Modul    : Recruitment - Candidates
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-SQLi
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-06-Verify-SQL-Injection-In-Keywords.spec.ts
  * Path     : tests/recruitment/candidates/

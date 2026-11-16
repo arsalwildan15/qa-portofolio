@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-KPI-07 — Verify "Make Default Scale" Is Silently Exclusive Per Job Title
  * Modul    : Performance - Configure - KPIs
- * Kategori : Boundary (B) / Edge Case (E)
+ * Kategori : Positive (+) 1.4 | Edge Case (!) 4.8
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-KPI-07-Verify-Default-Scale-Is-Exclusive-Per-Job-Title.spec.ts
  * Path     : tests/performance/kpi/

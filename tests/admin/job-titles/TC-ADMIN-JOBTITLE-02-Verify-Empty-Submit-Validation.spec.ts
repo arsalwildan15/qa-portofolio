@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-JOBTITLE-02: Verify Empty Submit Validation
  * Modul    : Admin - Job Titles
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-JOBTITLE-02-Verify-Empty-Submit-Validation.spec.ts
  * Path     : tests/admin/job-titles/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-17: Verify List Filters Combination
  * Modul    : Recruitment - Candidates
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-17-Verify-List-Filters-Combination.spec.ts
  * Path     : tests/recruitment/candidates/

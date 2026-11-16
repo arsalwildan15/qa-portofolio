@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-USER-08: Verify Connection Dropped During Save Request
  * Modul    : Admin - User Management - Users
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-USER-08-Verify-Connection-Dropped-During-Save-Request.spec.ts
  * Path     : tests/admin/users/

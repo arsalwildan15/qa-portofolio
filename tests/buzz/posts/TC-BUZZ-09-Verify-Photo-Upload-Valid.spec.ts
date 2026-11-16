@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-09: Verify Valid Photo Upload Succeeds
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.7 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-09-Verify-Photo-Upload-Valid.spec.ts
  * Path     : tests/buzz/posts/

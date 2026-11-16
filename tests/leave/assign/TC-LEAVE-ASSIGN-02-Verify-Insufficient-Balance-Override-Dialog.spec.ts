@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-ASSIGN-02 — Verify Insufficient-Balance Override Dialog (Cancel & Confirm Paths)
  * Modul    : Leave - Assign Leave
- * Kategori : Negative (-) / Business Logic Abuse
+ * Kategori : Edge Case (!) 4.8 | Security (S) 5.9 -- Business Logic Abuse
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-ASSIGN-02-Verify-Insufficient-Balance-Override-Dialog.spec.ts
  * Path     : tests/leave/assign/

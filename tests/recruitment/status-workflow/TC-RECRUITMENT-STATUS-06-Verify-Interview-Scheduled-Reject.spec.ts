@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-STATUS-06: Verify Interview Scheduled Reject
  * Modul    : Recruitment - Status Workflow
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.3 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-STATUS-06-Verify-Interview-Scheduled-Reject.spec.ts
  * Path     : tests/recruitment/status-workflow/

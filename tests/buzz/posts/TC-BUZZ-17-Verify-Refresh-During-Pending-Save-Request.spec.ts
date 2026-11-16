@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-17: Verify Refresh During Pending Save Request
  * Modul    : Buzz
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.3
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-17-Verify-Refresh-During-Pending-Save-Request.spec.ts
  * Path     : tests/buzz/posts/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-SOCIALAUTH-03: Verify XSS Payload In Name
  * Modul    : Admin - Configuration - Social Media Authentication
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-SOCIALAUTH-03-Verify-XSS-In-Name.spec.ts
  * Path     : tests/admin/social-media-authentication/

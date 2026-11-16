@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-14: Verify "Most Commented Posts" Filter Tab
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-14-Verify-Most-Commented-Posts-Filter.spec.ts
  * Path     : tests/buzz/feed-filters/

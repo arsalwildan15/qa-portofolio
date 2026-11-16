@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMPSTATUS-01: Verify Add Employment Status Valid
  * Modul    : Admin - Employment Status
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMPSTATUS-01-Verify-Add-Employment-Status-Valid.spec.ts
  * Path     : tests/admin/employment-status/

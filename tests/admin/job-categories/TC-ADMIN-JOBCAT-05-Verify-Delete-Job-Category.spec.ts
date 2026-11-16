@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-JOBCAT-05: Verify Delete Job Category
  * Modul    : Admin - Job Categories
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-JOBCAT-05-Verify-Delete-Job-Category.spec.ts
  * Path     : tests/admin/job-categories/

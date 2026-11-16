@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPLY-07 — Verify A Half-Day Leave Deducts Exactly 0.5 Day From The Balance
  * Modul    : Leave - Apply Leave (ESS)
- * Kategori : Positive (+) / Boundary (B)
+ * Kategori : Positive (+) 1.1-C | Boundary (B) 3.2 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPLY-07-Verify-Half-Day-Deducts-Half-Balance.spec.ts
  * Path     : tests/leave/apply/

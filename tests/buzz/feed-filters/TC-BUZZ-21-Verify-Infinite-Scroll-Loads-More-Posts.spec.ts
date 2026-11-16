@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-21: Verify Infinite Scroll Loads More Posts
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Boundary (B) 3.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-21-Verify-Infinite-Scroll-Loads-More-Posts.spec.ts
  * Path     : tests/buzz/feed-filters/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-07: Verify Resume Over 1MB Rejected
  * Modul    : Recruitment - Candidates
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.3 | Security (S) 5.3-Oversize
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-07-Verify-Resume-Over-1MB-Rejected.spec.ts
  * Path     : tests/recruitment/candidates/

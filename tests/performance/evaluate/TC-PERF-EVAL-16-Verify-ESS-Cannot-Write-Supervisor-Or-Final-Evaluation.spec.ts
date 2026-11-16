@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-EVAL-16 — Verify An Employee Cannot Write The Supervisor Or Final Evaluation Of Their Own Review
  * Modul    : Performance - Review Evaluation (API authorization)
- * Kategori : Security (S) / Privilege Escalation + Boundary (B)
+ * Kategori : Negative (-) 2.4 | Security (S) 5.2-PrivEsc | API (A) 6.1 -- Privilege Escalation + Boundary (B)
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-EVAL-16-Verify-ESS-Cannot-Write-Supervisor-Or-Final-Evaluation.spec.ts
  * Path     : tests/performance/evaluate/

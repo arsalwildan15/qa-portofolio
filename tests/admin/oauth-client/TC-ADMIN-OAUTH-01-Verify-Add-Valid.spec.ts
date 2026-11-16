@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-OAUTH-01: Verify Add OAuth Client Valid
  * Modul    : Admin - Configuration - OAuth Client
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-OAUTH-01-Verify-Add-Valid.spec.ts
  * Path     : tests/admin/oauth-client/

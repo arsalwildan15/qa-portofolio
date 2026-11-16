@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-STRUCTURE-09: Verify Nested Child Unit
  * Modul    : Admin - Organization - Structure
- * Kategori : Unexpected / Edge Case (!)
+ * Kategori : Positive (+) 1.1-C 1.4 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-STRUCTURE-09-Verify-Nested-Child-Unit.spec.ts
  * Path     : tests/admin/structure/

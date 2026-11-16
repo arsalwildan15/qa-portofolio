@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LDAP-02: Verify Empty Host Via Test Connection
  * Modul    : Admin - Configuration - LDAP Configuration
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LDAP-02-Verify-Empty-Host-Test-Connection.spec.ts
  * Path     : tests/admin/ldap-configuration/

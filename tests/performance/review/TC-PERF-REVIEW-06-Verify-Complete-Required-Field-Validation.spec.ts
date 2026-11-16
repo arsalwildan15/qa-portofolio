@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-06 — Verify "Complete" On The Evaluation Page Requires Finalization Fields
  * Modul    : Performance - Manage Reviews - Evaluate
- * Kategori : Negative (-) / Boundary (B)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-06-Verify-Complete-Required-Field-Validation.spec.ts
  * Path     : tests/performance/review/

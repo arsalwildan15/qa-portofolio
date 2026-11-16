@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-17: Verify List Pagination And Sorting
  * Modul    : Recruitment - Vacancies
- * Kategori : Unexpected / Edge Case (!)
+ * Kategori : Positive (+) 1.6 | Boundary (B) 3.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-17-Verify-List-Pagination-And-Sorting.spec.ts
  * Path     : tests/recruitment/vacancies/

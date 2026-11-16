@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-ASSIGN-02 — Verify XSS Payload In Claim Remarks Does Not Execute
  * Modul    : Claim - Assign Claim
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-ASSIGN-02-Verify-XSS-In-Remarks.spec.ts
  * Path     : tests/claim/assign/

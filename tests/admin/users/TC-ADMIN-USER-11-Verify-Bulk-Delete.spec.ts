@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-USER-11: Verify Bulk Delete
  * Modul    : Admin - User Management - Users
- * Kategori : Positive (+) [API VERIFICATION]
+ * Kategori : Positive (+) 1.1-D | API (A) 6.1 6.2 [API VERIFICATION]
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-USER-11-Verify-Bulk-Delete.spec.ts
  * Path     : tests/admin/users/

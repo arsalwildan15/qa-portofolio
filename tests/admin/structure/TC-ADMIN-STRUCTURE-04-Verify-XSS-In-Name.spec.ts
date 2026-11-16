@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-STRUCTURE-04: Verify XSS In Name
  * Modul    : Admin - Organization - Structure
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-STRUCTURE-04-Verify-XSS-In-Name.spec.ts
  * Path     : tests/admin/structure/

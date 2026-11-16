@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-TS-APPROVAL-01 — Verify Admin Can Approve A Submitted ESS Timesheet (With Comment)
  * Modul    : Time - Employee Timesheets (Admin)
- * Kategori : Positive (+) / Cross-Role
+ * Kategori : Positive (+) 1.3 1.5 -- Cross-Role
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-TS-APPROVAL-01-Verify-Admin-Approve-Timesheet.spec.ts
  * Path     : tests/time/timesheet/

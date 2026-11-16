@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-SKILL-06: Verify Cancel Discards Form
  * Modul    : Admin - Qualifications - Skills
- * Kategori : Unexpected / Edge Case (!)
+ * Kategori : Unexpected / Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-SKILL-06-Verify-Cancel-Discards-Form.spec.ts
  * Path     : tests/admin/skills/

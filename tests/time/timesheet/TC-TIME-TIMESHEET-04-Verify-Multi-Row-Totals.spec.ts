@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-TIMESHEET-04 — Verify Day And Week Totals Add Up Across Multiple Timesheet Rows
  * Modul    : Time - My Timesheet (ESS)
- * Kategori : Positive (+) / Calculation
+ * Kategori : Positive (+) 1.1-D 1.1-U | API (A) 6.1 -- Calculation
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-TIMESHEET-04-Verify-Multi-Row-Totals.spec.ts
  * Path     : tests/time/timesheet/

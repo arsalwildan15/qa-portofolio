@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LANG-05: Verify Delete Language
  * Modul    : Admin - Qualifications - Languages
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LANG-05-Verify-Delete-Language.spec.ts
  * Path     : tests/admin/languages/

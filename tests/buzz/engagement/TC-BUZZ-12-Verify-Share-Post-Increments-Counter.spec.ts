@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-12: Verify Sharing A Post Increments The Shares Counter
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-12-Verify-Share-Post-Increments-Counter.spec.ts
  * Path     : tests/buzz/engagement/

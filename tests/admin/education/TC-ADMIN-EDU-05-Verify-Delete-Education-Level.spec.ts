@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EDU-05: Verify Delete Education Level
  * Modul    : Admin - Qualifications - Education
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EDU-05-Verify-Delete-Education-Level.spec.ts
  * Path     : tests/admin/education/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-XMOD-01 — Verify Leave, Claim, Performance And Time Send A Clickjacking Protection Header
  * Modul    : Lintas modul (Leave / Claim / Performance / Time) - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.6
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-XMOD-01-Verify-Clickjacking-Protection-Header-4-Modules.spec.ts
  * Path     : tests/_global/cross-module/

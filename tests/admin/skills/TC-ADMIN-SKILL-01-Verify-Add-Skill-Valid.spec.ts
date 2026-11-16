@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-SKILL-01: Verify Add Skill Valid
  * Modul    : Admin - Qualifications - Skills
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1 6.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-SKILL-01-Verify-Add-Skill-Valid.spec.ts
  * Path     : tests/admin/skills/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-CONFIG-EXPTYPE-02 — Verify Duplicate Expense Type Names Are Blocked And Inactive Types Are Hidden From ESS
  * Modul    : Claim - Configuration - Expense Types
- * Kategori : Negative (-) / Business Rule
+ * Kategori : Positive (+) 1.4 | Negative (-) 2.3 -- Business Rule
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-CONFIG-EXPTYPE-02-Verify-Duplicate-And-Inactive-Expense-Type.spec.ts
  * Path     : tests/claim/config/

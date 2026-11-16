@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-STATUS-07: Verify Mark Interview Failed Fresh Candidate
  * Modul    : Recruitment - Status Workflow
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.3 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-STATUS-07-Verify-Mark-Interview-Failed-Fresh-Candidate.spec.ts
  * Path     : tests/recruitment/status-workflow/

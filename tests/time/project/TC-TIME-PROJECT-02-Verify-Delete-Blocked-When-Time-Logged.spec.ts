@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-PROJECT-02 — Verify Activities, Projects And Customers With Logged Time Cannot Be Deleted
  * Modul    : Time - Project Info (Customers / Projects / Activities)
- * Kategori : Negative (-) / Referential Integrity
+ * Kategori : Positive (+) 1.1-D 1.4 -- Referential Integrity
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-PROJECT-02-Verify-Delete-Blocked-When-Time-Logged.spec.ts
  * Path     : tests/time/project/

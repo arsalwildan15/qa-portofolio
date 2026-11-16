@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-ORGGI-03: Verify Organization Name Very Long Text
  * Modul    : Admin - Organization - General Information
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-ORGGI-03-Verify-Organization-Name-Very-Long-Text.spec.ts
  * Path     : tests/admin/general-information/

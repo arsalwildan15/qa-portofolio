@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPROVAL-01 — Verify An ESS Leave Request Can Be Approved By Admin (Pending -> Scheduled)
  * Modul    : Leave - Apply (ESS) + Leave List (Admin)
- * Kategori : Positive (+) / Cross-Role
+ * Kategori : Positive (+) 1.3 1.5 | API (A) 6.1 -- Cross-Role
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPROVAL-01-Verify-ESS-Apply-Admin-Approve.spec.ts
  * Path     : tests/leave/approval/

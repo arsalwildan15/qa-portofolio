@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPLY-10 — Verify A Leave Request Overlapping An Existing One Is Rejected
  * Modul    : Leave - Apply Leave (ESS, API)
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.3 | Security (S) 5.9
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPLY-10-Verify-Overlapping-Request-Rejected.spec.ts
  * Path     : tests/leave/apply/

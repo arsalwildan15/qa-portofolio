@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-PAYGRADE-04: Verify Duplicate Name
  * Modul    : Admin - Pay Grades
- * Kategori : Unexpected / Edge Case (!)
+ * Kategori : Unexpected / Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-PAYGRADE-04-Verify-Duplicate-Name.spec.ts
  * Path     : tests/admin/pay-grades/

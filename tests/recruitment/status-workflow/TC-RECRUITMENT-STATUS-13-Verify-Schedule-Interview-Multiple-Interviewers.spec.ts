@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-STATUS-13: Verify Schedule Interview Multiple Interviewers
  * Modul    : Recruitment - Status Workflow
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.3 | API (A) 6.1 6.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-STATUS-13-Verify-Schedule-Interview-Multiple-Interviewers.spec.ts
  * Path     : tests/recruitment/status-workflow/

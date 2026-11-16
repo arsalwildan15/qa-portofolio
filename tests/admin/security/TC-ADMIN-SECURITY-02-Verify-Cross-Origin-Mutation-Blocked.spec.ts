@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-SECURITY-02: Verify Cross-Origin Mutation Request (CSRF) Blocked
  * Modul    : Admin - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.4
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-SECURITY-02-Verify-Cross-Origin-Mutation-Blocked.spec.ts
  * Path     : tests/admin/security/

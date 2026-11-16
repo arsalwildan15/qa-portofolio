@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-STATUS-10: Verify Mark Interview Passed
  * Modul    : Recruitment - Status Workflow
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.3 1.4 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-STATUS-10-Verify-Mark-Interview-Passed.spec.ts
  * Path     : tests/recruitment/status-workflow/

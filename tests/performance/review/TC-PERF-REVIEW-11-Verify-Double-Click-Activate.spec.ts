@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-11 — Verify Double-Clicking Activate Does Not Corrupt State Or Duplicate Effects
  * Modul    : Performance - Manage Reviews
- * Kategori : Edge Case (!) / Race Condition
+ * Kategori : Edge Case (!) 4.2 -- Race Condition
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-11-Verify-Double-Click-Activate.spec.ts
  * Path     : tests/performance/review/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-TRACKER-04 — Verify A Tracker Can Be Renamed And Then Deleted (Including Its Logs)
  * Modul    : Performance - Configure - Trackers
- * Kategori : Positive (+) / CRUD
+ * Kategori : Positive (+) 1.1-D 1.1-U | API (A) 6.1 -- CRUD
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-TRACKER-04-Verify-Edit-And-Delete-Tracker.spec.ts
  * Path     : tests/performance/tracker/

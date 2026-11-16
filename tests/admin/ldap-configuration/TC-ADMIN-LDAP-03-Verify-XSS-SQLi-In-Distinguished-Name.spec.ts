@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LDAP-03: Verify XSS/SQLi Payload In Distinguished Name
  * Modul    : Admin - Configuration - LDAP Configuration
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-SQLi 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LDAP-03-Verify-XSS-SQLi-In-Distinguished-Name.spec.ts
  * Path     : tests/admin/ldap-configuration/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-20: Verify Delete Comment
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-20-Verify-Delete-Comment.spec.ts
  * Path     : tests/buzz/engagement/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-SECURITY-11: Verify Rate Limiting On Rapid Post Creation
  * Modul    : Buzz - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-SECURITY-11-Verify-Rate-Limiting-Post-Creation.spec.ts
  * Path     : tests/buzz/security/

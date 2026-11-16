@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-10: Verify Edit Empty Vacancy Name Validation
  * Modul    : Recruitment - Vacancies
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-10-Verify-Edit-Empty-Vacancy-Name-Validation.spec.ts
  * Path     : tests/recruitment/vacancies/

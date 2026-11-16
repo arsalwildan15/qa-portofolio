@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMAILSUB-05: Verify XSS/SQLi Payload In Subscriber Name
  * Modul    : Admin - Configuration - Email Subscriptions
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Reflected
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMAILSUB-05-Verify-XSS-SQLi-In-Employee-Search.spec.ts
  * Path     : tests/admin/email-subscriptions/

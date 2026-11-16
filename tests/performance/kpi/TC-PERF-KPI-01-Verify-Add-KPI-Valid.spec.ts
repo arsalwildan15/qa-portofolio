@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-KPI-01 — Verify Adding A KPI With Valid Data Succeeds
  * Modul    : Performance - Configure - KPIs
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-KPI-01-Verify-Add-KPI-Valid.spec.ts
  * Path     : tests/performance/kpi/

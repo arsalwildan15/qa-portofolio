@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-JOBTITLE-07: Verify Exe Renamed As Jpg Upload Security
  * Modul    : Admin - Job Titles
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-Rename
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-JOBTITLE-07-Verify-Exe-Renamed-As-Jpg-Upload-Security.spec.ts
  * Path     : tests/admin/job-titles/

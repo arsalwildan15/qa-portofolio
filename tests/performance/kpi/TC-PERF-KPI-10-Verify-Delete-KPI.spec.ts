@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-KPI-10 — Verify Deleting A KPI Removes It From The List
  * Modul    : Performance - Configure - KPIs
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-KPI-10-Verify-Delete-KPI.spec.ts
  * Path     : tests/performance/kpi/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-09: Verify Delete Candidate
  * Modul    : Recruitment - Candidates
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-09-Verify-Delete-Candidate.spec.ts
  * Path     : tests/recruitment/candidates/

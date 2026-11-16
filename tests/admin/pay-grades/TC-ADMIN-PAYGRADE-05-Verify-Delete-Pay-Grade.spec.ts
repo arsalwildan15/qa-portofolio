@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-PAYGRADE-05: Verify Delete Pay Grade
  * Modul    : Admin - Pay Grades
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-PAYGRADE-05-Verify-Delete-Pay-Grade.spec.ts
  * Path     : tests/admin/pay-grades/

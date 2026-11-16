@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-EVAL-13 — Verify XSS Payloads In Evaluation Comments Are Stored As Text, Not Executed
  * Modul    : Performance - Manage Reviews - Evaluate
- * Kategori : Security (S) / Stored XSS
+ * Kategori : Security (S) 5.1-XSS-Stored -- Stored XSS
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-EVAL-13-Verify-XSS-In-Evaluation-Comments.spec.ts
  * Path     : tests/performance/evaluate/

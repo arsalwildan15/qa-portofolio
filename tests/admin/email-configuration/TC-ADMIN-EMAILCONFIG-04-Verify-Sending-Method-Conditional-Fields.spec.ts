@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMAILCONFIG-04: Verify Sending Method Conditional Fields
  * Modul    : Admin - Configuration - Email Configuration
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Edge Case (!) 4.8
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMAILCONFIG-04-Verify-Sending-Method-Conditional-Fields.spec.ts
  * Path     : tests/admin/email-configuration/

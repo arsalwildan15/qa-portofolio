@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-APPROVAL-05 — Verify A Stale "Reject" Button After Approve Cannot Undo A PAID Claim
  * Modul    : Claim - Employee Claims (Admin)
- * Kategori : Edge Case (!) / Stale UI
+ * Kategori : Negative (-) 2.5 | Edge Case (!) 4.7 -- Stale UI
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-APPROVAL-05-Verify-Stale-Reject-After-Approve.spec.ts
  * Path     : tests/claim/approval/

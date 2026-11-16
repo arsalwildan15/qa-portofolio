@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-JOBCAT-01: Verify Add Job Category Valid
  * Modul    : Admin - Job Categories
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-JOBCAT-01-Verify-Add-Job-Category-Valid.spec.ts
  * Path     : tests/admin/job-categories/

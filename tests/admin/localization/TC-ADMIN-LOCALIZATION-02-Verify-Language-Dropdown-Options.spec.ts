@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LOCALIZATION-02: Verify Language Dropdown Options
  * Modul    : Admin - Configuration - Localization
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Positive (+) 1.1-R
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LOCALIZATION-02-Verify-Language-Dropdown-Options.spec.ts
  * Path     : tests/admin/localization/

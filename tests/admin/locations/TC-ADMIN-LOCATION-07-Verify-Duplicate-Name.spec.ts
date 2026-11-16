@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LOCATION-07: Verify Duplicate Name
  * Modul    : Admin - Organization - Locations
- * Kategori : Unexpected / Edge Case (!)
+ * Kategori : Negative (-) 2.3
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LOCATION-07-Verify-Duplicate-Name.spec.ts
  * Path     : tests/admin/locations/

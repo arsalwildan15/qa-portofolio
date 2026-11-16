@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LDAP-04: Verify Host Very Long Text
  * Modul    : Admin - Configuration - LDAP Configuration
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LDAP-04-Verify-Host-Very-Long-Text.spec.ts
  * Path     : tests/admin/ldap-configuration/

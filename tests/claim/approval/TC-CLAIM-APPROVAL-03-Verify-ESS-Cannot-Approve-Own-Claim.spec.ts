@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-APPROVAL-03 — Verify An ESS Employee Cannot Approve Their Own Claim
  * Modul    : Claim - Access Control
- * Kategori : Security (S) / Segregation Of Duties (BFLAC)
+ * Kategori : Negative (-) 2.4 | Security (S) 5.2-PrivEsc 5.9 -- Segregation Of Duties (BFLAC)
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-APPROVAL-03-Verify-ESS-Cannot-Approve-Own-Claim.spec.ts
  * Path     : tests/claim/approval/

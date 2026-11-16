@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-16: Verify Resume Exact 1MB Boundary
  * Modul    : Recruitment - Candidates
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.3 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-16-Verify-Resume-Exact-1MB-Boundary.spec.ts
  * Path     : tests/recruitment/candidates/

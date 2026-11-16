@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-SKILL-07: Verify Delete Skill
  * Modul    : Admin - Qualifications - Skills
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-SKILL-07-Verify-Delete-Skill.spec.ts
  * Path     : tests/admin/skills/

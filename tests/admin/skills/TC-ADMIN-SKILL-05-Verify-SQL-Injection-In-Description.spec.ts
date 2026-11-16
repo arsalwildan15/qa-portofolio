@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-SKILL-05: Verify SQL Injection In Description
  * Modul    : Admin - Qualifications - Skills
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-SQLi
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-SKILL-05-Verify-SQL-Injection-In-Description.spec.ts
  * Path     : tests/admin/skills/

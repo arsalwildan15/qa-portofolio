@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-PUNCH-02 — Verify XSS Payload In Punch In/Out Note Does Not Execute
  * Modul    : Time - Attendance (Punch In/Out)
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-PUNCH-02-Verify-XSS-In-Note.spec.ts
  * Path     : tests/time/attendance/

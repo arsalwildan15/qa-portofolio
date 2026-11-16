@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPLY-08 — Verify "Specify Time" Leave Accepts A Valid Range And Rejects Reversed/Zero Ranges
  * Modul    : Leave - Apply Leave (ESS, API)
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.2 3.4 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPLY-08-Verify-Specify-Time-Range-Boundary.spec.ts
  * Path     : tests/leave/apply/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-XMOD-05 — Verify An Emoji In A Name Is Handled With A Clear Message, Not A Server Error
  * Modul    : Lintas modul (Leave / Claim / Time) - form "nama unik"
- * Kategori : Negative (-) / Error Handling / Internationalisation
+ * Kategori : Edge Case (!) 4.1 | API (A) 6.1 | UI (8) 8.4 -- Error Handling / Internationalisation
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-XMOD-05-Verify-Emoji-In-Name-Handled-Without-Server-Error.spec.ts
  * Path     : tests/_global/cross-module/

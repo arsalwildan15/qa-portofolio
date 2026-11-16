@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-APPROVAL-04 — Verify A Claim Cancelled By Its Owner Cannot Be Approved Via API
  * Modul    : Claim - Employee Claims (Admin)
- * Kategori : Negative (-) / State Machine Bypass
+ * Kategori : Positive (+) 1.3 | Negative (-) 2.5 -- State Machine Bypass
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-APPROVAL-04-Verify-Approve-Cancelled-Claim-Rejected.spec.ts
  * Path     : tests/claim/approval/

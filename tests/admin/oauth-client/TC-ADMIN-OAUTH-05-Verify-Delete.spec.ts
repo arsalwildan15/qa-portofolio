@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-OAUTH-05: Verify Delete OAuth Client
  * Modul    : Admin - Configuration - OAuth Client
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D | Edge Case (!) 4.8
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-OAUTH-05-Verify-Delete.spec.ts
  * Path     : tests/admin/oauth-client/

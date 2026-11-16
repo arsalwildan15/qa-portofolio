@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-11: Verify Exe Renamed As Pdf Upload Security
  * Modul    : Recruitment - Candidates
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-Rename
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-11-Verify-Exe-Renamed-As-Pdf-Upload-Security.spec.ts
  * Path     : tests/recruitment/candidates/

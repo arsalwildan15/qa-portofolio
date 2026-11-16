@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-08 — Verify Manage Reviews List Search/Filter By Employee Name And Review Status
  * Modul    : Performance - Manage Reviews
- * Kategori : Positive (+) / UI
+ * Kategori : Positive (+) 1.6 -- UI
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-08-Verify-Search-Filter-List.spec.ts
  * Path     : tests/performance/review/

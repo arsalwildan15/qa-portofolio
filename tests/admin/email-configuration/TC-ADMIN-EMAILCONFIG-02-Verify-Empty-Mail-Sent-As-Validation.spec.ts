@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMAILCONFIG-02: Verify Empty Mail Sent As Validation
  * Modul    : Admin - Configuration - Email Configuration
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMAILCONFIG-02-Verify-Empty-Mail-Sent-As-Validation.spec.ts
  * Path     : tests/admin/email-configuration/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LOCATION-05: Verify SQL Injection In Name
  * Modul    : Admin - Organization - Locations
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-SQLi
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LOCATION-05-Verify-SQL-Injection-In-Name.spec.ts
  * Path     : tests/admin/locations/

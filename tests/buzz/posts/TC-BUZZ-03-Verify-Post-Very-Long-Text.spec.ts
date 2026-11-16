@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-03: Verify Post With Very Long Text (Boundary)
  * Modul    : Buzz
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-03-Verify-Post-Very-Long-Text.spec.ts
  * Path     : tests/buzz/posts/

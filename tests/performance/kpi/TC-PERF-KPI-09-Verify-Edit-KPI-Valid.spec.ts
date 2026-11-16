@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-KPI-09 — Verify Editing An Existing KPI's Rating Range Succeeds
  * Modul    : Performance - Configure - KPIs
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-U | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-KPI-09-Verify-Edit-KPI-Valid.spec.ts
  * Path     : tests/performance/kpi/

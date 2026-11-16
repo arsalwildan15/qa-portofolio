@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-TS-APPROVAL-03 — Verify An ESS Employee Cannot Approve Their Own Timesheet
  * Modul    : Time - Access Control
- * Kategori : Security (S) / Segregation Of Duties (BFLAC)
+ * Kategori : Negative (-) 2.4 | Security (S) 5.2-PrivEsc 5.9 -- Segregation Of Duties (BFLAC)
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-TS-APPROVAL-03-Verify-ESS-Cannot-Approve-Own-Timesheet.spec.ts
  * Path     : tests/time/timesheet/

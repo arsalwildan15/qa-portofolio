@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-MEMBERSHIP-03: Verify Duplicate Name
  * Modul    : Admin - Qualifications - Memberships
- * Kategori : Unexpected / Edge Case (!)
+ * Kategori : Unexpected / Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-MEMBERSHIP-03-Verify-Duplicate-Name.spec.ts
  * Path     : tests/admin/memberships/

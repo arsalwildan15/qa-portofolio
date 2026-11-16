@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPLY-09 — Verify A Leave Falling Only On A Holiday Or A Weekend Is Rejected
  * Modul    : Leave - Apply Leave (ESS, API)
- * Kategori : Negative (-) / Boundary (B)
+ * Kategori : Boundary (B) 3.4 | Security (S) 5.9
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPLY-09-Verify-Holiday-Or-Weekend-Only-Rejected.spec.ts
  * Path     : tests/leave/apply/

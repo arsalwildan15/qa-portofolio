@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-ORGGI-02: Verify Empty Organization Name Validation
  * Modul    : Admin - Organization - General Information
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-ORGGI-02-Verify-Empty-Organization-Name-Validation.spec.ts
  * Path     : tests/admin/general-information/

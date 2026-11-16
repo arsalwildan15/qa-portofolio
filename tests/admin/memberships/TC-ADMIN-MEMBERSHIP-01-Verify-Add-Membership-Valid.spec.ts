@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-MEMBERSHIP-01: Verify Add Membership Valid
  * Modul    : Admin - Qualifications - Memberships
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-MEMBERSHIP-01-Verify-Add-Membership-Valid.spec.ts
  * Path     : tests/admin/memberships/

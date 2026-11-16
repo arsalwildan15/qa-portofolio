@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LANG-04: Verify XSS In Name
  * Modul    : Admin - Qualifications - Languages
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LANG-04-Verify-XSS-In-Name.spec.ts
  * Path     : tests/admin/languages/

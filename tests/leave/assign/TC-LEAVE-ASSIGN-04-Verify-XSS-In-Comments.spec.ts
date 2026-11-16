@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-ASSIGN-04 — Verify XSS Payload In Assign Leave Comments Does Not Execute
  * Modul    : Leave - Assign Leave
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-ASSIGN-04-Verify-XSS-In-Comments.spec.ts
  * Path     : tests/leave/assign/

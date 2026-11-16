@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-18: Verify Connection Dropped During Save Request
  * Modul    : Buzz
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-18-Verify-Connection-Dropped-During-Save-Request.spec.ts
  * Path     : tests/buzz/posts/

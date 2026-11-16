@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-15: Verify Number Of Positions Negative/Non-Numeric
  * Modul    : Recruitment - Vacancies
- * Kategori : Boundary (B)
+ * Kategori : Negative (-) 2.2 | Boundary (B) 3.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-15-Verify-Number-Of-Positions-Negative-NonNumeric.spec.ts
  * Path     : tests/recruitment/vacancies/

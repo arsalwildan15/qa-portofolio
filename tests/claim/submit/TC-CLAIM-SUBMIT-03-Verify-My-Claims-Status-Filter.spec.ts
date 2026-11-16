@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-SUBMIT-03 — Verify The ESS "My Claims" List Filters By Status
  * Modul    : Claim - My Claims (ESS)
- * Kategori : Positive (+) / UI
+ * Kategori : Positive (+) 1.6 | Boundary (B) 3.6 | Edge Case (!) 4.6 -- UI
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-SUBMIT-03-Verify-My-Claims-Status-Filter.spec.ts
  * Path     : tests/claim/submit/

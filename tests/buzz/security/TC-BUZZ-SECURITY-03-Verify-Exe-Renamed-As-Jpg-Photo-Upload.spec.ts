@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-SECURITY-03: Verify Exe Renamed As Jpg Accepted Via Share Photo
  * Modul    : Buzz - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-Rename
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-SECURITY-03-Verify-Exe-Renamed-As-Jpg-Photo-Upload.spec.ts
  * Path     : tests/buzz/security/

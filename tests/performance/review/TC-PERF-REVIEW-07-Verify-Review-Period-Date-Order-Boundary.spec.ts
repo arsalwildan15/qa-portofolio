@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-07 — Verify Review Period Date-Order Boundary On Add Review
  * Modul    : Performance - Manage Reviews
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.4
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-07-Verify-Review-Period-Date-Order-Boundary.spec.ts
  * Path     : tests/performance/review/

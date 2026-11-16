@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-CONFIG-EXPTYPE-01 — Verify A New Expense Type Is Saved And Offered In The ESS Add Expense Dialog
  * Modul    : Claim - Configuration - Expense Types
- * Kategori : Positive (+) / Cross-Role
+ * Kategori : Positive (+) 1.1-C 1.4 | API (A) 6.1 -- Cross-Role
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-CONFIG-EXPTYPE-01-Verify-Add-Expense-Type-Available-To-ESS.spec.ts
  * Path     : tests/claim/config/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-APPROVAL-06 — Verify Concurrent Approve And Reject On The Same Claim Resolve To One Outcome
  * Modul    : Claim - Employee Claims (Admin)
- * Kategori : Edge Case (!) / Race Condition
+ * Kategori : Edge Case (!) 4.4 -- Race Condition
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-APPROVAL-06-Verify-Concurrent-Approve-And-Reject.spec.ts
  * Path     : tests/claim/approval/

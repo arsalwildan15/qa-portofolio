@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LOCATION-06: Verify Cancel Discards Form
  * Modul    : Admin - Organization - Locations
- * Kategori : Unexpected / Edge Case (!)
+ * Kategori : Unexpected / Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LOCATION-06-Verify-Cancel-Discards-Form.spec.ts
  * Path     : tests/admin/locations/

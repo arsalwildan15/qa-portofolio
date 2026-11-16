@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-NATIONALITY-04: Verify IDOR By Id
  * Modul    : Admin - Nationalities
- * Kategori : Security (S)
+ * Kategori : Negative (-) 2.6 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-NATIONALITY-04-Verify-IDOR-By-Id.spec.ts
  * Path     : tests/admin/nationalities/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-04 — Verify Activate Succeeds For An Employee With A Job Title+KPI
  * Modul    : Performance - Manage Reviews
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.3 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-04-Verify-Activate-Succeeds-With-Job-Title-KPI.spec.ts
  * Path     : tests/performance/review/

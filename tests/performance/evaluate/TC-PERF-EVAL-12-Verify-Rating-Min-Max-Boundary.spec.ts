@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-EVAL-12 — Verify KPI Rating Min/Max Boundary (Client-Side And Server-Side)
  * Modul    : Performance - Manage Reviews - Evaluate
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.2 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-EVAL-12-Verify-Rating-Min-Max-Boundary.spec.ts
  * Path     : tests/performance/evaluate/

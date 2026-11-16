@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPLY-11 — Verify A Retroactive (Past-Date) Leave Request Is Accepted And Deducted
  * Modul    : Leave - Apply Leave (ESS, API)
- * Kategori : Edge Case (!) / Design Behavior
+ * Kategori : Boundary (B) 3.4 | Edge Case (!) 4.8 -- Design Behavior
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPLY-11-Verify-Past-Date-Leave-Accepted.spec.ts
  * Path     : tests/leave/apply/

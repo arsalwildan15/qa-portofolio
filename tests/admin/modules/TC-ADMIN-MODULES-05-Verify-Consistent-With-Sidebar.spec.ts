@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-MODULES-05: Verify Enabled Modules Consistent With Sidebar
  * Modul    : Admin - Configuration - Modules
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Positive (+) 1.4
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-MODULES-05-Verify-Consistent-With-Sidebar.spec.ts
  * Path     : tests/admin/modules/

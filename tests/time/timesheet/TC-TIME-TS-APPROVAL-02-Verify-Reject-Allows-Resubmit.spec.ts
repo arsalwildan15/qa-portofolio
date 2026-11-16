@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-TS-APPROVAL-02 — Verify A Rejected Timesheet Can Be Corrected And Resubmitted By The ESS
  * Modul    : Time - Employee Timesheets (Admin) + My Timesheet (ESS)
- * Kategori : Positive (+) / State Machine
+ * Kategori : Positive (+) 1.3 -- State Machine
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-TS-APPROVAL-02-Verify-Reject-Allows-Resubmit.spec.ts
  * Path     : tests/time/timesheet/

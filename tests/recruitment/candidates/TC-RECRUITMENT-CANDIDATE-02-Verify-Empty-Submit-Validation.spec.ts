@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-02: Verify Empty Submit Validation
  * Modul    : Recruitment - Candidates
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-02-Verify-Empty-Submit-Validation.spec.ts
  * Path     : tests/recruitment/candidates/

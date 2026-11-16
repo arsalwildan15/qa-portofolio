@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-13 — Verify An ESS Account Cannot Create/Activate A Review Via Direct API Call
  * Modul    : Performance - Manage Reviews - Access Control
- * Kategori : Security (S) / Broken Function-Level Access Control
+ * Kategori : Negative (-) 2.4 | Security (S) 5.2-BFLAC -- Broken Function-Level Access Control
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-13-Verify-ESS-Cannot-Create-Review-Via-API.spec.ts
  * Path     : tests/performance/review/

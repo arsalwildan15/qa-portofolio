@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMPSTATUS-05: Verify Delete Employment Status
  * Modul    : Admin - Employment Status
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMPSTATUS-05-Verify-Delete-Employment-Status.spec.ts
  * Path     : tests/admin/employment-status/

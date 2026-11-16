@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-10 — Verify Editing (Employee/Supervisor/Dates) Is Blocked After Activation
  * Modul    : Performance - Manage Reviews
- * Kategori : Negative (-) / Boundary (B)
+ * Kategori : Negative (-) 2.5 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-10-Verify-Edit-Blocked-After-Activation.spec.ts
  * Path     : tests/performance/review/

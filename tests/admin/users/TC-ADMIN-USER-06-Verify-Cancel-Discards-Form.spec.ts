@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-USER-06: Verify Cancel Discards Form
  * Modul    : Admin - User Management - Users
- * Kategori : Unexpected / Edge Case (!)
+ * Kategori : Unexpected / Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-USER-06-Verify-Cancel-Discards-Form.spec.ts
  * Path     : tests/admin/users/

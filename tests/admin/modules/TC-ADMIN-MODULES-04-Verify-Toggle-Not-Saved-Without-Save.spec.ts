@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-MODULES-04: Verify Toggle Not Saved Without Save
  * Modul    : Admin - Configuration - Modules
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Edge Case (!) 4.8
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-MODULES-04-Verify-Toggle-Not-Saved-Without-Save.spec.ts
  * Path     : tests/admin/modules/

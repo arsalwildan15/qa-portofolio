@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-08: Verify New Vacancy In Candidate Dropdown
  * Modul    : Recruitment - Vacancies
- * Kategori : Positive (+) [Integration]
+ * Kategori : Positive (+) 1.4 [Integration]
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-08-Verify-New-Vacancy-In-Candidate-Dropdown.spec.ts
  * Path     : tests/recruitment/vacancies/

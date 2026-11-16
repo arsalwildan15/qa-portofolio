@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-APPROVAL-01 — Verify Admin Approving An ESS Claim Moves It To PAID
  * Modul    : Claim - Employee Claims (Admin)
- * Kategori : Positive (+) / Cross-Role
+ * Kategori : Positive (+) 1.3 1.5 | API (A) 6.1 -- Cross-Role
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-APPROVAL-01-Verify-Admin-Approve-Pays-Claim.spec.ts
  * Path     : tests/claim/approval/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-ORGGI-06: Verify Edit Toggle Off Discards Without Save
  * Modul    : Admin - Organization - General Information
- * Kategori : Unexpected / Edge Case (!)
+ * Kategori : Edge Case (!) 4.8
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-ORGGI-06-Verify-Edit-Toggle-Off-Discards-Without-Save.spec.ts
  * Path     : tests/admin/general-information/

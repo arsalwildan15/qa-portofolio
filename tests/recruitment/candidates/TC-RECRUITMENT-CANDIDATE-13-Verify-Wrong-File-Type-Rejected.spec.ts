@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-13: Verify Wrong File Type Rejected
  * Modul    : Recruitment - Candidates
- * Kategori : Negative (-)
+ * Kategori : Security (S) 5.3-BadExt
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-13-Verify-Wrong-File-Type-Rejected.spec.ts
  * Path     : tests/recruitment/candidates/

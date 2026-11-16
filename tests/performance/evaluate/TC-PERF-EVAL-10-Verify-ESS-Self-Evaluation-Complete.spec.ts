@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-EVAL-10 — Verify An Employee Can Complete Their Self-Evaluation And It Becomes Read-Only
  * Modul    : Performance - My Reviews (ESS self-evaluation)
- * Kategori : Positive (+) / Cross-Role / State Transition
+ * Kategori : Positive (+) 1.1-U 1.3 1.5 | API (A) 6.1 -- Cross-Role / State Transition
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-EVAL-10-Verify-ESS-Self-Evaluation-Complete.spec.ts
  * Path     : tests/performance/evaluate/

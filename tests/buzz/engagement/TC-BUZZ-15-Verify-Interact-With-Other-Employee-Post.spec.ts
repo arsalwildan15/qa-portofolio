@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-15: Verify Like/Comment On Another Employee's Post
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.4 1.5 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-15-Verify-Interact-With-Other-Employee-Post.spec.ts
  * Path     : tests/buzz/engagement/

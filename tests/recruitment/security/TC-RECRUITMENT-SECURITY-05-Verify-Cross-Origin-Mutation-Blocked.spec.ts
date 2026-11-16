@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-SECURITY-05: Verify Cross-Origin Mutation Request Is Blocked (CSRF)
  * Modul    : Recruitment - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.4
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-SECURITY-05-Verify-Cross-Origin-Mutation-Blocked.spec.ts
  * Path     : tests/recruitment/security/

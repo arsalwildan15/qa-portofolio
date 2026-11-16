@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-06: Verify Like A Post
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-06-Verify-Like-Post.spec.ts
  * Path     : tests/buzz/engagement/

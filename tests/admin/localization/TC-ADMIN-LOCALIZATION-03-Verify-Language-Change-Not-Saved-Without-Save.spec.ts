@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LOCALIZATION-03: Verify Language Change Not Saved Without Save
  * Modul    : Admin - Configuration - Localization
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Edge Case (!) 4.8
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LOCALIZATION-03-Verify-Language-Change-Not-Saved-Without-Save.spec.ts
  * Path     : tests/admin/localization/

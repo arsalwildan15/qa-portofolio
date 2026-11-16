@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-JOBTITLE-01: Verify Add Job Title Valid
  * Modul    : Admin - Job Titles
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-JOBTITLE-01-Verify-Add-Job-Title-Valid.spec.ts
  * Path     : tests/admin/job-titles/

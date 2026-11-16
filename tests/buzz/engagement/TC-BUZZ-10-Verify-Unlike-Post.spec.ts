@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-10: Verify Unlike A Post (Toggle Like Off)
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-10-Verify-Unlike-Post.spec.ts
  * Path     : tests/buzz/engagement/

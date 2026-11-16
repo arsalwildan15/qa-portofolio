@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LOCATION-08: Verify Delete Location
  * Modul    : Admin - Organization - Locations
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LOCATION-08-Verify-Delete-Location.spec.ts
  * Path     : tests/admin/locations/

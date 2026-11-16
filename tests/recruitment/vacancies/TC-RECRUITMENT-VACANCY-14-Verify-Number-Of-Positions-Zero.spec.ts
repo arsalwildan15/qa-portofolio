@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-14: Verify Number Of Positions Zero
  * Modul    : Recruitment - Vacancies
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-14-Verify-Number-Of-Positions-Zero.spec.ts
  * Path     : tests/recruitment/vacancies/

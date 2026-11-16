@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-MY-01 — Verify An ESS Employee Can See And Cancel Their Own Pending Leave In My Leave
  * Modul    : Leave - My Leave (ESS)
- * Kategori : Positive (+) / State Machine
+ * Kategori : Positive (+) 1.3 1.5 | Negative (-) 2.5 -- State Machine
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-MY-01-Verify-ESS-Cancel-Own-Pending-Leave.spec.ts
  * Path     : tests/leave/my-leave/

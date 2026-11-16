@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LDAP-05: Verify Test Connection Is Non-Mutating
  * Modul    : Admin - Configuration - LDAP Configuration
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Edge Case (!) 4.8
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LDAP-05-Verify-Test-Connection-Non-Mutating.spec.ts
  * Path     : tests/admin/ldap-configuration/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-LIST-02 — Verify Access Control On viewLeaveRequest/<id> (IDOR Check)
  * Modul    : Leave - Leave List
- * Kategori : Security (S) - Access Control
+ * Kategori : Negative (-) 2.6 | Security (S) 5.2-IDOR | API (A) 6.2 6.4
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-LIST-02-Verify-IDOR-View-Leave-Request-Details.spec.ts
  * Path     : tests/leave/leave-list/

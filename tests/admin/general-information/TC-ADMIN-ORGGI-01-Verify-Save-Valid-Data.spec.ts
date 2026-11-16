@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-ORGGI-01: Verify Save Valid Data
  * Modul    : Admin - Organization - General Information
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-U | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-ORGGI-01-Verify-Save-Valid-Data.spec.ts
  * Path     : tests/admin/general-information/

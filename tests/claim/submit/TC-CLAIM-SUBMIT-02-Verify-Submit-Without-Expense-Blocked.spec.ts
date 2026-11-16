@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-SUBMIT-02 — Verify A Claim With No Expenses Cannot Be Submitted (And Approved/Paid)
  * Modul    : Claim - Submit Claim (ESS)
- * Kategori : Negative (-) / Business Rule
+ * Kategori : Negative (-) 2.5 | Security (S) 5.9 -- Business Rule
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-SUBMIT-02-Verify-Submit-Without-Expense-Blocked.spec.ts
  * Path     : tests/claim/submit/

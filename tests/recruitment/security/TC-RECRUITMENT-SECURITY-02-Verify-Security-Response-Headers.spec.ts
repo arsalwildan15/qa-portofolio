@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-SECURITY-02: Verify Security Response Headers
  * Modul    : Recruitment - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.6
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-SECURITY-02-Verify-Security-Response-Headers.spec.ts
  * Path     : tests/recruitment/security/

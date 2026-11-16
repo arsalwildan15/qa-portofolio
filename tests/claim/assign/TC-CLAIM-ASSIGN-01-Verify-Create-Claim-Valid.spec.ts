@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-ASSIGN-01 — Verify Creating A Claim Request With Valid Data Succeeds
  * Modul    : Claim - Assign Claim
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-ASSIGN-01-Verify-Create-Claim-Valid.spec.ts
  * Path     : tests/claim/assign/

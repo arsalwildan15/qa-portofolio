@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPLY-05 — Verify Applying Beyond Available Balance Is Rejected
  * Modul    : Leave - Apply
- * Kategori : Negative (-)
+ * Kategori : Security (S) 5.9
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPLY-05-Verify-Insufficient-Balance-Rejected.spec.ts
  * Path     : tests/leave/apply/

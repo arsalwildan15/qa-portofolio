@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-SECURITY-08: Verify XSS Payload In Comment Text
  * Modul    : Buzz - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-SECURITY-08-Verify-XSS-In-Comment-Text.spec.ts
  * Path     : tests/buzz/security/

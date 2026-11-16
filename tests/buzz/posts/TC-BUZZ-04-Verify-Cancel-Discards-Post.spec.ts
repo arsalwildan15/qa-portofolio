@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-04: Verify Cancel Discards Post Without Saving
  * Modul    : Buzz
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Unexpected/Edge (!) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-04-Verify-Cancel-Discards-Post.spec.ts
  * Path     : tests/buzz/posts/

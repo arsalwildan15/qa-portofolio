@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-EVAL-14 — Verify An Inactive Review Cannot Be Evaluated Or Completed Via Direct API Calls
  * Modul    : Performance - Manage Reviews - Evaluate
- * Kategori : Negative (-) / Business-Logic Bypass
+ * Kategori : Negative (-) 2.5 | API (A) 6.1 -- Business-Logic Bypass
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-EVAL-14-Verify-Evaluate-Inactive-Review-Via-API-Rejected.spec.ts
  * Path     : tests/performance/evaluate/

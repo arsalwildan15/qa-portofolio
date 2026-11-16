@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-EVAL-11 — Verify A Fully-Filled Evaluation Can Be Saved, Completed, And Becomes Read-Only
  * Modul    : Performance - Manage Reviews - Evaluate
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.3 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-EVAL-11-Verify-Finalize-Review-Completed.spec.ts
  * Path     : tests/performance/evaluate/

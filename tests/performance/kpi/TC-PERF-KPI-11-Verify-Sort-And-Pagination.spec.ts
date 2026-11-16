@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-KPI-11 — Verify The KPI List Sorts By Name And Paginates At 50 Rows
  * Modul    : Performance - Configure - KPIs
- * Kategori : Positive (+) / UI List
+ * Kategori : Positive (+) 1.6 | Boundary (B) 3.5 3.6 | API (A) 6.6 -- UI List
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-KPI-11-Verify-Sort-And-Pagination.spec.ts
  * Path     : tests/performance/kpi/

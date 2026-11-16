@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-SECURITY-01: Verify XSS Payload In Post Text Is Sanitized
  * Modul    : Buzz - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-SECURITY-01-Verify-XSS-In-Post-Text.spec.ts
  * Path     : tests/buzz/security/

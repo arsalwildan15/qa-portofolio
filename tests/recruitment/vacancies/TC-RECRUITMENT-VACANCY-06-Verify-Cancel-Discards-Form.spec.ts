@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-06: Verify Cancel Discards Form
  * Modul    : Recruitment - Vacancies
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-06-Verify-Cancel-Discards-Form.spec.ts
  * Path     : tests/recruitment/vacancies/

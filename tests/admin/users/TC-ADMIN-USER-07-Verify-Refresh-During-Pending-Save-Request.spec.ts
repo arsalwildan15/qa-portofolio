@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-USER-07: Verify Refresh During Pending Save Request
  * Modul    : Admin - User Management - Users
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.3
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-USER-07-Verify-Refresh-During-Pending-Save-Request.spec.ts
  * Path     : tests/admin/users/

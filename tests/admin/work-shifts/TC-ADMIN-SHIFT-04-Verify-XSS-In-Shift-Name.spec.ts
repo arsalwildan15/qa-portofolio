@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-SHIFT-04: Verify XSS In Shift Name
  * Modul    : Admin - Work Shifts
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-SHIFT-04-Verify-XSS-In-Shift-Name.spec.ts
  * Path     : tests/admin/work-shifts/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-JOBTITLE-04: Verify XSS In Job Title
  * Modul    : Admin - Job Titles
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-JOBTITLE-04-Verify-XSS-In-Job-Title.spec.ts
  * Path     : tests/admin/job-titles/

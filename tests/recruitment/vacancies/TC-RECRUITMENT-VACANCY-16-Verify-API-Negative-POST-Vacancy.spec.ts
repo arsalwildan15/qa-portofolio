@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-16: Verify API Negative POST Vacancy
  * Modul    : Recruitment - Vacancies
- * Kategori : Security (S)
+ * Kategori : Negative (-) 2.1 | API (A) 6.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-16-Verify-API-Negative-POST-Vacancy.spec.ts
  * Path     : tests/recruitment/vacancies/

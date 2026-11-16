@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-ASSIGN-01 — Verify Valid Assign Leave Lands As "Scheduled" (No Approval Step)
  * Modul    : Leave - Assign Leave
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.3
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-ASSIGN-01-Verify-Valid-Assign-Lands-Scheduled.spec.ts
  * Path     : tests/leave/assign/

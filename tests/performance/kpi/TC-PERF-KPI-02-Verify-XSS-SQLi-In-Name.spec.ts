@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-KPI-02 — Verify XSS/SQLi Payload In KPI Name Does Not Break The App
  * Modul    : Performance - Configure - KPIs
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored 5.1-SQLi
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-KPI-02-Verify-XSS-SQLi-In-Name.spec.ts
  * Path     : tests/performance/kpi/

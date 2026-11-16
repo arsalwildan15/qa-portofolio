@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-07: Verify Search Vacancies List
  * Modul    : Recruitment - Vacancies
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6 | Boundary (B) 3.6
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-07-Verify-Search-Vacancies-List.spec.ts
  * Path     : tests/recruitment/vacancies/

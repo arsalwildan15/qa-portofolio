@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-SECURITY-05: Verify Malicious Video URL Input Is Not Executed
  * Modul    : Buzz - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-SECURITY-05-Verify-Malicious-Video-Url-Rejected.spec.ts
  * Path     : tests/buzz/security/

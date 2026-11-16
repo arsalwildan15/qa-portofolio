@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-TIMESHEET-11 — Verify A Day Cannot Total More Than 24 Hours Across Timesheet Rows
  * Modul    : Time - My Timesheet (ESS)
- * Kategori : Boundary (B) / Data Integrity
+ * Kategori : Boundary (B) 3.2 | Security (S) 5.9 -- Data Integrity
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-TIMESHEET-11-Verify-Day-Total-Over-24h-Across-Rows-Rejected.spec.ts
  * Path     : tests/time/timesheet/

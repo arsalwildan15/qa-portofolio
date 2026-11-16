@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-08: Verify Empty Comment Is Blocked
  * Modul    : Buzz
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-08-Verify-Empty-Comment-Blocked.spec.ts
  * Path     : tests/buzz/engagement/

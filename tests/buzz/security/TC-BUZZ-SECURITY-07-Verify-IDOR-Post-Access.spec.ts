@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-SECURITY-07: Verify IDOR On Post/Comment Access
  * Modul    : Buzz - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-SECURITY-07-Verify-IDOR-Post-Access.spec.ts
  * Path     : tests/buzz/security/

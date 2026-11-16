@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-SECURITY-09: Verify SQL Injection Payload In Comment Text
  * Modul    : Buzz - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-SQLi
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-SECURITY-09-Verify-SQL-Injection-In-Comment-Text.spec.ts
  * Path     : tests/buzz/security/

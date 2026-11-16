@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-MODULES-02: Verify Admin Module Is Locked
  * Modul    : Admin - Configuration - Modules
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Edge Case (!) 4.8
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-MODULES-02-Verify-Admin-Module-Locked.spec.ts
  * Path     : tests/admin/modules/

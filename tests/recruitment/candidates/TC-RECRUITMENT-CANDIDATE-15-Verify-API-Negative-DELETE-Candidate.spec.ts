@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-15: Verify API Negative DELETE Candidate
  * Modul    : Recruitment - Candidates
- * Kategori : Security (S)
+ * Kategori : Negative (-) 2.6 | API (A) 6.1 6.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-15-Verify-API-Negative-DELETE-Candidate.spec.ts
  * Path     : tests/recruitment/candidates/

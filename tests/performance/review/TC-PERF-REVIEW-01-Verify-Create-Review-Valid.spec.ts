@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-01 — Verify Creating A Performance Review With Valid Data Succeeds
  * Modul    : Performance - Manage Reviews
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-01-Verify-Create-Review-Valid.spec.ts
  * Path     : tests/performance/review/

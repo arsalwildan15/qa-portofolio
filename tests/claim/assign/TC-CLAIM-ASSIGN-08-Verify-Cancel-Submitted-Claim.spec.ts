@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-ASSIGN-08 — Verify Cancelling A SUBMITTED Claim Moves It To CANCELLED With No Further Actions
  * Modul    : Claim - Submit Claim (ESS, owner)
- * Kategori : Positive (+) / State Transition
+ * Kategori : Positive (+) 1.3 | API (A) 6.1 -- State Transition
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-ASSIGN-08-Verify-Cancel-Submitted-Claim.spec.ts
  * Path     : tests/claim/assign/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-TIMESHEET-01 — Verify Logging Hours Against A Project/Activity Succeeds
  * Modul    : Time - Timesheets (My Timesheet)
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.8 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-TIMESHEET-01-Verify-Add-Hours-Valid.spec.ts
  * Path     : tests/time/timesheet/

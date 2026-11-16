@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-TRACKER-03 — Verify Behaviour When Two Trackers With The Same Name Are Created For One Employee
  * Modul    : Performance - Configure - Trackers
- * Kategori : Edge Case (!) / Business Rule (observasi desain)
+ * Kategori : Negative (-) 2.3 | Edge Case (!) 4.8 -- Business Rule (observasi desain)
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-TRACKER-03-Verify-Duplicate-Tracker-Name-Same-Employee.spec.ts
  * Path     : tests/performance/tracker/

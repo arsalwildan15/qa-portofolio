@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-12: Verify Deactivate Vacancy
  * Modul    : Recruitment - Vacancies
- * Kategori : Unexpected / Edge Case (!)
+ * Kategori : Positive (+) 1.3 1.4
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-12-Verify-Deactivate-Vacancy.spec.ts
  * Path     : tests/recruitment/vacancies/

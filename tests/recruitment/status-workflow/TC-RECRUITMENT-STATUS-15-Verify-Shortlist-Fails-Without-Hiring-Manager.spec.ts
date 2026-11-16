@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-STATUS-15: Verify Shortlist Fails Without Hiring Manager
  * Modul    : Recruitment - Status Workflow
- * Kategori : Security/Regression (!)
+ * Kategori : Positive (+) 1.3 | Edge Case (!) 4.8
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-STATUS-15-Verify-Shortlist-Fails-Without-Hiring-Manager.spec.ts
  * Path     : tests/recruitment/status-workflow/

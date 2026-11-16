@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMAILSUB-02: Verify Add/Delete Subscriber Restore Cycle
  * Modul    : Admin - Configuration - Email Subscriptions
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMAILSUB-02-Verify-Add-Delete-Subscriber-Restore.spec.ts
  * Path     : tests/admin/email-subscriptions/

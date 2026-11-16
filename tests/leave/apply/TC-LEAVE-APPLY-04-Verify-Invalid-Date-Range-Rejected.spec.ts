@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPLY-04 — Verify To Date Earlier Than From Date Is Rejected
  * Modul    : Leave - Apply
- * Kategori : Negative (-) / Boundary (B)
+ * Kategori : Boundary (B) 3.4
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPLY-04-Verify-Invalid-Date-Range-Rejected.spec.ts
  * Path     : tests/leave/apply/

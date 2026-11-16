@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-STRUCTURE-07: Verify Edit Unit Rename
  * Modul    : Admin - Organization - Structure
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-U 1.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-STRUCTURE-07-Verify-Edit-Unit-Rename.spec.ts
  * Path     : tests/admin/structure/

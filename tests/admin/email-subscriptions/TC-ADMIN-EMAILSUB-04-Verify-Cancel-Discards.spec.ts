@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMAILSUB-04: Verify Cancel Discards Add Subscriber Dialog
  * Modul    : Admin - Configuration - Email Subscriptions
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Unexpected/Edge (!) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMAILSUB-04-Verify-Cancel-Discards.spec.ts
  * Path     : tests/admin/email-subscriptions/

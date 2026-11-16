@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-MODULES-03: Verify All Modules Currently Enabled
  * Modul    : Admin - Configuration - Modules
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-R
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-MODULES-03-Verify-All-Modules-Enabled.spec.ts
  * Path     : tests/admin/modules/

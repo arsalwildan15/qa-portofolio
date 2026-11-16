@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-SECURITY-04: Verify Concurrent Status Transition Race Condition
  * Modul    : Recruitment - Security
- * Kategori : Security (S)
+ * Kategori : Edge Case (!) 4.4
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-SECURITY-04-Verify-Concurrent-Status-Transition-Race-Condition.spec.ts
  * Path     : tests/recruitment/security/

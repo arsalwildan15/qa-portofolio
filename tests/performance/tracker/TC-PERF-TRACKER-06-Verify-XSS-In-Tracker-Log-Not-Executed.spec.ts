@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-TRACKER-06 — Verify XSS Payloads In A Tracker Log Render As Text For Employee And Reviewer
  * Modul    : Performance - Tracker Logs
- * Kategori : Security (S) / Stored XSS
+ * Kategori : Security (S) 5.1-XSS-Stored -- Stored XSS
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-TRACKER-06-Verify-XSS-In-Tracker-Log-Not-Executed.spec.ts
  * Path     : tests/performance/tracker/

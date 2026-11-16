@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LANGPACK-02: Verify Delete / Re-Add Restore Cycle
  * Modul    : Admin - Configuration - Language Packages
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-D | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LANGPACK-02-Verify-Delete-ReAdd-Restore.spec.ts
  * Path     : tests/admin/language-packages/

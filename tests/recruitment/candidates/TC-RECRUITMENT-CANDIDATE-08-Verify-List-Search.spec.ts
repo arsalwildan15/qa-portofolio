@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-08: Verify List Search
  * Modul    : Recruitment - Candidates
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-08-Verify-List-Search.spec.ts
  * Path     : tests/recruitment/candidates/

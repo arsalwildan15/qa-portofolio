@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-CORPBRAND-01: Verify Form Loads
  * Modul    : Admin - Corporate Branding
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-R
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-CORPBRAND-01-Verify-Form-Loads.spec.ts
  * Path     : tests/admin/corporate-branding/

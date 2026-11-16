@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-ORGGI-04: Verify XSS In Organization Name
  * Modul    : Admin - Organization - General Information
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-ORGGI-04-Verify-XSS-In-Organization-Name.spec.ts
  * Path     : tests/admin/general-information/

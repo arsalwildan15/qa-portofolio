@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-OAUTH-02: Verify Empty Submit Validation
  * Modul    : Admin - Configuration - OAuth Client
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-OAUTH-02-Verify-Empty-Submit-Validation.spec.ts
  * Path     : tests/admin/oauth-client/

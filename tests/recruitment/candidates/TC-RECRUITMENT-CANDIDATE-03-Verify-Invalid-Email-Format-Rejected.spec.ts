@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-03: Verify Invalid Email Format Rejected
  * Modul    : Recruitment - Candidates
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-03-Verify-Invalid-Email-Format-Rejected.spec.ts
  * Path     : tests/recruitment/candidates/

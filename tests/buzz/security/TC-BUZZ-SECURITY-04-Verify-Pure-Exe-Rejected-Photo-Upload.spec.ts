@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-SECURITY-04: Verify Pure Exe Rejected As Photo (Baseline)
  * Modul    : Buzz - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-BadExt
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-SECURITY-04-Verify-Pure-Exe-Rejected-Photo-Upload.spec.ts
  * Path     : tests/buzz/security/

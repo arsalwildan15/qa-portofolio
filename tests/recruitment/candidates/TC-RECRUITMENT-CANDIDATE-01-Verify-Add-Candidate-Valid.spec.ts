@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-01: Verify Add Candidate Valid
  * Modul    : Recruitment - Candidates
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C | API (A) 6.1 6.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-01-Verify-Add-Candidate-Valid.spec.ts
  * Path     : tests/recruitment/candidates/

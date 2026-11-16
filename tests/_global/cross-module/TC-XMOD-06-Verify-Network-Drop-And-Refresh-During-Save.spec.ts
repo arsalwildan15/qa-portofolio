@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-XMOD-06 — Verify A Dropped Connection Or A Refresh During Save Never Creates Duplicates
  * Modul    : Lintas modul (Claim Event / Time Customer / Leave Type forms)
- * Kategori : Edge Case (!) / Network Resilience
+ * Kategori : Edge Case (!) 4.3 4.5 -- Network Resilience
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-XMOD-06-Verify-Network-Drop-And-Refresh-During-Save.spec.ts
  * Path     : tests/_global/cross-module/

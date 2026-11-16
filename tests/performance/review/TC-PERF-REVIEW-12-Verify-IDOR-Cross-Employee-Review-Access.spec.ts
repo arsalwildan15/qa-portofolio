@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-12 — Verify An ESS Employee Cannot Access Another Employee's Review Data (IDOR)
  * Modul    : Performance - Manage Reviews - Access Control
- * Kategori : Security (S) / Access Control
+ * Kategori : Security (S) 5.2-IDOR -- Access Control
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-12-Verify-IDOR-Cross-Employee-Review-Access.spec.ts
  * Path     : tests/performance/review/

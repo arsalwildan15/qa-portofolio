@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-SHIFT-05: Verify Delete Work Shift
  * Modul    : Admin - Work Shifts
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-SHIFT-05-Verify-Delete-Work-Shift.spec.ts
  * Path     : tests/admin/work-shifts/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-JOBTITLE-08: Verify Pure Exe Upload Rejected
  * Modul    : Admin - Job Titles
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.3-BadExt
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-JOBTITLE-08-Verify-Pure-Exe-Upload-Rejected.spec.ts
  * Path     : tests/admin/job-titles/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-14: Verify Duplicate Email Allowed
  * Modul    : Recruitment - Candidates
- * Kategori : Negative (-) [TEMUAN]
+ * Kategori : Negative (-) | kode: - [TEMUAN]
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-14-Verify-Duplicate-Email-Allowed.spec.ts
  * Path     : tests/recruitment/candidates/

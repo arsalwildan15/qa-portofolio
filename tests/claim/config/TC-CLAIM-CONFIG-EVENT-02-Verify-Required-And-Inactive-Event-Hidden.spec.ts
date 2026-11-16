@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-CONFIG-EVENT-02 — Verify Event Name Is Required And Inactive Events Are Not Offered
  * Modul    : Claim - Configuration - Events
- * Kategori : Negative (-) / Business Rule
+ * Kategori : Positive (+) 1.4 | Negative (-) 2.1 -- Business Rule
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-CONFIG-EVENT-02-Verify-Required-And-Inactive-Event-Hidden.spec.ts
  * Path     : tests/claim/config/

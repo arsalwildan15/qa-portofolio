@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMAILSUB-01: Verify List Loads
  * Modul    : Admin - Configuration - Email Subscriptions
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-R
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMAILSUB-01-Verify-List-Loads.spec.ts
  * Path     : tests/admin/email-subscriptions/

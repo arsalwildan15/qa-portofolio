@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LANGPACK-04: Verify Cancel Discards Add Dialog
  * Modul    : Admin - Configuration - Language Packages
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Unexpected/Edge (!) | kode: -
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LANGPACK-04-Verify-Cancel-Discards.spec.ts
  * Path     : tests/admin/language-packages/

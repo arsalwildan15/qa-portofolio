@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPLY-01 — Verify Apply Leave With Valid Data Succeeds
  * Modul    : Leave - Apply
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.5 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPLY-01-Verify-Apply-Leave-Valid.spec.ts
  * Path     : tests/leave/apply/

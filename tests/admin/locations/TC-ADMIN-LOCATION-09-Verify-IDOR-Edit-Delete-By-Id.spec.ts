@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LOCATION-09: Verify IDOR Edit/Delete By Id
  * Modul    : Admin - Organization - Locations
- * Kategori : Security (S)
+ * Kategori : Negative (-) 2.6 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LOCATION-09-Verify-IDOR-Edit-Delete-By-Id.spec.ts
  * Path     : tests/admin/locations/

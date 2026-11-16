@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-11: Verify Delete Own Post
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-11-Verify-Delete-Own-Post.spec.ts
  * Path     : tests/buzz/posts/

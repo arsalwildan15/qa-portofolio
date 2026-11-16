@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-19: Verify Edit Own Post
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-U | API (A) 6.1 6.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-19-Verify-Edit-Own-Post.spec.ts
  * Path     : tests/buzz/posts/

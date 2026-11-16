@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-CONFIG-EVENT-04 — Verify An XSS Payload In An Event Name Is Rendered As Text Everywhere
  * Modul    : Claim - Configuration - Events
- * Kategori : Security (S) / Stored XSS
+ * Kategori : Security (S) 5.1-XSS-Stored -- Stored XSS
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-CONFIG-EVENT-04-Verify-XSS-In-Event-Name-Not-Executed.spec.ts
  * Path     : tests/claim/config/

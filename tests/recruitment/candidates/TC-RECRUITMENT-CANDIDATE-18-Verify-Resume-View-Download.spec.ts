@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-18: Verify Resume View/Download
  * Modul    : Recruitment - Candidates
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-R 1.7
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-18-Verify-Resume-View-Download.spec.ts
  * Path     : tests/recruitment/candidates/

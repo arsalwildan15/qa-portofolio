@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-TRACKER-01 — Verify Adding A Performance Tracker With Valid Data Succeeds
  * Modul    : Performance - Configure - Trackers
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-TRACKER-01-Verify-Add-Tracker-Valid.spec.ts
  * Path     : tests/performance/tracker/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-CONFIG-EVENT-01 — Verify A New Active Event Is Saved And Offered To ESS Employees
  * Modul    : Claim - Configuration - Events
- * Kategori : Positive (+) / Cross-Role
+ * Kategori : Positive (+) 1.1-C 1.4 1.5 | API (A) 6.1 -- Cross-Role
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-CONFIG-EVENT-01-Verify-Add-Event-Available-To-ESS.spec.ts
  * Path     : tests/claim/config/

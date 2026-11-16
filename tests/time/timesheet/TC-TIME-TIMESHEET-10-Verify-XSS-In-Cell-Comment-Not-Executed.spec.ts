@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-TIMESHEET-10 — Verify An XSS Payload In A Timesheet Cell Comment Renders As Text
  * Modul    : Time - My Timesheet (ESS) / Employee Timesheet (Admin)
- * Kategori : Security (S) / Stored XSS
+ * Kategori : Security (S) 5.1-XSS-Stored -- Stored XSS
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-TIMESHEET-10-Verify-XSS-In-Cell-Comment-Not-Executed.spec.ts
  * Path     : tests/time/timesheet/

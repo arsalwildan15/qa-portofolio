@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-07: Verify Comment On A Post
  * Modul    : Buzz
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-07-Verify-Comment-On-Post.spec.ts
  * Path     : tests/buzz/engagement/

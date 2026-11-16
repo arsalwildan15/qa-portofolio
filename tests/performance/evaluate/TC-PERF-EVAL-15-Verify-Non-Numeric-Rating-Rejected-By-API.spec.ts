@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-EVAL-15 — Verify The API Rejects A Non-Numeric KPI Rating
  * Modul    : Performance - Manage Reviews - Evaluate
- * Kategori : Negative (-) / Server-Side Validation
+ * Kategori : Negative (-) 2.2 | API (A) 6.1 -- Server-Side Validation
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-EVAL-15-Verify-Non-Numeric-Rating-Rejected-By-API.spec.ts
  * Path     : tests/performance/evaluate/

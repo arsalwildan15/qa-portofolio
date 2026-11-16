@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-02: Verify Empty Post Is Blocked
  * Modul    : Buzz
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-02-Verify-Empty-Post-Blocked.spec.ts
  * Path     : tests/buzz/posts/

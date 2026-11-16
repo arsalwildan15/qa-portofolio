@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-03 — Verify Activate Is Blocked For An Employee Without A Job Title+KPI
  * Modul    : Performance - Manage Reviews
- * Kategori : Negative (-) / Boundary (B)
+ * Kategori : Negative (-) 2.5 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-03-Verify-Activate-Blocked-Without-Job-Title-KPI.spec.ts
  * Path     : tests/performance/review/

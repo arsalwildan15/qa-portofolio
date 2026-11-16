@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-MEMBERSHIP-05: Verify Delete Membership
  * Modul    : Admin - Qualifications - Memberships
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-MEMBERSHIP-05-Verify-Delete-Membership.spec.ts
  * Path     : tests/admin/memberships/

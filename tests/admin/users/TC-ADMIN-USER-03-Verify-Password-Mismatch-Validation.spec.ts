@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-USER-03: Verify Password Mismatch Validation
  * Modul    : Admin - User Management - Users
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-USER-03-Verify-Password-Mismatch-Validation.spec.ts
  * Path     : tests/admin/users/

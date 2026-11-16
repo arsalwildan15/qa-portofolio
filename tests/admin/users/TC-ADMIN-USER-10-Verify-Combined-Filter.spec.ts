@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-USER-10: Verify Combined Filter (Username + User Role + Status)
  * Modul    : Admin - User Management - Users
- * Kategori : Positive (+) [API VERIFICATION]
+ * Kategori : Positive (+) 1.6 | API (A) 6.1 6.6 [API VERIFICATION]
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-USER-10-Verify-Combined-Filter.spec.ts
  * Path     : tests/admin/users/

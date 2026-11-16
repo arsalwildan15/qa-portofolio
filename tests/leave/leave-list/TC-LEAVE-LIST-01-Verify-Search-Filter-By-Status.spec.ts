@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-LIST-01 — Verify Search/Filter By Status Returns Matching Records
  * Modul    : Leave - Leave List
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.6
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-LIST-01-Verify-Search-Filter-By-Status.spec.ts
  * Path     : tests/leave/leave-list/

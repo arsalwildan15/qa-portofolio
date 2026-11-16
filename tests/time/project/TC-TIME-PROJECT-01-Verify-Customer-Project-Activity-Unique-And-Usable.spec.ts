@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-PROJECT-01 — Verify A New Customer → Project → Activity Chain Is Usable By ESS And Names Are Unique
  * Modul    : Time - Project Info (Customers / Projects / Activities)
- * Kategori : Positive (+) / Negative (-) / Cross-Role
+ * Kategori : Positive (+) 1.1-C 1.4 1.5 | Negative (-) 2.3 | API (A) 6.1 -- Cross-Role
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-PROJECT-01-Verify-Customer-Project-Activity-Unique-And-Usable.spec.ts
  * Path     : tests/time/project/

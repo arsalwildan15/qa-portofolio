@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-05: Verify SQL Injection In Vacancy Name
  * Modul    : Recruitment - Vacancies
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-SQLi
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-05-Verify-SQL-Injection-In-Vacancy-Name.spec.ts
  * Path     : tests/recruitment/vacancies/

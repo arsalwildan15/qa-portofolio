@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-18: Verify Double-Click Save Does Not Duplicate
  * Modul    : Recruitment - Vacancies
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-18-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
  * Path     : tests/recruitment/vacancies/

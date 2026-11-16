@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EDU-02: Verify Empty Submit Validation
  * Modul    : Admin - Qualifications - Education
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EDU-02-Verify-Empty-Submit-Validation.spec.ts
  * Path     : tests/admin/education/

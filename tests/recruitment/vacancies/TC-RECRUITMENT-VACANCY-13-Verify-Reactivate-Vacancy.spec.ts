@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-13: Verify Reactivate Vacancy
  * Modul    : Recruitment - Vacancies
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.3 1.4 | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-13-Verify-Reactivate-Vacancy.spec.ts
  * Path     : tests/recruitment/vacancies/

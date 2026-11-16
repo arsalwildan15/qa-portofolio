@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-CANDIDATE-19: Verify Refresh During Pending Save Request
  * Modul    : Recruitment - Candidates
- * Kategori : Edge Case (!)
+ * Kategori : Edge Case (!) 4.3
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-CANDIDATE-19-Verify-Refresh-During-Pending-Save-Request.spec.ts
  * Path     : tests/recruitment/candidates/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-TRACKER-07 — Verify An Employee Cannot Read Or Write Another Employee's Tracker
  * Modul    : Performance - Tracker Logs (API authorization)
- * Kategori : Security (S) / IDOR
+ * Kategori : Security (S) 5.2-IDOR -- IDOR
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-TRACKER-07-Verify-IDOR-Other-Employee-Tracker.spec.ts
  * Path     : tests/performance/tracker/

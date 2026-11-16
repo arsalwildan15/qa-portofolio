@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-STATUS-05: Verify Schedule Interview Empty Validation
  * Modul    : Recruitment - Status Workflow
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-STATUS-05-Verify-Schedule-Interview-Empty-Validation.spec.ts
  * Path     : tests/recruitment/status-workflow/

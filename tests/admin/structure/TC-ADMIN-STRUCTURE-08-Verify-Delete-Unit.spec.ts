@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-STRUCTURE-08: Verify Delete Unit
  * Modul    : Admin - Organization - Structure
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-D
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-STRUCTURE-08-Verify-Delete-Unit.spec.ts
  * Path     : tests/admin/structure/

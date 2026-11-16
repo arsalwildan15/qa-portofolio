@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EDU-03: Verify XSS In Level
  * Modul    : Admin - Qualifications - Education
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EDU-03-Verify-XSS-In-Level.spec.ts
  * Path     : tests/admin/education/

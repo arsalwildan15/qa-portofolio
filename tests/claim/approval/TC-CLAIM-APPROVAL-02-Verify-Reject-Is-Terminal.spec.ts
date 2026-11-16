@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-APPROVAL-02 — Verify Rejecting An ESS Claim Is Terminal (Cannot Be Approved Afterward)
  * Modul    : Claim - Employee Claims (Admin)
- * Kategori : Positive (+) / State Machine
+ * Kategori : Positive (+) 1.3 | Negative (-) 2.5 -- State Machine
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-APPROVAL-02-Verify-Reject-Is-Terminal.spec.ts
  * Path     : tests/claim/approval/

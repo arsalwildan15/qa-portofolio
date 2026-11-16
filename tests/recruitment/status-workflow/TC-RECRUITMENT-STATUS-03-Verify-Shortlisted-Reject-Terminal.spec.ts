@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-STATUS-03: Verify Shortlisted Reject Terminal
  * Modul    : Recruitment - Status Workflow
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.3 | Negative (-) 2.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-STATUS-03-Verify-Shortlisted-Reject-Terminal.spec.ts
  * Path     : tests/recruitment/status-workflow/

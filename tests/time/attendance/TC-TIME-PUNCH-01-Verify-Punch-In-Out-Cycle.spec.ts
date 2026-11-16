@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-TIME-PUNCH-01 — Verify Punch In Then Punch Out Completes The Attendance Cycle
  * Modul    : Time - Attendance (Punch In/Out)
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.3 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-TIME-PUNCH-01-Verify-Punch-In-Out-Cycle.spec.ts
  * Path     : tests/time/attendance/

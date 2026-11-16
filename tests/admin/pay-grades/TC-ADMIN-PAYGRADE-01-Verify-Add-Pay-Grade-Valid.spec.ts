@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-PAYGRADE-01: Verify Add Pay Grade Valid
  * Modul    : Admin - Pay Grades
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-PAYGRADE-01-Verify-Add-Pay-Grade-Valid.spec.ts
  * Path     : tests/admin/pay-grades/

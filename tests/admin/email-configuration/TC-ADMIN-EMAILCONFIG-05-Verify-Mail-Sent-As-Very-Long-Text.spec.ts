@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMAILCONFIG-05: Verify Mail Sent As Very Long Text
  * Modul    : Admin - Configuration - Email Configuration
- * Kategori : Boundary (B)
+ * Kategori : Boundary (B) 3.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMAILCONFIG-05-Verify-Mail-Sent-As-Very-Long-Text.spec.ts
  * Path     : tests/admin/email-configuration/

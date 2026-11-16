@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-VACANCY-09: Verify Edit Vacancy Valid
  * Modul    : Recruitment - Vacancies
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-U | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-VACANCY-09-Verify-Edit-Vacancy-Valid.spec.ts
  * Path     : tests/recruitment/vacancies/

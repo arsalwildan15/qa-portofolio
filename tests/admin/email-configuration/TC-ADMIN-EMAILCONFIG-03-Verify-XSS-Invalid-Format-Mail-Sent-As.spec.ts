@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EMAILCONFIG-03: Verify XSS/Invalid-Format Payload In Mail Sent As
  * Modul    : Admin - Configuration - Email Configuration
- * Kategori : Security (S)
+ * Kategori : Negative (-) 2.2 | Security (S) 5.1-XSS-Stored
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EMAILCONFIG-03-Verify-XSS-Invalid-Format-Mail-Sent-As.spec.ts
  * Path     : tests/admin/email-configuration/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-PERF-REVIEW-02 — Verify Supervisor Reviewer Is Scoped To The Employee's Actual Supervisor
  * Modul    : Performance - Manage Reviews
- * Kategori : Negative (-) / Boundary (B)
+ * Kategori : Positive (+) 1.4 | Negative (-) 2.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-PERF-REVIEW-02-Verify-Supervisor-Required-Before-Create.spec.ts
  * Path     : tests/performance/review/

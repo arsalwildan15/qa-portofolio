@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-EDU-01: Verify Add Education Level Valid
  * Modul    : Admin - Qualifications - Education
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C 1.1-R | API (A) 6.1
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-EDU-01-Verify-Add-Education-Level-Valid.spec.ts
  * Path     : tests/admin/education/

@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-RECRUITMENT-SECURITY-03: Verify Rate Limiting Candidate Create
  * Modul    : Recruitment - Security
- * Kategori : Security (S)
+ * Kategori : Security (S) 5.5
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-RECRUITMENT-SECURITY-03-Verify-Rate-Limiting-Candidate-Create.spec.ts
  * Path     : tests/recruitment/security/

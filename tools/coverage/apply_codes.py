@@ -13,6 +13,7 @@ import glob, json, os, re, sys
 GROUP = {'1': 'Positive (+)', '2': 'Negative (-)', '3': 'Boundary (B)', '4': 'Edge Case (!)', '5': 'Security (S)',
          '6': 'API (A)', '7': 'Console (7)', '8': 'UI (8)'}
 LINE = re.compile(r'^(\s*\*\s*Kategori\s*:\s*)(.*)$', re.M)
+EXPL = re.compile(r'(?<![\d.])[1-8]\.\d(?![\d.])')
 
 def render(codes: str, old: str) -> str:
     tags = ' '.join(re.findall(r'\[[^\]]+\]', old))
@@ -24,7 +25,12 @@ def render(codes: str, old: str) -> str:
     for c in codes.split():
         by.setdefault(c[0], []).append(c)
     text = ' | '.join(f"{GROUP[k]} {' '.join(v)}" for k, v in sorted(by.items()))
-    return f"{text}{(' ' + tags) if tags else ''}"
+    # Keep a free-text descriptor such as "Positive (+) / Cross-Role" -> "... -- Cross-Role".
+    plain = re.sub(r'\s*\[[^\]]+\]', '', old)
+    descr = plain.split(' -- ', 1)[1].strip() if ' -- ' in plain else (plain.split(' / ', 1)[1].strip() if ' / ' in plain and not EXPL.search(plain) else '')
+    # Category names are already rendered from the codes; keep only the free-text parts.
+    descr = ' / '.join(p for p in (x.strip() for x in descr.split(' / ')) if p and not re.match(r'(Positive|Negative|Boundary|Edge Case|Edge|Security|API)\b', p))
+    return f"{text}{(' -- ' + descr) if descr else ''}{(' ' + tags) if tags else ''}"
 
 def main():
     mapping = {k: v for k, v in json.load(open(sys.argv[1], encoding='utf-8')).items() if not k.startswith('_')}

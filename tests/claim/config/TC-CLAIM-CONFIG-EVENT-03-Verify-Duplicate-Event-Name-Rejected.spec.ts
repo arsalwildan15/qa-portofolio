@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-CLAIM-CONFIG-EVENT-03 — Verify A Duplicate Event Name Is Rejected (UI And API)
  * Modul    : Claim - Configuration - Events
- * Kategori : Negative (-)
+ * Kategori : Negative (-) 2.3 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-CLAIM-CONFIG-EVENT-03-Verify-Duplicate-Event-Name-Rejected.spec.ts
  * Path     : tests/claim/config/

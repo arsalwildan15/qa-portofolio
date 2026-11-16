@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-XMOD-04 — Verify Arabic (RTL), CJK And Accented Names Are Stored And Shown Unchanged (4 Modules)
  * Modul    : Lintas modul (Leave / Claim / Performance / Time)
- * Kategori : Positive (+) / Internationalisation
+ * Kategori : Positive (+) 1.1-C 1.1-R | Edge Case (!) 4.1 | API (A) 6.1 -- Internationalisation
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-XMOD-04-Verify-Unicode-RTL-Names-Round-Trip-4-Modules.spec.ts
  * Path     : tests/_global/cross-module/

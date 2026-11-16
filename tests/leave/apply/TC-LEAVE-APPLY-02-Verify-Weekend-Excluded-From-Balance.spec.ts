@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPLY-02 — Verify Weekend Days Are Excluded From Balance Deduction
  * Modul    : Leave - Apply
- * Kategori : Positive (+)
+ * Kategori : Positive (+) 1.1-C | Boundary (B) 3.4 | API (A) 6.1
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPLY-02-Verify-Weekend-Excluded-From-Balance.spec.ts
  * Path     : tests/leave/apply/

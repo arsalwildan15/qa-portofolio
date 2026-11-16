@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-ADMIN-LOCALIZATION-05: Verify Language Options Match Language Packages
  * Modul    : Admin - Configuration - Localization
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Positive (+) 1.4
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-ADMIN-LOCALIZATION-05-Verify-Language-Options-Match-Language-Packages.spec.ts
  * Path     : tests/admin/localization/

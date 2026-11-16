@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-LEAVE-APPROVAL-02 — Verify Rejecting An ESS Leave Request Restores Its Balance
  * Modul    : Leave - Leave List (Admin)
- * Kategori : Positive (+) / Business Rule
+ * Kategori : Positive (+) 1.3 | Negative (-) 2.5 -- Business Rule
  * Env      : OrangeHRM Demo — opensource-demo.orangehrmlive.com
  * File     : TC-LEAVE-APPROVAL-02-Verify-Reject-Restores-Balance.spec.ts
  * Path     : tests/leave/approval/

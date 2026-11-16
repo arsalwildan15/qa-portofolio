@@ -2,7 +2,7 @@
  * ================================================================================
  * TC-BUZZ-05: Verify Double-Click Submit Does Not Duplicate Post
  * Modul    : Buzz
- * Kategori : Unexpected/Edge (!)
+ * Kategori : Edge Case (!) 4.2
  * Env      : OrangeHRM Demo: opensource-demo.orangehrmlive.com
  * File     : TC-BUZZ-05-Verify-Double-Click-Submit-No-Duplicate.spec.ts
  * Path     : tests/buzz/posts/
