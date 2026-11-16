@@ -173,13 +173,28 @@ LEGEND SIMBOL SKENARIO
                              setelah reload, bukan perilaku server yang
                              sedang memproses. TC SENGAJA FAILED.
 
+ 7   TC-XMOD-07  [DONE -- BUG]  TC-XMOD-07-Verify-Expired-Session-On-Save-Redirects-To-Login-Without-Script-Errors.spec.ts
+                             (!) 4.5 | 8.4   [U100 U101 U088]
+                             Verify Saving A Form After The Session Has Expired
+                             Sends The User To Login Cleanly, Without Unhandled
+                             Script Errors (Recruitment Candidate & Vacancy, PIM
+                             Personal Details)
+                             -> ubah field, hapus cookie sesi, Save -> 401,
+                                dialihkan ke login, data tidak berubah (LOLOS 3/3).
+                             -> tanpa exception JS saat pengalihan: GAGAL 3/3,
+                                "Cannot read properties of undefined (reading
+                                'response')" (BUG BG-441, Low). Menutup catatan
+                                "sesi kedaluwarsa saat form terbuka" di bawah.
+                             HASIL 17 Nov 2026: 3/6 lolos (SENGAJA FAILED).
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
 
-  Total TC         : 6
+  Total TC         : 7 (XMOD-07 ditambahkan 17 Nov 2026)
   PASSED           : 3 (XMOD-02, 03, 04)
-  FAILED (BUG, sengaja, dikonfirmasi) : 3
+  FAILED (BUG, sengaja, dikonfirmasi) : 4
+    -> TC-XMOD-07 (BG-441, Low, exception JS saat sesi habis lalu Save)
     -> TC-XMOD-01 (BG-404, Medium, clickjacking 4 modul)
     -> TC-XMOD-05 (BG-405, Medium, emoji -> 500 di cek nama unik)
     -> TC-XMOD-06 (BG-406, Low, form macet di spinner setelah koneksi
@@ -191,8 +206,8 @@ LEGEND SIMBOL SKENARIO
 
   BELUM DICAKUP: rate limiting (sengaja tidak dijalankan ke demo publik
   bersama -- beban berlebih bisa mengganggu pengguna lain; lebih tepat di
-  instance self-host, lihat keputusan target ZAP), sesi kedaluwarsa saat
-  form terbuka.
+  instance self-host, lihat keputusan target ZAP). (Sesi kedaluwarsa saat form
+  terbuka kini dicakup TC-XMOD-07.)
 
   RUN COMMAND:
     npx playwright test tests/_global/cross-module --project=chromium --workers=1

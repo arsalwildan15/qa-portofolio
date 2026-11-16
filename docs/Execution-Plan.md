@@ -40,17 +40,20 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** FASE 4 / P4.0. Selesai 17 Nov: kurasi kode taksonomi semua modul (matrix 100% kode eksplisit,
-  kecuali 16 TC lemah) + Maintenance 4 TC (43.3% -> 88.7%; BUG BG-440 High: prompt "Administrator Access"
-  hanya di UI -- purge karyawan/kandidat & unduh data pribadi lolos lewat API tanpa password). Matrix 65.1%.
-  Fix util: passAdminAccessGate() kini menunggu prompt ATAU sidebar (isVisible tidak menunggu).
-  BERIKUT (urut terendah): Recruitment 54.6%, Leave 55.1%, Time 56.2%, Performance 59.6% -> pola API sweep
-  + mutasi per modul (spt PIM-API-01/MUT-01) + GAP spesifik unit; Maintenance sisa (4.2, 4.5, 5.4, U086
-  1.3/2.5/4.4, U087 6.3/6.5); perkuat 23 TC lemah; PIM sisa; lalu Fase 5-8.
+- **NEXT ACTION:** FASE 4 / P4.0. Selesai 17 Nov: Recruitment 54.6% -> 100% (8 TC baru + TC-XMOD-07; 7 BUG
+  BG-441..447: exception JS saat sesi habis [app-wide], emoji kandidat jadi "?", filter tanggal satu hari 400,
+  resume utk kandidat 999999 -> 500, server tidak menegakkan aturan form lowongan/kandidat, klik ganda Save
+  lampiran lowongan = 2 lampiran, exe di-rename .pdf diterima di lampiran lowongan). Matrix 67.3%.
+  BERIKUT (urut terendah): Leave 55.1%, Time 56.2%, Performance 59.6% -> pola Recruitment: probe UI+API dulu,
+  lalu API-01 (kontrak/method/sesi/id asing/ESS), MUT-01 (validasi/injeksi/mass-assign), VALID-01 (aturan
+  form vs server), UPLOAD (bila ada file), SECURITY (race/multi-user/CSRF/burst), UI edit (feedback/refresh/
+  sesi/klik ganda); lalu My Info 64.5%, PIM 65.1%, Buzz/Claim 69%, Admin 72.8%; Maintenance sisa; perkuat
+  23 TC lemah; lalu Fase 5-8.
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
-  tulis skrip ke file.
+  tulis skrip ke file; noise console bug yg sudah punya TC sendiri -> expectedConsoleErrorPatterns (arg ke-5
+  TestReport) + komentar rujukan; demo format tanggal yyyy-dd-mm & server tolak From = To.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -452,3 +455,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | P4.0 PIM | kurasi kode taksonomi di header 156 TC PIM (pim_codes.json, apply_codes.py idempoten; build_matrix baca Kategori -> PIM jujur 50.4%); +3 TC: REPORTTO-08 (BUG BG-438 Medium: karyawan jadi atasan sendiri & saling membawahi diterima), API-01 (108/108, 12 tab + PrivEsc ESS), MUT-01 (67/69, BUG BG-439 Low: Work Experience tanggal invalid/id tak ada -> 500); README 597; PIM 64.9%; matrix 65.5% | 1 commit
 - 2026-11-17 | P4.0 kurasi kode semua modul | header Kategori diisi kode terverifikasi utk Admin (133), Recruitment (55), Performance+Buzz (65), Leave+Claim+Time+XMOD (63) via codes_*.json + apply_codes.py (deskriptor ' -- ' dipertahankan, idempoten); tersisa 16 TC lemah tanpa kode; matrix jujur 64.2% (Recruitment 67.6->54.6, Leave 58.1->55.1, Claim 73.9->69.0, Performance 62.0->59.6) | 1 commit
 - 2026-11-17 | P4.0 Maintenance | 4 TC tests/maintenance (PURGE-EMP-01 24/24, PURGE-CAND-01 21/21, ACCESS-01 13/13 termasuk sanitasi nama file '../', SECURITY-01 2/5 = BUG BG-440 High: prompt Administrator Access hanya UI, 3 operasi lolos tanpa password); hanya data buatan TC yg di-purge; fix passAdminAccessGate (tunggu prompt/sidebar); docs/TC-Maintenance.txt; README 601; Maintenance 88.7%; matrix 65.1% | 1 commit
+- 2026-11-17 | P4.0 Recruitment | 8 TC (API-01, MUT-01 lolos, VALID-01, UPLOAD-01, SECURITY-06 lolos, CANDIDATE-22, CANDIDATE-23, VACANCY-20) + TC-XMOD-07; helper src/utils/recruitmentData.ts; BUG BG-441..447 ditulis standar; docs TC-Recruitment/TC-XMOD; README 610; Recruitment 100%; matrix 67.3% | 1 commit

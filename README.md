@@ -194,19 +194,19 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Login | 46 | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | Admin | 144 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 167 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
-| Recruitment | 60 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
+| Recruitment | 68 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Performance | 38 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 26 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
 | Time | 17 | [docs/TC-Time.txt](docs/TC-Time.txt) |
-| Cross-module (Leave/Claim/Performance/Time) | 6 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
+| Cross-module (Leave/Claim/Performance/Time) | 7 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
 | My Info | 15 | [docs/TC-MyInfo.txt](docs/TC-MyInfo.txt) |
 | Dashboard | 3 | [docs/TC-Dashboard.txt](docs/TC-Dashboard.txt) |
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **601** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **610** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
