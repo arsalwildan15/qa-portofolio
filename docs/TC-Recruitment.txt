@@ -9,6 +9,7 @@
 LEGEND STATUS
   [TODO]        = Belum dibuat / belum dijalankan
   [DONE]        = Test case selesai & script berjalan
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug (ID di docs/Bug-List.xlsx)
   [CANCEL]      = Dibatalkan (redundan / tidak relevan)
   [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
 
@@ -441,7 +442,7 @@ LEGEND SIMBOL SKENARIO
                                      Candidate TIDAK muncul di list setelah
                                      kembali ke halaman list.
 
-11   TC-RECRUITMENT-CANDIDATE-11   [DONE]   TC-RECRUITMENT-CANDIDATE-11-Verify-Exe-Renamed-As-Pdf-Upload-Security.spec.ts
+11   TC-RECRUITMENT-CANDIDATE-11   [DONE -- BUG]   TC-RECRUITMENT-CANDIDATE-11-Verify-Exe-Renamed-As-Pdf-Upload-Security.spec.ts
                              (S) Verify an Executable Renamed to .pdf Is Accepted as a Resume
                              -> Isi field wajib, upload file dengan header PE
                                 "MZ" (executable asli) tapi nama file
@@ -1169,7 +1170,7 @@ LEGEND SIMBOL SKENARIO
                                    sorting kolom "Vacancy" Ascending berhasil
                                    dipicu tanpa error.
 
-18   TC-RECRUITMENT-VACANCY-18   [DONE]   TC-RECRUITMENT-VACANCY-18-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
+18   TC-RECRUITMENT-VACANCY-18   [DONE -- BUG]   TC-RECRUITMENT-VACANCY-18-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
                              (!) Verify Double-Click Save Does Not Duplicate
                              -> Isi form vacancy valid, klik Save 2x
                                 secepat mungkin.
@@ -1287,7 +1288,7 @@ LEGEND SIMBOL SKENARIO
                              kali di list (0 atau 1 keduanya wajar, >1 akan
                              jadi bug duplikat).
 
-20   TC-RECRUITMENT-CANDIDATE-20   [DONE]   TC-RECRUITMENT-CANDIDATE-20-Verify-Connection-Dropped-During-Save-Request.spec.ts
+20   TC-RECRUITMENT-CANDIDATE-20   [DONE -- BUG]   TC-RECRUITMENT-CANDIDATE-20-Verify-Connection-Dropped-During-Save-Request.spec.ts
                              (!) Verify Connection Dropped During Save Request
                              -> Intercept POST /api/v2/recruitment/candidates
                                 dgn abort() (simulasi koneksi terputus),
@@ -1303,7 +1304,7 @@ LEGEND SIMBOL SKENARIO
                              ke user (bukan silent failure) -- bug-nya di
                              penanganan exception level kode.
 
-21   TC-RECRUITMENT-CANDIDATE-21   [DONE]   TC-RECRUITMENT-CANDIDATE-21-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
+21   TC-RECRUITMENT-CANDIDATE-21   [DONE -- BUG]   TC-RECRUITMENT-CANDIDATE-21-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
                              (!) Verify Double-Click Save Does Not Duplicate
                              -> Isi form candidate valid, klik Save 2x
                                 secepat mungkin, baca body response TIAP
@@ -1739,6 +1740,12 @@ LEGEND SIMBOL SKENARIO
                                 lowongan dari daftar.
                              HASIL: SENGAJA FAILED -- klik ganda Save lampiran
                              menyimpan 2 lampiran (BUG BG-446, Low).
+
+  Perbaikan skrip lama (17 Nov 2026): TC-RECRUITMENT-CANDIDATE-08 kini mencari
+  kandidat lewat filter Candidate Name (bukan "halaman terakhir" -- list diurut
+  menurut Date of Application, bukan urutan dibuat) & menghapus datanya; lolos 3/3.
+  BG-064 (CANDIDATE-08) & BG-065 (CANDIDATE-17, kini lolos) dipindah ke Archive:
+  keduanya kelemahan skrip, bukan bug aplikasi.
 
   Terkait (lintas modul): TC-XMOD-07 (sesi habis saat Save -> exception JS
   "reading 'response'", BUG BG-441) -- lihat docs/TC-XMOD.txt.

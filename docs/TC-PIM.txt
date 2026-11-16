@@ -12,6 +12,7 @@
 LEGEND STATUS
   [TODO]        = Belum dibuat / belum dijalankan
   [DONE]        = Test case selesai & script berjalan
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug (ID di docs/Bug-List.xlsx)
   [CANCEL]      = Dibatalkan (redundan / tidak relevan)
   [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
 
@@ -846,7 +847,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    belum tentu tertangkap. Dokumentasi
                                    observasi, bukan klaim field ini anti-XSS.
 
-35   TC-PIM-ADD-22     [DONE]   TC-PIM-ADD-22-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
+35   TC-PIM-ADD-22     [DONE -- BUG]   TC-PIM-ADD-22-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
                              (!) [BUG, INTERMITEN] Verify Double Click Save Does Not Duplicate
                              -> Fill nama, double-click tombol Save.
                              [API VERIFICATION]
@@ -913,7 +914,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify URL kembali ke /pim/viewEmployeeList.
                              -> Verify POST TIDAK terkirim.
 
-41   TC-PIM-ADD-28     [DONE]   TC-PIM-ADD-28-Verify-Exe-Renamed-As-Jpg-Upload-Security.spec.ts
+41   TC-PIM-ADD-28     [DONE -- BUG]   TC-PIM-ADD-28-Verify-Exe-Renamed-As-Jpg-Upload-Security.spec.ts
                              (S) [BUG] Verify Exe Renamed As Jpg Upload Security
                              -> Fill nama, upload file executable (header PE
                                 "MZ") yang di-rename jadi .jpg.
@@ -931,7 +932,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                    validasinya ADA tapi bisa di-bypass dengan
                                    rename ekstensi sederhana.
 
-42   TC-PIM-ADD-29     [DONE]   TC-PIM-ADD-29-Verify-Apk-Renamed-As-Jpg-Upload-Security.spec.ts
+42   TC-PIM-ADD-29     [DONE -- BUG]   TC-PIM-ADD-29-Verify-Apk-Renamed-As-Jpg-Upload-Security.spec.ts
                              (S) [BUG] Verify Apk Renamed As Jpg Upload Security
                              -> Fill nama, upload file Android APK (header ZIP
                                 "PK..") yang di-rename jadi .jpg.
@@ -980,7 +981,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              di Employee List (0 atau 1 keduanya wajar, >1
                              akan jadi bug duplikat).
 
-46   TC-PIM-ADD-33     [DONE]   TC-PIM-ADD-33-Verify-Connection-Dropped-During-Save-Request.spec.ts
+46   TC-PIM-ADD-33     [DONE -- BUG]   TC-PIM-ADD-33-Verify-Connection-Dropped-During-Save-Request.spec.ts
                              (!) Verify Connection Dropped During Save Request
                              -> Intercept POST /api/v2/pim/employees dgn
                                 abort() (simulasi koneksi terputus), klik
@@ -1118,7 +1119,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify method === PUT.
                              -> Verify response.status() === 200.
 
-57   TC-PIM-PD-13      [DONE]   TC-PIM-PD-13-Verify-Exe-Renamed-As-Jpg-Upload-Security.spec.ts
+57   TC-PIM-PD-13      [DONE -- BUG]   TC-PIM-PD-13-Verify-Exe-Renamed-As-Jpg-Upload-Security.spec.ts
                              (S) [BUG] Verify Exe Renamed As Jpg Upload Security
                              -> Buat employee baru, klik foto profil untuk
                                 reveal file input (pola sama TC-PIM-PD-10).

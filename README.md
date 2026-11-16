@@ -255,7 +255,7 @@ Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-ex
 
 **Users list filter + bulk delete** (`TC-ADMIN-USER-10`/`11`, added 2026-11-12) were previously untested. Combined Role+Status filtering is confirmed to AND together server-side as expected. The Username filter field turned out to be **exact-match (case-insensitive), not a substring search**. It looks like a plain free-text search box with no visual hint that it needs the full username, which is a UX gap worth flagging even though the server behavior itself isn't wrong. Bulk delete (checkbox-select 2+ rows, then "Delete Selected") is confirmed to send a single `DELETE` with `{"ids":[...]}` for every selected row at once, the same pattern already seen on Languages/Nationalities/Qualifications.
 
-### PIM (164 TCs)
+### PIM (167 TCs)
 
 Full module coverage, no open functional gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job incl. Terminate Employment, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs and 2 IDOR/clickjacking security TCs.
 
@@ -269,7 +269,9 @@ Full module coverage, no open functional gaps: Employee List (14), Add Employee 
 
 IDOR on personal-details/salary access is confirmed N/A (single-role architecture, same as other modules). Report-to's "Add Supervisor/Subordinate" TCs (3) have a known intermittent UI-verification issue: the underlying save is confirmed working via its own API-level TC, only the text-match assertion is unreliable.
 
-### Recruitment (59 TCs)
+**Employee tab APIs (2026-11-17):** `TC-PIM-API-01` checks the API of all 12 employee tabs (contract, paging, wrong method, no session, unknown employee) and that an ESS user cannot change their own Job, Salary or supervisors (108/108 pass). `TC-PIM-MUT-01` creates, updates and deletes rows on the 6 writable tabs with invalid, unicode, injected and mass-assigned input. Bug: Work Experience with an invalid date or an unknown id returns 500 (BG-439, Low).
+
+### Recruitment (68 TCs)
 
 Vacancies incl. edit/deactivate/pagination/sorting (17), Candidates incl. resume upload/download and list filters (18), candidate status workflow state machine through to terminal "Hired" (14), cross-cutting security: IDOR, response headers, rate limiting, concurrent-write race condition, cross-origin mutation/CSRF (5).
 
@@ -278,6 +280,13 @@ Vacancies incl. edit/deactivate/pagination/sorting (17), Candidates incl. resume
 Also confirmed: the same unhandled-exception-on-dropped-connection bug as Admin and PIM (**3rd of 4 confirmations**), reproduced identically on create-candidate.
 
 Two more distinct bugs confirmed on double-click: rapid double-clicking Save on Add Candidate creates two genuinely duplicate candidate records, since this form neither debounces the button nor enforces a unique-email constraint server-side (candidates allow duplicate emails by design, per `TC-RECRUITMENT-CANDIDATE-14`). This was confirmed via the raw API response bodies returning two distinct candidate IDs, not just a UI-list count. The same scenario on Add Vacancy instead crashes the app's own save handler (`Cannot read properties of undefined (reading 'id')`) without creating a duplicate, a client-side defect rather than a data-integrity one.
+
+**Taxonomy gap closure (2026-11-17), 9 new tests, Recruitment matrix 54.6% to 100%:** every endpoint behind the candidate and vacancy detail pages was first recorded live, then covered by `TC-RECRUITMENT-API-01` (contract, wrong method, no session, unknown ids, ESS denied on all 9 operations), `MUT-01` (server validation, unicode, injection stored as text, mass assignment rejected), `VALID-01` (each form rule proven in the form, then the same body sent to the API), `UPLOAD-01` (resume and vacancy attachments: types, 1 MB limit, disguised and malicious file names, safe download headers), `SECURITY-06` (parallel writes, two admins editing one candidate, cross-site requests, burst creation), and three UI tests for editing a candidate, the candidate list filters, and editing a vacancy with its attachments. Confirmed bugs:
+- The API accepts what the forms reject: vacancy names over 50 characters or duplicated, 0/-1/100 positions, emails over 50 characters, attachment comments over 200 characters, and candidates for an inactive vacancy (who then cannot be shortlisted). The Notes field shows no message for what the server rejects (BG-445, Medium)
+- An emoji in a candidate's name is silently saved as "?", right after a "Successfully Updated" toast (BG-442, Medium)
+- Vacancy attachments accept an executable renamed to `.pdf`, the same content-blind check as resumes (BG-447, Medium; resumes are BG-004)
+- A single-day date filter (From = To) passes the form but the server returns 400, and the list stays unfiltered (BG-443, Low)
+- Uploading a resume for a non-existent candidate returns 500 (BG-444, Low); a double-click on Save stores the vacancy attachment twice (BG-446, Low)
 
 ### Buzz (32 TCs)
 
@@ -331,13 +340,31 @@ Attendance punch in/out incl. XSS in notes, Admin proxy punch-in, invalid-id han
 
 Bug found: the 24-hour limit is checked per cell only. One cell of 25:00 is refused, but two rows on the same day (08:00 + 20:00) are accepted and the day shows 28:00 (BG-402, Medium; TC-TIME-TIMESHEET-11 stays FAILED on purpose). Finding, not logged as a bug: a timesheet can be rejected without any comment.
 
-### Cross-module checks for Leave, Claim, Performance and Time (6 TCs)
+### Cross-module checks (7 TCs)
 
 These aspects are handled by layers the four modules share (web server, the `/api/v2` router, the HTTP client and the common form components), so each test loops over all four modules and labels every check with the module name.
 
 - **Pass:** a page on another site cannot create data in any module. A JSON request is blocked by CORS, and a plain form POST arrives without the session cookie because it is `SameSite=Lax`. List APIs reject bad `limit` / `offset` / `sortField` / `sortOrder` values (including an SQL-looking sort field) with a clean 422. Arabic, Chinese and accented names are saved and shown unchanged.
 - **Finding:** the server itself accepts form-encoded bodies, does not check `Origin` and uses no CSRF token, so the browser's SameSite rule is the only line of defense.
 - **Bugs:** none of the four modules sends a clickjacking header (BG-404, Medium, same gap as the older modules). Typing an emoji in a name makes the uniqueness check return a 500, and the user only sees "Unexpected Error Occurred" (BG-405, Medium). After a dropped connection during Save, the form stays stuck on its spinner until the page is reloaded, though no duplicate is ever created (BG-406, Low, part of app-wide BG-199).
+
+**Expired session (2026-11-17), `TC-XMOD-07`:** saving after the session has expired correctly sends the user to the login page without changing data, but every time it throws an unhandled script error (`Cannot read properties of undefined (reading 'response')`) on Recruitment and PIM forms alike (BG-441, Low, app-wide).
+
+### My Info (15 TCs)
+
+Tested as a real Employee Self-Service user created on the fly: personal details, contact details, emergency contacts, dependents, immigration, qualifications, attachments, the tab APIs, and cross-site requests. Confirmed bugs: fields locked for employees (Employee Id, Driver's License, Date of Birth) can still be changed by the employee through the API (BG-420, High); attachments accept an executable renamed to `.pdf` (BG-422); double-click Save duplicates Immigration and Work Experience records (BG-431, BG-432); the Immigration API accepts an expiry date before the issue date (BG-433); unknown qualification ids return 500 (BG-434); and a page on another site can log the employee out by overwriting their session cookie (BG-437, Medium, app-wide). The cross-site attempt itself could not change any data.
+
+### Dashboard (3 TCs), Sidebar Search (3 TCs), Maintenance (4 TCs)
+
+- **Dashboard:** every widget shows the data its API returns, per role (Admin and ESS); the seven widget APIs (contract, methods, auth, headers, no sensitive data); and empty data, a failing widget, speed, layout and accessibility (all pass).
+- **Sidebar Search:** filters the menu by module name, sends no request, is injection-safe and role-scoped, and works on a phone screen, collapsed, with a screen reader and in other browsers (all pass, findings in the doc).
+- **Maintenance:** purging past employees and a vacancy's candidates, and downloading an employee's personal data record. Purge is permanent, so the tests only purge data they created. Bug: the "Administrator Access" password prompt exists only in the UI, and purge or personal-data download succeeds through the API without it (BG-440, High).
+
+### Sweep over all menus (11 TCs)
+
+Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
+
+**Taxonomy coverage snapshot (2026-11-17):** 67.3% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100% and Maintenance at 88.7%; Leave (55.1%), Time (56.2%) and Performance (59.6%) are next. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

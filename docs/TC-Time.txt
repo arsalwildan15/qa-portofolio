@@ -10,6 +10,7 @@
 LEGEND STATUS
   [TODO]        = Belum dibuat / belum dijalankan
   [DONE]        = Test case selesai & script berjalan
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug (ID di docs/Bug-List.xlsx)
   [CANCEL]      = Dibatalkan (redundan / tidak relevan)
   [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
 
@@ -573,7 +574,7 @@ No.  Test Case ID              Status   Skenario / Deskripsi
                                 tidak ada img[src="x"] -- di ESS DAN Admin.
                              NOTE: [TEMUAN POSITIF] output di-escape.
 
-15   TC-TIME-TIMESHEET-11  [DONE]  TC-TIME-TIMESHEET-11-Verify-Day-Total-Over-24h-Across-Rows-Rejected.spec.ts
+15   TC-TIME-TIMESHEET-11  [DONE -- BUG]  TC-TIME-TIMESHEET-11-Verify-Day-Total-Over-24h-Across-Rows-Rejected.spec.ts
                              (B) Verify A Day Cannot Total More Than 24
                              Hours Across Timesheet Rows
                              -> Setup: createEssTimesheet({submit:false})

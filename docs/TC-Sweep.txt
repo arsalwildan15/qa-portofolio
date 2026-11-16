@@ -8,6 +8,7 @@
 
 LEGEND STATUS
   [DONE]        = Test case selesai & script berjalan
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug (ID di docs/Bug-List.xlsx)
   [TODO]        = Belum dibuat
 
 LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
@@ -40,7 +41,7 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
   DAFTAR TEST CASE
 ================================================================================
 
- 1   TC-SWEEP-PAGE-01  [DONE]  TC-SWEEP-PAGE-01-Verify-Every-Menu-Loads-Cleanly-For-Admin.spec.ts
+ 1   TC-SWEEP-PAGE-01  [DONE -- BUG]  TC-SWEEP-PAGE-01-Verify-Every-Menu-Loads-Cleanly-For-Admin.spec.ts
                              (+) 1.5 | 7.1 7.2 7.3 7.4 7.5
                              Verify Every Menu Page Loads Cleanly For The
                              Admin Role
@@ -143,7 +144,7 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              SPA me-render stlh Confirm -> util gerbang kini
                              menunggu konten & menu.
 
- 5   TC-SWEEP-A11Y-01  [DONE]  TC-SWEEP-A11Y-01-Verify-Interactive-Elements-Have-Accessible-Names.spec.ts
+ 5   TC-SWEEP-A11Y-01  [DONE -- BUG]  TC-SWEEP-A11Y-01-Verify-Interactive-Elements-Have-Accessible-Names.spec.ts
                              (+) 8.3
                              Verify Interactive Elements On Every Menu Have
                              Accessible Names
@@ -212,7 +213,7 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              krn list kosong -> tanpa id kontrol). [TEMUAN
                              POSITIF] lapisan API konsisten di semua menu.
 
- 8   TC-SWEEP-LIST-01  [DONE]  TC-SWEEP-LIST-01-Verify-Pagination-Result-Counts-Sort-And-Empty-State-Per-Menu.spec.ts
+ 8   TC-SWEEP-LIST-01  [DONE -- BUG]  TC-SWEEP-LIST-01-Verify-Pagination-Result-Counts-Sort-And-Empty-State-Per-Menu.spec.ts
                              (B) 3.5 3.6 | (+) 1.6 | (!) 4.6
                              Verify Pagination, Result Counts, Sort Order And
                              Empty State On Every Menu List API
@@ -230,7 +231,7 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              -> 500 (BUG BG-424, Low; endpoint lain kembalikan
                              array kosong). Unit lain tanpa data cukup -> finding.
 
- 9   TC-SWEEP-MUT-01   [DONE]  TC-SWEEP-MUT-01-Verify-Create-Update-Delete-Contract-Per-Menu.spec.ts
+ 9   TC-SWEEP-MUT-01   [DONE -- BUG]  TC-SWEEP-MUT-01-Verify-Create-Update-Delete-Contract-Per-Menu.spec.ts
                              (+) 1.1-C 1.1-R 1.1-U 1.1-D | (-) 2.1 2.3 2.6 |
                              (B) 3.1 | (!) 4.1 | (S) 5.1-SQLi 5.2-MassAssign 5.5 |
                              (A) 6.5 6.7
@@ -266,7 +267,7 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              [TEMUAN] tidak ada rate limit di 19 menu; soft
                              delete di Job Titles, Leave Types, Customers.
 
- 10  TC-SWEEP-UIMUT-01 [DONE]  TC-SWEEP-UIMUT-01-Verify-Add-Form-Feedback-Double-Submit-Navigation-And-Connection-Loss-Per-Menu.spec.ts
+ 10  TC-SWEEP-UIMUT-01 [DONE -- BUG]  TC-SWEEP-UIMUT-01-Verify-Add-Form-Feedback-Double-Submit-Navigation-And-Connection-Loss-Per-Menu.spec.ts
                              (+) 1.8 | (-) 2.1 2.3 | (B) 3.1 | (!) 4.2 4.3 4.5 |
                              (8) 8.4
                              Verify The Add Form Of Every Named-Entity Menu:
@@ -296,7 +297,7 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              [TEMUAN] pesan koneksi putus generik "Unexpected
                              Error!" (tidak menyebut koneksi/coba lagi).
 
- 11  TC-SWEEP-CONC-01  [DONE]  TC-SWEEP-CONC-01-Verify-Two-Admin-Sessions-Race-Last-Write-And-Edit-After-Delete-Per-Menu.spec.ts
+ 11  TC-SWEEP-CONC-01  [DONE -- BUG]  TC-SWEEP-CONC-01-Verify-Two-Admin-Sessions-Race-Last-Write-And-Edit-After-Delete-Per-Menu.spec.ts
                              (!) 4.4 4.7 | (A) 6.1
                              Verify Two Concurrent Admin Sessions On Every
                              Named-Entity Menu: Create Race, Last Write, Edit

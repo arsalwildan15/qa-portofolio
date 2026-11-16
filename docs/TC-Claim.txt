@@ -10,6 +10,7 @@
 LEGEND STATUS
   [TODO]        = Belum dibuat / belum dijalankan
   [DONE]        = Test case selesai & script berjalan
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug (ID di docs/Bug-List.xlsx)
   [CANCEL]      = Dibatalkan (redundan / tidak relevan)
   [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
 
@@ -271,7 +272,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                                 (Employee Name, Event, Currency).
                              NOTE: tidak termasuk regresi 15 Nov 2026.
 
- 5   TC-CLAIM-ASSIGN-06  [DONE]  TC-CLAIM-ASSIGN-06-Verify-Expense-Amount-Boundary.spec.ts
+ 5   TC-CLAIM-ASSIGN-06  [DONE -- BUG]  TC-CLAIM-ASSIGN-06-Verify-Expense-Amount-Boundary.spec.ts
                              (B) Verify Expense Amount Boundary (Negative,
                              Zero)
                              -> Buat klaim baru, buka detail.
@@ -388,7 +389,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              (versi revisi diverifikasi 3x stabil saat
                              P0.4).
 
-10   TC-CLAIM-ASSIGN-10  [DONE]  TC-CLAIM-ASSIGN-10-Verify-File-Upload-Extension-Bypass.spec.ts
+10   TC-CLAIM-ASSIGN-10  [DONE -- BUG]  TC-CLAIM-ASSIGN-10-Verify-File-Upload-Extension-Bypass.spec.ts
                              (S) Verify File Upload Rejects Disguised
                              Executable (Renamed Extension)
                              -> Buat klaim baru, buka detail, section
@@ -535,7 +536,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                                 === [APPROVE, REJECT].
                              NOTE: PASS 2x pada regresi 15 Nov 2026.
 
-17   TC-CLAIM-SUBMIT-02  [DONE]  TC-CLAIM-SUBMIT-02-Verify-Submit-Without-Expense-Blocked.spec.ts
+17   TC-CLAIM-SUBMIT-02  [DONE -- BUG]  TC-CLAIM-SUBMIT-02-Verify-Submit-Without-Expense-Blocked.spec.ts
                              (-) Verify A Claim With No Expenses Cannot Be
                              Submitted (And Approved/Paid)
                              -> Setup: createEssClaim() dengan klaim
@@ -637,7 +638,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              API (state machine bypass).
                              NOTE: PASS 2x pada regresi 15 Nov 2026.
 
-22   TC-CLAIM-APPROVAL-05  [DONE]  TC-CLAIM-APPROVAL-05-Verify-Stale-Reject-After-Approve.spec.ts
+22   TC-CLAIM-APPROVAL-05  [DONE -- BUG]  TC-CLAIM-APPROVAL-05-Verify-Stale-Reject-After-Approve.spec.ts
                              (!) Verify A Stale "Reject" Button After
                              Approve Cannot Undo A PAID Claim
                              -> Setup: createEssClaim() -> klaim SUBMITTED.

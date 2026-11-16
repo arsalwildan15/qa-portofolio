@@ -9,6 +9,7 @@
 LEGEND STATUS
   [TODO]        = Belum dibuat / belum dijalankan
   [DONE]        = Test case selesai & script berjalan
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug (ID di docs/Bug-List.xlsx)
   [CANCEL]      = Dibatalkan (redundan / tidak relevan)
   [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
 
@@ -252,7 +253,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              terkirim, dan post TIDAK muncul di feed
                              setelah reload.
 
- 5   TC-BUZZ-05     [DONE]   TC-BUZZ-05-Verify-Double-Click-Submit-No-Duplicate.spec.ts
+ 5   TC-BUZZ-05     [DONE -- BUG]   TC-BUZZ-05-Verify-Double-Click-Submit-No-Duplicate.spec.ts
                              (!) Verify Rapid Double-Click Submit Does Not
                              Duplicate Post
                              -> Isi composer, klik tombol Post 2x secepat
@@ -293,7 +294,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              duplikat -- dampaknya lebih besar di sini krn
                              broadcast company-wide, bukan cuma 1 record).
 
-18   TC-BUZZ-18     [DONE]   TC-BUZZ-18-Verify-Connection-Dropped-During-Save-Request.spec.ts
+18   TC-BUZZ-18     [DONE -- BUG]   TC-BUZZ-18-Verify-Connection-Dropped-During-Save-Request.spec.ts
                              (!) Verify Connection Dropped During Save Request
                              -> Intercept POST /api/v2/buzz/posts dgn
                                 abort() (simulasi koneksi terputus), klik
@@ -379,7 +380,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              setelahnya (minimal 1 card visible setelah
                              reload + wait 3s).
 
-11   TC-BUZZ-SECURITY-03  [DONE]  TC-BUZZ-SECURITY-03-Verify-Exe-Renamed-As-Jpg-Photo-Upload.spec.ts
+11   TC-BUZZ-SECURITY-03  [DONE -- BUG]  TC-BUZZ-SECURITY-03-Verify-Exe-Renamed-As-Jpg-Photo-Upload.spec.ts
                              (S) Verify Executable Renamed As .jpg Rejected
                              Via Share Photo
                              -> Klik Share Photo, upload file dengan magic
@@ -423,7 +424,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              upload, TC awal (menguji file upload) dihapus
                              karena menguji fitur yang tidak ada.
 
-14   TC-BUZZ-SECURITY-06  [DONE]  TC-BUZZ-SECURITY-06-Verify-Clickjacking-Protection-Header.spec.ts
+14   TC-BUZZ-SECURITY-06  [DONE -- BUG]  TC-BUZZ-SECURITY-06-Verify-Clickjacking-Protection-Header.spec.ts
                              (S) Verify Clickjacking Protection Header
                              -> [API] GET halaman Buzz dan GET
                                 /api/v2/buzz/posts, cek header
@@ -482,7 +483,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              Verify: fetch GAGAL di level browser (CORS
                              memblokir), bukan diproses server.
 
-19   TC-BUZZ-SECURITY-11  [DONE]  TC-BUZZ-SECURITY-11-Verify-Rate-Limiting-Post-Creation.spec.ts
+19   TC-BUZZ-SECURITY-11  [DONE -- BUG]  TC-BUZZ-SECURITY-11-Verify-Rate-Limiting-Post-Creation.spec.ts
                              (S) Verify Rate Limiting On Rapid Post Creation
                              -> [API] Kirim 8x POST /api/v2/buzz/posts
                                 berturut-turut, cek ada/tidaknya 429/throttle.

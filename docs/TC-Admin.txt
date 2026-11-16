@@ -10,6 +10,7 @@
 LEGEND STATUS
   [TODO]        = Belum dibuat / belum dijalankan
   [DONE]        = Test case selesai & script berjalan
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug (ID di docs/Bug-List.xlsx)
   [CANCEL]      = Dibatalkan (redundan / tidak relevan)
   [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
 
@@ -831,7 +832,7 @@ LEGEND SIMBOL SKENARIO
                              list setelah refresh (0 atau 1 kali keduanya
                              wajar, >1 akan jadi bug duplikat).
 
- 8   TC-ADMIN-USER-08   [DONE]   TC-ADMIN-USER-08-Verify-Connection-Dropped-During-Save-Request.spec.ts
+ 8   TC-ADMIN-USER-08   [DONE -- BUG]   TC-ADMIN-USER-08-Verify-Connection-Dropped-During-Save-Request.spec.ts
                              (!) Verify Connection Dropped During Save Request
                              -> Intercept POST /api/v2/admin/users dgn
                                 abort() (simulasi koneksi terputus), klik
@@ -856,7 +857,7 @@ LEGEND SIMBOL SKENARIO
                              ikut rusak. KONFIRMASI KE-1 dari bug app-wide
                              yang sama (lihat juga PIM, Recruitment, Buzz).
 
- 9   TC-ADMIN-USER-09   [DONE]   TC-ADMIN-USER-09-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
+ 9   TC-ADMIN-USER-09   [DONE -- BUG]   TC-ADMIN-USER-09-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
                              (!) Verify Double-Click Save Does Not Duplicate
                              -> Isi form user valid, klik Save 2x secepat
                                 mungkin.
@@ -982,7 +983,7 @@ LEGEND SIMBOL SKENARIO
                                 ADA, tapi bisa di-bypass dengan rename
                                 ekstensi).
 
- 9   TC-ADMIN-JOBTITLE-09   [DONE]   TC-ADMIN-JOBTITLE-09-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
+ 9   TC-ADMIN-JOBTITLE-09   [DONE -- BUG]   TC-ADMIN-JOBTITLE-09-Verify-Double-Click-Save-Does-Not-Duplicate.spec.ts
                              (!) Verify Double-Click Save Does Not Duplicate
                              -> Isi Job Title valid, klik Save 2x secepat
                                 mungkin.

@@ -9,6 +9,7 @@
 LEGEND STATUS
   [TODO]        = Belum dibuat / belum dijalankan
   [DONE]        = Test case selesai & script berjalan
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug (ID di docs/Bug-List.xlsx)
   [CANCEL]      = Dibatalkan (redundan / tidak relevan)
   [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
 
@@ -560,7 +561,7 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              User harus navigasi ulang ke halaman login,
                              sekadar "coba lagi di tempat" tidak akan jalan.
 
-46   TC-LOGIN-46    [DONE]   TC-LOGIN-46-Verify-Reset-Password-Request-Completes.spec.ts
+46   TC-LOGIN-46    [DONE -- BUG]   TC-LOGIN-46-Verify-Reset-Password-Request-Completes.spec.ts
                              (!) [BUG] Verify Reset Password Request Completes
                              -> Buat user baru khusus (bukan akun Admin
                                 bersama), logout, buka halaman Reset

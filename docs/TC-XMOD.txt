@@ -12,6 +12,7 @@
 LEGEND STATUS
   [TODO]        = Belum dibuat / belum dijalankan
   [DONE]        = Test case selesai & script berjalan
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug (ID di docs/Bug-List.xlsx)
   [CANCEL]      = Dibatalkan (redundan / tidak relevan)
 
 LEGEND SIMBOL SKENARIO
@@ -47,7 +48,7 @@ LEGEND SIMBOL SKENARIO
   DAFTAR TEST CASE
 ================================================================================
 
- 1   TC-XMOD-01  [DONE]  TC-XMOD-01-Verify-Clickjacking-Protection-Header-4-Modules.spec.ts
+ 1   TC-XMOD-01  [DONE -- BUG]  TC-XMOD-01-Verify-Clickjacking-Protection-Header-4-Modules.spec.ts
                              (S) Verify Leave, Claim, Performance And Time
                              Send A Clickjacking Protection Header
                              -> [API] GET halaman tiap modul (viewLeaveList,
@@ -121,7 +122,7 @@ LEGEND SIMBOL SKENARIO
                              NOTE: batas panjang nama Leave Type = 50
                              (51 -> 422). Emoji diuji terpisah (XMOD-05).
 
- 5   TC-XMOD-05  [DONE]  TC-XMOD-05-Verify-Emoji-In-Name-Handled-Without-Server-Error.spec.ts
+ 5   TC-XMOD-05  [DONE -- BUG]  TC-XMOD-05-Verify-Emoji-In-Name-Handled-Without-Server-Error.spec.ts
                              (-/!) Verify An Emoji In A Name Is Handled With
                              A Clear Message, Not A Server Error
                              -> Per form (Claim Event, Leave Type, Time
@@ -144,7 +145,7 @@ LEGEND SIMBOL SKENARIO
                              -> khusus karakter 4-byte. Diduga charset
                              database utf8 (3-byte). TC SENGAJA FAILED.
 
- 6   TC-XMOD-06  [DONE]  TC-XMOD-06-Verify-Network-Drop-And-Refresh-During-Save.spec.ts
+ 6   TC-XMOD-06  [DONE -- BUG]  TC-XMOD-06-Verify-Network-Drop-And-Refresh-During-Save.spec.ts
                              (!) Verify A Dropped Connection Or A Refresh
                              During Save Never Creates Duplicates
                              -> Per form (Claim Event, Time Customer, Leave

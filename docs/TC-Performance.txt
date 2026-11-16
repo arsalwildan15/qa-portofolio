@@ -10,6 +10,7 @@
 LEGEND STATUS
   [TODO]        = Belum dibuat / belum dijalankan
   [DONE]        = Test case selesai & script berjalan
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug (ID di docs/Bug-List.xlsx)
   [CANCEL]      = Dibatalkan (redundan / tidak relevan)
   [BLOCKED]     = TC tidak bisa dijalankan sampai bug tertentu di-fix
 
@@ -646,7 +647,7 @@ No.  Test Case ID         Status   Skenario / Deskripsi
                                    -> Verify pesan "end date should be after
                                       period start date" muncul.
 
-19   TC-PERF-REVIEW-10    [DONE]   TC-PERF-REVIEW-10-Verify-Edit-Blocked-After-Activation.spec.ts
+19   TC-PERF-REVIEW-10    [DONE -- BUG]   TC-PERF-REVIEW-10-Verify-Edit-Blocked-After-Activation.spec.ts
                                    (-/B) Verify Editing (Employee/Supervisor/
                                    Dates) Is Blocked After Activation
                                    -> Setup: employee + supervisor + Job
@@ -727,7 +728,7 @@ No.  Test Case ID         Status   Skenario / Deskripsi
                                    larangan itu juga ditegakkan server
                                    (business-logic bypass ditolak).
 
-22   TC-PERF-EVAL-15      [DONE]   TC-PERF-EVAL-15-Verify-Non-Numeric-Rating-Rejected-By-API.spec.ts
+22   TC-PERF-EVAL-15      [DONE -- BUG]   TC-PERF-EVAL-15-Verify-Non-Numeric-Rating-Rejected-By-API.spec.ts
                                    (-) Verify The API Rejects A Non-Numeric KPI
                                    Rating
                                    -> Setup: createReview() (Activated), ambil
