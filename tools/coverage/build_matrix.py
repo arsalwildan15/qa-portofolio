@@ -71,6 +71,7 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'claim/config/TC-CLAIM-CONFIG-EXPTYPE', ['Claim > Configuration > Expense Types']),
  (r'_global/login/', ['Login > Login Page']),
  (r'_global/sidebar-search/', ['Sidebar > Search & Collapse']),
+ (r'dashboard/widgets/', ['Dashboard > Widgets (Time at Work, My Actions, Quick Launch, Buzz, Leave Today, Distribution charts)', 'Dashboard']),
  (r'infra/TC-INFRA-01', ['PIM > Add Employee']), (r'infra/TC-INFRA-02', ['Admin > User Management > Users']), (r'infra/TC-INFRA-03', ['PIM > Employee > Report-to']),
  (r'cross-module/TC-XMOD-01', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Timesheets > Employee Timesheets', 'Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Time > Project Info > Projects']),
  (r'cross-module/TC-XMOD-0[24]', ['Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Performance > Configure > KPIs', 'Time > Project Info > Customers']),

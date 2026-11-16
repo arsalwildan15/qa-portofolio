@@ -44,8 +44,10 @@
   BG-427 double submit, BG-429 toast Pay Grade), Blok 3 (CONC-01, BG-428 race keunikan, BG-430 edit record
   terhapus), Blok 4 sebagian: Sidebar Search 3 TC -> unit 100%. Matrix 58.1% (angka JUJUR setelah audit:
   mode kode-eksplisit menghapus ~5 poin tag keyword yg salah tembak; lihat tools/coverage/README.md).
-  BERIKUT: (a) Dashboard Widgets U107 (18 GAP: 1.1-R 1.5 4.6 4.8 5.6 5.8 6.1-6.4 7.x 8.x) -> probe API
-  widget dulu; (b) My Info Immigration U111 & Qualifications U115 (masing2 49 GAP) CRUD ESS;
+  Dashboard (U008+U107) 3 TC -> 100%. BERIKUT: (b) My Info Immigration U111 & Qualifications U115
+  (masing2 49 GAP) CRUD ESS -- probe: Immigration Number max 30, Comments max 250; Work Experience
+  Company max 100; Skill years < 100 & angka; form TIDAK memvalidasi Expiry<Issued / To<From (cek
+  apakah server menerima -> bug 3.4?); IDOR-01 sudah uji GET immigration/qualifications -> petakan;
   (c) gel. E spesifik unit + perkuat 23 TC lemah; lalu Fase 5-8.
   Catatan util: label check WAJIB menulis kode taksonomi literal (bukan variabel) -> matrix hanya membaca
   kode eksplisit; soft delete -> nilai delete dari DAFTAR; race diuji multi-putaran (hasil acak).
@@ -444,3 +446,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-16 | P4.0 gel. LIST | TC-SWEEP-LIST-01 (3.5/3.6/1.6/4.6, 47 unit list, 186/188 lolos); BUG BG-424 (Low, My Entitlements offset di luar range -> 500); matrix 57.9% | 1 commit
 - 2026-11-16 | P4.0 Blok 1 mutasi API | TC-SWEEP-MUT-01 + src/data/unitMutationRegistry.ts (19 unit, body ditangkap live; 1.1-C/R/U/D 2.1 2.3 2.6 3.1 4.1 5.1 5.2 5.5 6.5 6.7); 301/304 lolos; BUG BG-425 (Low, Work Shifts tanpa startTime -> 500) & BG-426 (Medium, duplikat Locations/Reporting Methods diterima server); soft delete dibuktikan bukan bug; README 580; matrix 60.3% | 1 commit
 - 2026-11-16 | P4.0 Blok 2-4 | TC-SWEEP-UIMUT-01 (19 form Add: 1.8 2.1 2.3 3.1 4.2 4.3 4.5 8.4; 188/192) + TC-SWEEP-CONC-01 (2 sesi Admin: 4.4 race 5 putaran, 4.7 last-write & edit-setelah-hapus; 39/58) + 3 TC Sidebar Search (36/36, unit 100%, flag NOAPI); BUG BG-427 (Medium, double submit), BG-428 (Medium, race keunikan + Pay Grades 500), BG-429 (Low, tanpa toast create Pay Grade), BG-430 (Low, edit record terhapus 200); audit matrix: mode kode-eksplisit, label 9 file dilengkapi kode yg benar diverifikasi; README 585; matrix 58.1% | 1 commit
+- 2026-11-16 | P4.0 Blok 4 Dashboard | 3 TC tests/dashboard/widgets (WIDGET-01 data vs API & role 11/11; WIDGET-02 7 API kontrak/405/401/ESS 403/header/5.8 59/59; WIDGET-03 empty state mock, isolasi 500, 7.5 batas kewajaran, 8.1-8.3 14/14); Dashboard 100%; createEssAccount kini menyertakan body 422 di pesan error; README 588; matrix 58.6% | 1 commit

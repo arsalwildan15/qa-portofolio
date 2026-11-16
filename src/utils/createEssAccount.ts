@@ -38,7 +38,9 @@ export async function createEssAccount(
   const resp = await responsePromise;
 
   if (!resp || resp.status() !== 200) {
-    throw new Error(`createEssAccount: Save did not produce a 200 response (status=${resp?.status()})`);
+    // Include the body: a 422 here names the rejected field (needed to tell a demo-data collision from a bug).
+    const detail = resp ? (await resp.text().catch(() => '')).slice(0, 300) : '';
+    throw new Error(`createEssAccount: Save did not produce a 200 response (status=${resp?.status()}) ${detail}`);
   }
   const body = await resp.json().catch(() => null);
   if (!body?.data?.empNumber) {

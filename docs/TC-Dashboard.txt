@@ -1,0 +1,104 @@
+================================================================================
+  DAFTAR TEST CASE, DASHBOARD
+  Modul    : Dashboard (U008) & Dashboard > Widgets (U107)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [DONE]        = Test case selesai & script berjalan
+  [TODO]        = Belum dibuat
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug
+
+LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
+  (+) Positive  (-) Negative  (B) Boundary  (!) Edge Case  (S) Security  (A) API
+  Tiap entri mencantumkan KODE item taksonomi yg diverifikasi; tiap check di
+  script diberi label kode tsb.
+
+  FORMAT ID  : TC-DASHBOARD-WIDGET-NN
+  FILE       : TC-DASHBOARD-WIDGET-NN-Verify-Name-In-English.spec.ts
+  FOLDER     : tests/dashboard/widgets/
+  HELPER     : src/utils/dashboardWidgets.ts (WIDGET_API, widget(), SHORTCUT_LABEL)
+
+================================================================================
+  FUNGSI & PERILAKU YANG DIBUKTIKAN LIVE (16 Nov 2026)
+================================================================================
+
+  Dashboard bersifat read-only: 7 widget, masing-masing memanggil endpoint sendiri:
+    Time at Work            -> dashboard/employees/time-at-work (jam & zona waktu
+                               dikirim BROWSER: timezoneOffset/currentDate/currentTime)
+    My Actions              -> dashboard/employees/action-summary
+    Quick Launch            -> dashboard/shortcuts (flag true/false per shortcut)
+    Buzz Latest Posts       -> buzz/feed
+    Employees on Leave Today-> dashboard/employees/leaves
+    Distribution Sub Unit   -> dashboard/employees/subunit      (khusus Admin)
+    Distribution Location   -> dashboard/employees/locations    (khusus Admin)
+  ESS melihat 5 widget; endpoint distribusi menjawab ESS dgn 403.
+  Item mutasi (create/edit/delete, 2.x, 3.x, 5.4, 6.5-6.7) tidak berlaku -> N/A
+  di matrix (flag RO).
+
+================================================================================
+  DAFTAR TEST CASE
+================================================================================
+
+ 1   TC-DASHBOARD-WIDGET-01  [DONE]  TC-DASHBOARD-WIDGET-01-Verify-Widgets-Show-The-Data-Returned-By-Their-API-Per-Role.spec.ts
+                             (+) 1.1-R 1.5 | (!) 4.8
+                             Verify Every Dashboard Widget Shows The Data Its API
+                             Returned, And Each Role Sees Only Its Widgets And
+                             Shortcuts
+                             -> Login Admin; respons tiap widget direkam dari
+                                halaman itu sendiri lalu dibandingkan dgn layar.
+                             [UI VERIFICATION]
+                             -> 1.1-R 7 widget berurutan; Time at Work rentang
+                                minggu = tanggal API; My Actions "(N) grup";
+                                Quick Launch = shortcut true; Leave Today &
+                                legenda distribusi sesuai API ("Unassigned"
+                                sesuai meta); klik "Leave List" membuka daftar.
+                             -> 1.5 ESS: 5 widget, Quick Launch hanya Apply
+                                Leave, My Leave, My Timesheet.
+                             -> 4.8 Time at Work memakai waktu browser (finding).
+                             HASIL 16 Nov 2026: 11/11 lolos.
+
+ 2   TC-DASHBOARD-WIDGET-02  [DONE]  TC-DASHBOARD-WIDGET-02-Verify-Widget-APIs-Contract-Methods-Auth-Role-Headers-And-No-Sensitive-Data.spec.ts
+                             (S) 5.6 5.8 | (A) 6.1 6.2 6.3 6.4
+                             Verify The Seven Dashboard Widget APIs: Contract,
+                             Wrong Method, No Session, ESS Access, Headers And No
+                             Sensitive Data
+                             [API VERIFICATION per endpoint]
+                             -> 6.1 GET Admin 200; param tanggal/jam/zona tidak
+                                valid -> 422 menyebut nama parameter.
+                             -> 6.2 data + meta & field kunci per widget.
+                             -> 6.3 PATCH & POST -> 405.
+                             -> 6.4 tanpa sesi -> 401; ESS -> 403 utk grafik
+                                distribusi, 200 utk widget ESS.
+                             -> 5.6 nosniff + HSTS + CSP, Cache-Control
+                                no-cache/private.
+                             -> 5.8 tanpa field password/hash/secret/token/salt.
+                             HASIL 16 Nov 2026: 59/59 lolos.
+
+ 3   TC-DASHBOARD-WIDGET-03  [DONE]  TC-DASHBOARD-WIDGET-03-Verify-Widgets-Empty-State-Error-Isolation-Speed-Layout-And-Accessibility.spec.ts
+                             (!) 4.6 4.8 | (7) 7.1 7.2 7.3 7.4 7.5 | (8) 8.1 8.2 8.3
+                             Verify Dashboard Widgets With Empty Data, A Failing
+                             Widget API, Their Load Speed, Phone Layout, Other
+                             Browsers And Assistive Tech
+                             [UI VERIFICATION]
+                             -> 4.6 semua API kosong (route.fulfill) -> 7 widget
+                                tampil tanpa NaN/undefined/null; totalTime null
+                                -> tanpa NaN.
+                             -> 4.8 API Location 500 (tab terpisah) -> 6 widget
+                                lain tetap berisi.
+                             -> 7.5 batas kewajaran (Dashboard < 20 dtk, tiap
+                                API < 10 dtk), waktu nyata sbg finding.
+                             -> 7.1-7.4 tanpa console error/warning aplikasi.
+                             -> 8.1 375px tanpa scroll horizontal; 8.2 Firefox &
+                                WebKit 7 widget; 8.3 tombol Quick Launch bernama,
+                                grafik punya legenda teks.
+                             HASIL 16 Nov 2026: 14/14 lolos.
+                             [TEMUAN] grafik distribusi tanpa data tidak
+                             menampilkan teks apa pun; canvas tanpa aria-label;
+                             API widget gagal -> toast "Unexpected Error
+                             Occurred" + AxiosError tak tertangani di console.
+
+  RUN COMMAND:
+    npx playwright test tests/dashboard --project=chromium --workers=1

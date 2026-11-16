@@ -13,12 +13,13 @@ DOCS = {  # doc file -> spec folders it documents
     'docs/TC-Claim.txt': ['tests/claim'], 'docs/TC-Leave.txt': ['tests/leave'], 'docs/TC-Time.txt': ['tests/time'],
     'docs/TC-XMOD.txt': ['tests/_global/cross-module'], 'docs/TC-Sweep.txt': ['tests/_global/sweep'],
     'docs/TC-MyInfo.txt': ['tests/my-info'], 'docs/TC-SidebarSearch.txt': ['tests/_global/sidebar-search'],
+    'docs/TC-Dashboard.txt': ['tests/dashboard'],
 }
 README_ROWS = {  # README coverage-table label -> folders counted
     'Login': ['tests/_global/login'], 'Admin': ['tests/admin'], 'PIM': ['tests/pim'], 'Recruitment': ['tests/recruitment'],
     'Buzz': ['tests/buzz'], 'Performance': ['tests/performance'], 'Claim': ['tests/claim'], 'Leave': ['tests/leave'],
     'Time': ['tests/time'], 'Cross-module (Leave/Claim/Performance/Time)': ['tests/_global/cross-module'],
-    'My Info': ['tests/my-info'], 'Sidebar Search': ['tests/_global/sidebar-search'], 'Sweep, all menus (data-driven)': ['tests/_global/sweep'],
+    'My Info': ['tests/my-info'], 'Sidebar Search': ['tests/_global/sidebar-search'], 'Dashboard': ['tests/dashboard'], 'Sweep, all menus (data-driven)': ['tests/_global/sweep'],
 }
 problems = 0
 def specs_in(folders):
