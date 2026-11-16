@@ -80,6 +80,8 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'my-info/records', ['My Info > Emergency Contacts', 'My Info > Dependents', 'My Info > Memberships', 'My Info > Attachments & Profile Picture']),
  (r'my-info/security', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts']),
  (r'sweep/TC-SWEEP-LIST', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8')) if u['id'] in set(json.load(open(S + '/api_units.json')))]),
+ (r'sweep/TC-SWEEP-MUT', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
+                         if u['id'] in set(re.findall(r"'(U\d{3})'", open('src/data/unitMutationRegistry.ts', encoding='utf-8').read()))]),
  (r'sweep/TC-SWEEP-API', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
                          if u['id'] in set(json.load(open(S + '/api_units.json')))]),
  (r'sweep/TC-SWEEP-(PAGE|HDR|ROLE|VIEW|A11Y|XBROWSER)', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))

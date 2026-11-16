@@ -40,15 +40,16 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** FASE 4 / P4.0. Selesai gel. A+B (sweep VIEW/A11Y/XBROWSER/API) & My Info gel. D awal
-  (6 TC tests/my-info: PD-01/02, JOB-01, CONTACT-01, EMERGENCY-01, IDOR-01; BUG BG-420 High = field
-  terkunci Personal Details bisa diubah ESS via API). Matrix 53.1%. BERIKUT:
-  (1) My Info sisa: Dependents/Immigration/Qualifications/Memberships CRUD+boundary, Attachments
-      (upload valid + exe-rename seturut BG-003), Profile Picture.
-  (2) gel. C mutasi per unit CRUD (registry create body) utk modul config sederhana yg masih GAP.
-  (3) gel. E spesifik unit + perkuat 23 TC lemah. Lalu Fase 5-8.
-  Catatan util: timeout createEssAccount/createTestEmployee dinaikkan ke 60 dtk (demo lambat);
-  gotoTabAndHydrate() utk tab form yg menimpa input saat GET hidrasi; setTimeout TC lintas-sesi 240 dtk.
+- **NEXT ACTION:** FASE 4 / P4.0, rencana hari ini 16 Nov (4 blok). Blok 1 SELESAI: TC-SWEEP-MUT-01
+  (mutasi API 19 menu entitas bernama; BUG BG-425 Work Shifts tanpa startTime -> 500, BG-426 duplikat
+  Locations/Reporting Methods diterima server). Matrix 60.3%. BERIKUT:
+  (Blok 2) sweep mutasi UI: 1.8 toast sukses, 4.2 double submit, 4.5 koneksi putus (route.abort),
+      4.3 navigasi balik/refresh saat form terisi, 8.4 fokus/keyboard form Add.
+  (Blok 3) konkurensi dua sesi Admin 4.7 (edit record yg sama / hapus saat dibuka sesi lain).
+  (Blok 4) menu 0%: Sidebar Search (3 TC), Dashboard Widgets (3-4 TC), My Info Immigration &
+      Qualifications (2 TC). Lalu gel. E spesifik unit + perkuat 23 TC lemah, Fase 5-8.
+  Catatan util: soft delete (Job Titles/Leave Types/Customers) -> nilai delete dari DAFTAR, bukan GET
+  detail; timeout setup 60 dtk (demo lambat); gotoTabAndHydrate(); setTimeout TC lintas-sesi 240 dtk.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -442,3 +443,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-16 | FASE 4 My Info | 6 TC tests/my-info + util myInfo.ts (newEssSession/openMyInfoFromMenu/gotoTabAndHydrate); BUG BG-420 (High, field terkunci Personal Details diubah ESS via API, tersimpan); 5 lolos + 1 sengaja FAILED; fix timeout setup 15->60 dtk (demo lambat); docs/TC-MyInfo.txt; README 575; matrix 53.1% | 1 commit
 - 2026-11-16 | FASE 4 My Info lanjut | +3 TC tests/my-info/records (DEPENDENT-01, MEMBERSHIP-01 lolos; ATTACHMENT-01 sengaja FAILED = BUG BG-422 High, exe-rename .pdf diterima sbg attachment karyawan, keluarga BG-003); fix timeout loginAs 20->60 dtk; attachment = form inline bukan modal; My Info 9 TC (7 pass+2 bug); README 578; matrix 54.0% | 1 commit
 - 2026-11-16 | P4.0 gel. LIST | TC-SWEEP-LIST-01 (3.5/3.6/1.6/4.6, 47 unit list, 186/188 lolos); BUG BG-424 (Low, My Entitlements offset di luar range -> 500); matrix 57.9% | 1 commit
+- 2026-11-16 | P4.0 Blok 1 mutasi API | TC-SWEEP-MUT-01 + src/data/unitMutationRegistry.ts (19 unit, body ditangkap live; 1.1-C/R/U/D 2.1 2.3 2.6 3.1 4.1 5.1 5.2 5.5 6.5 6.7); 301/304 lolos; BUG BG-425 (Low, Work Shifts tanpa startTime -> 500) & BG-426 (Medium, duplikat Locations/Reporting Methods diterima server); soft delete dibuktikan bukan bug; README 580; matrix 60.3% | 1 commit

@@ -230,5 +230,41 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              -> 500 (BUG BG-424, Low; endpoint lain kembalikan
                              array kosong). Unit lain tanpa data cukup -> finding.
 
+ 9   TC-SWEEP-MUT-01   [DONE]  TC-SWEEP-MUT-01-Verify-Create-Update-Delete-Contract-Per-Menu.spec.ts
+                             (+) 1.1-C 1.1-R 1.1-U 1.1-D | (-) 2.1 2.3 2.6 |
+                             (B) 3.1 | (!) 4.1 | (S) 5.1-SQLi 5.2-MassAssign 5.5 |
+                             (A) 6.5 6.7
+                             Verify The Create/Update/Delete API Of Every
+                             Named-Entity Menu: CRUD, Validation, Injection,
+                             Mass Assignment
+                             -> 19 menu entitas bernama (registry
+                                src/data/unitMutationRegistry.ts; body POST
+                                ditangkap LIVE dari form Add tiap menu).
+                             -> Semua record uji berprefix "QaMut" & dihapus
+                                di akhir tiap unit.
+                             [API VERIFICATION per unit]
+                             -> 1.1-C POST valid -> 200 + id; 1.1-R GET detail
+                                -> nama sama; 1.1-U PUT ganti nama -> tersimpan.
+                             -> 1.1-D DELETE {ids} -> 200 & record hilang dari
+                                daftar (soft delete: detail tetap terbaca ->
+                                finding, bukan bug).
+                             -> 2.1 body {} & nama whitespace -> 4xx.
+                             -> 2.3/6.7 nama duplikat -> 4xx (KPI boleh duplikat
+                                by design -> finding).
+                             -> 3.1 nama 300 karakter -> 4xx.
+                             -> 4.1 Arab/CJK/aksen -> identik; emoji -> bukan 5xx.
+                             -> 5.1-SQLi payload tersimpan sbg teks atau 4xx.
+                             -> 5.2-MassAssign id/deleted/isDeleted diabaikan.
+                             -> 6.5 nama null -> 4xx; angka -> bukan 5xx.
+                             -> 2.6 PUT/DELETE id 999999 -> 404/422 / bukan 5xx.
+                             -> 5.5 burst 5 create paralel -> dicatat.
+                             HASIL 16 Nov 2026: 301/304 lolos. SENGAJA FAILED:
+                             U017 Work Shifts body tanpa startTime -> 500 (BUG
+                             BG-425, Low); U019 Locations & U039 Reporting
+                             Methods menerima nama duplikat padahal form
+                             menjawab "Already exists" (BUG BG-426, Medium).
+                             [TEMUAN] tidak ada rate limit di 19 menu; soft
+                             delete di Job Titles, Leave Types, Customers.
+
   RUN COMMAND:
     npx playwright test tests/_global/sweep --project=chromium --workers=1
