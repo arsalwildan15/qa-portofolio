@@ -82,6 +82,12 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'my-info/contact-details', ['My Info > Contact Details']),
  (r'my-info/job-salary-report-to', ['My Info > Job', 'My Info > Salary', 'My Info > Report-to']),
  (r'my-info/records', ['My Info > Emergency Contacts', 'My Info > Dependents', 'My Info > Memberships', 'My Info > Attachments & Profile Picture']),
+ (r'my-info/security/TC-MYINFO-API-', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts', 'My Info > Dependents',
+                                     'My Info > Immigration', 'My Info > Job', 'My Info > Salary', 'My Info > Report-to', 'My Info > Qualifications',
+                                     'My Info > Memberships', 'My Info > Attachments & Profile Picture']),
+ # CSRF-01: the forged requests target the writable tabs; the session-cookie checks hold for every tab that saves data.
+ (r'my-info/security/TC-MYINFO-CSRF-', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts', 'My Info > Dependents',
+                                      'My Info > Immigration', 'My Info > Qualifications', 'My Info > Memberships', 'My Info > Attachments & Profile Picture']),
  # IDOR-01 requests the victim's data on 12 tabs (personal, contact, emergency, dependents, immigration, job,
  # salary, supervisors, skills, memberships, custom fields, attachments) -- each one is a 5.2-IDOR check.
  (r'my-info/security/TC-MYINFO-IDOR-', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts', 'My Info > Dependents',

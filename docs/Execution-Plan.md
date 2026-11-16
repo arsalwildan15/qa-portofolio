@@ -40,20 +40,19 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** FASE 4 / P4.0. Rencana 16 Nov SELESAI (Blok 1-4): MUT-01, UIMUT-01, CONC-01, Sidebar
-  Search 3 TC (100%), Dashboard 3 TC (100%), My Info Immigration & Qualifications 4 TC. Bug baru hari ini
-  BG-425..BG-434. Matrix 60.0% (angka jujur, mode kode-eksplisit). BERIKUT:
-  (1) Sweep halaman (PAGE/HDR/VIEW/A11Y/XBROWSER/ROLE) belum mencakup 10 unit My Info (URL <self>) ->
-      tambahkan resolver empNumber sendiri di src/data/unitRegistry.ts lalu jalankan ulang sweep: menutup
-      5.6, 5.8, 7.1-7.5, 8.1-8.3 di My Info (unit My Info terendah: 32.5%).
-  (2) GAP spesifik My Info: 5.2-PrivEsc, 5.4 CSRF, 4.7 konkurensi, 6.6 paging tab list, Languages & License
-      via UI, Profile Picture.
-  (3) PIM Employee tabs (51.8%), Maintenance (43.3%), Leave (58.1%): gel. E spesifik unit + perkuat 23 TC
-      lemah. Lalu Fase 5-8.
-  Catatan util: label check WAJIB kode taksonomi literal (bukan variabel/array) -> matrix hanya membaca
-  kode eksplisit; form edit My Info menimpa input saat GET detail -> tunggu GET <seg>/<id> dulu;
-  createEssAccount mengisi Employee Id unik sendiri (id bawaan form kadang bentrok di demo -> 422);
-  heredoc bash dgn tanda kutip tunggal di isi -> tulis skrip ke file (Write) lalu jalankan.
+- **NEXT ACTION:** FASE 4 / P4.0. Selesai 17 Nov: sweep halaman diperluas ke 10 tab My Info (registry 107
+  unit, filter SWEEP_ONLY), TC-MYINFO-API-01 (14 endpoint, 105/105), TC-MYINFO-CSRF-01 (BUG BG-437 logout
+  paksa via form POST lintas situs). My Info 65.6%, matrix 63.3%. BERIKUT:
+  (1) PIM (51.8%): TC PIM lama masih ditandai keyword & sebagian salah (mis. IMMIGRATION-03 "Very Long
+      Text" tanpa 3.1, IMMIGRATION-02 "Empty Submit" dapat 3.2/3.6) -> tulis kode taksonomi literal di
+      label check TC PIM (tanpa mengubah perilaku), lalu tutup GAP PIM Employee tabs dgn pola My Info
+      (API sweep tab Admin + mutasi).
+  (2) Maintenance (43.3%), Leave (58.1%), Time (55.0%): GAP spesifik unit.
+  (3) My Info sisa: 5.2-PrivEsc, 4.7, mutasi (MassAssign/SQLi/4.1) Emergency/Dependents/Memberships/
+      Contact/Personal, Profile Picture. Perkuat 23 TC lemah. Lalu Fase 5-8.
+  Catatan util: label check WAJIB kode taksonomi literal (bukan variabel/array); form edit My Info menimpa
+  input saat GET detail -> tunggu GET <seg>/<id>; cookie sesi berpath /web -> cookies(<origin>/web/...);
+  heredoc bash dgn tanda kutip tunggal -> tulis skrip ke file (Write) lalu jalankan.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -451,3 +450,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-16 | P4.0 Blok 2-4 | TC-SWEEP-UIMUT-01 (19 form Add: 1.8 2.1 2.3 3.1 4.2 4.3 4.5 8.4; 188/192) + TC-SWEEP-CONC-01 (2 sesi Admin: 4.4 race 5 putaran, 4.7 last-write & edit-setelah-hapus; 39/58) + 3 TC Sidebar Search (36/36, unit 100%, flag NOAPI); BUG BG-427 (Medium, double submit), BG-428 (Medium, race keunikan + Pay Grades 500), BG-429 (Low, tanpa toast create Pay Grade), BG-430 (Low, edit record terhapus 200); audit matrix: mode kode-eksplisit, label 9 file dilengkapi kode yg benar diverifikasi; README 585; matrix 58.1% | 1 commit
 - 2026-11-16 | P4.0 Blok 4 Dashboard | 3 TC tests/dashboard/widgets (WIDGET-01 data vs API & role 11/11; WIDGET-02 7 API kontrak/405/401/ESS 403/header/5.8 59/59; WIDGET-03 empty state mock, isolasi 500, 7.5 batas kewajaran, 8.1-8.3 14/14); Dashboard 100%; createEssAccount kini menyertakan body 422 di pesan error; README 588; matrix 58.6% | 1 commit
 - 2026-11-16 | P4.0 Blok 4 My Info | 4 TC: IMMIGRATION-01 (UI, 15/16), IMMIGRATION-02 (API, 14/17), QUALIFICATION-01 (UI WE+Skills, 20/21), QUALIFICATION-02 (API 5 endpoint, 22/26); BUG BG-431 (Medium, double submit Immigration), BG-432 (Medium, double submit Work Experience), BG-433 (Low, server terima expiry<issued & type 0/3 -> tampil VISA), BG-434 (Low, id tak ada -> 500 di skills/licenses/educations/PUT WE); fix createEssAccount (Employee Id unik, akar 422 employeeId); IDOR-01 dipetakan ke 11 tab My Info; README 592; matrix 60.0% | 1 commit
+- 2026-11-17 | P4.0 My Info lanjut | registry +10 tab My Info (U108-U117) & SWEEP_ONLY; 6 sweep halaman utk 10 unit (gagal = bug lama BG-414/416/clickjacking; duplikat BG-435/436 diarsip); TC-MYINFO-API-01 (105/105); TC-MYINFO-CSRF-01 (6/7, BUG BG-437 Medium: form POST lintas situs -> 401 + Set-Cookie sesi baru -> karyawan ter-logout; data tetap aman via SameSite=Lax); README 594; My Info 65.6%; matrix 63.3% | 1 commit

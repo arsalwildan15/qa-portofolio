@@ -318,5 +318,16 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              -> 200 (BUG BG-430, Low). Race bersifat acak: menu
                              yg lolos di satu run belum tentu aman.
 
+
+  PERLUASAN 17 Nov 2026: registry src/data/unitRegistry.ts kini memuat 107 unit
+  (+10 tab My Info U108-U117, URL dari empNumber pengguna yang login). Keenam
+  sweep halaman dijalankan utk 10 unit baru (filter SWEEP_ONLY):
+    PAGE-01 49/51, HDR-01 31/41, VIEW-01 61/61, A11Y-01 11/31, XBROWSER-01
+    42/43, ROLE-01 21/21. Semua kegagalan = bug yang sudah tercatat:
+    clickjacking (keluarga BG-404/BG-145), label aksesibel (BG-416), dan tab
+    Job meminta Job Specification yang tidak ada -> 404 (BG-414). Baris
+    otomatis duplikat (BG-435, BG-436) dipindah ke sheet Archive.
+  Filter opsional: SWEEP_ONLY=U108,U109 menjalankan unit tertentu saja.
+
   RUN COMMAND:
     npx playwright test tests/_global/sweep --project=chromium --workers=1

@@ -37,7 +37,7 @@ const me = async (page: Page): Promise<number | null> => {
   return m ? Number(m[1]) : null;
 };
 
-export const PAGE_UNITS: PageUnit[] = [
+const ALL_PAGE_UNITS: PageUnit[] = [
   { id: 'U001', path: 'Admin > User Management > Users', access: 'admin', url: 'admin/viewSystemUsers' },
   { id: 'U002', path: 'PIM > Employee List', access: 'admin', url: 'pim/viewEmployeeList' },
   { id: 'U003', path: 'Leave > Leave List', access: 'admin', url: 'leave/viewLeaveList' },
@@ -144,7 +144,26 @@ export const PAGE_UNITS: PageUnit[] = [
   { id: 'U106', path: 'Time > Timesheet Edit & Approval', access: 'all', url: async (p) => {
     await p.goto('/web/index.php/time/viewMyTimesheet'); // the visit creates the timesheet for a new user
     const id = await apiObjectId(p, 'time/timesheets/default'); return id ? `time/editTimesheet/${id}` : null; } },
+  // My Info tabs (added 2026-11-17): the logged-in user's OWN record, so the same resolver gives Admin
+  // their own tabs in the Admin sweeps and gives the ESS user theirs in TC-SWEEP-ROLE-01.
+  { id: 'U108', path: 'My Info > Contact Details', access: 'all', url: async (p) => `pim/contactDetails/empNumber/${await me(p)}` },
+  { id: 'U109', path: 'My Info > Emergency Contacts', access: 'all', url: async (p) => `pim/viewEmergencyContacts/empNumber/${await me(p)}` },
+  { id: 'U110', path: 'My Info > Dependents', access: 'all', url: async (p) => `pim/viewDependents/empNumber/${await me(p)}` },
+  { id: 'U111', path: 'My Info > Immigration', access: 'all', url: async (p) => `pim/viewImmigration/empNumber/${await me(p)}` },
+  { id: 'U112', path: 'My Info > Job', access: 'all', url: async (p) => `pim/viewJobDetails/empNumber/${await me(p)}` },
+  { id: 'U113', path: 'My Info > Salary', access: 'all', url: async (p) => `pim/viewSalaryList/empNumber/${await me(p)}` },
+  { id: 'U114', path: 'My Info > Report-to', access: 'all', url: async (p) => `pim/viewReportToDetails/empNumber/${await me(p)}` },
+  { id: 'U115', path: 'My Info > Qualifications', access: 'all', url: async (p) => `pim/viewQualifications/empNumber/${await me(p)}` },
+  { id: 'U116', path: 'My Info > Memberships', access: 'all', url: async (p) => `pim/viewMemberships/empNumber/${await me(p)}` },
+  { id: 'U117', path: 'My Info > Attachments & Profile Picture', access: 'all', url: async (p) => `pim/viewPhotograph/empNumber/${await me(p)}` },
 ];
+
+/**
+ * Optional run filter for the sweeps: SWEEP_ONLY=U108,U109 runs only those units (used to verify units
+ * added later without re-running the whole sweep). Unset = every unit. Set it only for sweep runs.
+ */
+const ONLY = (process.env.SWEEP_ONLY ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+export const PAGE_UNITS: PageUnit[] = ONLY.length ? ALL_PAGE_UNITS.filter((u) => ONLY.includes(u.id)) : ALL_PAGE_UNITS;
 
 export async function resolveUnitUrl(page: Page, unit: PageUnit): Promise<string | null> {
   const rel = typeof unit.url === 'string' ? unit.url : await unit.url(page);

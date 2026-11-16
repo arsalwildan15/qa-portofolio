@@ -291,15 +291,51 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              tak ada -> 500 di POST skills/licenses/educations &
                              PUT work-experiences/999999 (BUG BG-434, Low).
 
+ 14  TC-MYINFO-API-01  [DONE]  TC-MYINFO-API-01-Verify-Every-My-Info-Tab-API-Contract-Paging-Methods-Session-And-No-Sensitive-Data.spec.ts
+                             (B) 3.5 3.6 | (!) 4.6 | (S) 5.8 | (A) 6.1 6.2 6.3 6.4 6.6
+                             Verify The API Behind Every My Info Tab For The
+                             Employee's Own Record: Contract, Paging, Wrong Method,
+                             No Session, Sensitive Data
+                             -> Folder: tests/my-info/security/. Sesi ESS baru,
+                                14 endpoint dari 11 tab (U006, U108-U117).
+                             [API VERIFICATION per endpoint]
+                             -> 6.1 GET 200; 6.2 list = data[] + meta.total,
+                                objek = field kunci tab.
+                             -> 6.6 limit=-1 -> 422; 3.6 limit=1 -> maks 1 baris;
+                                3.5/4.6 offset=9999 -> data [].
+                             -> 6.3 PATCH 405; 6.4 tanpa sesi 401; 5.8 tanpa
+                                field sensitif.
+                             HASIL 17 Nov 2026: 105/105 lolos.
+
+ 15  TC-MYINFO-CSRF-01  [DONE -- BUG]  TC-MYINFO-CSRF-01-Verify-A-Foreign-Site-Cannot-Change-The-Employees-Data-With-Their-Session.spec.ts
+                             (S) 5.4
+                             Verify A Page On Another Site Cannot Change The
+                             Logged-In Employee's My Info Data (CSRF)
+                             -> Folder: tests/my-info/security/. Sesi ESS; halaman
+                                penyerang https://attacker.test disajikan
+                                route.fulfill di context browser yang sama.
+                             [SECURITY VERIFICATION]
+                             -> cookie sesi HttpOnly + Secure + SameSite=Lax.
+                             -> kontrol: PUT dari origin aplikasi -> 200.
+                             -> fetch no-cors PUT, fetch JSON (preflight) & form
+                                POST lintas situs -> cookie tidak ikut, Contact
+                                Details & Emergency Contacts tidak berubah.
+                             -> sesi karyawan tetap aktif setelahnya.
+                             HASIL 17 Nov 2026: 6/7 lolos -- data AMAN. SENGAJA
+                             FAILED: respons 401 atas form POST lintas situs
+                             memasang cookie sesi baru -> karyawan ter-logout
+                             paksa (BUG BG-437, Medium). [TEMUAN] server tidak
+                             memvalidasi Origin; pertahanan tunggal = SameSite.
+
 ================================================================================
   RINGKASAN
 ================================================================================
 
-  Total TC         : 13 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, DEPENDENT 1,
+  Total TC         : 15 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, DEPENDENT 1,
                      MEMBERSHIP 1, ATTACHMENT 1, IDOR 1, IMMIGRATION 2,
-                     QUALIFICATION 2)
-  PASSED           : 7
-  FAILED (BUG, sengaja) : 6
+                     QUALIFICATION 2, API 1, CSRF 1)
+  PASSED           : 8
+  FAILED (BUG, sengaja) : 7
     -> TC-MYINFO-PD-02 (BG-420, High, field terkunci Personal Details bisa
        diubah karyawan lewat API)
     -> TC-MYINFO-ATTACHMENT-01 (BG-422, High, executable di-rename .pdf
@@ -311,6 +347,10 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
        dokumen 0/3 diterima server)
     -> TC-MYINFO-QUALIFICATION-02 (BG-434, Low, id master/record tak ada ->
        500)
+    -> TC-MYINFO-CSRF-01 (BG-437, Medium, halaman situs lain membuat
+       karyawan ter-logout paksa)
+  Sweep halaman (TC-SWEEP-PAGE/HDR/VIEW/A11Y/XBROWSER/ROLE-01) mencakup 10 tab
+    My Info sejak 17 Nov 2026 (lihat docs/TC-Sweep.txt).
   BELUM DICAKUP (backlog): Profile Picture upload/remove; Languages & License
     via UI.
 

@@ -11,13 +11,13 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Directory | 21 | 5 | 45 | 80.8% |
 | Leave | 290 | 209 | 424 | 58.1% |
 | Maintenance | 42 | 55 | 116 | 43.3% |
-| My Info | 150 | 312 | 319 | 32.5% |
+| My Info | 303 | 159 | 319 | 65.6% |
 | PIM | 480 | 446 | 494 | 51.8% |
 | Performance | 261 | 160 | 289 | 62.0% |
 | Recruitment | 136 | 80 | 68 | 63.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 265 | 217 | 370 | 55.0% |
-| **Total** | **2789** | **1857** | **3093** | **60.0%** |
+| **Total** | **2942** | **1704** | **3093** | **63.3%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -32,7 +32,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 81 |
 | 1.3 | State transition valid | 6 |
 | 1.4 | Relasi antar-entity | 70 |
-| 1.5 | Permission/role positif | 11 |
+| 1.5 | Permission/role positif | 1 |
 | 1.6 | Search/filter/sort valid | 27 |
 | 1.7 | Upload file valid | 2 |
 | 1.8 | Notifikasi/feedback UI | 56 |
@@ -47,14 +47,14 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 3.2 | Nilai numerik | 1 |
 | 3.3 | Ukuran file upload | 7 |
 | 3.4 | Tanggal | 22 |
-| 3.5 | Pagination | 25 |
-| 3.6 | Jumlah hasil (0/1/limit) | 20 |
+| 3.5 | Pagination | 16 |
+| 3.6 | Jumlah hasil (0/1/limit) | 11 |
 | 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 63 |
 | 4.2 | Aksi ganda/cepat (double submit) | 57 |
 | 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 37 |
 | 4.4 | Race condition | 17 |
 | 4.5 | Session/koneksi terputus | 56 |
-| 4.6 | Data kosong/null (empty state) | 58 |
+| 4.6 | Data kosong/null (empty state) | 47 |
 | 4.7 | Konkurensi multi-user edit | 56 |
 | 4.8 | Behavior non-obvious terdokumentasi | 96 |
 | 5.1-SQLi | SQL Injection | 46 |
@@ -71,20 +71,20 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.3-DoubleExt | Double extension | 10 |
 | 5.3-Oversize | Oversized file | 7 |
 | 5.3-Filename | Malicious filename | 11 |
-| 5.4 | CSRF | 80 |
+| 5.4 | CSRF | 72 |
 | 5.5 | Rate limit / brute force / spam | 39 |
-| 5.6 | Security headers | 12 |
-| 5.8 | Sensitive data exposure | 12 |
+| 5.6 | Security headers | 2 |
+| 5.8 | Sensitive data exposure | 2 |
 | 5.9 | Business logic abuse | 20 |
-| 6.2 | Response schema/contract | 49 |
-| 6.3 | Request method salah (405) | 54 |
-| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 57 |
+| 6.2 | Response schema/contract | 40 |
+| 6.3 | Request method salah (405) | 45 |
+| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 48 |
 | 6.5 | Parameter negatif (tipe salah/extra/null) | 80 |
-| 6.6 | Pagination & sorting param | 25 |
+| 6.6 | Pagination & sorting param | 16 |
 | 6.7 | Idempotency | 35 |
-| 7.4 | Warning log | 12 |
-| 7.5 | Performance dasar | 12 |
-| 8.1 | Responsive/layout | 12 |
-| 8.2 | Cross-browser | 12 |
-| 8.3 | Accessibility dasar | 12 |
+| 7.4 | Warning log | 2 |
+| 7.5 | Performance dasar | 2 |
+| 8.1 | Responsive/layout | 2 |
+| 8.2 | Cross-browser | 2 |
+| 8.3 | Accessibility dasar | 2 |
 | 8.4 | Konsistensi pesan | 62 |
