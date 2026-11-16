@@ -1,0 +1,101 @@
+================================================================================
+  DAFTAR TEST CASE, SIDEBAR SEARCH
+  Modul    : Sidebar > Search & Collapse (kotak Search di atas menu utama, U085)
+  Target   : https://opensource-demo.orangehrmlive.com/web/index.php/* (ada di setiap halaman)
+  Engineer : Arsal Wildan Naviaddin, QA Engineer
+  Project  : qa-portofolio
+================================================================================
+
+LEGEND STATUS
+  [DONE]        = Test case selesai & script berjalan
+  [TODO]        = Belum dibuat
+  [DONE -- BUG] = Selesai & SENGAJA FAILED utk mendokumentasikan bug
+
+LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
+  (+) Positive  (-) Negative  (B) Boundary  (!) Edge Case  (S) Security  (A) API
+  Tiap entri mencantumkan KODE item taksonomi yg diverifikasi; tiap check di
+  script diberi label kode tsb.
+
+  FORMAT ID  : TC-SIDEBAR-SEARCH-NN
+  FILE       : TC-SIDEBAR-SEARCH-NN-Verify-Name-In-English.spec.ts
+  FOLDER     : tests/_global/sidebar-search/
+  HELPER     : src/utils/sidebarSearch.ts (searchSidebar, expectedMatches)
+
+================================================================================
+  FUNGSI & PERILAKU YANG DIBUKTIKAN LIVE (16 Nov 2026)
+================================================================================
+
+  Kotak Search menyaring daftar modul sidebar langsung di browser:
+  -> pencocokan potongan teks, tidak peka huruf besar/kecil, HANYA atas nama
+     modul (Admin, PIM, Leave, ...); nama sub-menu seperti "Leave List" tidak
+     ditemukan.
+  -> mengetik TIDAK mengirim request apa pun ke server. Karena itu item taksonomi
+     yg menilai respons server (5.6 header per dokumen, 5.8, 6.1-6.5) ditandai
+     N/A di matrix dgn flag NOAPI, berdasarkan bukti di TC-SIDEBAR-SEARCH-02.
+  -> query tanpa hasil mengosongkan menu tanpa teks "No results"; query spasi
+     saja tidak di-trim (semua modul tersembunyi). Keduanya dicatat sbg finding.
+
+================================================================================
+  DAFTAR TEST CASE
+================================================================================
+
+ 1   TC-SIDEBAR-SEARCH-01  [DONE]  TC-SIDEBAR-SEARCH-01-Verify-Search-Filters-Sidebar-Menu-By-Module-Name.spec.ts
+                             (+) 1.1-R 1.6 | (B) 3.6 | (!) 4.1 4.6 4.8
+                             Verify The Sidebar Search Filters The Menu By Module
+                             Name, Including Zero, One And Many Results
+                             -> Login Admin, buka Dashboard.
+                             [UI VERIFICATION]
+                             -> 1.1-R tanpa query: 12 modul tampil berurutan.
+                             -> 1.6 "le" -> Leave; "LEAVE" -> Leave
+                                (case-insensitive); "ime" -> Time.
+                             -> 3.6 1 hasil ("Buzz"), banyak hasil ("a" = persis
+                                modul yg mengandung "a"), 0 hasil ("zzz").
+                             -> 4.6 0 hasil -> menu kosong (teks empty state
+                                dicatat sbg finding).
+                             -> 4.8 sub-menu "Leave List" -> 0 hasil (known
+                                behaviour); Enter tidak berpindah halaman.
+                             -> 4.1 Arab, emoji, 300 karakter -> tanpa error.
+                             -> 1.1-R hapus query -> 12 modul kembali; klik
+                                hasil "Leave" -> modul Leave terbuka.
+                             HASIL 16 Nov 2026: 15/15 lolos, 2 temuan.
+
+ 2   TC-SIDEBAR-SEARCH-02  [DONE]  TC-SIDEBAR-SEARCH-02-Verify-Search-Is-Client-Side-Injection-Safe-And-Role-Scoped.spec.ts
+                             (+) 1.5 | (S) 5.1-XSS-Reflected 5.1-SQLi
+                             Verify The Sidebar Search Sends No Request, Is Safe
+                             Against Injection And Only Finds Menus The Role May
+                             Open
+                             -> Login Admin; lalu akun ESS baru (context terpisah).
+                             [SECURITY VERIFICATION]
+                             -> 5.1-XSS-Reflected <img onerror>, <script>,
+                                javascript: -> tidak dirender sbg HTML, tanpa
+                                dialog, jumlah <img>/<script> tidak bertambah.
+                             -> 5.1-SQLi "' OR 1=1 --" -> 0 hasil, tanpa error.
+                             -> Semua query diketik tanpa satu pun request ke
+                                server (bukti filter di klien).
+                             [ROLE VERIFICATION]
+                             -> 1.5 menu ESS tanpa Admin/PIM/Recruitment/
+                                Maintenance; ESS cari "Admin" -> 0; "Leave" ->
+                                Leave; "a" -> hanya modul ESS.
+                             HASIL 16 Nov 2026: 11/11 lolos.
+
+ 3   TC-SIDEBAR-SEARCH-03  [DONE]  TC-SIDEBAR-SEARCH-03-Verify-Search-On-Mobile-Collapse-Accessibility-Speed-And-Other-Browsers.spec.ts
+                             (!) 4.8 | (7) 7.1 7.2 7.3 7.4 7.5 | (8) 8.1 8.2 8.3
+                             Verify The Sidebar Search On A Phone Screen, With The
+                             Sidebar Collapsed, For Assistive Tech, Its Speed And
+                             In Firefox/WebKit
+                             [UI VERIFICATION]
+                             -> 8.3 role textbox dgn nama "Search" & bisa dicapai
+                                dgn Tab (nama hanya dari placeholder -> finding).
+                             -> 7.5 filter tampil < 300 ms.
+                             -> 4.8 sidebar diciutkan -> Search tidak bisa
+                                dipakai; dibuka lagi -> bisa dipakai, query
+                                dipertahankan (finding).
+                             -> 8.1 ponsel 375x812: hamburger -> Search terlihat
+                                & memfilter.
+                             -> 7.1-7.3 tanpa console error/request gagal; 7.4
+                                tanpa console warning dari aplikasi.
+                             -> 8.2 Firefox & WebKit: "le" -> Leave, hapus -> 12.
+                             HASIL 16 Nov 2026: 10/10 lolos, 2 temuan.
+
+  RUN COMMAND:
+    npx playwright test tests/_global/sidebar-search --project=chromium --workers=1

@@ -52,7 +52,7 @@ test('TC-MYINFO-CONTACT-01: an employee edits their own contact details, with em
   const put = nextResponse(essPage, `/pim/employee/${empNumber}/contact-details`, 'PUT');
   await contact.save();
   const resp = await put;
-  report.check('1.1-U PUT contact-details 200', resp?.status() === 200, `status=${resp?.status()}`);
+  report.check('1.1-U / 6.1 PUT contact-details 200', resp?.status() === 200, `status=${resp?.status()}`);
   report.check('1.8 Toast "Successfully Updated"', await isVisibleWithWait(essPage.getByText('Successfully Updated'), 10_000));
   const stored = (await (await page.request.get(api)).json().catch(() => null))?.data;
   report.check('1.1-U City & Work Email tersimpan', stored?.city === city && stored?.workEmail === email, `city=${stored?.city}, email=${stored?.workEmail}`);

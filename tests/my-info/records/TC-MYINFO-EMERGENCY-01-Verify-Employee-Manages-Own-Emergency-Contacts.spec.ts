@@ -53,13 +53,13 @@ test('TC-MYINFO-EMERGENCY-01: an employee adds, sees and deletes their own emerg
   const post = nextResponse(essPage, '/emergency-contacts', 'POST');
   await emerg.save();
   const resp = await post;
-  report.check('1.1-C POST emergency-contacts 200', resp?.status() === 200, `status=${resp?.status()}`);
+  report.check('1.1-C / 6.1 POST emergency-contacts 200', resp?.status() === 200, `status=${resp?.status()}`);
   report.check('1.8 Toast "Successfully Saved" tampil', await isVisibleWithWait(essPage.getByText('Successfully Saved'), 10_000));
   report.check('1.1-R Kontak muncul di tabel', await isVisibleWithWait(emerg.tableRows.filter({ hasText: name }).first(), 10_000));
 
   report.step('[ESS UI] Hapus kontak');
   const del = await deleteRowContaining(essPage, emerg.tableRows, name, '/emergency-contacts');
-  report.check('1.1-D DELETE emergency-contacts 200', del?.status() === 200, `status=${del?.status()}`);
+  report.check('1.1-D / 6.1 DELETE emergency-contacts 200', del?.status() === 200, `status=${del?.status()}`);
   report.check('1.1-D Kontak hilang dari tabel', await isHiddenWithWait(emerg.tableRows.filter({ hasText: name }).first(), 10_000));
 
   await close();

@@ -21,6 +21,10 @@ python tools/coverage/write_matrix.py <work> docs/Taxonomy-Coverage-Matrix.xlsx 
 
 Keyword tags are a first pass and are audited by sampling; a rule change must be re-audited the same way.
 
+Explicit codes win (since 2026-11-16): when at least 80% of a spec's `report.check` labels name their taxonomy code (`"1.1-C / 6.1 POST valid -> 200"`, `"[U013 ...] 4.4 ..."`), the spec is tagged with those codes only and the keyword pass is skipped for it. The audit that introduced this found keyword misfires on such labels (e.g. "Content-Type" header -> 5.3-ContentType upload, "hapus query" -> 1.1-D, "sesi" -> 5.7) that had inflated coverage by about 5 points. A code a TC genuinely verifies must therefore be written in its label.
+
+Flag `NOAPI` marks a unit that sends no server request (proven by a TC check); server-response items (5.6, 5.8, 6.1-6.5) are N/A for it. The sidebar-search folder is mapped only to the Sidebar unit: the Dashboard it stands on is the host page, not the subject.
+
 Before every commit that adds, moves or renames specs:
 
 ```bash

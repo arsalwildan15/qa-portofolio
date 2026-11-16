@@ -70,7 +70,7 @@ test('TC-SWEEP-MUT-01: create/update/delete contract, validation, injection and 
     report.step(`${tag} CRUD dasar`);
     const name = nm('QaMut');
     const c = await create(name);
-    report.check(`${tag} 1.1-C POST valid -> 200 + id`, c.r.status() === 200 && !!c.id, `status=${c.r.status()}`);
+    report.check(`${tag} 1.1-C / 6.1 POST valid -> 200 + id`, c.r.status() === 200 && !!c.id, `status=${c.r.status()}`);
     if (!c.id) { report.finding(`${tag} dilewati`, 'create valid gagal -> check lain tidak bermakna'); continue; }
     const got = await read(c.id);
     report.check(`${tag} 1.1-R GET detail -> nama sama`, got?.data?.[u.nameKey] === name, `name=${JSON.stringify(got?.data?.[u.nameKey])}`);
@@ -113,7 +113,7 @@ test('TC-SWEEP-MUT-01: create/update/delete contract, validation, injection and 
 
     report.step(`${tag} id tak eksis & burst`);
     const put404 = await page.request.put(`${ep}/999999`, { data: u.body(nm('QaMutX'), ctx) });
-    report.check(`${tag} 2.6 PUT id 999999 -> 404/422 (bukan 2xx/5xx)`, [404, 422].includes(put404.status()), `status=${put404.status()}`);
+    report.check(`${tag} 2.6 / 6.1 PUT id 999999 -> 404/422 (bukan 2xx/5xx)`, [404, 422].includes(put404.status()), `status=${put404.status()}`);
     const del404 = await page.request.delete(ep, { data: { ids: [999999] } });
     report.check(`${tag} 2.6 DELETE id 999999 -> bukan 5xx`, not5xx(del404.status()), `status=${del404.status()}`);
     const burst = await Promise.all([1, 2, 3, 4, 5].map((i) => create(nm(`QaMutB${i}`))));

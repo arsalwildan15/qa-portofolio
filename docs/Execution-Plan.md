@@ -40,16 +40,15 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** FASE 4 / P4.0, rencana hari ini 16 Nov (4 blok). Blok 1 SELESAI: TC-SWEEP-MUT-01
-  (mutasi API 19 menu entitas bernama; BUG BG-425 Work Shifts tanpa startTime -> 500, BG-426 duplikat
-  Locations/Reporting Methods diterima server). Matrix 60.3%. BERIKUT:
-  (Blok 2) sweep mutasi UI: 1.8 toast sukses, 4.2 double submit, 4.5 koneksi putus (route.abort),
-      4.3 navigasi balik/refresh saat form terisi, 8.4 fokus/keyboard form Add.
-  (Blok 3) konkurensi dua sesi Admin 4.7 (edit record yg sama / hapus saat dibuka sesi lain).
-  (Blok 4) menu 0%: Sidebar Search (3 TC), Dashboard Widgets (3-4 TC), My Info Immigration &
-      Qualifications (2 TC). Lalu gel. E spesifik unit + perkuat 23 TC lemah, Fase 5-8.
-  Catatan util: soft delete (Job Titles/Leave Types/Customers) -> nilai delete dari DAFTAR, bukan GET
-  detail; timeout setup 60 dtk (demo lambat); gotoTabAndHydrate(); setTimeout TC lintas-sesi 240 dtk.
+- **NEXT ACTION:** FASE 4 / P4.0, rencana 16 Nov. SELESAI: Blok 1 (MUT-01, BG-425/426), Blok 2 (UIMUT-01,
+  BG-427 double submit, BG-429 toast Pay Grade), Blok 3 (CONC-01, BG-428 race keunikan, BG-430 edit record
+  terhapus), Blok 4 sebagian: Sidebar Search 3 TC -> unit 100%. Matrix 58.1% (angka JUJUR setelah audit:
+  mode kode-eksplisit menghapus ~5 poin tag keyword yg salah tembak; lihat tools/coverage/README.md).
+  BERIKUT: (a) Dashboard Widgets U107 (18 GAP: 1.1-R 1.5 4.6 4.8 5.6 5.8 6.1-6.4 7.x 8.x) -> probe API
+  widget dulu; (b) My Info Immigration U111 & Qualifications U115 (masing2 49 GAP) CRUD ESS;
+  (c) gel. E spesifik unit + perkuat 23 TC lemah; lalu Fase 5-8.
+  Catatan util: label check WAJIB menulis kode taksonomi literal (bukan variabel) -> matrix hanya membaca
+  kode eksplisit; soft delete -> nilai delete dari DAFTAR; race diuji multi-putaran (hasil acak).
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -444,3 +443,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-16 | FASE 4 My Info lanjut | +3 TC tests/my-info/records (DEPENDENT-01, MEMBERSHIP-01 lolos; ATTACHMENT-01 sengaja FAILED = BUG BG-422 High, exe-rename .pdf diterima sbg attachment karyawan, keluarga BG-003); fix timeout loginAs 20->60 dtk; attachment = form inline bukan modal; My Info 9 TC (7 pass+2 bug); README 578; matrix 54.0% | 1 commit
 - 2026-11-16 | P4.0 gel. LIST | TC-SWEEP-LIST-01 (3.5/3.6/1.6/4.6, 47 unit list, 186/188 lolos); BUG BG-424 (Low, My Entitlements offset di luar range -> 500); matrix 57.9% | 1 commit
 - 2026-11-16 | P4.0 Blok 1 mutasi API | TC-SWEEP-MUT-01 + src/data/unitMutationRegistry.ts (19 unit, body ditangkap live; 1.1-C/R/U/D 2.1 2.3 2.6 3.1 4.1 5.1 5.2 5.5 6.5 6.7); 301/304 lolos; BUG BG-425 (Low, Work Shifts tanpa startTime -> 500) & BG-426 (Medium, duplikat Locations/Reporting Methods diterima server); soft delete dibuktikan bukan bug; README 580; matrix 60.3% | 1 commit
+- 2026-11-16 | P4.0 Blok 2-4 | TC-SWEEP-UIMUT-01 (19 form Add: 1.8 2.1 2.3 3.1 4.2 4.3 4.5 8.4; 188/192) + TC-SWEEP-CONC-01 (2 sesi Admin: 4.4 race 5 putaran, 4.7 last-write & edit-setelah-hapus; 39/58) + 3 TC Sidebar Search (36/36, unit 100%, flag NOAPI); BUG BG-427 (Medium, double submit), BG-428 (Medium, race keunikan + Pay Grades 500), BG-429 (Low, tanpa toast create Pay Grade), BG-430 (Low, edit record terhapus 200); audit matrix: mode kode-eksplisit, label 9 file dilengkapi kode yg benar diverifikasi; README 585; matrix 58.1% | 1 commit

@@ -50,15 +50,15 @@ test('TC-SWEEP-LIST-01: pagination, result counts, sort order and empty state on
 
     const one = await get(u.list, [['limit', '1'], ['offset', '0']]);
     const total = one?.meta?.total;
-    report.check(`${tag} 3.6 limit=1 -> <=1 baris & meta.total angka`, Array.isArray(one?.data) && (one.data?.length ?? 0) <= 1 && typeof total === 'number', `rows=${one?.data?.length}, total=${JSON.stringify(total)}`);
+    report.check(`${tag} 3.6 / 6.6 limit=1 -> <=1 baris & meta.total angka`, Array.isArray(one?.data) && (one.data?.length ?? 0) <= 1 && typeof total === 'number', `rows=${one?.data?.length}, total=${JSON.stringify(total)}`);
 
     const beyond = await get(u.list, [['limit', '10'], ['offset', String((total ?? 0) + 10)]]);
-    report.check(`${tag} 3.5/4.6 Halaman di luar range -> data:[] kosong`, Array.isArray(beyond?.data) && (beyond.data?.length ?? -1) === 0, `rows=${beyond?.data?.length}`);
+    report.check(`${tag} 3.5/4.6 / 6.6 Halaman di luar range (offset) -> data:[] kosong`, Array.isArray(beyond?.data) && (beyond.data?.length ?? -1) === 0, `rows=${beyond?.data?.length}`);
     report.check(`${tag} 4.6 Empty state terkendali (array, bukan null/error)`, Array.isArray(beyond?.data) && typeof beyond?.meta?.total === 'number', `data=${Array.isArray(beyond?.data)}`);
 
     if ((total ?? 0) > 1) {
       const p2 = await get(u.list, [['limit', '1'], ['offset', '1']]);
-      report.check(`${tag} 3.5 Halaman 2 (offset=1) baris berbeda dari halaman 1`, idOf(p2?.data?.[0]) !== idOf(one?.data?.[0]), `p1=${idOf(one?.data?.[0])}, p2=${idOf(p2?.data?.[0])}`);
+      report.check(`${tag} 3.5 / 6.6 Halaman 2 (offset=1) baris berbeda dari halaman 1`, idOf(p2?.data?.[0]) !== idOf(one?.data?.[0]), `p1=${idOf(one?.data?.[0])}, p2=${idOf(p2?.data?.[0])}`);
     } else {
       report.finding(`${tag} 3.5 pagination tidak teruji`, `total=${total} <= 1`);
     }
@@ -66,7 +66,7 @@ test('TC-SWEEP-LIST-01: pagination, result counts, sort order and empty state on
     if (u.sorted && (total ?? 0) > 1) {
       const asc = await get(u.list, [['limit', '50'], ['offset', '0'], ['sortOrder', 'ASC']]);
       const desc = await get(u.list, [['limit', '50'], ['offset', '0'], ['sortOrder', 'DESC']]);
-      report.check(`${tag} 1.6 Sort ASC vs DESC membalik urutan (baris pertama berbeda)`, idOf(asc?.data?.[0]) !== idOf(desc?.data?.[0]), `asc=${idOf(asc?.data?.[0])}, desc=${idOf(desc?.data?.[0])}`);
+      report.check(`${tag} 1.6 / 6.6 Sort ASC vs DESC (sortOrder) membalik urutan (baris pertama berbeda)`, idOf(asc?.data?.[0]) !== idOf(desc?.data?.[0]), `asc=${idOf(asc?.data?.[0])}, desc=${idOf(desc?.data?.[0])}`);
     } else if (u.sorted) {
       report.finding(`${tag} 1.6 sort tidak teruji`, `total=${total} <= 1`);
     }

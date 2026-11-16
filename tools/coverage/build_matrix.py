@@ -70,6 +70,7 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'claim/config/TC-CLAIM-CONFIG-EVENT', ['Claim > Configuration > Events']),
  (r'claim/config/TC-CLAIM-CONFIG-EXPTYPE', ['Claim > Configuration > Expense Types']),
  (r'_global/login/', ['Login > Login Page']),
+ (r'_global/sidebar-search/', ['Sidebar > Search & Collapse']),
  (r'infra/TC-INFRA-01', ['PIM > Add Employee']), (r'infra/TC-INFRA-02', ['Admin > User Management > Users']), (r'infra/TC-INFRA-03', ['PIM > Employee > Report-to']),
  (r'cross-module/TC-XMOD-01', ['Leave > Leave List', 'Claim > Employee Claims', 'Performance > Configure > KPIs', 'Time > Timesheets > Employee Timesheets', 'Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Time > Project Info > Projects']),
  (r'cross-module/TC-XMOD-0[24]', ['Leave > Configure > Leave Types', 'Claim > Configuration > Events', 'Performance > Configure > KPIs', 'Time > Project Info > Customers']),
@@ -80,7 +81,7 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'my-info/records', ['My Info > Emergency Contacts', 'My Info > Dependents', 'My Info > Memberships', 'My Info > Attachments & Profile Picture']),
  (r'my-info/security', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts']),
  (r'sweep/TC-SWEEP-LIST', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8')) if u['id'] in set(json.load(open(S + '/api_units.json')))]),
- (r'sweep/TC-SWEEP-MUT', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
+ (r'sweep/TC-SWEEP-(UIMUT|MUT|CONC)-', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
                          if u['id'] in set(re.findall(r"'(U\d{3})'", open('src/data/unitMutationRegistry.ts', encoding='utf-8').read()))]),
  (r'sweep/TC-SWEEP-API', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
                          if u['id'] in set(json.load(open(S + '/api_units.json')))]),
@@ -108,7 +109,8 @@ def spec_units(sp):
     if p.startswith('tests/pim/') and re.search(r'photo|picture', p.lower()): out.add(U('PIM > Employee > Profile Picture'))
     if p.startswith('tests/recruitment/candidates/') and re.search(r'status|detail|shortlist|interview', p.lower()): out.add(U('Recruitment > Candidate Detail & Status Workflow'))
     if p.startswith('tests/recruitment/vacancies/') and re.search(r'attachment|detail|edit|deactivate', p.lower()): out.add(U('Recruitment > Vacancy Detail & Attachments'))
-    for g in sp['gotos']:
+    # The sidebar is tested while standing on the Dashboard; that page is only the host, not under test.
+    for g in ([] if p.startswith('tests/_global/sidebar-search/') else sp['gotos']):
         path = g.split('/web/index.php/')[-1].split('?')[0]
         for url, uid in URL_UNITS:
             if path == url or path == url.rstrip('#'):
@@ -183,15 +185,21 @@ def is_weak(sp):
     """Vacuous TC: no check verifies an outcome (only 'ran without exception' or none at all)."""
     return len([c for c in sp['checks'] if not WEAK_RX.search(c)]) == 0
 
+EXPLICIT_RX = re.compile(r'(?<![\d.])([1-8]\.\d(?:-[A-Za-z]+(?:-[A-Za-z]+)?)?)(?![\d.])')
+
 def spec_codes(sp):
     if is_weak(sp):
         return []  # must not count as coverage; listed in the matrix as weak TCs to strengthen
     text = (sp['path'].split('/')[-1] + ' ' + sp['kategori'] + ' ' + ' '.join(sp['checks']) + ' ' + ' '.join(sp['findings'])).lower()
-    codes = {c for c, rx in R if re.search(rx, text)}
+    # A spec whose check labels name their taxonomy codes (the convention since 2026-11-16) is tagged
+    # ONLY with those codes: keyword rules misfire on plain words such as "hapus query" (-> 1.1-D) or
+    # "sesi" (-> 5.7) in such labels. Older specs keep the keyword pass.
+    explicit = [c for c in sp['checks'] if EXPLICIT_RX.search(c)]
+    codes = set() if sp['checks'] and len(explicit) >= 0.8 * len(sp['checks']) else {c for c, rx in R if re.search(rx, text)}
     # Explicit convention (sweep TCs and every TC written from now on): a check/finding label that
     # names its taxonomy code, e.g. "[U093 ...] 7.2 ..." or "5.2-IDOR ...", is tagged with it directly.
     for label in sp['checks'] + sp['findings']:
-        for code in re.findall(r'(?<![\d.])([1-8]\.\d(?:-[A-Za-z]+(?:-[A-Za-z]+)?)?)(?![\d.])', label):
+        for code in EXPLICIT_RX.findall(label):
             codes.add(code)
     codes |= {'7.1', '7.2', '7.3'}  # every TestReport runs the automatic console/failed-resource check
     return sorted(codes)
@@ -302,6 +310,10 @@ flag(['Login > Logout & Session'], 'LOG', 'ESS')
 flag(['Header > Change Password'], 'E', 'T', 'ESS', 'LOG')
 flag(['Header > About', 'Header > Support', 'Header > Help (?)', 'Header > Upgrade', 'Sidebar > Search & Collapse'], 'RO', 'ESS')
 flag(['Sidebar > Search & Collapse'], 'SR')
+# NOAPI: the search box filters the menu in the browser -- typing sends NO request (proven by the
+# TC-SIDEBAR-SEARCH-02 check "Filter berjalan di klien ... tanpa satu pun request", live 2026-11-16).
+# Items that judge a server response (5.6 headers per document, 5.8 data in responses, 6.1-6.5) cannot apply.
+flag(['Sidebar > Search & Collapse'], 'NOAPI')
 
 ITEMS = [  # (code, label, rule -> (applicable, reason_if_not))
  ('1.1-C', 'Create valid', lambda f: ('C' in f, 'tidak ada aksi create di menu ini')),
@@ -355,15 +367,15 @@ ITEMS = [  # (code, label, rule -> (applicable, reason_if_not))
  ('5.3-Filename', 'Malicious filename', lambda f: ('UP' in f, 'tidak ada upload')),
  ('5.4', 'CSRF', lambda f: (bool({'C', 'E', 'D', 'SET'} & f), 'tidak ada endpoint mutasi')),
  ('5.5', 'Rate limit / brute force / spam', lambda f: ('LOG' in f or 'C' in f, 'tidak ada login/create')),
- ('5.6', 'Security headers', lambda f: (True, '')),
+ ('5.6', 'Security headers', lambda f: ('NOAPI' not in f, 'tidak ada request: filter di klien (TC-SIDEBAR-SEARCH-02)')),
  ('5.7', 'Session security', lambda f: ('LOG' in f, 'bukan alur sesi/auth')),
- ('5.8', 'Sensitive data exposure', lambda f: (True, '')),
+ ('5.8', 'Sensitive data exposure', lambda f: ('NOAPI' not in f, 'tidak ada request: filter di klien (TC-SIDEBAR-SEARCH-02)')),
  ('5.9', 'Business logic abuse', lambda f: ('W' in f or 'N' in f, 'tidak ada urutan proses/nilai sensitif')),
- ('6.1', 'Status code benar', lambda f: (True, '')),
- ('6.2', 'Response schema/contract', lambda f: (True, '')),
- ('6.3', 'Request method salah (405)', lambda f: (True, '')),
- ('6.4', 'Auth/token (tanpa sesi / sesi user lain)', lambda f: (True, '')),
- ('6.5', 'Parameter negatif (tipe salah/extra/null)', lambda f: (bool({'C', 'E', 'SET', 'SR', 'L'} & f), 'tidak ada parameter input')),
+ ('6.1', 'Status code benar', lambda f: ('NOAPI' not in f, 'tidak ada request: filter di klien (TC-SIDEBAR-SEARCH-02)')),
+ ('6.2', 'Response schema/contract', lambda f: ('NOAPI' not in f, 'tidak ada request: filter di klien (TC-SIDEBAR-SEARCH-02)')),
+ ('6.3', 'Request method salah (405)', lambda f: ('NOAPI' not in f, 'tidak ada request: filter di klien (TC-SIDEBAR-SEARCH-02)')),
+ ('6.4', 'Auth/token (tanpa sesi / sesi user lain)', lambda f: ('NOAPI' not in f, 'tidak ada request: filter di klien (TC-SIDEBAR-SEARCH-02)')),
+ ('6.5', 'Parameter negatif (tipe salah/extra/null)', lambda f: (bool({'C', 'E', 'SET', 'SR', 'L'} & f) and 'NOAPI' not in f, 'tidak ada parameter input / tidak ada request')),
  ('6.6', 'Pagination & sorting param', lambda f: ('L' in f, 'tidak ada endpoint list')),
  ('6.7', 'Idempotency', lambda f: ('C' in f, 'tidak ada create')),
  ('7.1', 'JS console error', lambda f: (True, '')),

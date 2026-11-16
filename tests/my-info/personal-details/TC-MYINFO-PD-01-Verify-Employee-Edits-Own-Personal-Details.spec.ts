@@ -58,7 +58,7 @@ test('TC-MYINFO-PD-01: an employee edits their own personal details from My Info
   const put = nextResponse(essPage, `/pim/employees/${empNumber}/personal-details`, 'PUT');
   await pd.save();
   const resp = await put;
-  report.check('1.1-U PUT personal-details 200', resp?.status() === 200, `status=${resp?.status()}`);
+  report.check('1.1-U / 6.1 PUT personal-details 200', resp?.status() === 200, `status=${resp?.status()}`);
   report.check('1.8 Toast "Successfully Updated" tampil', await isVisibleWithWait(essPage.getByText('Successfully Updated'), 10_000));
 
   report.step('[Admin API] Nilai tersimpan');

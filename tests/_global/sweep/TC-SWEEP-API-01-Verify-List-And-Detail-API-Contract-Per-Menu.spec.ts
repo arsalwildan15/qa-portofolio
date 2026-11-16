@@ -58,7 +58,7 @@ test('TC-SWEEP-API-01: list/detail API contract, auth, method, paging, sensitive
     const ok = await page.request.get(API + u.list);
     const body = await ok.json().catch(() => null);
     const rows = Array.isArray(body?.data) ? (body.data as Array<Record<string, unknown>>) : null;
-    report.check(`${tag} 6.1 GET list (Admin) -> 200`, ok.status() === 200, `status=${ok.status()}`);
+    report.check(`${tag} 1.1-R / 6.1 GET list (Admin) -> 200`, ok.status() === 200, `status=${ok.status()}`);
     report.check(`${tag} 6.2 Kontrak list: data[] + meta.total angka`, !!rows && typeof body?.meta?.total === 'number', `data=${Array.isArray(body?.data)}, meta.total=${JSON.stringify(body?.meta?.total)}`);
 
     const noAuth = await anon.get(API + u.list);

@@ -57,7 +57,7 @@ test('TC-MYINFO-ATTACHMENT-01: an employee attachment upload on their own record
   const post = nextResponse(essPage, '/screen/personal/attachments', 'POST');
   await attachmentSave.click();
   const resp = await post;
-  report.check('1.7 POST attachments 200', resp?.status() === 200, `status=${resp?.status()}`);
+  report.check('1.7 / 6.1 POST attachments 200', resp?.status() === 200, `status=${resp?.status()}`);
   report.check('1.7 Attachment muncul di daftar', await isVisibleWithWait(essPage.getByText(`bukti-${stamp}.pdf`), 10_000));
 
   report.step('[ESS UI] Upload executable di-rename jadi .pdf');

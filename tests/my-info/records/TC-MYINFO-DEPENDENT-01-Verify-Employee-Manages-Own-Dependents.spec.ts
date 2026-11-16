@@ -69,13 +69,13 @@ test('TC-MYINFO-DEPENDENT-01: an employee manages their own dependents', async (
   const post = nextResponse(essPage, '/dependents', 'POST');
   await dep.save();
   const resp = await post;
-  report.check('1.1-C POST dependents 200', resp?.status() === 200, `status=${resp?.status()}`);
+  report.check('1.1-C / 6.1 POST dependents 200', resp?.status() === 200, `status=${resp?.status()}`);
   report.check('1.8 Toast "Successfully Saved"', await isVisibleWithWait(essPage.getByText('Successfully Saved'), 10_000));
   report.check('1.1-R Dependent muncul di tabel', await isVisibleWithWait(dep.tableRows.filter({ hasText: validName }).first(), 10_000));
 
   report.step('[ESS UI] Hapus dependent');
   const del = await deleteRowContaining(essPage, dep.tableRows, validName, '/dependents');
-  report.check('1.1-D DELETE dependents 200', del?.status() === 200, `status=${del?.status()}`);
+  report.check('1.1-D / 6.1 DELETE dependents 200', del?.status() === 200, `status=${del?.status()}`);
   report.check('1.1-D Dependent hilang dari tabel', await isHiddenWithWait(dep.tableRows.filter({ hasText: validName }).first(), 10_000));
 
   await close();

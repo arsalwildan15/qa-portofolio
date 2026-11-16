@@ -50,3 +50,47 @@ export const MUTATION_UNITS: MutationUnit[] = [
   named('U072', 'Claim > Configuration > Events', 'claim/events', { description: '', status: true }),
   named('U073', 'Claim > Configuration > Expense Types', 'claim/expenses/types', { description: '', status: true }),
 ];
+
+/**
+ * Add form of each unit above (URL reached by the list page's "+ Add" button, recorded LIVE 2026-11-16).
+ * The first input of every form is the name field. `fillRequired` fills the other required fields
+ * (only Locations: Country, and KPIs: Job Title + ratings, have any).
+ * Used by tests/_global/sweep/TC-SWEEP-UIMUT-01.
+ */
+export interface UiAddForm { addUrl: string; fillRequired?: (page: Page) => Promise<void> }
+
+const pickFirstOption = async (page: Page, label: RegExp) => {
+  await page.locator('form .oxd-input-group').filter({ has: page.locator('label', { hasText: label }) }).locator('.oxd-select-text').click();
+  await page.getByRole('option').nth(1).click();
+};
+
+export const UI_ADD_FORMS: Record<string, UiAddForm> = {
+  U013: { addUrl: 'admin/saveJobTitle' },
+  U014: { addUrl: 'admin/payGrade' },
+  U015: { addUrl: 'admin/saveEmploymentStatus' },
+  U016: { addUrl: 'admin/saveJobCategory' },
+  U017: { addUrl: 'admin/saveWorkShifts' },
+  U019: { addUrl: 'admin/saveLocation', fillRequired: (page) => pickFirstOption(page, /^Country/) },
+  U021: { addUrl: 'admin/saveSkills' },
+  U022: { addUrl: 'admin/saveEducation' },
+  U023: { addUrl: 'admin/saveLicenses' },
+  U024: { addUrl: 'admin/saveLanguages' },
+  U025: { addUrl: 'admin/saveMemberships' },
+  U026: { addUrl: 'admin/saveNationality' },
+  U039: { addUrl: 'pim/saveReportingMethod' },
+  U040: { addUrl: 'pim/saveTerminationReasons' },
+  U051: { addUrl: 'leave/defineLeaveType' },
+  U063: { addUrl: 'time/addCustomer' },
+  U066: {
+    addUrl: 'performance/saveKpi',
+    fillRequired: async (page) => {
+      await pickFirstOption(page, /^Job Title/);
+      for (const [label, value] of [[/^Minimum Rating/, '1'], [/^Maximum Rating/, '5']] as const) {
+        const input = page.locator('form .oxd-input-group').filter({ has: page.locator('label', { hasText: label }) }).locator('input');
+        if (!(await input.inputValue())) await input.fill(value);
+      }
+    },
+  },
+  U072: { addUrl: 'claim/saveEvents' },
+  U073: { addUrl: 'claim/saveExpense' },
+};

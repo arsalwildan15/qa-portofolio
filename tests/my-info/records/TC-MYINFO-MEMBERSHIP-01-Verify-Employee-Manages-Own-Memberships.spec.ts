@@ -58,13 +58,13 @@ test('TC-MYINFO-MEMBERSHIP-01: an employee manages their own memberships', async
   const post = nextResponse(essPage, '/memberships', 'POST');
   await mem.save();
   const resp = await post;
-  report.check('1.1-C POST memberships 200', resp?.status() === 200, `status=${resp?.status()}`);
+  report.check('1.1-C / 6.1 POST memberships 200', resp?.status() === 200, `status=${resp?.status()}`);
   report.check('1.8 Toast "Successfully Saved"', await isVisibleWithWait(essPage.getByText('Successfully Saved'), 10_000));
   report.check('1.1-R Membership muncul di tabel', await isVisibleWithWait(mem.tableRows.filter({ hasText: firstMembership }).first(), 10_000));
 
   report.step('[ESS UI] Hapus membership');
   const del = await deleteRowContaining(essPage, mem.tableRows, firstMembership, '/memberships');
-  report.check('1.1-D DELETE memberships 200', del?.status() === 200, `status=${del?.status()}`);
+  report.check('1.1-D / 6.1 DELETE memberships 200', del?.status() === 200, `status=${del?.status()}`);
   report.check('1.1-D Membership hilang dari tabel', await isHiddenWithWait(mem.tableRows.filter({ hasText: firstMembership }).first(), 10_000));
 
   await close();

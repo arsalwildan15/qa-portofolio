@@ -16,7 +16,7 @@ BODY = Font(name=ARIAL, size=10)
 FILL = {'COVERED': PatternFill('solid', fgColor='C6EFCE'), 'GAP': PatternFill('solid', fgColor='FFC7CE'), 'N/A': PatternFill('solid', fgColor='EDEDED')}
 FLAG_DOC = {'L': 'list', 'C': 'create', 'E': 'edit', 'D': 'delete', 'T': 'free text', 'N': 'numeric', 'DT': 'date', 'UP': 'upload',
             'W': 'workflow/status', 'RJ': 'reject/cancel action', 'ID': 'id-keyed record', 'AO': 'admin-only', 'ESS': 'used by ESS',
-            'URL': 'URL field', 'UQ': 'unique name', 'SR': 'search/filter', 'PII': 'personal data', 'LOG': 'auth flow', 'RO': 'read-only',
+            'URL': 'URL field', 'UQ': 'unique name', 'SR': 'search/filter', 'PII': 'personal data', 'LOG': 'auth flow', 'RO': 'read-only', 'NOAPI': 'no server request (client-side only, proven by a TC)',
             'SET': 'single settings form', 'EXP': 'file path import/export', 'PE': 'privilege boundary (read-only for ESS)'}
 module = lambda p: p.split(' > ')[0]
 

@@ -202,8 +202,9 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Time | 17 | [docs/TC-Time.txt](docs/TC-Time.txt) |
 | Cross-module (Leave/Claim/Performance/Time) | 6 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
 | My Info | 9 | [docs/TC-MyInfo.txt](docs/TC-MyInfo.txt) |
-| Sweep, all menus (data-driven) | 9 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **580** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
+| Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
+| **Total** | **585** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 

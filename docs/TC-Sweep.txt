@@ -266,5 +266,57 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              [TEMUAN] tidak ada rate limit di 19 menu; soft
                              delete di Job Titles, Leave Types, Customers.
 
+ 10  TC-SWEEP-UIMUT-01 [DONE]  TC-SWEEP-UIMUT-01-Verify-Add-Form-Feedback-Double-Submit-Navigation-And-Connection-Loss-Per-Menu.spec.ts
+                             (+) 1.8 | (-) 2.1 2.3 | (B) 3.1 | (!) 4.2 4.3 4.5 |
+                             (8) 8.4
+                             Verify The Add Form Of Every Named-Entity Menu:
+                             Feedback, Message Consistency, Double Submit,
+                             Navigation And Connection Loss
+                             -> Form Add 19 menu (registry UI_ADD_FORMS di
+                                src/data/unitMutationRegistry.ts, URL & field
+                                wajib direkam LIVE). Record uji "QaUi" dihapus.
+                             [UI VERIFICATION per unit]
+                             -> 2.1/8.4 nama kosong -> "Required", tanpa POST.
+                             -> 3.1/8.4 300 karakter -> "Should not exceed N
+                                characters"; format seragam di 19 form.
+                             -> 2.3/8.4 nama yg ada -> "Already exists".
+                             -> 1.8 Save valid -> toast "Successfully Saved",
+                                keluar dari form, tepat 1 record.
+                             -> 4.3 Back lalu Forward -> tanpa record kedua;
+                                tab baru sesi sama -> daftar terbuka; refresh
+                                saat submit -> maks 1 record.
+                             -> 4.2 double-click Save -> tepat 1 record.
+                             -> 4.5 koneksi putus (POST di-abort) -> tetap di
+                                form, isian utuh, toast error; sesi hilang ->
+                                dilempar ke login, tanpa record.
+                             HASIL 16 Nov 2026: 188/192 lolos. SENGAJA FAILED:
+                             4.2 double-click -> 2 record di Locations, Reporting
+                             Methods, KPIs (BUG BG-427, Medium); 1.8 create Pay
+                             Grade tanpa toast sukses (BUG BG-429, Low).
+                             [TEMUAN] pesan koneksi putus generik "Unexpected
+                             Error!" (tidak menyebut koneksi/coba lagi).
+
+ 11  TC-SWEEP-CONC-01  [DONE]  TC-SWEEP-CONC-01-Verify-Two-Admin-Sessions-Race-Last-Write-And-Edit-After-Delete-Per-Menu.spec.ts
+                             (!) 4.4 4.7 | (A) 6.1
+                             Verify Two Concurrent Admin Sessions On Every
+                             Named-Entity Menu: Create Race, Last Write, Edit
+                             After Delete
+                             -> Sesi A (fixture) & sesi B (login Admin kedua di
+                                context terpisah), 19 menu. Record "QaConc".
+                             [API VERIFICATION per unit]
+                             -> 4.4 nama sama dibuat paralel 5 putaran -> tidak
+                                pernah 2 record & tidak pernah 5xx.
+                             -> 4.7 A lalu B mengedit -> tanpa 5xx, hasil = B
+                                (last-write-wins dicatat sbg finding).
+                             -> 4.7/6.1 B mengedit record yg sudah dihapus A ->
+                                4xx & record tidak muncul kembali.
+                             HASIL 16 Nov 2026: 39/58 lolos. SENGAJA FAILED:
+                             4.4 cek keunikan tidak atomik -> 2 record bernama
+                             sama di 17 dari 18 menu ber-nama unik (1-4 dari 5
+                             putaran; Pay Grades -> 500) (BUG BG-428, Medium);
+                             4.7 Job Titles & Leave Types: edit record terhapus
+                             -> 200 (BUG BG-430, Low). Race bersifat acak: menu
+                             yg lolos di satu run belum tentu aman.
+
   RUN COMMAND:
     npx playwright test tests/_global/sweep --project=chromium --workers=1
