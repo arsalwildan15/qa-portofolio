@@ -36,6 +36,12 @@
  *   verifikasi UI, perlu investigasi lebih lanjut di sesi lain (lihat
  *   docs/QA-Review-Progress.md untuk riwayat lengkap 4 percobaan).
  *
+ * [PERBAIKAN 17 Nov 2026 -- root cause dibuktikan live] Fitur Report-to BENAR. Dua penyebab kegagalan
+ *   ada di skrip: (1) nama dicari dari teks opsi autocomplete yang memuat nama TENGAH ("A8DCo 4Ys 010Z"),
+ *   padahal tabel hanya menampilkan nama depan + belakang ("A8DCo 010Z"); (2) jeda tetap 3,5 dtk berpacu
+ *   dgn GET daftar yang baru dikirim ~3 dtk setelah POST. Kini nama diambil dari respons POST (record yg
+ *   benar2 tersimpan) dlm format tabel, dan TC menunggu GET daftar. BG-124/127/136 diarsip (bukan bug app).
+ *
  * RUN COMMAND:
  *   npx playwright test tests/pim/report-to/TC-PIM-REPORTTO-01-Verify-Add-Supervisor.spec.ts --project=chromium --headed
  * ================================================================================
@@ -62,13 +68,21 @@ test('TC-PIM-REPORTTO-01: add supervisor succeeds', async ({
   await reportToPage.openAddSupervisor();
   const selectedName = await reportToPage.selectFirstNameOption('a');
   await reportToPage.selectDropdownOption(reportToPage.reportingMethodSelect, 'Direct');
-  await reportToPage.save();
-  await page.waitForTimeout(3500);
+  const listReload = page.waitForResponse((r) => r.url().includes(`/employees/${empNumber}/supervisors?`) && r.request().method() === 'GET', { timeout: 30_000 }).catch(() => null);
+  const [saved] = await Promise.all([
+    page.waitForResponse((r) => r.url().includes(`/employees/${empNumber}/supervisors`) && r.request().method() === 'POST', { timeout: 30_000 }),
+    reportToPage.save(),
+  ]);
+  const who = ((await saved.json()) as { data: { supervisor: { firstName: string; lastName: string } } }).data.supervisor;
+  // The table shows "first last" without the middle name that the autocomplete option includes.
+  const shownName = `${who.firstName} ${who.lastName}`;
+  await listReload;
+  await page.waitForLoadState('networkidle');
 
   report.step('Verify Supervisor yang dipilih muncul di Assigned Supervisors');
   report.check(
-    `"${selectedName}" muncul di tabel Supervisors`,
-    await isVisibleWithWait(page.getByText(selectedName, { exact: false }).first()),
+    `"${shownName}" (dipilih: "${selectedName}") muncul di tabel Supervisors`,
+    await isVisibleWithWait(page.getByText(shownName, { exact: false }).first()),
   );
 
   report.print();

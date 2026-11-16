@@ -58,8 +58,8 @@ LEGEND SIMBOL SKENARIO
   s/d 10), dan TC-PIM-LIST-07 (sort kolom) sudah di-resolve dari finding
   jadi hard-check penuh. PIM tidak lagi punya gap coverage yang
   didokumentasikan sebagai "belum tuntas" atau "inconclusive" -- 3 TC
-  Report-to (REPORTTO-01/03/06) punya known issue intermiten di cara
-  verifikasi UI, didokumentasikan di entry masing2, BUKAN gap coverage.
+  Report-to (REPORTTO-01/03/06) yang dulu "known issue" verifikasi UI sudah
+  diperbaiki 17 Nov 2026 (lihat blok [RESOLVED] di bagian Report-to).
 
   BELUM DICAKUP: modul Admin (terpisah dari PIM, 23+ sub-halaman: User
   Management, Job, Organization, Qualifications, Nationalities, Corporate
@@ -1670,7 +1670,7 @@ No.  Test Case ID      Status   Kategori           Skenario
   Folder: tests/pim/report-to/
 ================================================================================
 
-105    TC-PIM-REPORTTO-01  [KNOWN ISSUE]  TC-PIM-REPORTTO-01-Verify-Add-Supervisor.spec.ts
+105    TC-PIM-REPORTTO-01  [DONE]  TC-PIM-REPORTTO-01-Verify-Add-Supervisor.spec.ts
                              (+) Verify Add Supervisor
                              -> Klik "+ Add" Supervisors, cari "a" di
                                 autocomplete Name (tunggu placeholder
@@ -1680,7 +1680,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              [UI VERIFICATION]
                              -> Verify nama yang dipilih muncul di tabel
                                 Supervisors.
-                             NOTE: lihat blok [KNOWN ISSUE] di bawah.
+                             NOTE: diperbaiki 17 Nov 2026, lihat blok [RESOLVED] di bawah.
 
 106   TC-PIM-REPORTTO-02  [DONE]  TC-PIM-REPORTTO-02-Verify-Empty-Submit-Validation.spec.ts
                              (-) Verify Empty Submit Validation
@@ -1691,7 +1691,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 Reporting Method).
                              -> Verify POST supervisor TIDAK terkirim.
 
-107   TC-PIM-REPORTTO-03  [KNOWN ISSUE]  TC-PIM-REPORTTO-03-Verify-Add-Subordinate.spec.ts
+107   TC-PIM-REPORTTO-03  [DONE]  TC-PIM-REPORTTO-03-Verify-Add-Subordinate.spec.ts
                              (+) Verify Add Subordinate
                              -> Klik "+ Add" Subordinates (tombol ke-2), cari
                                 "a", pilih opsi pertama, Reporting Method =
@@ -1699,7 +1699,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              [UI VERIFICATION]
                              -> Verify nama yang dipilih muncul di tabel
                                 Subordinates.
-                             NOTE: lihat blok [KNOWN ISSUE] di bawah.
+                             NOTE: diperbaiki 17 Nov 2026, lihat blok [RESOLVED] di bawah.
 
 108   TC-PIM-REPORTTO-04  [DONE]  TC-PIM-REPORTTO-04-Verify-NonExistent-Name-Search.spec.ts
                              (-) Verify NonExistent Name Search
@@ -1720,7 +1720,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                              -> Verify jumlah baris Assigned Supervisors
                                 tetap 0.
 
-110   TC-PIM-REPORTTO-06  [KNOWN ISSUE]  TC-PIM-REPORTTO-06-Verify-Both-Lists-Render-Independently.spec.ts
+110   TC-PIM-REPORTTO-06  [DONE]  TC-PIM-REPORTTO-06-Verify-Both-Lists-Render-Independently.spec.ts
                              (+) Verify Both Lists Render Independently
                              -> Tambah 1 Supervisor (opsi pertama pencarian
                                 "a").
@@ -1729,9 +1729,9 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 yang dipilih.
                              -> Verify Subordinates TETAP 0 baris (list
                                 independen, tidak ikut terisi).
-                             NOTE: lihat blok [KNOWN ISSUE] di bawah (hanya
-                                   sisi Supervisors yang terdampak; cek
-                                   Subordinates=0 konsisten benar).
+                             NOTE: diperbaiki 17 Nov 2026, lihat blok [RESOLVED] di
+                                   bawah (cek Subordinates=0 kini lewat
+                                   section tabel ke-2 + API).
 
 111   TC-PIM-REPORTTO-07  [DONE]  TC-PIM-REPORTTO-07-Verify-Save-API-Endpoint.spec.ts
                              (+) [API] Verify Save API Endpoint
@@ -1745,19 +1745,20 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 di sisi server, independen dari masalah
                                 verifikasi UI di TC-01/03/06.
 
-  [KNOWN ISSUE, 2026-11-11] TC-PIM-REPORTTO-01/03/06 intermiten FAIL karena mismatch
-  format teks: textContent opsi autocomplete menyertakan segmen tengah (mis.
-  "A8DCo 4Ys 010Z") yang TIDAK selalu identik dengan isi cell tabel (mis.
-  "A8DCo 010Z", tanpa "4Ys"), jadi getByText(selectedName) kadang tidak match
-  walau data TERBUKTI tersimpan benar (dikonfirmasi via TC-PIM-REPORTTO-07:
-  POST .../supervisors -> 200 nyata, dan via page snapshot DOM yang menunjukkan
-  row memang ada). Fitur Report-to SENDIRI bekerja benar -- ini murni
-  keterbatasan cara verifikasi UI. 4 percobaan perbaikan locator
-  (table-index, tbody tr, role-based getByRole) SEMUA gagal atau meregresi TC
-  lain yang tadinya PASS, sehingga DIKEMBALIKAN ke pendekatan text-match
-  original atas keputusan user. Perlu investigasi lebih lanjut di sesi lain
-  kalau ingin dituntaskan (lihat riwayat lengkap di
-  docs/QA-Review-Progress.md, bagian BATCH 3, PIM).
+  [RESOLVED, 17 Nov 2026] TC-PIM-REPORTTO-01/03/06 -- dulu "known issue intermiten"
+  (2026-11-11), kini root cause dibuktikan live & skrip diperbaiki:
+    1. Opsi autocomplete menampilkan nama LENGKAP dgn nama tengah ("A8DCo 4Ys 010Z"),
+       tabel Assigned Supervisors/Subordinates hanya nama depan + belakang
+       ("A8DCo 010Z"). Kini nama diambil dari respons POST (record yang benar2
+       tersimpan) dlm format tabel.
+    2. Daftar dimuat ulang (GET .../supervisors|subordinates) ~3 dtk setelah POST;
+       jeda tetap 3,5 dtk kadang kalah cepat. Kini TC menunggu GET tsb.
+    3. REPORTTO-06: locator subordinateRows ikut menghitung kartu supervisor
+       (div pembungkus memuat kedua section). Kini memakai section tabel ke-2
+       (urutan terbukti live) + cek API subordinates total 0.
+  Fitur Report-to SENDIRI benar sejak awal. Hasil: 01 lolos 5/6 (1 run lambat di
+  pembuatan karyawan, tidak tereproduksi 3x berturut), 03 lolos 5/5, 06 lolos 2/2
+  berurutan. BG-124/127/136 dipindah ke Archive (bukan bug aplikasi).
 
 114   TC-PIM-REPORTTO-08  [DONE -- BUG]  TC-PIM-REPORTTO-08-Verify-Employee-Cannot-Report-To-Themselves-Or-Form-A-Reporting-Loop.spec.ts
                              (+) 1.4 | (S) 5.9 | (A) 6.1
