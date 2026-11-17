@@ -2474,14 +2474,38 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/security/TC-PIM-ATTACHMENT-API-01-Verify-Attachment-API-Contract-Size-Limit-Content-Validation-Filename-And-Injection.spec.ts --project=chromium
 
+118   TC-PIM-PHOTO-API-01  [DONE -- BUG]  tests/pim/security/TC-PIM-PHOTO-API-01-Verify-Profile-Picture-API-Contract-Size-Limit-Content-Validation-Filename-And-Mass-Assignment.spec.ts
+                             (+) 1.1-U | (-) 2.6 | (B) 3.3 | (S) 5.1-CmdPath 5.2-MassAssign
+                             5.3-ContentType 5.3-DoubleExt 5.3-Oversize 5.3-Filename |
+                             (A) 6.2 6.3 6.4 6.5   [U099]
+                             -> LATAR: PUT pim/employees/<N>/picture body JSON
+                                {empPicture:{name,type,size,base64}} -- endpoint TERPISAH
+                                dari personal-details, kontrak & gaya validasi SAMA dgn
+                                Attachments.
+                             -> PUT valid -> 200 & kontrak; file 2MB -> 422; .exe
+                                octet-stream -> 422 (keduanya ditegakkan benar).
+                             -> empNumber karyawan lain di body diabaikan (foto tetap milik
+                                empNumber di URL); PUT ke empNumber 999999 -> 422 BUKAN 500
+                                (kontras positif dgn pola "ghost id -> 500" modul lain);
+                                PATCH -> 405; tanpa sesi -> 401.
+                             HASIL: SENGAJA FAILED (R3), BUG BG-464 (Medium) -- pola SAMA
+                             dgn BG-462/BG-463: file "bad.php.png" (isi kode PHP, type
+                             diklaim image/png) DITERIMA 200; nama file path traversal
+                             DITERIMA 200 & disimpan apa adanya. Mengonfirmasi backend
+                             upload file OrangeHRM (Attachments & Profile Picture, Admin &
+                             ESS) berbagi kode validasi yg sama di KEEMPAT varian.
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/security/TC-PIM-PHOTO-API-01-Verify-Profile-Picture-API-Contract-Size-Limit-Content-Validation-Filename-And-Mass-Assignment.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 169 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 170 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
-  API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01
-  ditambahkan 2026-11-17 penutup gap taksonomi)
+  API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
+  PHOTO-API-01 ditambahkan 2026-11-17 penutup gap taksonomi)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

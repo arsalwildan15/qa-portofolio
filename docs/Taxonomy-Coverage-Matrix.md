@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 619 | 307 | 494 | 66.8% |
+| PIM | 630 | 296 | 494 | 68.0% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3430** | **1216** | **3093** | **73.8%** |
+| **Total** | **3441** | **1205** | **3093** | **74.1%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -27,7 +27,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 |---|---|---:|
 | 1.1-C | Create valid | 2 |
 | 1.1-R | Read / list | 26 |
-| 1.1-U | Update valid | 25 |
+| 1.1-U | Update valid | 24 |
 | 1.1-D | Delete valid | 8 |
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 71 |
 | 1.3 | State transition valid | 4 |
@@ -41,7 +41,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 2.3 | Duplicate/unique conflict | 6 |
 | 2.4 | Aksi tanpa permission (UI/API) | 1 |
 | 2.5 | State transition invalid | 9 |
-| 2.6 | Operasi pada record invalid/tak eksis | 7 |
+| 2.6 | Operasi pada record invalid/tak eksis | 6 |
 | 2.8 | Reject/cancel tanpa alasan | 5 |
 | 3.1 | Panjang karakter field | 23 |
 | 3.2 | Nilai numerik | 3 |
@@ -58,24 +58,24 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.1-SQLi | SQL Injection | 36 |
 | 5.1-XSS-Stored | Stored XSS | 18 |
 | 5.1-XSS-Reflected | Reflected XSS | 16 |
-| 5.1-CmdPath | Command/Path injection | 8 |
+| 5.1-CmdPath | Command/Path injection | 7 |
 | 5.1-SSRF | SSRF | 5 |
 | 5.2-IDOR | IDOR | 2 |
 | 5.2-PrivEsc | Privilege escalation | 6 |
-| 5.2-MassAssign | Mass assignment | 38 |
+| 5.2-MassAssign | Mass assignment | 37 |
 | 5.3-BadExt | Upload ekstensi terlarang | 2 |
 | 5.3-Rename | Upload file di-rename | 4 |
-| 5.3-ContentType | Content-Type spoofing | 6 |
-| 5.3-DoubleExt | Double extension | 6 |
-| 5.3-Oversize | Oversized file | 5 |
-| 5.3-Filename | Malicious filename | 6 |
+| 5.3-ContentType | Content-Type spoofing | 5 |
+| 5.3-DoubleExt | Double extension | 5 |
+| 5.3-Oversize | Oversized file | 4 |
+| 5.3-Filename | Malicious filename | 5 |
 | 5.4 | CSRF | 63 |
 | 5.5 | Rate limit / brute force / spam | 29 |
 | 5.6 | Security headers | 2 |
 | 5.9 | Business logic abuse | 13 |
-| 6.2 | Response schema/contract | 11 |
-| 6.3 | Request method salah (405) | 14 |
-| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 13 |
+| 6.2 | Response schema/contract | 10 |
+| 6.3 | Request method salah (405) | 13 |
+| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 12 |
 | 6.5 | Parameter negatif (tipe salah/extra/null) | 51 |
 | 6.7 | Idempotency | 23 |
 | 7.4 | Warning log | 2 |
