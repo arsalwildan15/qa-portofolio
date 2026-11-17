@@ -185,12 +185,14 @@
   Ditemukan jg: kapan pesan error muncul bisa RACE CONDITION (tidak konsisten antar-run)
   meski hasil akhirnya konsisten -- utk kasus spt ini, catat via report.finding() bukan
   hard-check pd aspek yg racy, tapi hard-check pd hasil akhir yg konsisten.
-  BERIKUT: PIM msh 75.7%, GAP tersisa (6 tab lain @11-13 -- Emergency Contacts, Dependents,
-  Immigration, Salary, Qualifications, Memberships; Employee List 8; Reporting Methods/
-  Termination Reasons @5) -> TERUSKAN PIM sampai 100% sesuai instruksi user, urutan GAP
-  terbesar dulu; SETELAH PIM 100%, LANJUT OTOMATIS ke modul berikutnya (Performance 67.2%
-  saat ini terendah) TANPA perlu konfirmasi user lagi (instruksi user 2026-11-17: "apabila
-  menu PIM sudah 100%, langsung lanjut ke modul berikutnya tanpa perlu konfirmasi").
+  DAN PIM lanjutan 75.7% -> 76.0% (1 TC baru: EMERGENCY-API-01; lolos penuh 5/5, tidak ada
+  bug -- relationship wajib, phone opsional, format phone ditegakkan). Matrix TOTAL 75.7%.
+  BERIKUT: PIM msh 76.0%, GAP tersisa (5 tab lain @11-13 -- Dependents, Immigration, Salary,
+  Qualifications, Memberships; Employee List 8; Reporting Methods/Termination Reasons @5) ->
+  TERUSKAN PIM sampai 100% sesuai instruksi user, urutan GAP terbesar dulu; SETELAH PIM
+  100%, LANJUT OTOMATIS ke modul berikutnya (Performance 67.2% saat ini terendah) TANPA
+  perlu konfirmasi user lagi (instruksi user 2026-11-17: "apabila menu PIM sudah 100%,
+  langsung lanjut ke modul berikutnya tanpa perlu konfirmasi").
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -620,3 +622,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | PIM lanjutan (ADD-API-01) | 1 TC; endpoint create employee pakai backend photo-upload yg sama dgn Attachments/Profile Picture (size WAJIB cocok persis panjang konten); BG-469 (Medium, konfirmasi ke-4 pola BG-462/463/464, tapi filename TIDAK ter-echo di API manapun); docs TC-PIM/README; PIM 74.2%; matrix TOTAL 75.3% | 1 commit
 - 2026-11-17 | PIM lanjutan (PD-API-01) | 1 TC; BG-470 (High, konfirmasi ke-3 pola BG-466/467 -- nationalityId tidak ada -> 500, gender/empNumber benar divalidasi 422); docs TC-PIM/README; PIM 75.1%; matrix TOTAL 75.5% | 1 commit
 - 2026-11-17 | PIM lanjutan (CONTACT-API-01 + perbaikan CONTACT-03) | 1 TC baru + 1 TC lama diperbaiki; ditemukan bug skrip di TC-PIM-CONTACT-03 (klaim "email invalid diterima tanpa validasi" salah, tidak pernah periksa body yg benar2 terkirim -- app sebenarnya mengosongkan sendiri nilai invalid, server JUSTRU memvalidasi 422 saat dikirim langsung via API); aturan baru: klaim "diterima tanpa validasi" wajib verifikasi body asli; docs TC-PIM/README; PIM 75.7%; matrix TOTAL 75.6% | 1 commit
+- 2026-11-17 | PIM lanjutan (EMERGENCY-API-01) | 1 TC; lolos penuh 5/5, tidak ada bug (relationship wajib, phone opsional, format phone ditegakkan); docs TC-PIM/README; PIM 76.0%; matrix TOTAL 75.7% | 1 commit
