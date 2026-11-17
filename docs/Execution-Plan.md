@@ -168,8 +168,12 @@
   KE-4 pola BG-462/463/464 -- photo "bad.php.png" diterima + filename path traversal
   diterima saat create employee, TAPI filename TIDAK ter-echo di API manapun yg diuji jadi
   dampak baca-balik tidak terkonfirmasi langsung). Matrix TOTAL 75.3%.
-  BERIKUT: PIM msh 74.2%, GAP tersisa (Personal Details 16, 7 tab lain @11-13, Employee List
-  8, Reporting Methods/Termination Reasons @5) -> TERUSKAN PIM sampai 100% sesuai instruksi
+  DAN PIM lanjutan 74.2% -> 75.1% (1 TC baru: PD-API-01; BUG BG-470 (High), konfirmasi KE-3
+  pola BG-466/467 -- nationalityId tidak ada -> 500; gender/empNumber benar divalidasi 422).
+  Matrix TOTAL 75.5%.
+  BERIKUT: PIM msh 75.1%, GAP tersisa (7 tab lain @11-13 -- Contact Details, Emergency
+  Contacts, Dependents, Immigration, Salary, Qualifications, Memberships; Employee List 8;
+  Reporting Methods/Termination Reasons @5) -> TERUSKAN PIM sampai 100% sesuai instruksi
   user, urutan GAP terbesar dulu; SETELAH PIM 100%, LANJUT OTOMATIS ke modul berikutnya
   (Performance 67.2% saat ini terendah) TANPA perlu konfirmasi user lagi (instruksi user
   2026-11-17: "apabila menu PIM sudah 100%, langsung lanjut ke modul berikutnya tanpa perlu
@@ -601,3 +605,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | PIM lanjutan (JOB-API-01) | 1 TC; BG-467 (High, pola sama dgn BG-466 -- jobTitleId/empStatusId/locationId tidak ada -> 500, hanya subUnitId divalidasi benar); docs TC-PIM/README; PIM 71.5%; matrix TOTAL 74.8% | 1 commit
 - 2026-11-17 | PIM lanjutan (CUSTOMFIELD-API-01) | 1 TC; percobaan awal batas panjang SALAH (string identik antar percobaan + delete-by-path gagal diam2 -> data lama kolisi, simpul 60/400 keliru); diulang dgn nama unik -> batas REAL 250 karakter, status 422 konsisten; BG-468 (Low, duplikat diterima via API, form-only validation); docs TC-PIM/README + pelajaran metodologi; PIM 72.6%; matrix TOTAL 75.0% | 1 commit
 - 2026-11-17 | PIM lanjutan (ADD-API-01) | 1 TC; endpoint create employee pakai backend photo-upload yg sama dgn Attachments/Profile Picture (size WAJIB cocok persis panjang konten); BG-469 (Medium, konfirmasi ke-4 pola BG-462/463/464, tapi filename TIDAK ter-echo di API manapun); docs TC-PIM/README; PIM 74.2%; matrix TOTAL 75.3% | 1 commit
+- 2026-11-17 | PIM lanjutan (PD-API-01) | 1 TC; BG-470 (High, konfirmasi ke-3 pola BG-466/467 -- nationalityId tidak ada -> 500, gender/empNumber benar divalidasi 422); docs TC-PIM/README; PIM 75.1%; matrix TOTAL 75.5% | 1 commit
