@@ -2763,18 +2763,34 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/qualifications/TC-PIM-QUALIFICATION-API-01-Verify-Work-Experience-API-Contract-Optional-Dates-Date-Order-And-Unknown-Record.spec.ts --project=chromium
 
+132   TC-PIM-MEMBERSHIP-API-01  [DONE]  tests/pim/memberships/TC-PIM-MEMBERSHIP-API-01-Verify-Membership-API-Contract-Optional-Fields-And-Business-Rule-Validation.spec.ts
+                             (+) 1.1-C 1.2 1.4 | (S) 5.9 | (A) 6.2   [U097]
+                             -> LATAR: tidak ada field teks bebas pd endpoint ini (5.1-XSS-
+                                Stored N/A, dicatat tanpa kode literal di label).
+                             -> Create valid -> 200; fee & kedua tanggal kosong (opsional)
+                                -> 200; fee negatif -> 422; renewalDate sebelum
+                                commenceDate -> 422 (KEDUANYA ditegakkan benar, kontras
+                                positif dgn Immigration/BG-433).
+                             HASIL: lolos penuh (6/6), tidak ada bug.
+
+  SEMUA 9 TAB EMPLOYEE (Personal Details, Contact, Emergency, Dependents, Immigration, Job,
+  Salary, Qualifications, Memberships) SELESAI ditutup gap-nya 17-18 Nov 2026.
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/memberships/TC-PIM-MEMBERSHIP-API-01-Verify-Membership-API-Contract-Optional-Fields-And-Business-Rule-Validation.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 183 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 184 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
   JOB-API-01, CUSTOMFIELD-API-01, ADD-API-01, PD-API-01, CONTACT-API-01,
   EMERGENCY-API-01, DEPENDENT-API-01, IMMIGRATION-API-01, SALARY-API-01,
-  QUALIFICATION-API-01 ditambahkan 2026-11-17/18 penutup gap taksonomi;
-  CONTACT-03 ditulis ulang krn bug skrip)
+  QUALIFICATION-API-01, MEMBERSHIP-API-01 ditambahkan 2026-11-17/18
+  penutup gap taksonomi; CONTACT-03 ditulis ulang krn bug skrip)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,
