@@ -2619,15 +2619,40 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/configuration/custom-fields/TC-PIM-CUSTOMFIELD-API-01-Verify-Custom-Field-API-Contract-Validation-Length-Limit-Injection-And-Mass-Assignment.spec.ts --project=chromium
 
+124   TC-PIM-ADD-API-01  [DONE -- BUG]  tests/pim/add-employee/TC-PIM-ADD-API-01-Verify-Add-Employee-API-Contract-Photo-Validation-Content-Type-Filename-And-Mass-Assignment.spec.ts
+                             (+) 1.2 1.4 | (-) 4.6 | (S) 5.1-CmdPath 5.2-MassAssign
+                             5.3-ContentType 5.3-Oversize 5.3-Filename | (A) 6.2 6.3 6.4
+                             6.5   [U041]
+                             -> LATAR: POST pim/employees body {firstName,middleName,
+                                lastName,empPicture,employeeId}; empPicture = {name,type,
+                                size,base64} -- `size` WAJIB cocok persis panjang konten
+                                base64-decoded (ditemukan via percobaan awal yg salah pakai
+                                literal size:10 -> 422 tidak sesuai, bukan bug).
+                             -> Create dgn/tanpa photo -> 200; required kosong -> 422; .exe/
+                                text-html -> 422 (allowlist benar); 2MB -> 422; field asing
+                                (empNumber, isAdmin) -> 422; PATCH -> 405; tanpa sesi -> 401;
+                                nama file path traversal TIDAK di-echo di API employee
+                                manapun (beda dgn Attachments -- dampak baca-balik lbh
+                                rendah).
+                             HASIL: SENGAJA FAILED (R3), BUG BG-469 (Medium), KONFIRMASI
+                             KE-4 dari pola BG-462/463/464 -- file "bad.php.png" (isi kode
+                             PHP, type diklaim image/png) DITERIMA 200 saat create employee;
+                             nama file path traversal DITERIMA 200 (tapi TIDAK terkonfirmasi
+                             tersimpan verbatim scr terbaca-balik spt Attachments).
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/add-employee/TC-PIM-ADD-API-01-Verify-Add-Employee-API-Contract-Photo-Validation-Content-Type-Filename-And-Mass-Assignment.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 175 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 176 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
-  JOB-API-01, CUSTOMFIELD-API-01 ditambahkan 2026-11-17 penutup gap taksonomi)
+  JOB-API-01, CUSTOMFIELD-API-01, ADD-API-01 ditambahkan 2026-11-17
+  penutup gap taksonomi)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

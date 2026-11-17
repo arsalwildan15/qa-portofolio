@@ -193,7 +193,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 |--------|----:|------|
 | Login | 46 | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | Admin | 144 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
-| PIM | 175 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| PIM | 176 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 68 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Performance | 41 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
@@ -206,7 +206,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **635** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **636** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -255,7 +255,7 @@ Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-ex
 
 **Users list filter + bulk delete** (`TC-ADMIN-USER-10`/`11`, added 2026-11-12) were previously untested. Combined Role+Status filtering is confirmed to AND together server-side as expected. The Username filter field turned out to be **exact-match (case-insensitive), not a substring search**. It looks like a plain free-text search box with no visual hint that it needs the full username, which is a UX gap worth flagging even though the server behavior itself isn't wrong. Bulk delete (checkbox-select 2+ rows, then "Delete Selected") is confirmed to send a single `DELETE` with `{"ids":[...]}` for every selected row at once, the same pattern already seen on Languages/Nationalities/Qualifications.
 
-### PIM (175 TCs)
+### PIM (176 TCs)
 
 Full module coverage, no open functional gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job incl. Terminate Employment, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs and 2 IDOR/clickjacking security TCs.
 
@@ -286,6 +286,8 @@ IDOR on personal-details/salary access is confirmed N/A (single-role architectur
 `TC-PIM-JOB-API-01` found the Job Details API validates exactly one of its four lookup ids correctly: a `subUnitId` that doesn't exist is rejected with 422, but `jobTitleId`, `empStatusId` and `locationId` that don't exist all crash the endpoint with HTTP 500 instead — the same per-field validation inconsistency as `BG-466` (`BG-467`, High). Date validation, mass-assignment rejection, and the Employment Contract's start/end date ordering check all work correctly.
 
 `TC-PIM-CUSTOMFIELD-API-01` confirmed the real field-name length limit is 250 characters (an initial probe using identical strings across repeated trials gave a false boundary, caught and corrected by re-running with a unique name per trial). Bug: a field name that already exists is correctly rejected by the Add Custom Field form ("Already exists"), but accepted as a second row when posted directly to the API — the uniqueness check only lives in the form (`BG-468`, Low, the same form-only-validation pattern already confirmed elsewhere, e.g. Leave Holidays).
+
+`TC-PIM-ADD-API-01` found the same photo-upload backend (now the 4th confirmed instance) on employee creation itself: a `bad.php.png` claiming `image/png` is accepted and a path-traversal filename is accepted too (`BG-469`, Medium) — though unlike Attachments, that filename is never echoed back by any employee endpoint tested, so a read-back exposure isn't confirmed here even though the underlying validation gap is identical. The content-type allowlist, size limit, required fields, and mass-assignment rejection all work correctly.
 
 ### Recruitment (68 TCs)
 
@@ -408,7 +410,7 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 
 Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
 
-**Taxonomy coverage snapshot (2026-11-17):** 75.0% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7%, Leave at 82.4%, My Info at 76.6%, PIM at 72.6%, Admin at 72.8%, Time at 69.5% and Buzz/Claim at 69.0%; Performance (67.2%) is the lowest. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-17):** 75.3% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7%, Leave at 82.4%, My Info at 76.6%, PIM at 74.2%, Admin at 72.8%, Time at 69.5% and Buzz/Claim at 69.0%; Performance (67.2%) is the lowest. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 
