@@ -2498,14 +2498,32 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/security/TC-PIM-PHOTO-API-01-Verify-Profile-Picture-API-Contract-Size-Limit-Content-Validation-Filename-And-Mass-Assignment.spec.ts --project=chromium
 
+119   TC-PIM-REPORT-API-01  [DONE]  tests/pim/reports/TC-PIM-REPORT-API-01-Verify-Reports-API-Contract-Validation-Length-Limit-Injection-Mass-Assignment-And-Method.spec.ts
+                             (+) 1.1-C 1.1-R 1.1-D 1.8 | (-) 2.2 2.3 2.6 | (B) 3.1 |
+                             (S) 5.1-SQLi 5.1-XSS-Stored 5.1-XSS-Reflected 5.2-MassAssign |
+                             (A) 6.3 6.4 6.5   [U042]
+                             -> LATAR: POST pim/reports/defined body {name,include,criteria,
+                                fieldGroup}; batas panjang name = 255 karakter (dikonfirmasi
+                                via probe binary-search: 255 ok, 256 ditolak 422).
+                             -> Create/Read/Delete valid -> 200; name kosong -> 422; 255/256
+                                karakter -> 200/422; SQLi/XSS pada name -> 200 & tersimpan
+                                aman; GET search dgn payload SQLi/XSS -> exact-match, tidak
+                                direfleksikan; field asing (isAdmin) -> 422 skema ketat;
+                                DELETE/GET id 999999 -> 404 (bukan 500, benar); PATCH -> 405;
+                                tanpa sesi -> 401.
+                             HASIL: lolos penuh (16/16), tidak ada bug ditemukan.
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/reports/TC-PIM-REPORT-API-01-Verify-Reports-API-Contract-Validation-Length-Limit-Injection-Mass-Assignment-And-Method.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 170 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 171 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
-  PHOTO-API-01 ditambahkan 2026-11-17 penutup gap taksonomi)
+  PHOTO-API-01, REPORT-API-01 ditambahkan 2026-11-17 penutup gap taksonomi)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

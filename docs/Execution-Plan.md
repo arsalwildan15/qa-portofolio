@@ -120,12 +120,17 @@
   blm diuji scr API langsung) kini terbukti berbagi backend validasi yg sama persis (BG-462/
   463/464) -- SATU root cause, EMPAT bug id (sesuai konvensi project: 1 bug id per modul/unit
   meski root cause sama).
-  BERIKUT (urut terendah): PIM 68.0% msh terendah -> lanjutkan modul ini (Reports, Report-to,
-  Data Import, Job, Custom Fields, Add Employee, sisa 7 tab employee) sblm pindah modul lain;
-  lalu Buzz/Claim 69%, Admin 72.8%, Time 69.5%, Performance 67.2%, My Info 76.6% (sisa GAP di
-  atas) utk diperkuat nanti; Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple
-  Employees" Add Entitlement msh N/A beralasan (filter kosong kena 118 karyawan sungguhan);
-  lalu Fase 5-8.
+  DAN PIM lanjutan lagi 68.0% -> 69.0% (1 TC baru: REPORT-API-01; batas panjang name Reports =
+  255 karakter dikonfirmasi via probe binary-search; 16/16 lolos, TIDAK ada bug ditemukan --
+  validasi, search, method, sesi semua benar). Matrix TOTAL 74.3%. CATATAN: satu kali run resmi
+  sempat gagal krn ECONNRESET transien lokal (BG-465 auto-logged lalu auto-closed saat retest
+  lolos bersih) -- sudah diarsipkan, bukan bug aplikasi. PIM kini SEJAJAR dgn Buzz/Claim (69.0%)
+  -> Performance (67.2%) kini modul TERENDAH keseluruhan proyek.
+  BERIKUT (urut terendah): Performance 67.2% kini terendah -> cek GAP tersisa di sana dulu;
+  lalu PIM 69.0% (Report-to, Data Import, Job, Custom Fields, Add Employee, sisa 7 tab
+  employee) sejajar dgn Buzz/Claim; Admin 72.8%, Time 69.5%, My Info 76.6% (sisa GAP di atas)
+  utk diperkuat nanti; Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees"
+  Add Entitlement msh N/A beralasan (filter kosong kena 118 karyawan sungguhan); lalu Fase 5-8.
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -547,3 +552,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | P4.0 My Info lanjutan lagi | 1 TC (ATTACHMENT-02); ditemukan endpoint Attachments JSON base64 (bukan multipart) via page.on('request'); BG-462 (2 temuan: PHP diterima diklaim pdf, filename path traversal disimpan verbatim) ditulis standar; docs TC-MyInfo/README; My Info 76.6% (lewati PIM); matrix TOTAL 73.6% | 1 commit
 - 2026-11-17 | P4.0 PIM lanjutan | 1 TC (ATTACHMENT-API-01); endpoint Attachments Admin-side terbukti backend IDENTIK dgn My Info/ESS; BG-463 (Medium, pola sama dgn BG-462: filename path traversal disimpan verbatim) ditulis standar; docs TC-PIM/README; PIM 66.8%; matrix TOTAL 73.8% | 1 commit
 - 2026-11-17 | P4.0 PIM lanjutan lagi | 1 TC (PHOTO-API-01); endpoint Profile Picture terpisah dari personal-details tapi backend validasi sama dgn Attachments; BG-464 (Medium, pola sama dgn BG-462/463) + kontras positif (ghost empNumber -> 422 bukan 500); docs TC-PIM/README; PIM 68.0%; matrix TOTAL 74.1% | 1 commit
+- 2026-11-17 | P4.0 PIM lanjutan lagi | 1 TC (REPORT-API-01); batas panjang name Reports = 255 karakter (probe binary-search); 16/16 lolos, tidak ada bug; BG-465 (ECONNRESET transien, auto-closed, diarsipkan); docs TC-PIM/README; PIM 69.0% (sejajar Buzz/Claim); matrix TOTAL 74.3%. Performance (67.2%) kini modul terendah proyek | 1 commit
