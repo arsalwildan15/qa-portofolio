@@ -2516,14 +2516,38 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/reports/TC-PIM-REPORT-API-01-Verify-Reports-API-Contract-Validation-Length-Limit-Injection-Mass-Assignment-And-Method.spec.ts --project=chromium
 
+120   TC-PIM-REPORTTO-API-01  [DONE -- BUG]  tests/pim/report-to/TC-PIM-REPORTTO-API-01-Verify-Supervisor-API-Contract-Validation-Update-Delete-Mass-Assignment-And-Method.spec.ts
+                             (+) 1.1-R 1.1-U 1.1-D | (-) 2.2 | (S) 5.2-MassAssign |
+                             (A) 6.3 6.4 6.5 6.7   [U095]
+                             -> LATAR: POST pim/employees/<N>/supervisors {empNumber
+                                (supervisor),reportingMethodId}; PUT .../supervisors/<sup>
+                                {reportingMethodId}; DELETE sama endpoint {ids}; GET
+                                .../supervisors (arah atasan) & .../subordinates (arah
+                                bawahan). Endpoint TIDAK punya field teks bebas -- 3.1/4.1/
+                                5.1-SQLi/5.1-XSS-Stored dicatat N/A via report.finding() TANPA
+                                kode literal di label (supaya tidak salah ke-tag COVERED oleh
+                                matrix tooling -- pelajaran ditemukan & diperbaiki sesi ini).
+                             -> Create/Read/Update/Delete valid -> 200 & kontrak benar; field
+                                asing (isAdmin) -> 422 (satu-satunya validasi yg benar).
+                             HASIL: SENGAJA FAILED (R3), BUG BG-466 (High) -- endpoint POST
+                             SAMA SEKALI tidak memvalidasi empNumber/reportingMethodId
+                             sebelum diproses: reportingMethodId di luar enum (999), empNumber
+                             bertipe salah ("abc"), supervisor yg tidak ada (999999), dan
+                             supervisor DUPLIKAT (ditambah 2x) KEEMPATNYA -> 500 Internal
+                             Server Error, bukan 422.
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/report-to/TC-PIM-REPORTTO-API-01-Verify-Supervisor-API-Contract-Validation-Update-Delete-Mass-Assignment-And-Method.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 171 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 172 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
-  PHOTO-API-01, REPORT-API-01 ditambahkan 2026-11-17 penutup gap taksonomi)
+  PHOTO-API-01, REPORT-API-01, REPORTTO-API-01 ditambahkan 2026-11-17
+  penutup gap taksonomi)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

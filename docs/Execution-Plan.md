@@ -40,6 +40,9 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
+- **INSTRUKSI USER 2026-11-17:** lanjutkan PIM sampai 100% (bukan modul terendah dulu dulu --
+  override urutan standing utk sesi ini). Workflow sama: probe-first, 1 unit/TC per commit,
+  verifikasi 2x (probe + real run) sblm anggap bug nyata.
 - **NEXT ACTION:** FASE 4 / P4.0. Selesai 17 Nov: Recruitment 54.6% -> 100% (8 TC + TC-XMOD-07; BG-441..447)
   DAN Leave 55.1% -> 82.4% (7 TC baru: API-01, MUT-01, ENT-02, VALID-01, SECURITY-01, CONFIG-01, HOLIDAY-01;
   BG-453 GET entitlements error 500 utk offset berapa pun, BG-454 API terima entitlement >=10000/>2 desimal
@@ -126,11 +129,22 @@
   sempat gagal krn ECONNRESET transien lokal (BG-465 auto-logged lalu auto-closed saat retest
   lolos bersih) -- sudah diarsipkan, bukan bug aplikasi. PIM kini SEJAJAR dgn Buzz/Claim (69.0%)
   -> Performance (67.2%) kini modul TERENDAH keseluruhan proyek.
-  BERIKUT (urut terendah): Performance 67.2% kini terendah -> cek GAP tersisa di sana dulu;
-  lalu PIM 69.0% (Report-to, Data Import, Job, Custom Fields, Add Employee, sisa 7 tab
-  employee) sejajar dgn Buzz/Claim; Admin 72.8%, Time 69.5%, My Info 76.6% (sisa GAP di atas)
-  utk diperkuat nanti; Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees"
-  Add Entitlement msh N/A beralasan (filter kosong kena 118 karyawan sungguhan); lalu Fase 5-8.
+  DAN PIM lanjutan (atas instruksi user 2026-11-17: PIM dulu sampai 100%, bukan modul terendah)
+  69.0% -> 69.8% (1 TC baru: REPORTTO-API-01; BUG BG-466 (High) -- endpoint POST
+  .../supervisors SAMA SEKALI tidak memvalidasi empNumber/reportingMethodId: reportingMethodId
+  di luar enum, empNumber bertipe salah, supervisor tak ada, DAN duplikat KEEMPATNYA -> 500,
+  bukan 422; satu-satunya validasi yg benar = skema body). Matrix TOTAL 74.4%.
+  PELAJARAN TOOLING (diperbaiki sesi ini): report.finding() dgn kode taksonomi LITERAL di
+  label (mis. "3.1 / 4.1 / 5.1-SQLi N/A") ikut di-tag COVERED oleh build_matrix.py (baris 252-254
+  menambah SEMUA kode yg match EXPLICIT_RX dari checks+findings tanpa syarat) -- padahal
+  maksudnya N/A, bukan ter-verifikasi. Fix: tulis finding tanpa kode literal di label kalau
+  maksudnya N/A/tidak berlaku, bukan "tercakup". Ditemukan & diperbaiki langsung (matrix
+  re-build turun dari 3461 COVERED jadi 3457 COVERED yg jujur).
+  BERIKUT: PIM msh 69.8%, 217 GAP tersisa (Add Employee 18, Data Import 21, Job 20, Custom
+  Fields 19, Personal Details 16, 7 tab lain @11-13, Employee List 8, Reporting
+  Methods/Termination Reasons @5) -> TERUSKAN PIM sampai 100% sesuai instruksi user, urutan
+  GAP terbesar dulu. Setelah PIM selesai, baru kembali ke urutan standing (modul terendah):
+  Performance 67.2% saat ini terendah drpd PIM.
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -553,3 +567,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | P4.0 PIM lanjutan | 1 TC (ATTACHMENT-API-01); endpoint Attachments Admin-side terbukti backend IDENTIK dgn My Info/ESS; BG-463 (Medium, pola sama dgn BG-462: filename path traversal disimpan verbatim) ditulis standar; docs TC-PIM/README; PIM 66.8%; matrix TOTAL 73.8% | 1 commit
 - 2026-11-17 | P4.0 PIM lanjutan lagi | 1 TC (PHOTO-API-01); endpoint Profile Picture terpisah dari personal-details tapi backend validasi sama dgn Attachments; BG-464 (Medium, pola sama dgn BG-462/463) + kontras positif (ghost empNumber -> 422 bukan 500); docs TC-PIM/README; PIM 68.0%; matrix TOTAL 74.1% | 1 commit
 - 2026-11-17 | P4.0 PIM lanjutan lagi | 1 TC (REPORT-API-01); batas panjang name Reports = 255 karakter (probe binary-search); 16/16 lolos, tidak ada bug; BG-465 (ECONNRESET transien, auto-closed, diarsipkan); docs TC-PIM/README; PIM 69.0% (sejajar Buzz/Claim); matrix TOTAL 74.3%. Performance (67.2%) kini modul terendah proyek | 1 commit
+- 2026-11-17 | PIM lanjutan (instruksi user: PIM dulu sampai 100%) | 1 TC (REPORTTO-API-01); BG-466 (High, endpoint supervisors tidak validasi input sama sekali -> 500 utk 4 skenario); fix tooling report.finding() dgn kode literal salah ke-tag COVERED (ditemukan & diperbaiki, matrix jadi lebih jujur); docs TC-PIM/README; PIM 69.8%; matrix TOTAL 74.4% | 1 commit
