@@ -171,13 +171,26 @@
   DAN PIM lanjutan 74.2% -> 75.1% (1 TC baru: PD-API-01; BUG BG-470 (High), konfirmasi KE-3
   pola BG-466/467 -- nationalityId tidak ada -> 500; gender/empNumber benar divalidasi 422).
   Matrix TOTAL 75.5%.
-  BERIKUT: PIM msh 75.1%, GAP tersisa (7 tab lain @11-13 -- Contact Details, Emergency
-  Contacts, Dependents, Immigration, Salary, Qualifications, Memberships; Employee List 8;
-  Reporting Methods/Termination Reasons @5) -> TERUSKAN PIM sampai 100% sesuai instruksi
-  user, urutan GAP terbesar dulu; SETELAH PIM 100%, LANJUT OTOMATIS ke modul berikutnya
-  (Performance 67.2% saat ini terendah) TANPA perlu konfirmasi user lagi (instruksi user
-  2026-11-17: "apabila menu PIM sudah 100%, langsung lanjut ke modul berikutnya tanpa perlu
-  konfirmasi").
+  DAN PIM lanjutan 75.1% -> 75.7% (1 TC baru CONTACT-API-01 + 1 TC diperbaiki CONTACT-03).
+  Matrix TOTAL 75.6%.
+  TEMUAN METODOLOGI PENTING (bug SKRIP, bukan bug app -- SELALU diperiksa di modul
+  berikutnya): TC-PIM-CONTACT-03 lama menyimpulkan "email invalid diterima tanpa validasi"
+  HANYA dari status 200 & 0 error DOM, TANPA memeriksa body yg benar2 terkirim. Investigasi
+  page.on('request') membuktikan SEBALIKNYA: app mengosongkan sendiri nilai invalid sblm
+  Save (body yg terkirim sudah bersih, workEmail=null) -- 200 itu benar krn body-nya valid,
+  BUKAN krn app menerima string invalid. ATURAN BARU utk TC berikutnya: setiap TC yg
+  mengklaim "field X diterima tanpa validasi" WAJIB memverifikasi BODY REQUEST YG BENAR2
+  TERKIRIM (via page.on('request') atau resp.request().postData()), TIDAK CUKUP hanya
+  status code + DOM error count -- form bisa diam2 mengosongkan/mengubah nilai sblm submit.
+  Ditemukan jg: kapan pesan error muncul bisa RACE CONDITION (tidak konsisten antar-run)
+  meski hasil akhirnya konsisten -- utk kasus spt ini, catat via report.finding() bukan
+  hard-check pd aspek yg racy, tapi hard-check pd hasil akhir yg konsisten.
+  BERIKUT: PIM msh 75.7%, GAP tersisa (6 tab lain @11-13 -- Emergency Contacts, Dependents,
+  Immigration, Salary, Qualifications, Memberships; Employee List 8; Reporting Methods/
+  Termination Reasons @5) -> TERUSKAN PIM sampai 100% sesuai instruksi user, urutan GAP
+  terbesar dulu; SETELAH PIM 100%, LANJUT OTOMATIS ke modul berikutnya (Performance 67.2%
+  saat ini terendah) TANPA perlu konfirmasi user lagi (instruksi user 2026-11-17: "apabila
+  menu PIM sudah 100%, langsung lanjut ke modul berikutnya tanpa perlu konfirmasi").
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -606,3 +619,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | PIM lanjutan (CUSTOMFIELD-API-01) | 1 TC; percobaan awal batas panjang SALAH (string identik antar percobaan + delete-by-path gagal diam2 -> data lama kolisi, simpul 60/400 keliru); diulang dgn nama unik -> batas REAL 250 karakter, status 422 konsisten; BG-468 (Low, duplikat diterima via API, form-only validation); docs TC-PIM/README + pelajaran metodologi; PIM 72.6%; matrix TOTAL 75.0% | 1 commit
 - 2026-11-17 | PIM lanjutan (ADD-API-01) | 1 TC; endpoint create employee pakai backend photo-upload yg sama dgn Attachments/Profile Picture (size WAJIB cocok persis panjang konten); BG-469 (Medium, konfirmasi ke-4 pola BG-462/463/464, tapi filename TIDAK ter-echo di API manapun); docs TC-PIM/README; PIM 74.2%; matrix TOTAL 75.3% | 1 commit
 - 2026-11-17 | PIM lanjutan (PD-API-01) | 1 TC; BG-470 (High, konfirmasi ke-3 pola BG-466/467 -- nationalityId tidak ada -> 500, gender/empNumber benar divalidasi 422); docs TC-PIM/README; PIM 75.1%; matrix TOTAL 75.5% | 1 commit
+- 2026-11-17 | PIM lanjutan (CONTACT-API-01 + perbaikan CONTACT-03) | 1 TC baru + 1 TC lama diperbaiki; ditemukan bug skrip di TC-PIM-CONTACT-03 (klaim "email invalid diterima tanpa validasi" salah, tidak pernah periksa body yg benar2 terkirim -- app sebenarnya mengosongkan sendiri nilai invalid, server JUSTRU memvalidasi 422 saat dikirim langsung via API); aturan baru: klaim "diterima tanpa validasi" wajib verifikasi body asli; docs TC-PIM/README; PIM 75.7%; matrix TOTAL 75.6% | 1 commit

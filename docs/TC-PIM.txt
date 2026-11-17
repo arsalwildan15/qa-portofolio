@@ -2665,16 +2665,45 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/personal-details/TC-PIM-PD-API-01-Verify-Personal-Details-API-Contract-Validation-Length-Limit-Injection-Unknown-Lookup-Id-And-Mass-Assignment.spec.ts --project=chromium
 
+126   TC-PIM-CONTACT-API-01  [DONE]  tests/pim/contact-details/TC-PIM-CONTACT-API-01-Verify-Contact-Details-API-Contract-Email-Format-Validation-Unicode-Injection-And-Mass-Assignment.spec.ts
+                             (+) 1.1-R 1.4 | (-) 2.1 2.2 | (S) 5.2-MassAssign | (A) 6.5
+                             [U089]
+                             -> LATAR: semua field Contact Details opsional; SERVER (bukan
+                                form) memvalidasi format workEmail -- dikonfirmasi via API
+                                langsung ("not-an-email" -> 422), kontras dgn TC-PIM-
+                                CONTACT-03 (lihat di bawah) yg membuktikan form sendiri
+                                mengosongkan nilai invalid sblm sempat terkirim.
+                             -> GET/PUT valid -> 200 & kontrak; Arab/CJK -> 200 & aman;
+                                street1 300 karakter -> 422; field asing (isAdmin) -> 422;
+                                empNumber tidak ada -> 422 (benar); PATCH -> 405; tanpa sesi
+                                -> 401.
+                             HASIL: lolos penuh (10/10), tidak ada bug.
+
+  KOREKSI TC-PIM-CONTACT-03 (bug SKRIP ditemukan & diperbaiki, BUKAN bug app baru): versi
+  lama menyimpulkan "Work Email TIDAK divalidasi" HANYA dari status 200 & 0 error DOM,
+  TANPA memeriksa isi body yg benar2 terkirim. Investigasi ulang (page.on('request'))
+  membuktikan klaim itu SALAH: app MENGOSONGKAN SENDIRI nilai "not-an-email" sblm Save
+  (body yg terkirim workEmail=null, bukan string invalid) -- 200 memang benar krn body-nya
+  sudah bersih, bukan krn app menerima string invalid. TC ditulis ulang memverifikasi NILAI
+  SEBENARNYA (bukan cuma status code); ditemukan jg bhw kapan pesan error muncul TIDAK
+  KONSISTEN antar-run (race condition validasi async, diverifikasi 2x run berulang) --
+  dicatat sbg finding, bukan hard-check, krn hasil akhir (field selalu kosong) tetap
+  konsisten.
+
+  RUN COMMAND (TC baru + TC diperbaiki):
+    npx playwright test tests/pim/contact-details/TC-PIM-CONTACT-API-01-Verify-Contact-Details-API-Contract-Email-Format-Validation-Unicode-Injection-And-Mass-Assignment.spec.ts tests/pim/contact-details/TC-PIM-CONTACT-03-Verify-Invalid-Email-Format-Not-Validated.spec.ts --project=chromium --workers=1
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 177 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 178 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
-  JOB-API-01, CUSTOMFIELD-API-01, ADD-API-01, PD-API-01 ditambahkan
-  2026-11-17 penutup gap taksonomi)
+  JOB-API-01, CUSTOMFIELD-API-01, ADD-API-01, PD-API-01, CONTACT-API-01
+  ditambahkan 2026-11-17 penutup gap taksonomi; CONTACT-03 ditulis ulang
+  krn bug skrip)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

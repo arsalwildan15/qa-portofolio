@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 695 | 231 | 494 | 75.1% |
+| PIM | 701 | 225 | 494 | 75.7% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3506** | **1140** | **3093** | **75.5%** |
+| **Total** | **3512** | **1134** | **3093** | **75.6%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -26,17 +26,17 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | Item | Taxonomy | Units with GAP |
 |---|---|---:|
 | 1.1-C | Create valid | 2 |
-| 1.1-R | Read / list | 23 |
+| 1.1-R | Read / list | 22 |
 | 1.1-U | Update valid | 22 |
 | 1.1-D | Delete valid | 7 |
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 68 |
 | 1.3 | State transition valid | 4 |
-| 1.4 | Relasi antar-entity | 48 |
+| 1.4 | Relasi antar-entity | 47 |
 | 1.5 | Permission/role positif | 1 |
 | 1.6 | Search/filter/sort valid | 24 |
 | 1.7 | Upload file valid | 2 |
 | 1.8 | Notifikasi/feedback UI | 46 |
-| 2.1 | Required field kosong | 19 |
+| 2.1 | Required field kosong | 18 |
 | 2.2 | Format salah | 52 |
 | 2.3 | Duplicate/unique conflict | 5 |
 | 2.4 | Aksi tanpa permission (UI/API) | 1 |
@@ -47,7 +47,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 3.2 | Nilai numerik | 3 |
 | 3.3 | Ukuran file upload | 3 |
 | 3.4 | Tanggal | 21 |
-| 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 43 |
+| 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 42 |
 | 4.2 | Aksi ganda/cepat (double submit) | 51 |
 | 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 51 |
 | 4.4 | Race condition | 15 |
@@ -62,7 +62,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.1-SSRF | SSRF | 5 |
 | 5.2-IDOR | IDOR | 2 |
 | 5.2-PrivEsc | Privilege escalation | 6 |
-| 5.2-MassAssign | Mass assignment | 30 |
+| 5.2-MassAssign | Mass assignment | 29 |
 | 5.3-BadExt | Upload ekstensi terlarang | 2 |
 | 5.3-Rename | Upload file di-rename | 4 |
 | 5.3-ContentType | Content-Type spoofing | 3 |
@@ -76,7 +76,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 6.2 | Response schema/contract | 9 |
 | 6.3 | Request method salah (405) | 11 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 10 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 43 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 42 |
 | 6.7 | Idempotency | 21 |
 | 7.4 | Warning log | 2 |
 | 7.5 | Performance dasar | 2 |
