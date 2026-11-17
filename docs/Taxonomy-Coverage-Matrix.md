@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 719 | 207 | 494 | 77.6% |
+| PIM | 722 | 204 | 494 | 78.0% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3530** | **1116** | **3093** | **76.0%** |
+| **Total** | **3533** | **1113** | **3093** | **76.0%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -28,7 +28,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.1-C | Create valid | 2 |
 | 1.1-R | Read / list | 22 |
 | 1.1-U | Update valid | 22 |
-| 1.1-D | Delete valid | 7 |
+| 1.1-D | Delete valid | 6 |
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 62 |
 | 1.3 | State transition valid | 4 |
 | 1.4 | Relasi antar-entity | 41 |
@@ -47,7 +47,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 3.2 | Nilai numerik | 3 |
 | 3.3 | Ukuran file upload | 3 |
 | 3.4 | Tanggal | 21 |
-| 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 42 |
+| 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 41 |
 | 4.2 | Aksi ganda/cepat (double submit) | 51 |
 | 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 51 |
 | 4.4 | Race condition | 15 |
@@ -76,7 +76,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 6.2 | Response schema/contract | 9 |
 | 6.3 | Request method salah (405) | 11 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 10 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 42 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 41 |
 | 6.7 | Idempotency | 21 |
 | 7.4 | Warning log | 2 |
 | 7.5 | Performance dasar | 2 |

@@ -2779,18 +2779,29 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/memberships/TC-PIM-MEMBERSHIP-API-01-Verify-Membership-API-Contract-Optional-Fields-And-Business-Rule-Validation.spec.ts --project=chromium
 
+133   TC-PIM-LIST-API-01  [DONE]  tests/pim/employee-list/TC-PIM-LIST-API-01-Verify-Employee-List-API-Delete-Unicode-Search-And-Negative-Limit-Parameter.spec.ts
+                             (+) 1.1-D | (-) 4.1 | (A) 6.5   [U002]
+                             -> Search Arab/CJK -> 200; limit=-1 -> 422 (ditegakkan);
+                                DELETE sungguhan -> 200 & employee benar2 hilang (GET by id
+                                -> 422 setelahnya).
+                             HASIL: lolos penuh (5/5), tidak ada bug.
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/employee-list/TC-PIM-LIST-API-01-Verify-Employee-List-API-Delete-Unicode-Search-And-Negative-Limit-Parameter.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 184 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 185 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
   JOB-API-01, CUSTOMFIELD-API-01, ADD-API-01, PD-API-01, CONTACT-API-01,
   EMERGENCY-API-01, DEPENDENT-API-01, IMMIGRATION-API-01, SALARY-API-01,
-  QUALIFICATION-API-01, MEMBERSHIP-API-01 ditambahkan 2026-11-17/18
-  penutup gap taksonomi; CONTACT-03 ditulis ulang krn bug skrip)
+  QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01 ditambahkan
+  2026-11-17/18 penutup gap taksonomi; CONTACT-03 ditulis ulang krn bug
+  skrip)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,
