@@ -2868,19 +2868,89 @@ No.  Test Case ID      Status   Kategori           Skenario
   banyak unit via perulangan/loop, tambahkan entri NAME_RULES; kalau 1 file HANYA kebetulan
   berisi checks utk >1 unit krn ditulis sekaligus tanpa loop, pisahkan jadi 1 file per unit.
 
+138   TC-PIM-PD-API-02  [DONE]  tests/pim/personal-details/TC-PIM-PD-API-02-Verify-Optional-Field-Combinations-And-Nationality-Relation.spec.ts
+                             (+) 1.2 1.4   [U088]
+                             -> middleName/drivingLicenseNo+tanggal/birthday/nationality/
+                                maritalStatus semua kosong vs semua terisi -> 200 keduanya;
+                                nationalityId=1 -> response & GET ulang membawa
+                                nationality.name benar ("Afghan", bukan sekadar echo id);
+                                ganti nationalityId 1->2 -> nama ikut berubah (bukan cache).
+                             HASIL: lolos penuh (6/6), tidak ada bug baru. Menutup SISA
+                             1.2/1.4 Personal Details (kini unit INI 100% tertutup).
+
+  RUN COMMAND:
+    npx playwright test tests/pim/personal-details/TC-PIM-PD-API-02-Verify-Optional-Field-Combinations-And-Nationality-Relation.spec.ts --project=chromium
+
+139   TC-PIM-JOB-API-02  [DONE -- BUG]  tests/pim/job/TC-PIM-JOB-API-02-Verify-Termination-Business-Rule-And-Concurrent-Termination-Race.spec.ts
+                             (+) 1.2 | (!) 4.4 | (S) 5.9   [U093]
+                             -> 1.2: jobTitleId/empStatusId/locationId opsional kosong vs
+                                terisi -> 200 keduanya. [TEMUAN] subUnitId HARUS DIHILANGKAN
+                                dari body (bukan dikirim null) -- mengirim null ATAU id valid
+                                manapun utk subUnitId SAMA-SAMA 422, hanya meng-omit key itu
+                                yg diterima; inkonsistensi kecil, bukan bug (form UI tidak
+                                pernah mengirim field ini terpisah).
+                             -> 5.9: tanggal terminasi SEBELUM joinedDate -> DITERIMA 200
+                                (seharusnya 422) -- tidak ada validasi urutan tanggal sama
+                                sekali pd endpoint terminations, beda dgn Employment Contract
+                                yg SUDAH menegakkan startDate<endDate (BG-473, Medium).
+                             -> 4.4: 2 terminate bersamaan pd karyawan yg sama KEDUANYA 200
+                                (tidak ada locking/status-check); hasil akhir hanya 1 record
+                                tersimpan (last-write-wins), yg "kalah" hilang diam-diam
+                                (BG-474, Medium).
+                             HASIL: SENGAJA FAILED (R3), 2 BUG BARU (BG-473, BG-474). Menutup
+                             1.2/4.4/5.9 Job; sisa GAP Job (3.1/4.1/5.1-SQLi/5.1-XSS-Stored)
+                             = keterbatasan struktural flag 'T' generik EMP_TABS (Job TIDAK
+                             punya field teks bebas sama sekali, sudah dibuktikan di
+                             TC-PIM-JOB-API-01), dicatat di Execution-Plan.md.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/job/TC-PIM-JOB-API-02-Verify-Termination-Business-Rule-And-Concurrent-Termination-Race.spec.ts --project=chromium
+
+140   TC-PIM-REPORTTO-API-02  [DONE]  tests/pim/report-to/TC-PIM-REPORTTO-API-02-Verify-Feedback-Double-Submit-Navigation-Connection-Loss-Concurrency-And-Rate-Limit.spec.ts
+                             (+) 1.8 | (!) 4.2 4.3 4.5 4.7 4.8 | (S) 5.5 | (UI) 8.4   [U095]
+                             -> LATAR: Report-to DIKECUALIKAN dari TC-PIM-TABEDGE-01 krn
+                                menambah supervisor yg SAMA 2x sudah dikonfirmasi crash 500
+                                (BG-466). TC ini menutup 4.2/4.7 dgn AMAN memakai supervisor
+                                BERBEDA per request, dibuktikan live tidak memicu bug yg sama.
+                             -> 1.8/8.4: Add Supervisor valid via UI -> toast sukses muncul,
+                                teks konsisten ("Successfully Saved").
+                             -> 4.3/4.5: Back/Forward pasca-save & koneksi putus saat save
+                                (modal autocomplete, berbeda dgn form input teks biasa) ->
+                                tidak error, tidak ada record tersimpan sebagian.
+                             -> 4.2/4.7: 2 add SUPERVISOR BERBEDA & 2 update reportingMethodId
+                                pd SUPERVISOR YG SAMA, nyaris bersamaan -> tidak ada 500.
+                             -> 5.5 [TEMUAN]: 5 add supervisor berturut-turut cepat (<2 detik)
+                                -> semua 200, TIDAK ADA rate limit (dicatat sbg finding sesuai
+                                taksonomi 5.5, bukan bug -- rate limit opsional utk create).
+                             HASIL: lolos penuh (7/7), tidak ada bug baru. 1.2/1.6/3.1/4.1/
+                             5.1-SQLi/5.1-XSS-Stored DIBUKTIKAN LIVE N/A (Report-to hanya 2
+                             field id/enum, tidak ada search UI di ReportToPage.ts) -- dicatat
+                             sbg structural, lihat Execution-Plan.md.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/report-to/TC-PIM-REPORTTO-API-02-Verify-Feedback-Double-Submit-Navigation-Connection-Loss-Concurrency-And-Rate-Limit.spec.ts --project=chromium
+
+  PERBAIKAN 18 Nov 2026 (TC lama, bukan TC baru): TC-PIM-IMMIGRATION-API-01 &
+  TC-PIM-QUALIFICATION-API-01 masing2 ditambah 2 check baru (3.4 leap year + rentang tanggal
+  ekstrem 1950-2099) utk menutup GAP 3.4 yg sebelumnya tidak tertutup krn file lama hanya
+  menguji urutan tanggal (2.2/2.5), bukan boundary tanggal itu sendiri. Lolos penuh, tidak ada
+  bug baru. Menutup 3.4 Immigration & Qualifications sepenuhnya.
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 189 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 192 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
   JOB-API-01, CUSTOMFIELD-API-01, ADD-API-01, PD-API-01, CONTACT-API-01,
   EMERGENCY-API-01, DEPENDENT-API-01, IMMIGRATION-API-01, SALARY-API-01,
   QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01, REPORTMETHOD-API-01,
-  TERMREASON-API-01, CSRF-01, TABEDGE-01 ditambahkan 2026-11-17/18 penutup
-  gap taksonomi; CONTACT-03 ditulis ulang krn bug skrip)
+  TERMREASON-API-01, CSRF-01, TABEDGE-01, PD-API-02, JOB-API-02,
+  REPORTTO-API-02 ditambahkan 2026-11-17/18 penutup gap taksonomi;
+  CONTACT-03 ditulis ulang krn bug skrip; IMMIGRATION-API-01/
+  QUALIFICATION-API-01 ditambah check 3.4 18 Nov 2026)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

@@ -63,6 +63,16 @@ test('TC-PIM-QUALIFICATION-API-01: Work Experience API (Admin) - contract, optio
     report.finding('PUT id tidak ada -> 500 (BG-434, bukan bug baru)', `PUT work-experiences/999999 -> status=${ghostUpdate.status()} -- endpoint ini SAMA dgn My Info (ESS) yg sudah dikonfirmasi BG-434 (ghost id -> 500 Internal Server Error). Dicatat sbg konfirmasi cakupan Admin-side, bukan bug kedua.`);
     report.check('(kontrol) PUT id tidak ada tetap 4xx/5xx (tidak 200/2xx)', !(ghostUpdate.status() >= 200 && ghostUpdate.status() < 300), `status=${ghostUpdate.status()}`);
 
+    report.step('3.4 Tanggal boundary: leap year & rentang ekstrem');
+    const leap = await page.request.post(api, { data: { company: 'QaQualApiLeap', jobTitle: 'QaT', fromDate: '2024-02-29', toDate: '2028-02-29', comment: '' } });
+    const leapData = ((await leap.json().catch(() => ({}))) as { data?: WorkExperience }).data;
+    if (leapData?.id) createdIds.push(leapData.id);
+    report.check('3.4 [U096] fromDate/toDate 29 Februari (leap year) -> 200 & tersimpan apa adanya', leap.status() === 200 && leapData?.fromDate === '2024-02-29', `status=${leap.status()}`);
+    const extreme = await page.request.post(api, { data: { company: 'QaQualApiExtreme', jobTitle: 'QaT', fromDate: '1950-01-01', toDate: '2099-12-31', comment: '' } });
+    const extremeData = ((await extreme.json().catch(() => ({}))) as { data?: WorkExperience }).data;
+    if (extremeData?.id) createdIds.push(extremeData.id);
+    report.check('3.4 [U096] Rentang tanggal ekstrem (1950..2099) -> 200, tidak ada batas bisnis yg menolak', extreme.status() === 200, `status=${extreme.status()}`);
+
     if (createdIds.length) await page.request.delete(api, { data: { ids: createdIds } }).catch(() => null);
   } finally {
     await page.request.delete('/web/index.php/api/v2/pim/employees', { data: { ids: [emp] } }).catch(() => null);

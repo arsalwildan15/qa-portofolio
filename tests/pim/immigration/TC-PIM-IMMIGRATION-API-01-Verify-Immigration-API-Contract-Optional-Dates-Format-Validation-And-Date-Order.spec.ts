@@ -64,6 +64,16 @@ test('TC-PIM-IMMIGRATION-API-01: Immigration API (Admin) - contract, optional da
     if (expiryData?.id) createdIds.push(expiryData.id);
     report.finding('expiryDate sebelum issuedDate diterima (BG-433, bukan bug baru)', `POST dgn expiryDate (2020-01-01) sebelum issuedDate (2024-01-01) -> status=${expiryBeforeIssued.status()} -- backend Admin-side (PIM) memakai kode validasi yg SAMA dgn ESS-side (My Info) yg sudah dikonfirmasi BG-433 (Low). Dicatat sbg konfirmasi cakupan, bukan bug kedua.`);
 
+    report.step('3.4 Tanggal boundary: leap year & rentang ekstrem');
+    const leap = await page.request.post(api, { data: { number: 'QaImmApiLeap', issuedDate: '2024-02-29', expiryDate: '2028-02-29', type: 1, status: '', reviewDate: '', comment: '' } });
+    const leapData = ((await leap.json().catch(() => ({}))) as { data?: Immigration }).data;
+    if (leapData?.id) createdIds.push(leapData.id);
+    report.check('3.4 [U092] issuedDate/expiryDate 29 Februari (leap year) -> 200 & tersimpan apa adanya', leap.status() === 200 && leapData?.issuedDate === '2024-02-29', `status=${leap.status()}`);
+    const extreme = await page.request.post(api, { data: { number: 'QaImmApiExtreme', issuedDate: '1950-01-01', expiryDate: '2099-12-31', type: 1, status: '', reviewDate: '', comment: '' } });
+    const extremeData = ((await extreme.json().catch(() => ({}))) as { data?: Immigration }).data;
+    if (extremeData?.id) createdIds.push(extremeData.id);
+    report.check('3.4 [U092] Rentang tanggal ekstrem (1950..2099) -> 200, tidak ada batas bisnis yg menolak', extreme.status() === 200, `status=${extreme.status()}`);
+
     if (createdIds.length) await page.request.delete(api, { data: { ids: createdIds } }).catch(() => null);
   } finally {
     await page.request.delete('/web/index.php/api/v2/pim/employees', { data: { ids: [emp] } }).catch(() => null);

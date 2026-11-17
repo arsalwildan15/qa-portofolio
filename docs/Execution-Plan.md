@@ -251,12 +251,45 @@
       bentuk form) -- msh py gap signifikan masing2 (5-13 kode), BELUM ada rencana sweep utk ini.
     U098 Attachments (25 kode) & U099 Profile Picture (12 kode) msh GAP terbesar -- unik, perlu
       TC tersendiri per kode (bukan reusable lintas-unit spt CSRF/TABEDGE).
-  BERIKUT: lanjutkan menutup gap PIM yg tersisa (Job 6 kode, Report-to 11 kode, 1.6 N/A
-  verification utk 5 unit, lalu U002/U036-042/U098/U099) sampai HANYA struktural (1.2/1.4 pd
-  unit single-field spt U039/U040) yg tersisa; SETELAH itu baru LANJUT OTOMATIS ke modul
-  berikutnya (Performance 67.2% saat ini terendah) TANPA perlu konfirmasi user lagi (instruksi
-  user 2026-11-17: "apabila menu PIM sudah 100%, langsung lanjut ke modul berikutnya tanpa
-  perlu konfirmasi"; user 2026-11-18 menegaskan ulang "PIM harus 100%").
+  DAN PIM lanjutan (prioritas user 2026-11-18): U088 Personal Details 1.2/1.4 ditutup penuh
+  (TC-PIM-PD-API-02, 6/6 lolos -- nationality relation benar, GET ulang konsisten, ganti id
+  nationality ikut berubah nama, tidak cache nama lama). U093 Job 1.2/4.4/5.9 ditutup
+  (TC-PIM-JOB-API-02, SENGAJA FAILED R3, 2 BUG BARU: BG-473 Medium -- terminasi SEBELUM
+  joinedDate diterima 200 bukan ditolak 422, tidak ada validasi urutan tanggal sama sekali di
+  endpoint terminations; BG-474 Medium -- 2 terminate bersamaan pd karyawan sama KEDUANYA 200,
+  tidak ada locking, 1 record "hilang" diam-diam/last-write-wins. [TEMUAN non-bug] subUnitId
+  harus di-OMIT dari body job-details, bukan dikirim null -- inkonsistensi kecil). U095
+  Report-to 1.8/4.2/4.3/4.5/4.7/4.8/5.5/8.4 ditutup (TC-PIM-REPORTTO-API-02, 7/7 lolos --
+  4.2/4.7 diuji AMAN dgn supervisor BERBEDA per request, menghindari BG-466 duplicate-500;
+  5.5 TIDAK ada rate limit pd create supervisor, dicatat finding bukan bug). VERIFIKASI LIVE
+  (sesuai instruksi user): hipotesis 1.6 struktural utk Emergency/Dependents/Salary/
+  Qualifications/Memberships DIKONFIRMASI via probe browser -- 1 "search input" yg terdeteksi
+  di tiap tab TERNYATA class oxd-main-menu-search (search SIDEBAR MENU global, bukan milik
+  tabel record tab itu), dibuktikan via ancestor-chain DOM; ReportToPage.ts jg dikonfirmasi
+  tidak punya search locator apa pun. TC-PIM-IMMIGRATION-API-01 & TC-PIM-QUALIFICATION-API-01
+  ditambah check 3.4 (leap year + rentang tanggal 1950-2099) -- gap ini TERNYATA bukan
+  struktural (flag DT ada & genuine), hanya belum pernah diuji boundary-nya scr eksplisit.
+  Matrix TOTAL 77.6% -> 77.9%. PIM 85.6% -> 87.3% (806 COVERED/120 GAP/494 N/A dari 1420 sel).
+  SISA GAP PIM (120 sel) per unit, re-verified 18 Nov 2026:
+    U093 Job (4 kode: 3.1 4.1 5.1-SQLi 5.1-XSS-Stored) & U095 Report-to (6 kode: 1.2 1.6 3.1
+      4.1 5.1-SQLi 5.1-XSS-Stored) = STRUKTURAL, dikonfirmasi live tidak ada field teks bebas
+      (hanya id/enum) & tidak ada search UI -- flag 'T'/'C' generik EMP_TABS blanket-requires
+      evidence yg tidak mungkin ada scr genuine pd kedua unit ini, sama kelas keterbatasan dgn
+      1.2/1.4 di U039/U040. Report-to 1.2 jg struktural (tidak ada field opsional genuine,
+      hanya 2 field wajib).
+    U090/U091/U094/U096/U097 (Emergency/Dependents/Salary/Qualifications/Memberships): hanya
+      1.6 tersisa, KONFIRMASI STRUKTURAL (lihat verifikasi live di atas).
+    U092/U096 1.6 (sama struktural) -- U092 Immigration/U096 Qualifications jg py 1.6 msh GAP
+      (3.4 sudah ditutup).
+    U002/U036-U038/U041/U042 (Employee List, Optional/Custom Fields, Data Import, Add Employee,
+      Reports) & U098 Attachments/U099 Profile Picture: SAMA SEKALI belum disentuh batch PIM
+      sweep manapun (bukan employee-tab, bentuk form beda) -- msh py gap signifikan
+      (5-25 kode masing2), BELUM ada rencana sweep/TC utk ini.
+  BERIKUT: lanjutkan ke U098 Attachments (25 kode, GAP terbesar), U099 Profile Picture
+  (12 kode), lalu U002 Employee List, U036-U038 Configuration, U041 Add Employee, U042
+  Reports -- sampai HANYA struktural yg tersisa (Job/Report-to/5-unit-1.6 di atas + 1.2/1.4
+  U039/U040); SETELAH itu baru LANJUT OTOMATIS ke modul berikutnya (Performance 67.2% saat ini
+  terendah) TANPA perlu konfirmasi user lagi (instruksi user 2026-11-17 & 2026-11-18).
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -695,3 +728,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | PIM lanjutan (LIST-API-01) | 1 TC; lolos penuh 5/5, tidak ada bug (delete sungguhan, unicode search, limit negatif semua benar); docs TC-PIM/README; PIM 78.0%; matrix TOTAL 76.0% | 1 commit
 - 2026-11-18 | PIM lanjutan (REPORTMETHOD-API-01 + TERMREASON-API-01) | 2 TC file terpisah per unit; lolos penuh 5/5 masing2, tidak ada bug (limit 100 char, mass-assignment, whitespace-only name semua ditegakkan); ditemukan & diperbaiki 2 bug tooling (path-based unit mapping mis-atribusi evidence file gabungan, kode literal di label finding salah ke-tag COVERED); sisa GAP 1.2/1.4 pd unit single-field = keterbatasan struktural NA_RULES build_matrix.py, bukan bisa ditutup via TC; docs TC-PIM/README/Execution-Plan; PIM 78.2%; matrix TOTAL 76.1% | 1 commit
 - 2026-11-18 | PIM lanjutan BESAR (CSRF-01 + TABEDGE-01, sweep lintas-unit) | 2 TC baru + 2 entri NAME_RULES baru di build_matrix.py; menutup 1.8/4.2/4.3/4.5/4.7/4.8/5.4/8.4 di hampir semua 9 tab karyawan sekaligus (registry sweep lama tidak pernah mencakup form edit pim/employees/<empNumber>/*); CSRF-01 11/11 lolos (Origin tidak divalidasi di endpoint manapun, SameSite=Lax satu-satunya pertahanan, sama dgn My Info/BG-437); TABEDGE-01 19/19 lolos (toast+konsistensi pesan, back/forward, koneksi putus, double-submit, concurrency); BG-472 (timeout transien) diarsipkan sbg noise; sisa 133 GAP PIM: Job (6 kode), Report-to (11 kode, sengaja dikecualikan dari TABEDGE krn risiko duplicate-add 500), 1.6 di 5 unit (perlu verifikasi N/A genuine), U002/U036-042/U098/U099 belum tersentuh; docs TC-PIM/README/Execution-Plan; PIM 78.2% -> 85.6%; matrix TOTAL 76.1% -> 77.6% | 1 commit
+- 2026-11-18 | PIM lanjutan (PD-API-02 + JOB-API-02 + REPORTTO-API-02 + fix 3.4 Immigration/Qualifications) | 3 TC baru + 2 TC lama ditambah check; U088 Personal Details 1.2/1.4 TUNTAS (TC-PIM-PD-API-02, 6/6, nationality relation benar); U093 Job 1.2/4.4/5.9 ditutup, 2 BUG BARU (TC-PIM-JOB-API-02, SENGAJA FAILED: BG-473 Medium terminasi sblm joinedDate diterima, BG-474 Medium race 2-terminate-bersamaan tanpa locking); U095 Report-to 1.8/4.2/4.3/4.5/4.7/4.8/5.5/8.4 ditutup AMAN pakai supervisor berbeda per operasi (TC-PIM-REPORTTO-API-02, 7/7, hindari BG-466); verifikasi LIVE (bukan asumsi) bhw hipotesis 1.6-struktural utk 5 unit BENAR (1 "search input" terdeteksi di tiap tab adalah oxd-main-menu-search sidebar global, dibuktikan via ancestor-chain DOM, bukan search milik tabel record); 3.4 Immigration/Qualifications ternyata BUKAN struktural (cuma belum diuji boundary leap-year/rentang ekstrem), ditutup via 2 check tambahan di file lama; docs TC-PIM/README/Execution-Plan/Bug-List; PIM 85.6% -> 87.3%; matrix TOTAL 77.6% -> 77.9% | 1 commit
