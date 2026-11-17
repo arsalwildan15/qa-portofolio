@@ -2816,19 +2816,71 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (2 TC baru):
     npx playwright test tests/pim/configuration/reporting-methods/TC-PIM-REPORTMETHOD-API-01-Verify-Reporting-Method-API-Length-Limit-And-Mass-Assignment.spec.ts tests/pim/configuration/termination-reasons/TC-PIM-TERMREASON-API-01-Verify-Termination-Reason-API-Length-Limit-And-Mass-Assignment.spec.ts --project=chromium --workers=1
 
+136   TC-PIM-CSRF-01  [DONE]  tests/pim/security/TC-PIM-CSRF-01-Verify-A-Foreign-Site-Cannot-Change-Employee-Data-Via-PIM-Endpoints.spec.ts
+                             (S) 5.4   [U088 U089 U090 U091 U092 U093 U094 U096 U097]
+                             -> LATAR: probe membuktikan SEMUA endpoint mutasi PIM yg diuji
+                                mengembalikan status IDENTIK baik dgn Origin aplikasi sendiri
+                                maupun Origin palsu ("https://evil.example") -- server TIDAK
+                                memvalidasi Origin sama sekali, sama persis dgn arsitektur yg
+                                sudah dibuktikan di My Info (TC-MYINFO-CSRF-01, BG-437).
+                             -> Skenario browser sungguhan (halaman penyerang nyata, fetch
+                                no-cors + fetch CORS) terhadap Personal Details/Contact
+                                Details -> cookie sesi (HttpOnly+Secure+SameSite=Lax) TIDAK
+                                ikut terkirim lintas situs, data TIDAK berubah.
+                             -> A/B status identik Origin sendiri vs palsu utk job-details,
+                                emergency-contacts, dependents, immigrations, memberships,
+                                work-experiences, salary-components -- Origin tidak divalidasi
+                                di endpoint manapun yg diuji.
+                             HASIL: lolos penuh (11/11), tidak ada bug baru.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/security/TC-PIM-CSRF-01-Verify-A-Foreign-Site-Cannot-Change-Employee-Data-Via-PIM-Endpoints.spec.ts --project=chromium
+
+137   TC-PIM-TABEDGE-01  [DONE]  tests/pim/employee/TC-PIM-TABEDGE-01-Verify-Feedback-Double-Submit-Navigation-Connection-Loss-And-Concurrency-Across-Employee-Tabs.spec.ts
+                             (+) 1.8 | (!) 4.2 4.3 4.5 4.7 4.8 | (UI) 8.4
+                             [U088 U089 U090 U091 U092 U093 U094 U096 U097]
+                             -> LATAR: ke-8 tab karyawan (semua kecuali Report-to) TIDAK
+                                pernah disapu utk 1.8/4.2/4.3/4.5/4.7/4.8/8.4 krn registry
+                                sweep (unitMutationRegistry.ts) hanya mencakup menu "Add X"
+                                ber-nama tunggal, bukan form edit multi-field di bawah
+                                pim/employees/<empNumber>. TC ini membangun sweep KHUSUS:
+                                toast sukses + konsistensi pesan (UI, Personal Details & Job),
+                                Back/Forward pasca-Save tidak resubmit (UI), koneksi putus
+                                saat Save tidak menghilangkan isian (UI, Personal Details &
+                                Contact Details), 2 request identik nyaris bersamaan tidak
+                                crash (API, 8 endpoint), 2 nilai berbeda bersamaan ->
+                                last-write-wins tanpa corrupt (API, 2 endpoint representatif),
+                                known-behavior 4.8 didokumentasikan per tab.
+                             HASIL: lolos penuh (19/19), tidak ada bug baru. Console error
+                                net::ERR_FAILED/"Uncaught exception: fe" dari simulasi koneksi
+                                putus di-whitelist via expectedConsoleErrorPatterns -- pola
+                                app-wide BG-199 yg sudah berulang kali dikonfirmasi, bukan
+                                temuan baru.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/employee/TC-PIM-TABEDGE-01-Verify-Feedback-Double-Submit-Navigation-Connection-Loss-And-Concurrency-Across-Employee-Tabs.spec.ts --project=chromium
+
+  PELAJARAN METODOLOGI: kedua TC di atas memetakan SATU file spec ke BANYAK unit via entri
+  baru di NAME_RULES (tools/coverage/build_matrix.py), pola yg sama dgn TC-MYINFO-MUT-01/
+  TC-MYINFO-PRIVESC-01 -- diperlukan krn file ini sengaja menyapu lintas-unit (bukan 1 file
+  per direktori seperti kasus REPORTMETHOD/TERMREASON di atas, yg justru HARUS dipecah krn
+  tooling TIDAK punya NAME_RULES utk itu). Pelajaran: kalau 1 file memang didesain menyapu
+  banyak unit via perulangan/loop, tambahkan entri NAME_RULES; kalau 1 file HANYA kebetulan
+  berisi checks utk >1 unit krn ditulis sekaligus tanpa loop, pisahkan jadi 1 file per unit.
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 187 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 189 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
   JOB-API-01, CUSTOMFIELD-API-01, ADD-API-01, PD-API-01, CONTACT-API-01,
   EMERGENCY-API-01, DEPENDENT-API-01, IMMIGRATION-API-01, SALARY-API-01,
   QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01, REPORTMETHOD-API-01,
-  TERMREASON-API-01 ditambahkan 2026-11-17/18 penutup gap taksonomi;
-  CONTACT-03 ditulis ulang krn bug skrip)
+  TERMREASON-API-01, CSRF-01, TABEDGE-01 ditambahkan 2026-11-17/18 penutup
+  gap taksonomi; CONTACT-03 ditulis ulang krn bug skrip)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

@@ -125,6 +125,12 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
                                       'My Info > Memberships', 'My Info > Attachments & Profile Picture']),
  (r'my-info/security/TC-MYINFO-MUT-01', ['My Info > Contact Details', 'My Info > Emergency Contacts', 'My Info > Dependents', 'My Info > Memberships']),
  (r'my-info/security/TC-MYINFO-PRIVESC-01', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts', 'My Info > Dependents', 'My Info > Immigration', 'My Info > Qualifications', 'My Info > Memberships']),
+ (r'pim/security/TC-PIM-CSRF-01', ['PIM > Employee > Personal Details', 'PIM > Employee > Contact Details', 'PIM > Employee > Emergency Contacts',
+                                   'PIM > Employee > Dependents', 'PIM > Employee > Immigration', 'PIM > Employee > Job', 'PIM > Employee > Salary',
+                                   'PIM > Employee > Report-to', 'PIM > Employee > Qualifications', 'PIM > Employee > Memberships']),
+ (r'pim/employee/TC-PIM-TABEDGE-01', ['PIM > Employee > Personal Details', 'PIM > Employee > Contact Details', 'PIM > Employee > Emergency Contacts',
+                                      'PIM > Employee > Dependents', 'PIM > Employee > Immigration', 'PIM > Employee > Job', 'PIM > Employee > Salary',
+                                      'PIM > Employee > Qualifications', 'PIM > Employee > Memberships']),
  (r'my-info/security', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts']),
  (r'sweep/TC-SWEEP-LIST', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8')) if u['id'] in set(json.load(open(S + '/api_units.json')))]),
  (r'sweep/TC-SWEEP-(UIMUT|MUT|CONC)-', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))

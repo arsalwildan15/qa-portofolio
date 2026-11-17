@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 724 | 202 | 494 | 78.2% |
+| PIM | 793 | 133 | 494 | 85.6% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3535** | **1111** | **3093** | **76.1%** |
+| **Total** | **3604** | **1042** | **3093** | **77.6%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -35,7 +35,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.5 | Permission/role positif | 1 |
 | 1.6 | Search/filter/sort valid | 24 |
 | 1.7 | Upload file valid | 2 |
-| 1.8 | Notifikasi/feedback UI | 46 |
+| 1.8 | Notifikasi/feedback UI | 37 |
 | 2.1 | Required field kosong | 18 |
 | 2.2 | Format salah | 46 |
 | 2.3 | Duplicate/unique conflict | 5 |
@@ -48,13 +48,13 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 3.3 | Ukuran file upload | 3 |
 | 3.4 | Tanggal | 21 |
 | 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 41 |
-| 4.2 | Aksi ganda/cepat (double submit) | 51 |
-| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 51 |
+| 4.2 | Aksi ganda/cepat (double submit) | 42 |
+| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 43 |
 | 4.4 | Race condition | 15 |
-| 4.5 | Session/koneksi terputus | 56 |
+| 4.5 | Session/koneksi terputus | 48 |
 | 4.6 | Data kosong/null (empty state) | 10 |
-| 4.7 | Konkurensi multi-user edit | 48 |
-| 4.8 | Behavior non-obvious terdokumentasi | 80 |
+| 4.7 | Konkurensi multi-user edit | 39 |
+| 4.8 | Behavior non-obvious terdokumentasi | 72 |
 | 5.1-SQLi | SQL Injection | 33 |
 | 5.1-XSS-Stored | Stored XSS | 16 |
 | 5.1-XSS-Reflected | Reflected XSS | 15 |
@@ -69,7 +69,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.3-DoubleExt | Double extension | 4 |
 | 5.3-Oversize | Oversized file | 3 |
 | 5.3-Filename | Malicious filename | 3 |
-| 5.4 | CSRF | 63 |
+| 5.4 | CSRF | 53 |
 | 5.5 | Rate limit / brute force / spam | 29 |
 | 5.6 | Security headers | 2 |
 | 5.9 | Business logic abuse | 11 |
@@ -83,4 +83,4 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 8.1 | Responsive/layout | 2 |
 | 8.2 | Cross-browser | 2 |
 | 8.3 | Accessibility dasar | 2 |
-| 8.4 | Konsistensi pesan | 54 |
+| 8.4 | Konsistensi pesan | 46 |
