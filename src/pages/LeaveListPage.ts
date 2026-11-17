@@ -1,6 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
-import { DATE_INPUT_SELECTOR, type DateFormat } from '../utils/dateInput';
+import { DATE_INPUT_SELECTOR, convertDateFormat, type DateFormat } from '../utils/dateInput';
 import { isVisibleWithWait } from '../utils/testReport';
 
 /**
@@ -112,9 +112,8 @@ export class LeaveListPage extends BasePage {
    * different days and would false-match.
    */
   async rowByDate(date: string, valueFormat: DateFormat): Promise<Locator> {
-    const displayFormat = (await this.page.locator(DATE_INPUT_SELECTOR).first().getAttribute('placeholder').catch(() => null)) as DateFormat | null;
-    const [yyyy, a, b] = date.split('-');
-    const displayed = displayFormat && displayFormat !== valueFormat ? `${yyyy}-${b}-${a}` : date;
+    const displayFormat = await this.page.locator(DATE_INPUT_SELECTOR).first().getAttribute('placeholder').catch(() => null);
+    const displayed = convertDateFormat(date, valueFormat, displayFormat);
     return this.tableRows.filter({ hasText: displayed });
   }
 

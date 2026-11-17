@@ -40,20 +40,32 @@
   (4) P2.4 Time lapis 1 -> (5) Fase 3 docs -> (6) lapis 2 + P2.5 -> (7) Fase 4-8.
   Efisiensi: verifikasi per file dulu, full batch sekali per modul; bug intermiten cukup dibuktikan+
   dicatat lalu tinggal; run TC asli tanpa --reporter=list.
-- **NEXT ACTION:** FASE 4 / P4.0. Selesai 17 Nov: Recruitment 54.6% -> 100% (8 TC baru + TC-XMOD-07; 7 BUG
-  BG-441..447: exception JS saat sesi habis [app-wide], emoji kandidat jadi "?", filter tanggal satu hari 400,
-  resume utk kandidat 999999 -> 500, server tidak menegakkan aturan form lowongan/kandidat, klik ganda Save
-  lampiran lowongan = 2 lampiran, exe di-rename .pdf diterima di lampiran lowongan). Matrix 67.3%.
-  BERIKUT (urut terendah): Leave 55.1%, Time 56.2%, Performance 59.6% -> pola Recruitment: probe UI+API dulu,
-  lalu API-01 (kontrak/method/sesi/id asing/ESS), MUT-01 (validasi/injeksi/mass-assign), VALID-01 (aturan
-  form vs server), UPLOAD (bila ada file), SECURITY (race/multi-user/CSRF/burst), UI edit (feedback/refresh/
-  sesi/klik ganda); lalu My Info 64.5%, PIM 65.1%, Buzz/Claim 69%, Admin 72.8%; Maintenance sisa; perkuat
-  23 TC lemah; lalu Fase 5-8.
+- **NEXT ACTION:** FASE 4 / P4.0. Selesai 17 Nov: Recruitment 54.6% -> 100% (8 TC + TC-XMOD-07; BG-441..447)
+  DAN Leave 55.1% -> 82.4% (7 TC baru: API-01, MUT-01, ENT-02, VALID-01, SECURITY-01, CONFIG-01, HOLIDAY-01;
+  BG-453 GET entitlements error 500 utk offset berapa pun, BG-454 API terima entitlement >=10000/>2 desimal
+  padahal form tolak, BG-456 klik ganda Save Holiday = 2 baris identik). Matrix TOTAL 70.2%.
+  PERBAIKAN INFRA PENTING: dateInput.ts (dipakai Leave/PIM/Admin/Recruitment/Performance/Time) diubah jadi
+  BERBASIS TOKEN (yyyy/dd/mm urutan apa pun) -- sebelumnya hanya kenal 2 format, demo publik sempat tampilkan
+  varian ke-3 ("dd-mm-yyyy") yg membuat semua TC pengisi tanggal macet tanpa batas waktu. LeaveListPage.rowByDate
+  dan currentPeriodRange() (leaveData.ts) ikut dibenahi -- GET leave-entitlements WAJIB pakai periode AKTUAL
+  (currentPeriodRange), bukan '2026-01-01'/'2026-12-31' hardcode, krn server mengabaikan fromDate/toDate milik
+  klien dan selalu echo periode GLOBAL saat itu.
+  INSIDEN (sudah diperbaiki & diverifikasi): Leave Period global ter-korupsi sesaat (startMonth=8) akibat
+  satu percobaan TC yg crash sebelum withConfigRestore selesai -- sudah dikembalikan ke startMonth=1,startDay=1
+  & Work Week diverifikasi utuh. CONFIG-01 kini membaca bulan aktual dari API (bukan asumsi Januari) sblm
+  menjalankan skenario double-click, biar tidak terulang.
+  BERIKUT (urut terendah): Time 56.2%, Performance 59.6% -> pola yg sama (probe UI+API dulu, lalu API-01,
+  MUT-01, VALID-01, SECURITY, UI edit); lalu My Info 64.5%, PIM 65.1%, Buzz/Claim 69%, Admin 72.8%;
+  Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees" Add Entitlement msh N/A beralasan
+  (filter kosong kena 118 karyawan sungguhan); lalu Fase 5-8.
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
   tulis skrip ke file; noise console bug yg sudah punya TC sendiri -> expectedConsoleErrorPatterns (arg ke-5
-  TestReport) + komentar rujukan; demo format tanggal yyyy-dd-mm & server tolak From = To.
+  TestReport) + komentar rujukan; demo format tanggal bisa yyyy-dd-mm / yyyy-mm-dd / dd-mm-yyyy (lihat
+  dateInput.ts); server tolak From = To; Add/Edit Holiday = route terpisah (saveHolidays), bukan modal,
+  goto() butuh retry-on-ERR_ABORTED spt ApplyLeavePage; cek "Already exists" pd Holiday itu CLIENT-SIDE
+  per-tanggal (bukan per nama) -- gunakan tanggal unik per sub-tes drpd mengulang collision.
 - **Catatan run:** TC asli JANGAN pakai `--reporter=list` (R8). Di Performance yg SENGAJA FAILED hanya
   REVIEW-10 (BG-356) & EVAL-15 (BG-373); gagal lain = regresi, investigasi. Pelajaran batch 2:
   (1) set data setup lewat API kalau halaman UI-nya memicu request 404 sampingan; (2) jangan andalkan
@@ -458,3 +470,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | P4.0 Recruitment | 8 TC (API-01, MUT-01 lolos, VALID-01, UPLOAD-01, SECURITY-06 lolos, CANDIDATE-22, CANDIDATE-23, VACANCY-20) + TC-XMOD-07; helper src/utils/recruitmentData.ts; BUG BG-441..447 ditulis standar; docs TC-Recruitment/TC-XMOD; README 610; Recruitment 100%; matrix 67.3% | 1 commit
 - 2026-11-17 | Audit docs & Bug-List | status [DONE]/[DONE -- BUG] 36 TC di 10 docs diselaraskan dgn Bug-List (+legend); BG-064/065 (kelemahan skrip, bukan bug app) diarsip, CANDIDATE-08 diperbaiki (cari via Candidate Name, 3/3); README: jumlah TC per modul, bagian Recruitment/PIM/XMOD-07 + My Info, Dashboard, Sidebar Search, Maintenance, Sweep, snapshot coverage 67.3% | 1 commit
 - 2026-11-17 | Audit Bug-List lanjutan | REPORTTO-01/03/06 'known issue' diselesaikan: root cause live (tabel tanpa nama tengah, GET daftar ~3 dtk setelah POST, locator subordinateRows ikut hitung supervisor) -> skrip diperbaiki (01 5/6, 03 5/5, 06 2/2); BG-124/127/136 diarsip (bukan bug app), BG-009/068 (Closed) dipindah ke Archive (SECURITY-04 lolos 4/4); Bug-List aktif kini 69 baris, semua Open & bug aplikasi nyata | 1 commit
+- 2026-11-17 | P4.0 Leave | 7 TC (API-01, MUT-01 lolos, ENT-02 lolos, VALID-01, SECURITY-01 lolos, CONFIG-01 lolos, HOLIDAY-01); helper src/utils/leaveData.ts; perbaikan infra dateInput.ts (token-based, format ke-3 dd-mm-yyyy) + LeaveListPage.rowByDate; insiden Leave Period global ter-korupsi sesaat sudah diperbaiki & diverifikasi; BUG BG-453/454/456 ditulis standar; docs TC-Leave/README; Leave 82.4%; matrix TOTAL 70.2% | 1 commit

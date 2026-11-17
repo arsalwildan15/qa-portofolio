@@ -788,10 +788,139 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              Entitlements. File ada di tests/leave/assign/.
 
 ================================================================================
+  FASE 4 / P4.0 -- PENUTUP GAP TAKSONOMI LEAVE (17 Nov 2026)
+================================================================================
+
+  Matrix sebelum: Leave 55.1% (GAP terbanyak di Apply, Assign Leave, Entitlements,
+  Reports, Leave Period, Work Week, Holidays). Setiap endpoint & aturan dibaca LIVE
+  dari UI + probe API sebelum TC ditulis. Helper baru: src/utils/leaveData.ts
+  (grantEntitlement, createHoliday, deleteHolidays, cleanupLeave, currentLeavePeriod,
+  currentWorkWeek, currentPeriodRange).
+
+  PERBAIKAN INFRASTRUKTUR PENTING: src/utils/dateInput.ts (dipakai Leave, PIM, Admin,
+  Recruitment, Performance, Time) sebelumnya hanya mengenal 2 format tanggal demo
+  (yyyy-dd-mm / yyyy-mm-dd). Demo publik ternyata bisa menampilkan VARIAN KETIGA
+  ("dd-mm-yyyy"), membuat semua TC pengisi tanggal macet tanpa batas waktu.
+  fillDate() & LeaveListPage.rowByDate() ditulis ulang BERBASIS TOKEN (yyyy/dd/mm
+  dlm urutan apa pun), bukan daftar nama format -- tahan thdp kombinasi yg belum
+  pernah terlihat. convertDateFormat() diekspor bersama utk dipakai ulang.
+
+  Endpoint (dibaca live):
+    leave period   GET/PUT leave/leave-period {startMonth,startDay}
+    work week      GET/PUT leave/workweek {monday..sunday: 0|8}
+    holidays       GET leave/holidays, POST/PUT/<id>/DELETE leave/holidays
+    entitlements   GET/POST leave/leave-entitlements {empNumber,leaveTypeId,
+                   fromDate,toDate,entitlement} -- POST adalah UPSERT ADDITIF
+                   (menambah ke nilai lama, bukan mengganti; dikonfirmasi dialog
+                   UI sendiri "value X will be updated to Y" = X+Y, desain yg
+                   disengaja & terdokumentasi, BUKAN bug). GET diskopi ke periode
+                   GLOBAL SAAT ITU -- fromDate/toDate yg dikirim client diabaikan
+                   server utk POST, jadi GET harus pakai currentPeriodRange().
+    leave requests apply (self) POST leave/leave-requests; assign (admin) POST
+                   leave/employees/leave-requests; admin list/aksi GET/PUT
+                   leave/employees/leave-requests(/<id>) {action}
+    reports        GET leave/reports(/data)?name=<report>; my_leave_entitlements_
+                   and_usage (ESS), leave_type_leave_entitlements_and_usage (admin)
+
+ R1  TC-LEAVE-API-01  [DONE -- BUG]  tests/leave/security/TC-LEAVE-API-01-Verify-Leave-Settings-And-Request-APIs-Contract-Methods-Session-Unknown-Ids-And-ESS-Access.spec.ts
+                             (-) 2.6 | (B) 3.5 3.6 | (!) 4.6 | (S) 5.2-BFLAC 5.8 |
+                             (A) 6.1 6.2 6.3 6.4 6.5 6.6   [U003 U043 U044 U045 U046
+                             U048 U049 U050 U051 U052 U053 U054]
+                             -> 6 endpoint: GET 200 + kontrak, tanpa field sensitif,
+                                paging, PATCH 405, tanpa sesi 401.
+                             -> id/empNumber 999999 -> 4xx; ESS: 9 operasi
+                                administratif -> 403 (GET entitlement org lain -> 422
+                                "empNumber", dicek terpisah); ESS boleh baca
+                                entitlement/report MILIK SENDIRI.
+                             HASIL: SENGAJA FAILED -- GET leave-entitlements dgn
+                             parameter offset BERAPA PUN -> 500 (BUG BG-453, Medium;
+                             endpoint lain yg berpaging normal dgn offset yg sama).
+
+ R2  TC-LEAVE-MUT-01  [DONE]  tests/leave/security/TC-LEAVE-MUT-01-Verify-Leave-Period-Work-Week-And-Holidays-Create-Update-Delete-Validation-And-Injection.spec.ts
+                             (+) 1.1-C 1.1-R 1.1-U 1.1-D | (-) 2.1 2.2 | (B) 3.1 3.4 |
+                             (!) 4.1 | (S) 5.1-SQLi 5.1-XSS-Stored 5.2-MassAssign |
+                             (A) 6.5 6.7   [U050 U052 U053]
+                             -> Leave Period & Work Week dibungkus withConfigRestore()
+                                (R6): PUT nilai sama, batas bulan/hari, field asing
+                                "createdAt" -> 422 ditolak (bukan mass-assign, validasi
+                                server benar).
+                             -> Holidays: create/read/update/delete, nama 200/201
+                                karakter, Arab/CJK/SQLi/HTML tersimpan apa adanya,
+                                DELETE 2x -> 200 lalu 404.
+                             HASIL: lolos penuh. Finding: nama+tanggal holiday
+                             duplikat DITERIMA (200) dua kali tanpa constraint unik.
+
+ R3  TC-LEAVE-ENT-02  [DONE]  tests/leave/entitlements/TC-LEAVE-ENT-02-Verify-Add-Entitlement-Upsert-Validation-Injection-And-Mass-Assignment.spec.ts
+                             (+) 1.1-C 1.1-R 1.1-U 1.1-D 1.2 1.4 | (-) 2.2 2.6 |
+                             (B) 3.2 | (!) 4.1 4.7 4.8 | (S) 5.2-MassAssign |
+                             (A) 6.5 6.7   [U045 U046]
+                             -> upsert additif dibuktikan (10 lalu +5 = 15); validasi
+                                negatif/empNumber/leaveTypeId asing -> 422; pecahan
+                                2.5 diterima; field "id" -> 422 ditolak.
+                             -> karyawan nama Arab ditemukan & diberi entitlement
+                                lewat UI; 3 POST paralel -> akumulatif; DELETE
+                                (endpoint nyata TANPA kontrol UI apa pun) -> 200.
+                             HASIL: lolos penuh. Catatan cakupan: mode "Multiple
+                             Employees" (bulk by Location/Sub Unit) SENGAJA tidak
+                             diuji end-to-end -- filter kosong cocok 118 karyawan
+                             SUNGGUHAN milik pengguna lain, tidak ada cara aman
+                             mengisolasi ke karyawan uji; GAP ini N/A beralasan.
+
+ R4  TC-LEAVE-VALID-01  [DONE -- BUG]  tests/leave/security/TC-LEAVE-VALID-01-Verify-The-Server-Enforces-The-Same-Entitlement-Rules-As-The-Add-Entitlement-Form.spec.ts
+                             (B) 3.2 | (!) 4.8 | (S) 5.9   [U045]
+                             -> form Add Entitlement menolak entitlement >=10000 &
+                                >2 desimal; body yg sama dikirim ke API.
+                             HASIL: SENGAJA FAILED -- API MENERIMA (200) keduanya
+                             (BUG BG-454, Low): batas & presisi hanya di form.
+
+ R5  TC-LEAVE-SECURITY-01  [DONE]  tests/leave/security/TC-LEAVE-SECURITY-01-Verify-Cross-Site-Requests-Concurrent-Writes-And-A-Burst-Of-Leave-Requests.spec.ts
+                             (!) 4.4 | (S) 5.4 5.5   [U043 U050 U052 U053 U054]
+                             -> situs lain (fetch no-cors/JSON ber-credentials) ke
+                                PUT leave-period/workweek, POST holiday -> cookie
+                                tidak ikut, config tidak berubah, sesi tetap aktif.
+                             -> 3 POST holiday paralel -> 3 baris; 2 DELETE sama
+                                paralel -> tepat satu 200; 6 POST Assign Leave
+                                paralel (ditarget ke karyawan uji, bukan sesi Admin
+                                bersama) -> tanpa 5xx.
+                             HASIL: lolos penuh. Finding: tanpa rate limit Assign
+                             Leave (spt BG-067 Recruitment).
+
+ R6  TC-LEAVE-CONFIG-01  [DONE]  tests/leave/configure/TC-LEAVE-CONFIG-01-Verify-Leave-Period-And-Work-Week-Feedback-Double-Submit-Navigation-Session-And-Concurrency.spec.ts
+                             (+) 1.2 1.4 1.8 | (!) 4.2 4.3 4.5 4.7 4.8 | 8.4
+                             [U050 U052]
+                             -> ubah Start Month / hari Work Week -> toast sukses,
+                                nilai baru tampil; klik ganda Save -> nilai akhir
+                                konsisten; refresh tanpa Save -> nilai lama tetap;
+                                sesi habis -> PUT 401 & dialihkan ke login.
+                             -> 2 Admin edit Work Week bersamaan -> last-write-wins.
+                             HASIL: lolos penuh (bulan asli dibaca dari API, bukan
+                             diasumsikan Januari -- tahan thdp periode apa pun yg
+                             sedang aktif).
+
+ R7  TC-LEAVE-HOLIDAY-01  [DONE -- BUG]  tests/leave/configure/TC-LEAVE-HOLIDAY-01-Verify-Add-Edit-Delete-Holiday-Feedback-Navigation-Session-And-Stored-Text.spec.ts
+                             (+) 1.2 1.4 1.8 | (-) 2.3 | (!) 4.1 4.2 4.3 4.5 4.8 |
+                             (S) 5.1-SQLi 5.1-XSS-Stored | 8.4   [U053]
+                             -> Add/Edit/Delete holiday lewat UI (route terpisah
+                                saveHolidays, bukan modal); nama Arab/SQLi/HTML
+                                tersimpan & tampil aman; holiday ke-2 pd tanggal
+                                terisi diblokir CLIENT-SIDE ("Already exists", tanpa
+                                request) -- tapi body identik via API tetap 200
+                                (bug yg sama dgn MUT-01); refresh/sesi habis aman.
+                             HASIL: SENGAJA FAILED -- klik ganda Save -> 2 holiday
+                             identik tersimpan (BUG BG-456, Low, pola sama dgn
+                             BG-205/BG-427/BG-446).
+
+  Terkait: TC-XMOD-07 (sesi habis saat Save, exception JS -- lihat docs/TC-XMOD.txt).
+
+  RUN COMMAND (7 TC baru):
+    npx playwright test tests/leave/security/TC-LEAVE-API-01-Verify-Leave-Settings-And-Request-APIs-Contract-Methods-Session-Unknown-Ids-And-ESS-Access.spec.ts tests/leave/security/TC-LEAVE-MUT-01-Verify-Leave-Period-Work-Week-And-Holidays-Create-Update-Delete-Validation-And-Injection.spec.ts tests/leave/entitlements/TC-LEAVE-ENT-02-Verify-Add-Entitlement-Upsert-Validation-Injection-And-Mass-Assignment.spec.ts tests/leave/security/TC-LEAVE-VALID-01-Verify-The-Server-Enforces-The-Same-Entitlement-Rules-As-The-Add-Entitlement-Form.spec.ts tests/leave/security/TC-LEAVE-SECURITY-01-Verify-Cross-Site-Requests-Concurrent-Writes-And-A-Burst-Of-Leave-Requests.spec.ts tests/leave/configure/TC-LEAVE-CONFIG-01-Verify-Leave-Period-And-Work-Week-Feedback-Double-Submit-Navigation-Session-And-Concurrency.spec.ts tests/leave/configure/TC-LEAVE-HOLIDAY-01-Verify-Add-Edit-Delete-Holiday-Feedback-Navigation-Session-And-Stored-Text.spec.ts --project=chromium --workers=1
+
+================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
 
-  Total TC         : 26 (16 TC lama + 5 TC lapis 1 P2.3: APPROVAL-01/02/03,
+  Total TC         : 33 (26 lama + 7 TC Fase 4/P4.0: API-01, MUT-01, ENT-02, VALID-01,
+                     SECURITY-01, CONFIG-01, HOLIDAY-01) (16 TC lama + 5 TC lapis 1 P2.3: APPROVAL-01/02/03,
                      MY-01, ENT-01 + 5 TC lapis 2: APPLY-07..11)
   PASSED           : 26 (21 di verifikasi gabungan 15 Nov 2026 + 5 TC lapis 2
                      lolos di run pertamanya, 15 Nov 2026)

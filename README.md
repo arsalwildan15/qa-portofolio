@@ -198,7 +198,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Performance | 38 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
-| Leave | 26 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
+| Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
 | Time | 17 | [docs/TC-Time.txt](docs/TC-Time.txt) |
 | Cross-module (Leave/Claim/Performance/Time) | 7 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
 | My Info | 15 | [docs/TC-MyInfo.txt](docs/TC-MyInfo.txt) |
@@ -206,7 +206,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **610** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **617** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -330,9 +330,17 @@ Admin-side Assign Claim (14: create, required fields, expenses incl. amount boun
 - After Approve, the detail page keeps showing a stale Reject button. Clicking it is correctly refused by the server (403, claim stays PAID), but the UI throws an unhandled exception and shows the user nothing (`TC-CLAIM-APPROVAL-05`, BG-374, another confirmation of the app-wide defect)
 - Earlier findings in this module remain open: unhandled exception on an amount-boundary 422 (BG-333) and attachment upload accepting a `.php` file renamed to `.jpg` (BG-338)
 
-### Leave (26 TCs)
+### Leave (33 TCs)
 
-Apply (11), Assign (6), Leave List incl. cancel-restores-balance and IDOR (3 + 1), and the cross-role flow added in Fase 2 (5): an ESS user applies, the Admin approves (Pending Approval → Scheduled, balance deducted once) or rejects (balance restored, terminal), the ESS user cancels their own request from My Leave, and an entitlement added by the Admin becomes the ESS user's visible balance. Layer 2 added duration and calendar rules: a half day deducts 0.5, "Specify Time" deducts by hours and rejects reversed or zero-length ranges (422), a request falling only on a holiday (read live from the holiday calendar) or only on a weekend is rejected with "No Working Days Selected", overlapping requests are rejected, and retroactive (past-date) leave is accepted by design. The full Leave suite passes, old and new tests alike. No new application bugs in this module this round.
+Apply (11), Assign (6), Leave List incl. cancel-restores-balance and IDOR (3 + 1), and the cross-role flow added in Fase 2 (5): an ESS user applies, the Admin approves (Pending Approval → Scheduled, balance deducted once) or rejects (balance restored, terminal), the ESS user cancels their own request from My Leave, and an entitlement added by the Admin becomes the ESS user's visible balance. Layer 2 added duration and calendar rules: a half day deducts 0.5, "Specify Time" deducts by hours and rejects reversed or zero-length ranges (422), a request falling only on a holiday (read live from the holiday calendar) or only on a weekend is rejected with "No Working Days Selected", overlapping requests are rejected, and retroactive (past-date) leave is accepted by design.
+
+**Taxonomy gap closure (2026-11-17), 7 new tests, Leave matrix 55.1% to 82.4%:** Leave Period, Work Week, Holidays, Entitlements, and the settings/request APIs behind all of them were covered end to end: `TC-LEAVE-API-01` (contract, paging, wrong method, no session, unknown ids, ESS denied on 9 administrative operations), `MUT-01` (Leave Period/Work Week validation under `withConfigRestore`, Holidays CRUD and injection), `ENT-02` (the entitlement grant is confirmed to be an *additive* upsert — granting again adds to the existing value, exactly as the confirm dialog states, by design), `VALID-01`, `SECURITY-01` (cross-site requests, parallel writes, a burst of assignments), and two UI tests (`CONFIG-01`, `HOLIDAY-01`) for feedback, double-click, navigation, and a lost session. This also fixed an app-wide test-infrastructure bug: the shared demo can show a *third* date format (`dd-mm-yyyy`) that `dateInput.ts` didn't recognize, hanging every date-filling test across Leave, PIM, Admin, Recruitment, Performance and Time — the date-filling helper now works off the yyyy/mm/dd tokens themselves rather than a fixed list of format names. Confirmed bugs:
+- `GET leave/leave-entitlements` returns 500 for *any* `offset` value, not just large ones, while every other paginated endpoint in the module handles the same parameter normally (BG-453, Medium)
+- The Add Entitlement form rejects an entitlement of 10,000+ days or more than 2 decimal places, but the API accepts both (BG-454, Low)
+- Double-clicking Save on Add Holiday stores two identical holidays (BG-456, Low, the same missing-debounce pattern as BG-205/BG-427/BG-446)
+- Two holidays on the same date are blocked by a client-side "Already exists" check, but the same duplicate pair sent straight to the API is accepted (no server-side constraint at all)
+
+Not tested end to end: Add Entitlement's "Multiple Employees" bulk-assign mode, since an empty filter on the shared demo matches 118 real employees belonging to other users, with no safe way to scope it to this suite's own test data.
 
 ### Time (17 TCs)
 
@@ -364,7 +372,7 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 
 Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
 
-**Taxonomy coverage snapshot (2026-11-17):** 67.3% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100% and Maintenance at 88.7%; Leave (55.1%), Time (56.2%) and Performance (59.6%) are next. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-17):** 70.2% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7% and Leave at 82.4%; Time (56.2%) and Performance (59.6%) are next. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

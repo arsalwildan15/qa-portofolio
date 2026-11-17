@@ -48,6 +48,7 @@ DIR = {
  'leave/apply': ['Leave > Apply'], 'leave/approval': ['Leave > Leave List', 'Leave > My Leave'], 'leave/assign': ['Leave > Assign Leave'],
  'leave/entitlements': ['Leave > Entitlements > Add Entitlements', 'Leave > Entitlements > My Entitlements'], 'leave/leave-list': ['Leave > Leave List'],
  'leave/my-leave': ['Leave > My Leave'],
+ 'leave/configure': ['Leave > Configure > Leave Period', 'Leave > Configure > Work Week'],
  'time/project': ['Time > Project Info > Customers', 'Time > Project Info > Projects'],
  'recruitment/candidates': ['Recruitment > Candidates'], 'recruitment/status-workflow': ['Recruitment > Candidate Detail & Status Workflow'],
  'recruitment/vacancies': ['Recruitment > Vacancies'],
@@ -83,6 +84,12 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'recruitment/candidates/TC-RECRUITMENT-CANDIDATE-23', ['Recruitment > Candidates']),
  (r'recruitment/vacancies/TC-RECRUITMENT-VACANCY-20', ['Recruitment > Vacancy Detail & Attachments', 'Recruitment > Vacancies']),
  (r'cross-module/TC-XMOD-07', ['Recruitment > Candidate Detail & Status Workflow', 'Recruitment > Vacancy Detail & Attachments', 'PIM > Employee > Personal Details']),
+ (r'leave/configure/TC-LEAVE-HOLIDAY-01', ['Leave > Configure > Holidays']),
+ (r'leave/security/TC-LEAVE-API-01', ['Leave > Leave List', 'Leave > Apply', 'Leave > My Leave', 'Leave > Entitlements > Add Entitlements', 'Leave > Entitlements > Employee Entitlements', 'Leave > Entitlements > My Entitlements', 'Leave > Reports > Leave Entitlements and Usage Report', 'Leave > Reports > My Leave Entitlements and Usage Report', 'Leave > Configure > Leave Period', 'Leave > Configure > Leave Types', 'Leave > Configure > Work Week', 'Leave > Configure > Holidays', 'Leave > Assign Leave']),
+ (r'leave/security/TC-LEAVE-MUT-01', ['Leave > Configure > Leave Period', 'Leave > Configure > Work Week', 'Leave > Configure > Holidays']),
+ (r'leave/security/TC-LEAVE-VALID-01', ['Leave > Entitlements > Add Entitlements']),
+ (r'leave/security/TC-LEAVE-SECURITY-01', ['Leave > Configure > Leave Period', 'Leave > Configure > Work Week', 'Leave > Configure > Holidays', 'Leave > Assign Leave']),
+ (r'leave/entitlements/TC-LEAVE-ENT-02', ['Leave > Entitlements > Add Entitlements', 'Leave > Entitlements > Employee Entitlements']),
  (r'maintenance/purge-records/TC-MAINT-PURGE-EMP-', ['Maintenance > Purge Records > Employee Records']),
  (r'maintenance/purge-records/TC-MAINT-PURGE-CAND-', ['Maintenance > Purge Records > Candidate Records']),
  (r'maintenance/access-records/', ['Maintenance > Access Records']),
@@ -308,6 +315,9 @@ flag(['Leave > Apply', 'Leave > Assign Leave'], 'C', 'N')
 flag(['Leave > My Leave'], 'L', 'SR')
 flag(['Leave > Assign Leave'], 'DT', 'T', 'AO')
 flag(['Leave > Entitlements > Add Entitlements', 'Leave > Entitlements > Employee Entitlements'], 'C', 'E', 'D', 'N', 'AO', 'ID', 'L', 'DT')
+# 'D' kept: confirmed live 17 Nov 2026 -- DELETE leave/leave-entitlements {ids} is a real,
+# reachable endpoint (404 "Records Not Found" for an id that doesn't exist, not 404/405 route
+# missing), even though no UI control (0 trash icons) exposes it.
 flag(['Leave > Entitlements > My Entitlements', 'Leave > Reports > My Leave Entitlements and Usage Report'], 'RO', 'ESS', 'L', 'ID')
 flag(['Leave > Reports > Leave Entitlements and Usage Report', 'Time > Reports > Project Reports', 'Time > Reports > Employee Reports',
       'Time > Reports > Attendance Summary'], 'RO', 'AO', 'L', 'SR', 'DT')
