@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 646 | 280 | 494 | 69.8% |
+| PIM | 657 | 269 | 494 | 71.0% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3457** | **1189** | **3093** | **74.4%** |
+| **Total** | **3468** | **1178** | **3093** | **74.6%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -26,7 +26,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | Item | Taxonomy | Units with GAP |
 |---|---|---:|
 | 1.1-C | Create valid | 2 |
-| 1.1-R | Read / list | 25 |
+| 1.1-R | Read / list | 24 |
 | 1.1-U | Update valid | 23 |
 | 1.1-D | Delete valid | 7 |
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 71 |
@@ -52,31 +52,31 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 51 |
 | 4.4 | Race condition | 15 |
 | 4.5 | Session/koneksi terputus | 56 |
-| 4.6 | Data kosong/null (empty state) | 13 |
+| 4.6 | Data kosong/null (empty state) | 12 |
 | 4.7 | Konkurensi multi-user edit | 48 |
 | 4.8 | Behavior non-obvious terdokumentasi | 80 |
 | 5.1-SQLi | SQL Injection | 35 |
 | 5.1-XSS-Stored | Stored XSS | 17 |
 | 5.1-XSS-Reflected | Reflected XSS | 15 |
-| 5.1-CmdPath | Command/Path injection | 7 |
+| 5.1-CmdPath | Command/Path injection | 6 |
 | 5.1-SSRF | SSRF | 5 |
 | 5.2-IDOR | IDOR | 2 |
 | 5.2-PrivEsc | Privilege escalation | 6 |
-| 5.2-MassAssign | Mass assignment | 35 |
+| 5.2-MassAssign | Mass assignment | 34 |
 | 5.3-BadExt | Upload ekstensi terlarang | 2 |
 | 5.3-Rename | Upload file di-rename | 4 |
-| 5.3-ContentType | Content-Type spoofing | 5 |
-| 5.3-DoubleExt | Double extension | 5 |
+| 5.3-ContentType | Content-Type spoofing | 4 |
+| 5.3-DoubleExt | Double extension | 4 |
 | 5.3-Oversize | Oversized file | 4 |
-| 5.3-Filename | Malicious filename | 5 |
+| 5.3-Filename | Malicious filename | 4 |
 | 5.4 | CSRF | 63 |
 | 5.5 | Rate limit / brute force / spam | 29 |
 | 5.6 | Security headers | 2 |
 | 5.9 | Business logic abuse | 13 |
-| 6.2 | Response schema/contract | 10 |
-| 6.3 | Request method salah (405) | 13 |
-| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 12 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 49 |
+| 6.2 | Response schema/contract | 9 |
+| 6.3 | Request method salah (405) | 12 |
+| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 11 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 48 |
 | 6.7 | Idempotency | 22 |
 | 7.4 | Warning log | 2 |
 | 7.5 | Performance dasar | 2 |

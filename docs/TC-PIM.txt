@@ -2539,15 +2539,46 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/report-to/TC-PIM-REPORTTO-API-01-Verify-Supervisor-API-Contract-Validation-Update-Delete-Mass-Assignment-And-Method.spec.ts --project=chromium
 
+121   TC-PIM-DATAIMPORT-API-01  [DONE]  tests/pim/configuration/data-import/TC-PIM-DATAIMPORT-API-01-Verify-CSV-Import-API-Contract-Validation-Content-Type-Allowlist-Formula-Injection-And-Mass-Assignment.spec.ts
+                             (+) 1.4 | (-) 4.6 | (B) 5.3-Oversize | (S) 5.1-CmdPath
+                             5.2-MassAssign 5.3-ContentType 5.3-DoubleExt 5.3-Filename |
+                             (A) 6.2 6.3 6.4 6.5   [U038]
+                             -> LATAR: POST pim/csv-import body JSON {attachment:{name,type,
+                                size,base64}} -- SAMA pola dgn Attachments/Photo tapi hasil
+                                respons RINGKASAN IMPORT (meta.total/success/failed), bukan
+                                metadata file; GET pd endpoint sama -> 405 (write-only,
+                                1.1-R N/A by design, dicatat via report.finding() TANPA kode
+                                literal supaya tidak salah ke-tag COVERED).
+                             -> CSV valid (22 kolom resmi) -> 200 & kontrak benar; CSV kosong
+                                (hanya header) -> 200 & total=0 (bukan error); file 2MB ->
+                                422; .exe octet-stream -> 422; "bad.php.csv" (bukan struktur
+                                CSV valid) -> 400 (parser menolak krn struktur, bukan
+                                whitelist nama -- BEDA mekanisme dari Attachments/Photo,
+                                bukan bug); nama file path traversal dgn konten CSV valid ->
+                                tetap diproses normal (nama file tidak pernah di-echo/
+                                disimpan, tidak ada risiko penyimpanan verbatim); SQLi pada
+                                nilai sel -> 200 & aman; field asing (empNumber, isAdmin) ->
+                                422; body tanpa attachment -> 422; PATCH -> 405; tanpa sesi
+                                -> 401.
+                             HASIL: lolos penuh (14/14), tidak ada bug. [TEMUAN, bukan bug]
+                             CSV Formula Injection potensial: nilai sel "=1+1" diimpor &
+                             tersimpan literal (tidak dieksekusi app ini saat import) --
+                             berisiko kalau data pernah di-export ulang ke Excel & dibuka
+                             pengguna lain; tidak diverifikasi lebih jauh (perlu TC export
+                             terpisah).
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/configuration/data-import/TC-PIM-DATAIMPORT-API-01-Verify-CSV-Import-API-Contract-Validation-Content-Type-Allowlist-Formula-Injection-And-Mass-Assignment.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 172 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 173 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
-  PHOTO-API-01, REPORT-API-01, REPORTTO-API-01 ditambahkan 2026-11-17
-  penutup gap taksonomi)
+  PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01
+  ditambahkan 2026-11-17 penutup gap taksonomi)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

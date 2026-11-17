@@ -193,7 +193,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 |--------|----:|------|
 | Login | 46 | [docs/TC-Login.txt](docs/TC-Login.txt) |
 | Admin | 144 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
-| PIM | 172 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
+| PIM | 173 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 68 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Performance | 41 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
@@ -206,7 +206,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **632** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **633** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -255,7 +255,7 @@ Corporate Branding's logo/banner inputs, by contrast, reject the same renamed-ex
 
 **Users list filter + bulk delete** (`TC-ADMIN-USER-10`/`11`, added 2026-11-12) were previously untested. Combined Role+Status filtering is confirmed to AND together server-side as expected. The Username filter field turned out to be **exact-match (case-insensitive), not a substring search**. It looks like a plain free-text search box with no visual hint that it needs the full username, which is a UX gap worth flagging even though the server behavior itself isn't wrong. Bulk delete (checkbox-select 2+ rows, then "Delete Selected") is confirmed to send a single `DELETE` with `{"ids":[...]}` for every selected row at once, the same pattern already seen on Languages/Nationalities/Qualifications.
 
-### PIM (172 TCs)
+### PIM (173 TCs)
 
 Full module coverage, no open functional gaps: Employee List (14), Add Employee (30), Personal Details + 9 sub-tabs (Contact Details, Job incl. Terminate Employment, Emergency Contacts, Dependents, Immigration, Salary, Report-to, Qualifications with all 5 sub-sections, Memberships), Configuration (Optional Fields, Custom Fields, Data Import, Reporting Methods, Termination Reasons), Reports, plus 8 cross-cutting file-upload security TCs and 2 IDOR/clickjacking security TCs.
 
@@ -280,6 +280,8 @@ IDOR on personal-details/salary access is confirmed N/A (single-role architectur
 `TC-PIM-REPORT-API-01` swept the Reports API end to end (create/read/delete, a confirmed 255-character name limit, SQL/XSS injection safely stored and never reflected in search, strict rejection of unknown body fields, 404 for an id that doesn't exist, method and session) — all 16 checks pass clean, no bug found.
 
 `TC-PIM-REPORTTO-API-01` found the Supervisor/Subordinate API performs essentially no server-side validation beyond its body schema: an out-of-range `reportingMethodId`, a non-numeric `empNumber`, a supervisor id that doesn't exist, and adding the same supervisor twice all crash the endpoint with HTTP 500 instead of a 422 — only an unknown field in the body is correctly rejected (`BG-466`, High). Create/read/update/delete with valid data all work correctly.
+
+`TC-PIM-DATAIMPORT-API-01` swept the CSV Import API (same JSON+base64 body as Attachments, but the response is an import summary rather than file metadata): size limit and content-type allowlist hold, an empty CSV (header only) returns a clean zero-count rather than an error, SQL-injected cell values are stored safely, and unknown body fields are rejected. All 14 checks pass clean, no bug — but it surfaces a worth-noting finding: a cell value starting with `=` (e.g. `=1+1`) is imported and stored as literal text; harmless on import itself, but a classic CSV-injection risk if that data is ever exported back to a spreadsheet someone opens (not verified further — out of this test's scope).
 
 ### Recruitment (68 TCs)
 
@@ -402,7 +404,7 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 
 Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
 
-**Taxonomy coverage snapshot (2026-11-17):** 74.4% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7%, Leave at 82.4%, My Info at 76.6%, Admin at 72.8%, Time at 69.5%, PIM at 69.8% and Buzz/Claim at 69.0%; Performance (67.2%) is the lowest. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-17):** 74.6% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7%, Leave at 82.4%, My Info at 76.6%, Admin at 72.8%, PIM at 71.0%, Time at 69.5% and Buzz/Claim at 69.0%; Performance (67.2%) is the lowest. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 
