@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 704 | 222 | 494 | 76.0% |
+| PIM | 707 | 219 | 494 | 76.3% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3515** | **1131** | **3093** | **75.7%** |
+| **Total** | **3518** | **1128** | **3093** | **75.7%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -29,15 +29,15 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.1-R | Read / list | 22 |
 | 1.1-U | Update valid | 22 |
 | 1.1-D | Delete valid | 7 |
-| 1.2 | Variasi input valid (opsional diisi/kosong) | 67 |
+| 1.2 | Variasi input valid (opsional diisi/kosong) | 66 |
 | 1.3 | State transition valid | 4 |
-| 1.4 | Relasi antar-entity | 46 |
+| 1.4 | Relasi antar-entity | 45 |
 | 1.5 | Permission/role positif | 1 |
 | 1.6 | Search/filter/sort valid | 24 |
 | 1.7 | Upload file valid | 2 |
 | 1.8 | Notifikasi/feedback UI | 46 |
 | 2.1 | Required field kosong | 18 |
-| 2.2 | Format salah | 51 |
+| 2.2 | Format salah | 50 |
 | 2.3 | Duplicate/unique conflict | 5 |
 | 2.4 | Aksi tanpa permission (UI/API) | 1 |
 | 2.5 | State transition invalid | 8 |

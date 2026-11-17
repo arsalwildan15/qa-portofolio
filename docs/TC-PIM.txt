@@ -2706,17 +2706,30 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/emergency-contacts/TC-PIM-EMERGENCY-API-01-Verify-Emergency-Contacts-API-Contract-Required-Field-And-Format-Validation.spec.ts --project=chromium
 
+128   TC-PIM-DEPENDENT-API-01  [DONE]  tests/pim/dependents/TC-PIM-DEPENDENT-API-01-Verify-Dependents-API-Contract-Optional-Date-Of-Birth-And-Format-Validation.spec.ts
+                             (+) 1.1-C 1.2 1.4 | (-) 2.2 | (A) 6.2   [U091]
+                             -> Create valid -> 200; dateOfBirth kosong (opsional) -> 200;
+                                format tidak valid -> 422; relationshipType="other" +
+                                relationship teks pelengkap -> 200 & kontrak benar.
+                             HASIL: lolos penuh (5/5), tidak ada bug BARU. [TEMUAN,
+                             konsisten dgn TC-PIM-PD-04] dateOfBirth masa depan (2099) ->
+                             200, diterima tanpa validasi logis usia -- SAMA dgn behavior
+                             yg sudah terdokumentasi di Personal Details.
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/dependents/TC-PIM-DEPENDENT-API-01-Verify-Dependents-API-Contract-Optional-Date-Of-Birth-And-Format-Validation.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 179 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 180 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
   JOB-API-01, CUSTOMFIELD-API-01, ADD-API-01, PD-API-01, CONTACT-API-01,
-  EMERGENCY-API-01 ditambahkan 2026-11-17 penutup gap taksonomi;
-  CONTACT-03 ditulis ulang krn bug skrip)
+  EMERGENCY-API-01, DEPENDENT-API-01 ditambahkan 2026-11-17 penutup gap
+  taksonomi; CONTACT-03 ditulis ulang krn bug skrip)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

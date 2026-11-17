@@ -187,7 +187,10 @@
   hard-check pd aspek yg racy, tapi hard-check pd hasil akhir yg konsisten.
   DAN PIM lanjutan 75.7% -> 76.0% (1 TC baru: EMERGENCY-API-01; lolos penuh 5/5, tidak ada
   bug -- relationship wajib, phone opsional, format phone ditegakkan). Matrix TOTAL 75.7%.
-  BERIKUT: PIM msh 76.0%, GAP tersisa (5 tab lain @11-13 -- Dependents, Immigration, Salary,
+  DAN PIM lanjutan 76.0% -> 76.3% (1 TC baru: DEPENDENT-API-01; lolos penuh 5/5, tidak ada
+  bug baru -- dateOfBirth masa depan diterima, konsisten dgn TC-PIM-PD-04). Matrix TOTAL
+  tetap 75.7%.
+  BERIKUT: PIM msh 76.3%, GAP tersisa (4 tab lain @11-13 -- Immigration, Salary,
   Qualifications, Memberships; Employee List 8; Reporting Methods/Termination Reasons @5) ->
   TERUSKAN PIM sampai 100% sesuai instruksi user, urutan GAP terbesar dulu; SETELAH PIM
   100%, LANJUT OTOMATIS ke modul berikutnya (Performance 67.2% saat ini terendah) TANPA
@@ -623,3 +626,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | PIM lanjutan (PD-API-01) | 1 TC; BG-470 (High, konfirmasi ke-3 pola BG-466/467 -- nationalityId tidak ada -> 500, gender/empNumber benar divalidasi 422); docs TC-PIM/README; PIM 75.1%; matrix TOTAL 75.5% | 1 commit
 - 2026-11-17 | PIM lanjutan (CONTACT-API-01 + perbaikan CONTACT-03) | 1 TC baru + 1 TC lama diperbaiki; ditemukan bug skrip di TC-PIM-CONTACT-03 (klaim "email invalid diterima tanpa validasi" salah, tidak pernah periksa body yg benar2 terkirim -- app sebenarnya mengosongkan sendiri nilai invalid, server JUSTRU memvalidasi 422 saat dikirim langsung via API); aturan baru: klaim "diterima tanpa validasi" wajib verifikasi body asli; docs TC-PIM/README; PIM 75.7%; matrix TOTAL 75.6% | 1 commit
 - 2026-11-17 | PIM lanjutan (EMERGENCY-API-01) | 1 TC; lolos penuh 5/5, tidak ada bug (relationship wajib, phone opsional, format phone ditegakkan); docs TC-PIM/README; PIM 76.0%; matrix TOTAL 75.7% | 1 commit
+- 2026-11-17 | PIM lanjutan (DEPENDENT-API-01) | 1 TC; lolos penuh 5/5, tidak ada bug baru (dateOfBirth masa depan diterima, konsisten dgn TC-PIM-PD-04); docs TC-PIM/README; PIM 76.3%; matrix TOTAL 75.7% | 1 commit
