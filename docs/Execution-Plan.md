@@ -92,10 +92,21 @@
   tulis sekaligus -- Personal Details, Contact, Emergency, Dependents, Immigration, Work
   Experience, Memberships; field privilege asing ditolak 422 di SEMUA endpoint, lolos penuh,
   tidak ada bug). Matrix TOTAL 73.3%.
+  DAN My Info lanjutan lagi 73.4% -> 76.6% (1 TC baru: ATTACHMENT-02). LATAR PENTING: endpoint
+  Attachments ternyata JSON {attachment:{name,type,size,base64}, description} BUKAN multipart
+  (ditemukan via page.on('request') saat upload nyata, bukan ditebak dari convention lain).
+  Matrix TOTAL 73.6%. BUG BG-462 (Medium) 2 temuan: file "bad.php.pdf" isi kode PHP tapi type
+  diklaim application/pdf -> DITERIMA 200 (server cek field type diklaim klien via allowlist,
+  TIDAK cek isi file sesungguhnya, keluarga BG-003); nama file path traversal
+  ("../../etc/passwd.pdf") -> DITERIMA 200 & disimpan apa adanya tanpa sanitasi. My Info kini
+  76.6%, SUDAH di atas PIM -- My Info msh py sisa GAP (U006 Personal Details 17, + 4.2/4.3/4.5/
+  4.7/8.4 di hampir semua unit utk UI feedback/double-submit/navigasi/sesi/konkurensi/konsistensi
+  pesan) tapi prioritas urutan terendah pindah ke PIM.
   BERIKUT (urut terendah): PIM 65.7% msh terendah -> lanjutkan modul ini (Employee List, Add
   Employee, Reports, sisa Config, 9 tab employee) sblm pindah modul lain; lalu Buzz/Claim 69%,
-  Admin 72.8%; Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees" Add
-  Entitlement msh N/A beralasan (filter kosong kena 118 karyawan sungguhan); lalu Fase 5-8.
+  Admin 72.8%, Time 69.5%, Performance 67.2%, My Info 76.6% (sisa GAP di atas) utk diperkuat
+  nanti; Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees" Add Entitlement
+  msh N/A beralasan (filter kosong kena 118 karyawan sungguhan); lalu Fase 5-8.
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -514,3 +525,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | P4.0 My Info | 1 TC (MUT-01); body Contact/Emergency/Dependent/Membership direkam live via page.on('request') (Emergency pakai homePhone/officePhone/mobilePhone, Dependents relationshipType string enum); 2 bug skrip ditemukan & diperbaiki sendiri sblm real run (timestamp body re-dipanggil beda nilai, perbandingan referensi fungsi .json selalu beda); BG-461 (2 temuan: Dependent name kosong diterima, Membership id tak ada -> 500) ditulis standar; docs TC-MyInfo/README; My Info 71.9%; matrix TOTAL 73.0% | 1 commit
 - 2026-11-17 | P4.0 PIM (mulai) | 1 TC (OPTFIELD-04, API langsung via withConfigRestore); ditemukan TC-PIM-OPTFIELD-01 sudah dipakai file lama -> TC baru diberi nomor 04; lolos penuh 13/13 (finding koersi tipe lenient, bukan bug); docs TC-PIM/README; PIM 65.7%; matrix TOTAL 73.1%. PIM msh py 19 unit GAP lain, blm tuntas | 1 commit
 - 2026-11-17 | P4.0 My Info lanjutan | 1 TC (PRIVESC-01); sweep 5.2-PrivEsc di 7 endpoint sekaligus (Personal Details, Contact, Emergency, Dependents, Immigration, Work Experience, Memberships) dgn field privilege asing (userRoleId/isAdmin/roleName/permissions) -> 422 konsisten di semua 7; lolos penuh 8/8, tidak ada bug; docs TC-MyInfo/README; My Info 73.4%; matrix TOTAL 73.3% | 1 commit
+- 2026-11-17 | P4.0 My Info lanjutan lagi | 1 TC (ATTACHMENT-02); ditemukan endpoint Attachments JSON base64 (bukan multipart) via page.on('request'); BG-462 (2 temuan: PHP diterima diklaim pdf, filename path traversal disimpan verbatim) ditulis standar; docs TC-MyInfo/README; My Info 76.6% (lewati PIM); matrix TOTAL 73.6% | 1 commit

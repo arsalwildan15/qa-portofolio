@@ -201,12 +201,12 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
 | Time | 21 | [docs/TC-Time.txt](docs/TC-Time.txt) |
 | Cross-module (Leave/Claim/Performance/Time) | 7 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
-| My Info | 17 | [docs/TC-MyInfo.txt](docs/TC-MyInfo.txt) |
+| My Info | 18 | [docs/TC-MyInfo.txt](docs/TC-MyInfo.txt) |
 | Dashboard | 3 | [docs/TC-Dashboard.txt](docs/TC-Dashboard.txt) |
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **627** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **628** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -371,7 +371,7 @@ These aspects are handled by layers the four modules share (web server, the `/ap
 
 **Expired session (2026-11-17), `TC-XMOD-07`:** saving after the session has expired correctly sends the user to the login page without changing data, but every time it throws an unhandled script error (`Cannot read properties of undefined (reading 'response')`) on Recruitment and PIM forms alike (BG-441, Low, app-wide).
 
-### My Info (17 TCs)
+### My Info (18 TCs)
 
 Tested as a real Employee Self-Service user created on the fly: personal details, contact details, emergency contacts, dependents, immigration, qualifications, attachments, the tab APIs, and cross-site requests. Confirmed bugs: fields locked for employees (Employee Id, Driver's License, Date of Birth) can still be changed by the employee through the API (BG-420, High); attachments accept an executable renamed to `.pdf` (BG-422); double-click Save duplicates Immigration and Work Experience records (BG-431, BG-432); the Immigration API accepts an expiry date before the issue date (BG-433); unknown qualification ids return 500 (BG-434); and a page on another site can log the employee out by overwriting their session cookie (BG-437, Medium, app-wide). The cross-site attempt itself could not change any data.
 
@@ -381,6 +381,8 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 (both logged together as `BG-461`, High)
 
 `TC-MYINFO-PRIVESC-01` then confirmed an employee cannot escalate their own privileges through any of the 7 writable My Info endpoints (Personal Details, Contact Details, Emergency Contacts, Dependents, Immigration, Work Experience, Memberships): a privilege-shaped field (`userRoleId`, `isAdmin`, `roleName`, `permissions`) added alongside a valid body is rejected with 422 on every single one, no bypass found.
+
+`TC-MYINFO-ATTACHMENT-02` found the Attachments API is actually a JSON endpoint (`{attachment: {name, type, size, base64}, description}`, not multipart — discovered from real network traffic, not guessed), and that its size limit, a content-type allowlist and injection on the description field all hold up. Bug: a file named `bad.php.pdf` whose real content is PHP, with `type` merely *claimed* as `application/pdf`, is accepted and stored — the server checks the claimed type against an allowlist but never the file's actual content, the same root cause as the renamed-executable bug above. A filename containing a path-traversal sequence (`../../etc/passwd.pdf`) is also accepted and stored verbatim, with no sanitization (`BG-462`, Medium).
 
 ### Dashboard (3 TCs), Sidebar Search (3 TCs), Maintenance (4 TCs)
 
@@ -392,7 +394,7 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 
 Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
 
-**Taxonomy coverage snapshot (2026-11-17):** 73.3% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7%, My Info at 73.4%, Leave at 82.4%, Admin at 72.8%, Time at 69.5%, Buzz/Claim at ~69% and Performance at 67.2%; PIM (65.7%) is next. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-17):** 73.6% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7%, Leave at 82.4%, My Info at 76.6%, Admin at 72.8%, Time at 69.5%, Buzz/Claim at ~69% and Performance at 67.2%; PIM (65.7%) is next. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 
