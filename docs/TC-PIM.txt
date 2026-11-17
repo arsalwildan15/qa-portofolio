@@ -2789,19 +2789,46 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/employee-list/TC-PIM-LIST-API-01-Verify-Employee-List-API-Delete-Unicode-Search-And-Negative-Limit-Parameter.spec.ts --project=chromium
 
+134   TC-PIM-REPORTMETHOD-API-01  [DONE]  tests/pim/configuration/reporting-methods/TC-PIM-REPORTMETHOD-API-01-Verify-Reporting-Method-API-Length-Limit-And-Mass-Assignment.spec.ts
+135   TC-PIM-TERMREASON-API-01   [DONE]  tests/pim/configuration/termination-reasons/TC-PIM-TERMREASON-API-01-Verify-Termination-Reason-API-Length-Limit-And-Mass-Assignment.spec.ts
+                             (B) 3.1 | (-) 2.2 | (S) 5.2-MassAssign | (A) 6.5   [U039 U040]
+                             -> PELAJARAN METODOLOGI (ditemukan & diperbaiki LANGSUNG sesi
+                                ini): percobaan pertama menulis SATU file di direktori
+                                reporting-methods/ yg mencakup checks utk KEDUA unit --
+                                matrix tooling memetakan unit HANYA berdasarkan PATH
+                                direktori file (bukan label check), jadi seluruh check
+                                Termination Reasons TIDAK PERNAH ter-attribute ke U040.
+                                Diperbaiki dgn memisah jadi 2 file terpisah, masing2 di
+                                direktorinya sendiri.
+                             -> name 100 karakter (batas atas) -> 200; 101 -> 422; name
+                                hanya whitespace (format salah) -> 422; field asing
+                                (isAdmin) -> 422 (skema ketat). SAMA utk KEDUA unit, limit
+                                identik 100 karakter.
+                             HASIL: lolos penuh (5/5 masing2), tidak ada bug. [TEMUAN]
+                             1.2 (variasi opsional) & 1.4 (relasi antar-entity) TETAP GAP
+                             pd kedua unit krn limitasi sistem flag matrix tooling (flag
+                             'C' generik mengharuskan bukti 1.2/1.4 utk SEMUA unit berflag
+                             create, termasuk unit dgn SATU field wajib tanpa relasi) --
+                             bukan kekurangan TC ini, melainkan batasan arsitektur
+                             tools/coverage, dicatat utk sesi berikutnya kalau ingin
+                             diperbaiki scr sistemik.
+
+  RUN COMMAND (2 TC baru):
+    npx playwright test tests/pim/configuration/reporting-methods/TC-PIM-REPORTMETHOD-API-01-Verify-Reporting-Method-API-Length-Limit-And-Mass-Assignment.spec.ts tests/pim/configuration/termination-reasons/TC-PIM-TERMREASON-API-01-Verify-Termination-Reason-API-Length-Limit-And-Mass-Assignment.spec.ts --project=chromium --workers=1
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 185 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 187 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
   JOB-API-01, CUSTOMFIELD-API-01, ADD-API-01, PD-API-01, CONTACT-API-01,
   EMERGENCY-API-01, DEPENDENT-API-01, IMMIGRATION-API-01, SALARY-API-01,
-  QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01 ditambahkan
-  2026-11-17/18 penutup gap taksonomi; CONTACT-03 ditulis ulang krn bug
-  skrip)
+  QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01, REPORTMETHOD-API-01,
+  TERMREASON-API-01 ditambahkan 2026-11-17/18 penutup gap taksonomi;
+  CONTACT-03 ditulis ulang krn bug skrip)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

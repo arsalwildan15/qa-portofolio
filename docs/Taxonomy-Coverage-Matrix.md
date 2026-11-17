@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 722 | 204 | 494 | 78.0% |
+| PIM | 724 | 202 | 494 | 78.2% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3533** | **1113** | **3093** | **76.0%** |
+| **Total** | **3535** | **1111** | **3093** | **76.1%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -37,7 +37,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.7 | Upload file valid | 2 |
 | 1.8 | Notifikasi/feedback UI | 46 |
 | 2.1 | Required field kosong | 18 |
-| 2.2 | Format salah | 48 |
+| 2.2 | Format salah | 46 |
 | 2.3 | Duplicate/unique conflict | 5 |
 | 2.4 | Aksi tanpa permission (UI/API) | 1 |
 | 2.5 | State transition invalid | 8 |

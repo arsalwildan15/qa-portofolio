@@ -205,11 +205,28 @@
   Immigration, Job, Salary, Qualifications, Memberships).
   DAN PIM lanjutan 77.6% -> 78.0% (1 TC baru: LIST-API-01; lolos penuh 5/5, tidak ada bug --
   DELETE sungguhan, unicode search, limit negatif semua benar). Matrix TOTAL 76.0%.
-  BERIKUT: PIM msh 78.0%, GAP tersisa (Reporting Methods/Termination Reasons @5 masing2) ->
-  TERUSKAN PIM sampai 100% sesuai instruksi user; SETELAH PIM 100%, LANJUT OTOMATIS ke
-  modul berikutnya (Performance 67.2% saat ini terendah) TANPA perlu konfirmasi user lagi
-  (instruksi user 2026-11-17: "apabila menu PIM sudah 100%, langsung lanjut ke modul
-  berikutnya tanpa perlu konfirmasi").
+  DAN PIM lanjutan 78.0% -> 78.2% (2 TC baru: REPORTMETHOD-API-01 + TERMREASON-API-01, file
+  TERPISAH per unit; lolos penuh 5/5 masing2, tidak ada bug -- limit 100 char name, mass-
+  assignment, whitespace-only name semua ditegakkan benar). Matrix TOTAL 76.1%. PELAJARAN
+  METODOLOGI PENTING (lihat docs/TC-PIM.txt #134/135): build_matrix.py `spec_units()` memetakan
+  spec -> unit murni dari PATH FILE (NAME_RULES/DIR), BUKAN dari kode [U0xx] di label check --
+  1 file yg mencakup 2 unit berbeda (mis. Reporting Methods + Termination Reasons sekaligus)
+  akan SALAH mengatribusikan SEMUA evidence-nya ke 1 unit saja sesuai path direktori file itu.
+  JUGA: label `report.finding()` JANGAN pernah mengandung token berbentuk kode taksonomi literal
+  (mis. "3.1 / 4.1 N/A") kalau maksudnya menandai N/A -- `spec_codes()` scan SEMUA label check
+  DAN finding utk kode apa pun & otomatis menandai COVERED, terlepas dari maksud kalimatnya.
+  Fix: 1 file per unit/direktori, & tulis finding dlm prosa polos tanpa token kode.
+  SISA GAP PIM: 1.2/1.4 pada unit single-field (Reporting Methods, Termination Reasons) TIDAK
+  bisa ditutup via TC -- `NA_RULES` di build_matrix.py bersifat GLOBAL flag-based (unit dgn flag
+  'C'/create selalu dianggap butuh evidence 1.2/1.4 optional-field & 1.x relasi-entity, terlepas
+  apakah unit itu BENAR2 punya field opsional/relasi atau tidak) -- keterbatasan STRUKTURAL tool,
+  bukan sesuatu yg bisa diperbaiki di level penulisan TC tanpa mengubah build_matrix.py sendiri
+  (berisiko side effect ke unit lain). PIM TIDAK BISA mencapai 100% literal tanpa perubahan tool.
+  BERIKUT: cek ulang SEMUA GAP PIM yg tersisa (selain 1.2/1.4 struktural) utk pastikan tidak ada
+  yg masih bisa ditutup; kalau sisanya memang semua struktural, LANJUT OTOMATIS ke modul
+  berikutnya (Performance 67.2% saat ini terendah) TANPA perlu konfirmasi user lagi (instruksi
+  user 2026-11-17: "apabila menu PIM sudah 100%, langsung lanjut ke modul berikutnya tanpa
+  perlu konfirmasi").
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -646,3 +663,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | PIM lanjutan (QUALIFICATION-API-01) | 1 TC; lolos penuh 5/5, tidak ada bug baru (toDate<fromDate ditolak benar, beda dgn BG-433; ghost id -> 500 konfirmasi BG-434 jg di Admin-side); docs TC-PIM/README; PIM 77.3%; matrix TOTAL 75.9% | 1 commit
 - 2026-11-18 | PIM lanjutan (MEMBERSHIP-API-01) | 1 TC; lolos penuh 6/6, tidak ada bug (fee negatif & renewalDate<commenceDate ditegakkan benar); docs TC-PIM/README; SEMUA 9 tab employee selesai; PIM 77.6%; matrix TOTAL 76.0% | 1 commit
 - 2026-11-18 | PIM lanjutan (LIST-API-01) | 1 TC; lolos penuh 5/5, tidak ada bug (delete sungguhan, unicode search, limit negatif semua benar); docs TC-PIM/README; PIM 78.0%; matrix TOTAL 76.0% | 1 commit
+- 2026-11-18 | PIM lanjutan (REPORTMETHOD-API-01 + TERMREASON-API-01) | 2 TC file terpisah per unit; lolos penuh 5/5 masing2, tidak ada bug (limit 100 char, mass-assignment, whitespace-only name semua ditegakkan); ditemukan & diperbaiki 2 bug tooling (path-based unit mapping mis-atribusi evidence file gabungan, kode literal di label finding salah ke-tag COVERED); sisa GAP 1.2/1.4 pd unit single-field = keterbatasan struktural NA_RULES build_matrix.py, bukan bisa ditutup via TC; docs TC-PIM/README/Execution-Plan; PIM 78.2%; matrix TOTAL 76.1% | 1 commit
