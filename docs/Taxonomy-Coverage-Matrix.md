@@ -16,8 +16,8 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Performance | 251 | 170 | 289 | 59.6% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
-| Time | 271 | 211 | 370 | 56.2% |
-| **Total** | **3262** | **1384** | **3093** | **70.2%** |
+| Time | 335 | 147 | 370 | 69.5% |
+| **Total** | **3326** | **1320** | **3093** | **71.6%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -26,37 +26,37 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | Item | Taxonomy | Units with GAP |
 |---|---|---:|
 | 1.1-C | Create valid | 3 |
-| 1.1-R | Read / list | 29 |
-| 1.1-U | Update valid | 28 |
+| 1.1-R | Read / list | 28 |
+| 1.1-U | Update valid | 26 |
 | 1.1-D | Delete valid | 9 |
-| 1.2 | Variasi input valid (opsional diisi/kosong) | 73 |
+| 1.2 | Variasi input valid (opsional diisi/kosong) | 72 |
 | 1.3 | State transition valid | 4 |
-| 1.4 | Relasi antar-entity | 57 |
+| 1.4 | Relasi antar-entity | 56 |
 | 1.5 | Permission/role positif | 1 |
 | 1.6 | Search/filter/sort valid | 24 |
 | 1.7 | Upload file valid | 2 |
-| 1.8 | Notifikasi/feedback UI | 48 |
-| 2.1 | Required field kosong | 25 |
-| 2.2 | Format salah | 62 |
+| 1.8 | Notifikasi/feedback UI | 47 |
+| 2.1 | Required field kosong | 23 |
+| 2.2 | Format salah | 60 |
 | 2.3 | Duplicate/unique conflict | 6 |
 | 2.4 | Aksi tanpa permission (UI/API) | 1 |
 | 2.5 | State transition invalid | 9 |
-| 2.6 | Operasi pada record invalid/tak eksis | 17 |
+| 2.6 | Operasi pada record invalid/tak eksis | 15 |
 | 2.8 | Reject/cancel tanpa alasan | 5 |
-| 3.1 | Panjang karakter field | 31 |
+| 3.1 | Panjang karakter field | 30 |
 | 3.2 | Nilai numerik | 3 |
 | 3.3 | Ukuran file upload | 5 |
 | 3.4 | Tanggal | 22 |
-| 3.5 | Pagination | 4 |
-| 3.6 | Jumlah hasil (0/1/limit) | 4 |
+| 3.5 | Pagination | 1 |
+| 3.6 | Jumlah hasil (0/1/limit) | 1 |
 | 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 51 |
-| 4.2 | Aksi ganda/cepat (double submit) | 52 |
-| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 52 |
+| 4.2 | Aksi ganda/cepat (double submit) | 51 |
+| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 51 |
 | 4.4 | Race condition | 15 |
-| 4.5 | Session/koneksi terputus | 57 |
-| 4.6 | Data kosong/null (empty state) | 23 |
-| 4.7 | Konkurensi multi-user edit | 49 |
-| 4.8 | Behavior non-obvious terdokumentasi | 81 |
+| 4.5 | Session/koneksi terputus | 56 |
+| 4.6 | Data kosong/null (empty state) | 16 |
+| 4.7 | Konkurensi multi-user edit | 48 |
+| 4.8 | Behavior non-obvious terdokumentasi | 80 |
 | 5.1-SQLi | SQL Injection | 41 |
 | 5.1-XSS-Stored | Stored XSS | 21 |
 | 5.1-XSS-Reflected | Reflected XSS | 16 |
@@ -64,27 +64,27 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.1-SSRF | SSRF | 5 |
 | 5.2-IDOR | IDOR | 2 |
 | 5.2-PrivEsc | Privilege escalation | 12 |
-| 5.2-MassAssign | Mass assignment | 47 |
+| 5.2-MassAssign | Mass assignment | 45 |
 | 5.3-BadExt | Upload ekstensi terlarang | 3 |
 | 5.3-Rename | Upload file di-rename | 4 |
 | 5.3-ContentType | Content-Type spoofing | 8 |
 | 5.3-DoubleExt | Double extension | 7 |
 | 5.3-Oversize | Oversized file | 7 |
 | 5.3-Filename | Malicious filename | 8 |
-| 5.4 | CSRF | 65 |
-| 5.5 | Rate limit / brute force / spam | 30 |
+| 5.4 | CSRF | 63 |
+| 5.5 | Rate limit / brute force / spam | 29 |
 | 5.6 | Security headers | 2 |
 | 5.8 | Sensitive data exposure | 1 |
 | 5.9 | Business logic abuse | 13 |
-| 6.2 | Response schema/contract | 22 |
-| 6.3 | Request method salah (405) | 25 |
-| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 24 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 61 |
-| 6.6 | Pagination & sorting param | 4 |
-| 6.7 | Idempotency | 29 |
+| 6.2 | Response schema/contract | 15 |
+| 6.3 | Request method salah (405) | 18 |
+| 6.4 | Auth/token (tanpa sesi / sesi user lain) | 17 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 59 |
+| 6.6 | Pagination & sorting param | 1 |
+| 6.7 | Idempotency | 28 |
 | 7.4 | Warning log | 2 |
 | 7.5 | Performance dasar | 2 |
 | 8.1 | Responsive/layout | 2 |
 | 8.2 | Cross-browser | 2 |
 | 8.3 | Accessibility dasar | 2 |
-| 8.4 | Konsistensi pesan | 55 |
+| 8.4 | Konsistensi pesan | 54 |

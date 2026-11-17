@@ -58,6 +58,10 @@ DIR = {
  'claim/submit': ['Claim > Submit Claim', 'Claim > My Claims'], 'buzz': ['Buzz'],
 }
 NAME_RULES = [  # (regex on path, units) for folders whose specs split across units
+ (r'time/attendance/TC-TIME-CONFIG-01', ['Time > Attendance > Configuration']),
+ (r'time/security/TC-TIME-API-01', ['Time > Timesheets > Employee Timesheets', 'Time > Timesheets > My Timesheets', 'Time > Attendance > My Records', 'Time > Attendance > Punch In/Out', 'Time > Attendance > Employee Records', 'Time > Attendance > Configuration', 'Time > Reports > Project Reports', 'Time > Reports > Employee Reports', 'Time > Reports > Attendance Summary', 'Time > Project Info > Customers', 'Time > Project Info > Projects', 'Time > Timesheet Edit & Approval']),
+ (r'time/security/TC-TIME-MUT-01', ['Time > Project Info > Customers', 'Time > Project Info > Projects', 'Time > Attendance > Configuration']),
+ (r'time/security/TC-TIME-SECURITY-01', ['Time > Attendance > Configuration', 'Time > Project Info > Customers', 'Time > Project Info > Projects']),
  (r'time/attendance/TC-TIME-PUNCH', ['Time > Attendance > Punch In/Out', 'Time > Attendance > My Records']),
  (r'time/attendance/TC-TIME-ADMIN-ATTENDANCE', ['Time > Attendance > Employee Records']),
  (r'time/attendance/TC-TIME-REPORTS', ['Time > Reports > Employee Reports']),

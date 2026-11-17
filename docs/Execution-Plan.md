@@ -54,8 +54,19 @@
   satu percobaan TC yg crash sebelum withConfigRestore selesai -- sudah dikembalikan ke startMonth=1,startDay=1
   & Work Week diverifikasi utuh. CONFIG-01 kini membaca bulan aktual dari API (bukan asumsi Januari) sblm
   menjalankan skenario double-click, biar tidak terulang.
-  BERIKUT (urut terendah): Time 56.2%, Performance 59.6% -> pola yg sama (probe UI+API dulu, lalu API-01,
-  MUT-01, VALID-01, SECURITY, UI edit); lalu My Info 64.5%, PIM 65.1%, Buzz/Claim 69%, Admin 72.8%;
+  DAN Time 56.2% -> 69.5% (4 TC baru: API-01, MUT-01, SECURITY-01, CONFIG-01; BG-457 POST activity ke
+  project 999999 -> 500, BG-458 API terima Project Name 51 char padahal form & Customer Name tolak).
+  Matrix TOTAL 71.6%. Catatan live Time: Attendance Configuration URL asli /attendance/configure (BUKAN
+  /configuration -- salah merender halaman kosong); togglenya oxd-switch bukan checkbox; My Timesheet
+  self-service pakai endpoint BERBEDA (time/timesheets/default) dari sisi Admin
+  (time/employees/<empNumber>/timesheets) -- ESS 403 di endpoint Admin itu BENAR, bukan bug; Activity
+  = POST time/project/<id>/activities.
+  SISA Time (lanjutan): U055 My Timesheet, U056 Attendance My Records, U057 Punch In/Out, U058
+  Attendance Employee Records, U106 Timesheet Edit & Approval blm punya TC UI feedback/double-submit/
+  navigasi/sesi (pola spt TC-LEAVE-HOLIDAY-01/CANDIDATE-22); U060/U061/U062 Reports blm diuji search/
+  SQLi/XSS-Reflected.
+  BERIKUT (urut terendah): Performance 59.6% -> pola yg sama (probe UI+API dulu, lalu API-01, MUT-01,
+  VALID-01, SECURITY, UI edit); lalu My Info 64.5%, PIM 65.1%, Buzz/Claim 69%, Admin 72.8%;
   Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees" Add Entitlement msh N/A beralasan
   (filter kosong kena 118 karyawan sungguhan); lalu Fase 5-8.
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
@@ -471,3 +482,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | Audit docs & Bug-List | status [DONE]/[DONE -- BUG] 36 TC di 10 docs diselaraskan dgn Bug-List (+legend); BG-064/065 (kelemahan skrip, bukan bug app) diarsip, CANDIDATE-08 diperbaiki (cari via Candidate Name, 3/3); README: jumlah TC per modul, bagian Recruitment/PIM/XMOD-07 + My Info, Dashboard, Sidebar Search, Maintenance, Sweep, snapshot coverage 67.3% | 1 commit
 - 2026-11-17 | Audit Bug-List lanjutan | REPORTTO-01/03/06 'known issue' diselesaikan: root cause live (tabel tanpa nama tengah, GET daftar ~3 dtk setelah POST, locator subordinateRows ikut hitung supervisor) -> skrip diperbaiki (01 5/6, 03 5/5, 06 2/2); BG-124/127/136 diarsip (bukan bug app), BG-009/068 (Closed) dipindah ke Archive (SECURITY-04 lolos 4/4); Bug-List aktif kini 69 baris, semua Open & bug aplikasi nyata | 1 commit
 - 2026-11-17 | P4.0 Leave | 7 TC (API-01, MUT-01 lolos, ENT-02 lolos, VALID-01, SECURITY-01 lolos, CONFIG-01 lolos, HOLIDAY-01); helper src/utils/leaveData.ts; perbaikan infra dateInput.ts (token-based, format ke-3 dd-mm-yyyy) + LeaveListPage.rowByDate; insiden Leave Period global ter-korupsi sesaat sudah diperbaiki & diverifikasi; BUG BG-453/454/456 ditulis standar; docs TC-Leave/README; Leave 82.4%; matrix TOTAL 70.2% | 1 commit
+- 2026-11-17 | P4.0 Time | 4 TC (API-01, MUT-01, SECURITY-01 lolos, CONFIG-01 lolos); helper src/utils/timeData.ts; BUG BG-457/458 ditulis standar; docs TC-Time/README; Time 69.5%; matrix TOTAL 71.6% | 1 commit

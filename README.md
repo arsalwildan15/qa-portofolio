@@ -199,14 +199,14 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Performance | 38 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
-| Time | 17 | [docs/TC-Time.txt](docs/TC-Time.txt) |
+| Time | 21 | [docs/TC-Time.txt](docs/TC-Time.txt) |
 | Cross-module (Leave/Claim/Performance/Time) | 7 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
 | My Info | 15 | [docs/TC-MyInfo.txt](docs/TC-MyInfo.txt) |
 | Dashboard | 3 | [docs/TC-Dashboard.txt](docs/TC-Dashboard.txt) |
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **617** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **621** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -342,11 +342,17 @@ Apply (11), Assign (6), Leave List incl. cancel-restores-balance and IDOR (3 + 1
 
 Not tested end to end: Add Entitlement's "Multiple Employees" bulk-assign mode, since an empty filter on the shared demo matches 118 real employees belonging to other users, with no safe way to scope it to this suite's own test data.
 
-### Time (17 TCs)
+### Time (21 TCs)
 
 Attendance punch in/out incl. XSS in notes, Admin proxy punch-in, invalid-id handling, the employee report, timesheet hour entry and duration validation, and the cross-role timesheet flow added in Fase 2 (5): an ESS user fills and submits a weekly timesheet, the Admin approves it with a comment (APPROVED, no longer editable) or rejects it (the employee can correct and resubmit, so Reject is not terminal), self-approval through the API is refused, and approving a timesheet that was never submitted is refused (400). Layer 2 (5) adds day/week totals across several rows (and removing a row), stored XSS in a cell comment viewed by both the employee and the Admin, and Project Info: customer → project → activity names are unique at every level, an employee can log time to a new project but cannot create customers or projects (403), and nothing with time logged against it can be deleted.
 
 Bug found: the 24-hour limit is checked per cell only. One cell of 25:00 is refused, but two rows on the same day (08:00 + 20:00) are accepted and the day shows 28:00 (BG-402, Medium; TC-TIME-TIMESHEET-11 stays FAILED on purpose). Finding, not logged as a bug: a timesheet can be rejected without any comment.
+
+**Taxonomy gap closure (2026-11-17), 4 new tests, Time matrix 56.2% to 69.5%:** Attendance Configuration, Customers, Projects/Activities and the APIs behind the whole module were covered: `TC-TIME-API-01` (contract, paging, wrong method, no session, unknown ids, ESS denied on 5 administrative operations — and confirmed that self-service "My Timesheet" uses a genuinely different endpoint, `time/timesheets/default`, from the admin-facing `time/employees/<empNumber>/timesheets`, so an ESS 403 on the latter is correct, not a bug), `MUT-01` (CRUD, validation, injection, mass assignment; Customer's unique-name constraint is enforced by the server itself, unlike Leave's Holidays), `SECURITY-01` (cross-site requests, parallel writes, a burst of customer creations), and `CONFIG-01` (feedback, double-click, navigation, a lost session, two admins editing at once). Confirmed bugs:
+- Adding an Activity to a project that doesn't exist returns 500 instead of 404 (BG-457, Low)
+- The API accepts a Project Name over 50 characters, while the form rejects it and the otherwise-identical Customer Name field is enforced server-side too (BG-458, Low)
+
+Not yet covered: dedicated feedback/double-submit/navigation/session/XSS-reflected UI tests for My Timesheet, Punch In/Out, Attendance Records, and Timesheet Edit & Approval, and search/filter coverage (including reflected XSS and SQLi in the search box) for the three Reports pages.
 
 ### Cross-module checks (7 TCs)
 
@@ -372,7 +378,7 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 
 Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
 
-**Taxonomy coverage snapshot (2026-11-17):** 70.2% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7% and Leave at 82.4%; Time (56.2%) and Performance (59.6%) are next. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-17):** 71.6% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7%, Leave at 82.4% and Time at 69.5%; Performance (59.6%) is next. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 
