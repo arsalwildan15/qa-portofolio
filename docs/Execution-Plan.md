@@ -88,6 +88,10 @@
   TC-PIM-OPTFIELD-01/02/03 SUDAH ADA sblm sesi ini (fokus UI persistence, kode taksonomi tipis);
   TC baru diberi nomor 04 utk hindari koklisi id -- SELALU cek nomor TC tertinggi yg sudah
   dipakai di folder tujuan sblm menulis file baru.
+  DAN My Info lanjutan 71.9% -> 73.4% (1 TC baru: PRIVESC-01, sweep 5.2-PrivEsc di 7 endpoint
+  tulis sekaligus -- Personal Details, Contact, Emergency, Dependents, Immigration, Work
+  Experience, Memberships; field privilege asing ditolak 422 di SEMUA endpoint, lolos penuh,
+  tidak ada bug). Matrix TOTAL 73.3%.
   BERIKUT (urut terendah): PIM 65.7% msh terendah -> lanjutkan modul ini (Employee List, Add
   Employee, Reports, sisa Config, 9 tab employee) sblm pindah modul lain; lalu Buzz/Claim 69%,
   Admin 72.8%; Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees" Add
@@ -509,3 +513,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | P4.0 Performance | 3 TC (API-01 lolos sebagian, EVAL-17, TRACKER-08 lolos); probe binary-search konfirmasi batas 150 karakter Tracker Log; BG-459 (rating non-numerik diterima) & BG-460 (2 temuan: ghost-id 500 + ESS BFLAC Employee Trackers) ditulis standar, diverifikasi 2x re-run terisolasi lepas dari false-positive sesi ESS akibat run 3 TC sekaligus; docs TC-Performance/README; Performance 67.2%; matrix TOTAL 72.3% | 1 commit
 - 2026-11-17 | P4.0 My Info | 1 TC (MUT-01); body Contact/Emergency/Dependent/Membership direkam live via page.on('request') (Emergency pakai homePhone/officePhone/mobilePhone, Dependents relationshipType string enum); 2 bug skrip ditemukan & diperbaiki sendiri sblm real run (timestamp body re-dipanggil beda nilai, perbandingan referensi fungsi .json selalu beda); BG-461 (2 temuan: Dependent name kosong diterima, Membership id tak ada -> 500) ditulis standar; docs TC-MyInfo/README; My Info 71.9%; matrix TOTAL 73.0% | 1 commit
 - 2026-11-17 | P4.0 PIM (mulai) | 1 TC (OPTFIELD-04, API langsung via withConfigRestore); ditemukan TC-PIM-OPTFIELD-01 sudah dipakai file lama -> TC baru diberi nomor 04; lolos penuh 13/13 (finding koersi tipe lenient, bukan bug); docs TC-PIM/README; PIM 65.7%; matrix TOTAL 73.1%. PIM msh py 19 unit GAP lain, blm tuntas | 1 commit
+- 2026-11-17 | P4.0 My Info lanjutan | 1 TC (PRIVESC-01); sweep 5.2-PrivEsc di 7 endpoint sekaligus (Personal Details, Contact, Emergency, Dependents, Immigration, Work Experience, Memberships) dgn field privilege asing (userRoleId/isAdmin/roleName/permissions) -> 422 konsisten di semua 7; lolos penuh 8/8, tidak ada bug; docs TC-MyInfo/README; My Info 73.4%; matrix TOTAL 73.3% | 1 commit

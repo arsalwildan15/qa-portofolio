@@ -358,14 +358,26 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
   RUN COMMAND (1 TC baru):
     npx playwright test tests/my-info/security/TC-MYINFO-MUT-01-Verify-Contact-Emergency-Dependent-And-Membership-APIs-Validation-Injection-And-Mass-Assignment.spec.ts --project=chromium
 
+ R2  TC-MYINFO-PRIVESC-01  [DONE]  tests/my-info/security/TC-MYINFO-PRIVESC-01-Verify-An-Employee-Cannot-Escalate-Their-Own-Privileges-Through-Any-My-Info-Endpoint.spec.ts
+                             (S) 5.2-PrivEsc | (A) 6.5   [U006 U108 U109 U110 U111 U115 U116]
+                             -> Personal Details, Contact Details, Emergency Contacts,
+                                Dependents, Immigration, Work Experience, Memberships: body
+                                valid + field privilege asing (userRoleId, isAdmin, roleName,
+                                permissions) -> 422 di SEMUA TUJUH endpoint (skema ditegakkan
+                                ketat, field privilege tidak pernah diterima/diabaikan diam-diam).
+                             HASIL: lolos penuh (7/7 endpoint, 8/8 check), tidak ada bug.
+
+  RUN COMMAND (2 TC baru):
+    npx playwright test tests/my-info/security/TC-MYINFO-MUT-01-Verify-Contact-Emergency-Dependent-And-Membership-APIs-Validation-Injection-And-Mass-Assignment.spec.ts tests/my-info/security/TC-MYINFO-PRIVESC-01-Verify-An-Employee-Cannot-Escalate-Their-Own-Privileges-Through-Any-My-Info-Endpoint.spec.ts --project=chromium --workers=1
+
 ================================================================================
   RINGKASAN
 ================================================================================
 
-  Total TC         : 16 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, DEPENDENT 1,
+  Total TC         : 17 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, DEPENDENT 1,
                      MEMBERSHIP 1, ATTACHMENT 1, IDOR 1, IMMIGRATION 2,
-                     QUALIFICATION 2, API 1, CSRF 1, MUT 1)
-  PASSED           : 8
+                     QUALIFICATION 2, API 1, CSRF 1, MUT 1, PRIVESC 1)
+  PASSED           : 9
   FAILED (BUG, sengaja) : 8
     -> TC-MYINFO-PD-02 (BG-420, High, field terkunci Personal Details bisa
        diubah karyawan lewat API)

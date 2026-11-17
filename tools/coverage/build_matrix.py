@@ -124,6 +124,7 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
                                       'My Info > Immigration', 'My Info > Job', 'My Info > Salary', 'My Info > Report-to', 'My Info > Qualifications',
                                       'My Info > Memberships', 'My Info > Attachments & Profile Picture']),
  (r'my-info/security/TC-MYINFO-MUT-01', ['My Info > Contact Details', 'My Info > Emergency Contacts', 'My Info > Dependents', 'My Info > Memberships']),
+ (r'my-info/security/TC-MYINFO-PRIVESC-01', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts', 'My Info > Dependents', 'My Info > Immigration', 'My Info > Qualifications', 'My Info > Memberships']),
  (r'my-info/security', ['My Info > Personal Details', 'My Info > Contact Details', 'My Info > Emergency Contacts']),
  (r'sweep/TC-SWEEP-LIST', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8')) if u['id'] in set(json.load(open(S + '/api_units.json')))]),
  (r'sweep/TC-SWEEP-(UIMUT|MUT|CONC)-', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))

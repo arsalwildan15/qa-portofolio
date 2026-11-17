@@ -11,13 +11,13 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Directory | 21 | 5 | 45 | 80.8% |
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
-| My Info | 332 | 130 | 319 | 71.9% |
+| My Info | 339 | 123 | 319 | 73.4% |
 | PIM | 608 | 318 | 494 | 65.7% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3397** | **1249** | **3093** | **73.1%** |
+| **Total** | **3404** | **1242** | **3093** | **73.3%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -61,7 +61,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.1-CmdPath | Command/Path injection | 10 |
 | 5.1-SSRF | SSRF | 5 |
 | 5.2-IDOR | IDOR | 2 |
-| 5.2-PrivEsc | Privilege escalation | 12 |
+| 5.2-PrivEsc | Privilege escalation | 6 |
 | 5.2-MassAssign | Mass assignment | 40 |
 | 5.3-BadExt | Upload ekstensi terlarang | 3 |
 | 5.3-Rename | Upload file di-rename | 4 |
@@ -76,7 +76,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 6.2 | Response schema/contract | 11 |
 | 6.3 | Request method salah (405) | 14 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 13 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 52 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 51 |
 | 6.7 | Idempotency | 25 |
 | 7.4 | Warning log | 2 |
 | 7.5 | Performance dasar | 2 |
