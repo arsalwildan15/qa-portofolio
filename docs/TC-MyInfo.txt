@@ -328,14 +328,45 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
                              memvalidasi Origin; pertahanan tunggal = SameSite.
 
 ================================================================================
+  FASE 4 / P4.0 -- PENUTUP GAP TAKSONOMI MY INFO (17 Nov 2026)
+================================================================================
+
+  Matrix sebelum: My Info 64.5% (GAP terbanyak di Contact Details, Emergency Contacts,
+  Dependents, Memberships -- validasi server, panjang field, injeksi, mass assignment,
+  method/id tak eksis). Body tiap endpoint direkam LIVE dari UI (page.on('request')) sebelum
+  TC ditulis, bukan ditebak -- Emergency Contacts memakai field homePhone/officePhone/
+  mobilePhone (bukan homeTelephone/mobile/workTelephone spt label UI), Dependents memakai
+  relationshipType sbg STRING enum ("child", bukan id numerik).
+
+ R1  TC-MYINFO-MUT-01  [DONE -- BUG]  tests/my-info/security/TC-MYINFO-MUT-01-Verify-Contact-Emergency-Dependent-And-Membership-APIs-Validation-Injection-And-Mass-Assignment.spec.ts
+                             (-) 2.1 2.6 | (B) 3.1 | (!) 4.1 | (S) 5.1-SQLi 5.1-XSS-Stored
+                             5.2-MassAssign | (A) 6.1 6.2 6.3 6.4 6.5 6.7   [U108 U109 U110
+                             U116]
+                             -> Contact Details, Emergency Contacts, Dependents, Memberships:
+                                operasi valid -> 200 & kontrak field kunci; field wajib kosong/
+                                tipe salah -> 4xx; panjang field di batas form -> 4xx; Arab/CJK/
+                                SQLi/HTML -> 200 & tersimpan apa adanya sbg teks; field asing
+                                (empNumber lain) di body diabaikan; PATCH -> 405; tanpa sesi ->
+                                401; POST Emergency Contact identik 2x -> 2 baris independen
+                                dgn id berbeda (bukan upsert, by design).
+                             HASIL: SENGAJA FAILED -- BUG BG-461 (High), 2 temuan dlm 1 skrip:
+                             Dependents POST menerima name kosong dgn 200 & tersimpan (validasi
+                             "Required" hanya di form, bukan di server); POST Memberships dgn
+                             membershipId yg tidak ada (999999) -> 500 (pola ghost-id sama dgn
+                             Recruitment/Leave/Time/Performance).
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/my-info/security/TC-MYINFO-MUT-01-Verify-Contact-Emergency-Dependent-And-Membership-APIs-Validation-Injection-And-Mass-Assignment.spec.ts --project=chromium
+
+================================================================================
   RINGKASAN
 ================================================================================
 
-  Total TC         : 15 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, DEPENDENT 1,
+  Total TC         : 16 (PD 2, JOB 1, CONTACT 1, EMERGENCY 1, DEPENDENT 1,
                      MEMBERSHIP 1, ATTACHMENT 1, IDOR 1, IMMIGRATION 2,
-                     QUALIFICATION 2, API 1, CSRF 1)
+                     QUALIFICATION 2, API 1, CSRF 1, MUT 1)
   PASSED           : 8
-  FAILED (BUG, sengaja) : 7
+  FAILED (BUG, sengaja) : 8
     -> TC-MYINFO-PD-02 (BG-420, High, field terkunci Personal Details bisa
        diubah karyawan lewat API)
     -> TC-MYINFO-ATTACHMENT-01 (BG-422, High, executable di-rename .pdf
@@ -349,6 +380,8 @@ LEGEND SIMBOL SKENARIO (docs/Test-Case-Taxonomy.txt)
        500)
     -> TC-MYINFO-CSRF-01 (BG-437, Medium, halaman situs lain membuat
        karyawan ter-logout paksa)
+    -> TC-MYINFO-MUT-01 (BG-461, High, Dependent name kosong diterima +
+       Membership id tak ada -> 500)
   Sweep halaman (TC-SWEEP-PAGE/HDR/VIEW/A11Y/XBROWSER/ROLE-01) mencakup 10 tab
     My Info sejak 17 Nov 2026 (lihat docs/TC-Sweep.txt).
   BELUM DICAKUP (backlog): Profile Picture upload/remove; Languages & License
