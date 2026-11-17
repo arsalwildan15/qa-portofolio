@@ -193,12 +193,15 @@
   DAN PIM lanjutan 76.3% -> 76.7% (1 TC baru: IMMIGRATION-API-01; lolos penuh 4/4, tidak ada
   bug baru -- expiryDate<issuedDate diterima jg di Admin-side, konfirmasi BG-433 berlaku
   lintas Admin/ESS, bukan bug kedua). Matrix TOTAL 75.8%.
-  BERIKUT: PIM msh 76.7%, GAP tersisa (3 tab lain @11-13 -- Salary, Qualifications,
-  Memberships; Employee List 8; Reporting Methods/Termination Reasons @5) -> TERUSKAN PIM
-  sampai 100% sesuai instruksi user, urutan GAP terbesar dulu; SETELAH PIM 100%, LANJUT
-  OTOMATIS ke modul berikutnya (Performance 67.2% saat ini terendah) TANPA perlu konfirmasi
-  user lagi (instruksi user 2026-11-17: "apabila menu PIM sudah 100%, langsung lanjut ke
-  modul berikutnya tanpa perlu konfirmasi").
+  DAN PIM lanjutan 76.7% -> 77.0% (1 TC baru: SALARY-API-01; lolos penuh 7/7, tidak ada bug
+  -- aturan bisnis rentang gaji per Pay Grade ditegakkan konsisten, payGradeId tidak ada ->
+  400 aman bukan 500). Matrix TOTAL 75.9%. PIM (77.0%) kini di atas My Info (76.6%).
+  BERIKUT: PIM msh 77.0%, GAP tersisa (2 tab lain @11-13 -- Qualifications, Memberships;
+  Employee List 8; Reporting Methods/Termination Reasons @5) -> TERUSKAN PIM sampai 100%
+  sesuai instruksi user, urutan GAP terbesar dulu; SETELAH PIM 100%, LANJUT OTOMATIS ke
+  modul berikutnya (Performance 67.2% saat ini terendah) TANPA perlu konfirmasi user lagi
+  (instruksi user 2026-11-17: "apabila menu PIM sudah 100%, langsung lanjut ke modul
+  berikutnya tanpa perlu konfirmasi").
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -631,3 +634,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | PIM lanjutan (EMERGENCY-API-01) | 1 TC; lolos penuh 5/5, tidak ada bug (relationship wajib, phone opsional, format phone ditegakkan); docs TC-PIM/README; PIM 76.0%; matrix TOTAL 75.7% | 1 commit
 - 2026-11-17 | PIM lanjutan (DEPENDENT-API-01) | 1 TC; lolos penuh 5/5, tidak ada bug baru (dateOfBirth masa depan diterima, konsisten dgn TC-PIM-PD-04); docs TC-PIM/README; PIM 76.3%; matrix TOTAL 75.7% | 1 commit
 - 2026-11-17 | PIM lanjutan (IMMIGRATION-API-01) | 1 TC; lolos penuh 4/4, tidak ada bug baru (expiryDate<issuedDate diterima jg di Admin-side, konfirmasi BG-433 lintas Admin/ESS); docs TC-PIM/README; PIM 76.7%; matrix TOTAL 75.8% | 1 commit
+- 2026-11-18 | PIM lanjutan (SALARY-API-01) | 1 TC; lolos penuh 7/7, tidak ada bug (rentang gaji per Pay Grade ditegakkan konsisten, payGradeId tak ada -> 400 aman); docs TC-PIM/README; PIM 77.0% (lewati My Info); matrix TOTAL 75.9% | 1 commit

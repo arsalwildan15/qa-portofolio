@@ -2733,18 +2733,34 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/immigration/TC-PIM-IMMIGRATION-API-01-Verify-Immigration-API-Contract-Optional-Dates-Format-Validation-And-Date-Order.spec.ts --project=chromium
 
+130   TC-PIM-SALARY-API-01  [DONE]  tests/pim/salary/TC-PIM-SALARY-API-01-Verify-Salary-Component-API-Contract-Min-Max-Range-Business-Rule-And-Unknown-Pay-Grade.spec.ts
+                             (+) 1.1-C 1.2 | (-) 2.6 | (S) 5.9 | (A) 6.2   [U094]
+                             -> LATAR: POST pim/employees/<N>/salary-components body
+                                {salaryComponent (TEKS BEBAS),salaryAmount,payGradeId,
+                                currencyId,payFrequencyId,comment,addDirectDeposit}; Pay
+                                Grade "Grade 1" punya rentang gaji USD 50000-60000.
+                             -> Amount dlm rentang -> 200; comment null (opsional) -> 200;
+                                amount di bawah/atas rentang -> 400 (aturan bisnis
+                                ditegakkan benar); payGradeId tidak ada -> 400 (bukan
+                                500/200, aman); salaryComponent Arab/CJK -> 200 & aman.
+                             HASIL: lolos penuh (7/7), tidak ada bug -- aturan bisnis
+                             rentang gaji per Pay Grade ditegakkan konsisten.
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/salary/TC-PIM-SALARY-API-01-Verify-Salary-Component-API-Contract-Min-Max-Range-Business-Rule-And-Unknown-Pay-Grade.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 181 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 182 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
   JOB-API-01, CUSTOMFIELD-API-01, ADD-API-01, PD-API-01, CONTACT-API-01,
-  EMERGENCY-API-01, DEPENDENT-API-01, IMMIGRATION-API-01 ditambahkan
-  2026-11-17 penutup gap taksonomi; CONTACT-03 ditulis ulang krn bug
-  skrip)
+  EMERGENCY-API-01, DEPENDENT-API-01, IMMIGRATION-API-01, SALARY-API-01
+  ditambahkan 2026-11-17 penutup gap taksonomi; CONTACT-03 ditulis ulang
+  krn bug skrip)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

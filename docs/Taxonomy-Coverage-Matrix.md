@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 710 | 216 | 494 | 76.7% |
+| PIM | 713 | 213 | 494 | 77.0% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3521** | **1125** | **3093** | **75.8%** |
+| **Total** | **3524** | **1122** | **3093** | **75.9%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -29,9 +29,9 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.1-R | Read / list | 22 |
 | 1.1-U | Update valid | 22 |
 | 1.1-D | Delete valid | 7 |
-| 1.2 | Variasi input valid (opsional diisi/kosong) | 65 |
+| 1.2 | Variasi input valid (opsional diisi/kosong) | 64 |
 | 1.3 | State transition valid | 4 |
-| 1.4 | Relasi antar-entity | 44 |
+| 1.4 | Relasi antar-entity | 43 |
 | 1.5 | Permission/role positif | 1 |
 | 1.6 | Search/filter/sort valid | 24 |
 | 1.7 | Upload file valid | 2 |
@@ -72,7 +72,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.4 | CSRF | 63 |
 | 5.5 | Rate limit / brute force / spam | 29 |
 | 5.6 | Security headers | 2 |
-| 5.9 | Business logic abuse | 13 |
+| 5.9 | Business logic abuse | 12 |
 | 6.2 | Response schema/contract | 9 |
 | 6.3 | Request method salah (405) | 11 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 10 |
