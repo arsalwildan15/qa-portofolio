@@ -102,11 +102,21 @@
   76.6%, SUDAH di atas PIM -- My Info msh py sisa GAP (U006 Personal Details 17, + 4.2/4.3/4.5/
   4.7/8.4 di hampir semua unit utk UI feedback/double-submit/navigasi/sesi/konkurensi/konsistensi
   pesan) tapi prioritas urutan terendah pindah ke PIM.
-  BERIKUT (urut terendah): PIM 65.7% msh terendah -> lanjutkan modul ini (Employee List, Add
-  Employee, Reports, sisa Config, 9 tab employee) sblm pindah modul lain; lalu Buzz/Claim 69%,
-  Admin 72.8%, Time 69.5%, Performance 67.2%, My Info 76.6% (sisa GAP di atas) utk diperkuat
-  nanti; Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees" Add Entitlement
-  msh N/A beralasan (filter kosong kena 118 karyawan sungguhan); lalu Fase 5-8.
+  DAN PIM lanjutan 65.7% -> 66.8% (1 TC baru: ATTACHMENT-API-01, endpoint Attachments Admin-side
+  terbukti JSON+base64 IDENTIK dgn My Info/ESS; BUG BG-463 (Medium) pola SAMA dgn BG-462 --
+  filename path traversal diterima & disimpan verbatim, konfirmasi backend sama persis antara
+  Admin & ESS). Matrix TOTAL 73.8%. PIM msh py GAP besar di U099 Profile Picture (28 item), U042
+  Reports (22), U095 Report-to (22), U038 Data Import (21), U093 Job (20), U037 Custom Fields
+  (19), U041 Add Employee (18), U088 Personal Details (16), serta 7 tab lain (Immigration,
+  Qualifications, Memberships, Contact, Emergency, Dependents, Salary) msh 11-13 GAP masing2 --
+  sebagian besar item sisa adalah UI-feedback (4.2/4.3/4.5/4.7/8.4) yg butuh TC per-tab, bukan
+  sweep API sekaligus spt Attachments.
+  BERIKUT (urut terendah): PIM 66.8% msh terendah -> lanjutkan modul ini (Profile Picture,
+  Reports, Report-to, Data Import, Job, Custom Fields, Add Employee, sisa tab) sblm pindah
+  modul lain; lalu Buzz/Claim 69%, Admin 72.8%, Time 69.5%, Performance 67.2%, My Info 76.6%
+  (sisa GAP di atas) utk diperkuat nanti; Maintenance sisa; perkuat 23 TC lemah; Leave: mode
+  "Multiple Employees" Add Entitlement msh N/A beralasan (filter kosong kena 118 karyawan
+  sungguhan); lalu Fase 5-8.
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -526,3 +536,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | P4.0 PIM (mulai) | 1 TC (OPTFIELD-04, API langsung via withConfigRestore); ditemukan TC-PIM-OPTFIELD-01 sudah dipakai file lama -> TC baru diberi nomor 04; lolos penuh 13/13 (finding koersi tipe lenient, bukan bug); docs TC-PIM/README; PIM 65.7%; matrix TOTAL 73.1%. PIM msh py 19 unit GAP lain, blm tuntas | 1 commit
 - 2026-11-17 | P4.0 My Info lanjutan | 1 TC (PRIVESC-01); sweep 5.2-PrivEsc di 7 endpoint sekaligus (Personal Details, Contact, Emergency, Dependents, Immigration, Work Experience, Memberships) dgn field privilege asing (userRoleId/isAdmin/roleName/permissions) -> 422 konsisten di semua 7; lolos penuh 8/8, tidak ada bug; docs TC-MyInfo/README; My Info 73.4%; matrix TOTAL 73.3% | 1 commit
 - 2026-11-17 | P4.0 My Info lanjutan lagi | 1 TC (ATTACHMENT-02); ditemukan endpoint Attachments JSON base64 (bukan multipart) via page.on('request'); BG-462 (2 temuan: PHP diterima diklaim pdf, filename path traversal disimpan verbatim) ditulis standar; docs TC-MyInfo/README; My Info 76.6% (lewati PIM); matrix TOTAL 73.6% | 1 commit
+- 2026-11-17 | P4.0 PIM lanjutan | 1 TC (ATTACHMENT-API-01); endpoint Attachments Admin-side terbukti backend IDENTIK dgn My Info/ESS; BG-463 (Medium, pola sama dgn BG-462: filename path traversal disimpan verbatim) ditulis standar; docs TC-PIM/README; PIM 66.8%; matrix TOTAL 73.8% | 1 commit

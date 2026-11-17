@@ -2443,13 +2443,45 @@ No.  Test Case ID      Status   Kategori           Skenario
                              2x = 2 baris di semua tab; burst tanpa rate limit.
 
 ================================================================================
+  FASE 4 / P4.0 (lanjutan) -- PENUTUP GAP TAKSONOMI ATTACHMENTS (17 Nov 2026)
+================================================================================
+
+  Matrix sebelum: PIM 65.7% (GAP terbesar: U098 Attachments (all tabs) 36 item, U099 Profile
+  Picture 28 item). Endpoint direkam LIVE via page.on('request') saat Admin upload attachment
+  di tab Contact Details employee lain -- TERNYATA JSON {attachment:{name,type,size,base64},
+  description} (BUKAN multipart), identik dgn backend My Info (ESS) yg sudah dibuktikan
+  (TC-MYINFO-ATTACHMENT-02, BG-462).
+
+117   TC-PIM-ATTACHMENT-API-01  [DONE -- BUG]  tests/pim/security/TC-PIM-ATTACHMENT-API-01-Verify-Attachment-API-Contract-Size-Limit-Content-Validation-Filename-And-Injection.spec.ts
+                             (+) 1.1-C 1.1-R 1.4 | (B) 3.3 | (S) 5.1-SQLi 5.1-XSS-Stored
+                             5.1-CmdPath 5.2-MassAssign 5.3-ContentType 5.3-Oversize
+                             5.3-Filename | (A) 6.5 6.7   [U098]
+                             -> Upload valid (Admin, employee BUKAN diri sendiri, dibuat via
+                                API) -> 200 & kontrak; GET list -> muncul; Admin boleh
+                                mengelola attachment employee manapun (by design, bukan IDOR,
+                                arsitektur single-role -- dibuktikan, bukan diasumsikan).
+                             -> File 2MB -> 422; type di luar allowlist (text/html) -> 422
+                                (keduanya ditegakkan dgn benar).
+                             -> SQLi/XSS pada description -> 200 & tersimpan aman sbg teks;
+                                mass assignment (empNumber lain) -> ditolak/diabaikan; upload
+                                file identik 2x -> 2 entri independen.
+                             HASIL: SENGAJA FAILED (R3), BUG BG-463 (Medium) -- pola SAMA dgn
+                             BG-462 (My Info): nama file path traversal
+                             ("../../etc/passwd.pdf") DITERIMA (200) & disimpan APA ADANYA
+                             tanpa sanitasi, membuktikan endpoint Admin-side memakai
+                             backend/validasi identik dgn ESS-side.
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/security/TC-PIM-ATTACHMENT-API-01-Verify-Attachment-API-Contract-Size-Limit-Content-Validation-Filename-And-Injection.spec.ts --project=chromium
+
+================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 168 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 169 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
-  API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04 ditambahkan 2026-11-17
-  penutup gap taksonomi)
+  API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01
+  ditambahkan 2026-11-17 penutup gap taksonomi)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,
