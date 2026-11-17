@@ -80,10 +80,18 @@
   Catatan live My Info: body endpoint direkam dari page.on('request') nyata, bukan ditebak --
   Emergency Contacts field homePhone/officePhone/mobilePhone (BUKAN label UI homeTelephone/
   mobile/workTelephone), Dependents relationshipType STRING enum ("child", bukan id numerik).
-  BERIKUT (urut terendah): PIM 65.1% -> pola yg sama (probe UI+API dulu, lalu API-01, MUT-01,
-  VALID-01, SECURITY, UI edit); lalu Buzz/Claim 69%, Admin 72.8%;
-  Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees" Add Entitlement msh N/A beralasan
-  (filter kosong kena 118 karyawan sungguhan); lalu Fase 5-8.
+  DAN PIM 65.1% -> 65.7% (1 TC baru: OPTFIELD-04, API langsung via withConfigRestore; lolos
+  penuh 13/13, tanpa bug -- finding koersi tipe lenient, bukan bug). Matrix TOTAL 73.1%. PIM
+  modul BESAR (20 unit GAP, 318 sel) -- baru 1 unit (Optional Fields) ditutup penuh, 19 unit
+  lain (Employee List, Add Employee, Reports, Custom/Data Import/Reporting/Termination config,
+  9 tab employee) msh py GAP taksonomi sisa utk sesi berikutnya. PENTING: file lama
+  TC-PIM-OPTFIELD-01/02/03 SUDAH ADA sblm sesi ini (fokus UI persistence, kode taksonomi tipis);
+  TC baru diberi nomor 04 utk hindari koklisi id -- SELALU cek nomor TC tertinggi yg sudah
+  dipakai di folder tujuan sblm menulis file baru.
+  BERIKUT (urut terendah): PIM 65.7% msh terendah -> lanjutkan modul ini (Employee List, Add
+  Employee, Reports, sisa Config, 9 tab employee) sblm pindah modul lain; lalu Buzz/Claim 69%,
+  Admin 72.8%; Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees" Add
+  Entitlement msh N/A beralasan (filter kosong kena 118 karyawan sungguhan); lalu Fase 5-8.
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -500,3 +508,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | P4.0 Time | 4 TC (API-01, MUT-01, SECURITY-01 lolos, CONFIG-01 lolos); helper src/utils/timeData.ts; BUG BG-457/458 ditulis standar; docs TC-Time/README; Time 69.5%; matrix TOTAL 71.6% | 1 commit
 - 2026-11-17 | P4.0 Performance | 3 TC (API-01 lolos sebagian, EVAL-17, TRACKER-08 lolos); probe binary-search konfirmasi batas 150 karakter Tracker Log; BG-459 (rating non-numerik diterima) & BG-460 (2 temuan: ghost-id 500 + ESS BFLAC Employee Trackers) ditulis standar, diverifikasi 2x re-run terisolasi lepas dari false-positive sesi ESS akibat run 3 TC sekaligus; docs TC-Performance/README; Performance 67.2%; matrix TOTAL 72.3% | 1 commit
 - 2026-11-17 | P4.0 My Info | 1 TC (MUT-01); body Contact/Emergency/Dependent/Membership direkam live via page.on('request') (Emergency pakai homePhone/officePhone/mobilePhone, Dependents relationshipType string enum); 2 bug skrip ditemukan & diperbaiki sendiri sblm real run (timestamp body re-dipanggil beda nilai, perbandingan referensi fungsi .json selalu beda); BG-461 (2 temuan: Dependent name kosong diterima, Membership id tak ada -> 500) ditulis standar; docs TC-MyInfo/README; My Info 71.9%; matrix TOTAL 73.0% | 1 commit
+- 2026-11-17 | P4.0 PIM (mulai) | 1 TC (OPTFIELD-04, API langsung via withConfigRestore); ditemukan TC-PIM-OPTFIELD-01 sudah dipakai file lama -> TC baru diberi nomor 04; lolos penuh 13/13 (finding koersi tipe lenient, bukan bug); docs TC-PIM/README; PIM 65.7%; matrix TOTAL 73.1%. PIM msh py 19 unit GAP lain, blm tuntas | 1 commit

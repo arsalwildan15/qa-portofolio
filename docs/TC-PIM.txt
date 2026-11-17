@@ -1949,7 +1949,7 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 membership terpanggil dengan status 200.
 
 ================================================================================
-  FASE 3 - GROUP 1: OPTIONAL FIELDS (3 TC)
+  FASE 3 - GROUP 1: OPTIONAL FIELDS (4 TC)
   Folder: tests/pim/configuration/optional-fields/
 ================================================================================
 
@@ -2004,6 +2004,23 @@ No.  Test Case ID      Status   Kategori           Skenario
                                 toggle 2x (net no-op), TC ini secara desain
                                 self-restoring, tidak butuh langkah restore
                                 terpisah.
+
+131b  TC-PIM-OPTFIELD-04  [DONE]  (P4.0, 17 Nov 2026) tests/pim/configuration/optional-fields/TC-PIM-OPTFIELD-04-Verify-Optional-Fields-Toggle-Persistence-Validation-And-Injection.spec.ts
+                             (+) 1.1-U 1.2 | (S) 5.9 | (A) 6.1 6.2 6.3 6.4 6.5
+                             [U036]
+                             -> PUT optional-field langsung via API (lewat
+                                withConfigRestore): toggle ON semua -> 200 &
+                                kontrak 4 field boolean, GET konfirmasi
+                                persist; toggle OFF semua -> 200 & persist.
+                             -> tipe non-boolean (string "true", angka 1,
+                                null) -> 200 & dikoersi konsisten ke boolean
+                                (truthy/falsy) -- lenient tapi tidak
+                                membingungkan, dicatat via report.finding().
+                             -> field asing (isAdmin) di body -> 422, skema
+                                ditegakkan ketat. PATCH -> 405. Tanpa sesi ->
+                                401.
+                             HASIL: lolos penuh (13/13), nilai dikembalikan
+                             ke semula & diverifikasi via GET di akhir.
 
 ================================================================================
   FASE 3 - GROUP 2: CUSTOM FIELDS (6 TC)
@@ -2429,9 +2446,10 @@ No.  Test Case ID      Status   Kategori           Skenario
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 167 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 168 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
-  API-01, MUT-01 ditambahkan 2026-11-17)
+  API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04 ditambahkan 2026-11-17
+  penutup gap taksonomi)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,
@@ -2465,8 +2483,8 @@ No.  Test Case ID      Status   Kategori           Skenario
     Dependents        : 7        Memberships     : 7
     Immigration       : 8
 
-  Fase 3 : 31
-    Optional Fields     : 3        Reporting Methods    : 5
+  Fase 3 : 32
+    Optional Fields     : 4        Reporting Methods    : 5
     Custom Fields       : 6        Termination Reasons  : 5
     Data Import         : 6 (termasuk 2 TC security file upload)  Reports : 6
 
