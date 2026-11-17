@@ -151,10 +151,25 @@
   DAN PIM lanjutan 71.0% -> 71.5% (1 TC baru: JOB-API-01; BUG BG-467 (High) pola sama dgn
   BG-466 -- jobTitleId/empStatusId/locationId tidak ada -> 500, HANYA subUnitId yg benar
   divalidasi 422). Matrix TOTAL 74.8%.
-  BERIKUT: PIM msh 71.5%, GAP tersisa (Add Employee 18, Custom Fields 19, Personal Details 16,
-  7 tab lain @11-13, Employee List 8, Reporting Methods/Termination Reasons @5) -> TERUSKAN
-  PIM sampai 100% sesuai instruksi user, urutan GAP terbesar dulu. Setelah PIM selesai, baru
-  kembali ke urutan standing (modul terendah): Performance 67.2% saat ini terendah drpd PIM.
+  DAN PIM lanjutan 71.5% -> 72.6% (1 TC baru: CUSTOMFIELD-API-01; BUG BG-468 (Low) -- fieldName
+  duplikat diterima via API langsung, form-only validation, pola sama dgn Leave Holiday).
+  Matrix TOTAL 75.0%.
+  PELAJARAN METODOLOGI PENTING (ditemukan & diperbaiki LANGSUNG sesi ini, DIBACA ULANG sblm
+  probe batas panjang/duplikat di modul lain): (1) jangan pakai string IDENTIK ("NNNN...")
+  utk setiap percobaan length-boundary -- kalau run sebelumnya gagal cleanup, percobaan
+  berikutnya KOLISI dgn baris lama & hasilnya salah total (sempat simpulkan batas=60 & status
+  400, padahal batas REAL=250 & statusnya 422 konsisten); SELALU sisipkan timestamp/tag unik
+  di setiap percobaan boundary. (2) jangan asumsikan DELETE /<resource>/<id> (path-style)
+  bekerja di semua endpoint PIM -- custom-fields JUSTRU 405 utk path-style & perlu bulk
+  DELETE {ids:[...]}; SELALU verifikasi status code delete, jangan .catch(()=>null) tanpa
+  cek dulu, krn itu menyembunyikan kegagalan cleanup senyap yg baru ketahuan 5 TC kemudian.
+  Devtools/metodologi ini sudah diterapkan ulang & diverifikasi bersih di TC final.
+  BERIKUT: PIM msh 72.6%, GAP tersisa (Add Employee 18, Personal Details 16, 7 tab lain
+  @11-13, Employee List 8, Reporting Methods/Termination Reasons @5) -> TERUSKAN PIM sampai
+  100% sesuai instruksi user, urutan GAP terbesar dulu; SETELAH PIM 100%, LANJUT OTOMATIS ke
+  modul berikutnya (Performance 67.2% saat ini terendah) TANPA perlu konfirmasi user lagi
+  (instruksi user 2026-11-17: "apabila menu PIM sudah 100%, langsung lanjut ke modul
+  berikutnya tanpa perlu konfirmasi").
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -580,3 +595,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | PIM lanjutan (instruksi user: PIM dulu sampai 100%) | 1 TC (REPORTTO-API-01); BG-466 (High, endpoint supervisors tidak validasi input sama sekali -> 500 utk 4 skenario); fix tooling report.finding() dgn kode literal salah ke-tag COVERED (ditemukan & diperbaiki, matrix jadi lebih jujur); docs TC-PIM/README; PIM 69.8%; matrix TOTAL 74.4% | 1 commit
 - 2026-11-17 | PIM lanjutan (DATAIMPORT-API-01) | 1 TC; endpoint csv-import sama body dgn Attachments/Photo tapi mekanisme validasi beda (parser CSV, bukan whitelist nama file); 14/14 lolos, tidak ada bug; TEMUAN CSV Formula Injection potensial (aman saat import, berisiko kalau di-export ulang); docs TC-PIM/README; PIM 71.0%; matrix TOTAL 74.6% | 1 commit
 - 2026-11-17 | PIM lanjutan (JOB-API-01) | 1 TC; BG-467 (High, pola sama dgn BG-466 -- jobTitleId/empStatusId/locationId tidak ada -> 500, hanya subUnitId divalidasi benar); docs TC-PIM/README; PIM 71.5%; matrix TOTAL 74.8% | 1 commit
+- 2026-11-17 | PIM lanjutan (CUSTOMFIELD-API-01) | 1 TC; percobaan awal batas panjang SALAH (string identik antar percobaan + delete-by-path gagal diam2 -> data lama kolisi, simpul 60/400 keliru); diulang dgn nama unik -> batas REAL 250 karakter, status 422 konsisten; BG-468 (Low, duplikat diterima via API, form-only validation); docs TC-PIM/README + pelajaran metodologi; PIM 72.6%; matrix TOTAL 75.0% | 1 commit

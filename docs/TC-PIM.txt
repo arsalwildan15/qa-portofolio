@@ -2593,15 +2593,41 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/job/TC-PIM-JOB-API-01-Verify-Job-Details-And-Employment-Contract-API-Contract-Validation-Mass-Assignment-Method-And-Session.spec.ts --project=chromium
 
+123   TC-PIM-CUSTOMFIELD-API-01  [DONE -- BUG]  tests/pim/configuration/custom-fields/TC-PIM-CUSTOMFIELD-API-01-Verify-Custom-Field-API-Contract-Validation-Length-Limit-Injection-And-Mass-Assignment.spec.ts
+                             (+) 1.1-U 1.2 1.4 | (-) 2.2 | (B) 3.1 | (S) 5.1-SQLi
+                             5.2-MassAssign | (A) 6.5 6.7   [U037]
+                             -> LATAR: DELETE /custom-fields/<id> -> 405 (tidak didukung) --
+                                endpoint pakai pola bulk-delete {ids:[...]} spt endpoint PIM
+                                lain. PELAJARAN METODOLOGI (ditemukan & diperbaiki sesi ini):
+                                percobaan awal batas panjang pakai string "NNNN..." yg SAMA
+                                di tiap percobaan + delete-by-path yg gagal diam2 (405
+                                di-catch tanpa dicek) -> data lama menumpuk & mengacaukan
+                                simpulan batas panjang jadi 60/400 (SALAH). Diulang dgn nama
+                                UNIK per percobaan binary-search -> batas panjang REAL = 250
+                                karakter (250 ok, 251 ditolak 422, konsisten).
+                             -> Create/Update/fieldType lain -> 200; required/tipe salah ->
+                                422; 250/251 karakter -> 200/422; Arab/CJK & SQLi -> 200 &
+                                aman; field asing (isAdmin) -> 422; id tak ada -> 404; PATCH
+                                -> 405; tanpa sesi -> 401.
+                             HASIL: SENGAJA FAILED (R3), BUG BG-468 (Low) -- fieldName
+                             duplikat (sama persis) DITERIMA (200) & tersimpan sbg baris
+                             kedua via API LANGSUNG (bypass form), padahal form Add Custom
+                             Field (TC-PIM-CUSTOMFIELD-04) menolaknya dgn "Already exists" --
+                             validasi keunikan HANYA di client, pola sama dgn Leave Holiday/
+                             Immigration BG-433.
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/configuration/custom-fields/TC-PIM-CUSTOMFIELD-API-01-Verify-Custom-Field-API-Contract-Validation-Length-Limit-Injection-And-Mass-Assignment.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 174 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 175 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
-  JOB-API-01 ditambahkan 2026-11-17 penutup gap taksonomi)
+  JOB-API-01, CUSTOMFIELD-API-01 ditambahkan 2026-11-17 penutup gap taksonomi)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,
