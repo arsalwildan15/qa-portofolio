@@ -65,8 +65,18 @@
   Attendance Employee Records, U106 Timesheet Edit & Approval blm punya TC UI feedback/double-submit/
   navigasi/sesi (pola spt TC-LEAVE-HOLIDAY-01/CANDIDATE-22); U060/U061/U062 Reports blm diuji search/
   SQLi/XSS-Reflected.
-  BERIKUT (urut terendah): Performance 59.6% -> pola yg sama (probe UI+API dulu, lalu API-01, MUT-01,
-  VALID-01, SECURITY, UI edit); lalu My Info 64.5%, PIM 65.1%, Buzz/Claim 69%, Admin 72.8%;
+  DAN Performance 59.6% -> 67.2% (3 TC baru: API-01 lolos sebagian, EVAL-17, TRACKER-08 lolos; BG-459
+  rating KPI non-numerik "abc" diterima 200 bukan 422, BG-460 dua temuan dlm 1 skrip -- PUT
+  evaluation/supervisor review 999999 -> 500 bukan 4xx, DAN ESS GET Employee Trackers (endpoint
+  administratif semua karyawan) -> 200 bukan 403 = BFLAC, diverifikasi 2x re-run terisolasi).
+  Matrix TOTAL 72.3%. Catatan live Performance: Tracker Log field "log" dibatasi 150 karakter server-side
+  (dikonfirmasi binary-search probe: 150 ok, 151 -> 422); evaluation/supervisor body
+  {ratings:[{kpiId,rating,comment}],generalComment}, evaluation/final body
+  {complete,finalRating,finalComment,completedDate}; run 3 TC sekaligus scr sequential dgn reporter
+  penuh (video+screenshot) bikin sesi ESS kedua timeout & memicu false-positive berantai (BFLAC check
+  lain ikut gagal) -- jalankan tiap TC security/API terpisah kalau butuh assert sesi ESS multipel.
+  BERIKUT (urut terendah): My Info 64.5% -> pola yg sama (probe UI+API dulu, lalu API-01, MUT-01,
+  VALID-01, SECURITY, UI edit); lalu PIM 65.1%, Buzz/Claim 69%, Admin 72.8%;
   Maintenance sisa; perkuat 23 TC lemah; Leave: mode "Multiple Employees" Add Entitlement msh N/A beralasan
   (filter kosong kena 118 karyawan sungguhan); lalu Fase 5-8.
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
@@ -483,3 +493,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | Audit Bug-List lanjutan | REPORTTO-01/03/06 'known issue' diselesaikan: root cause live (tabel tanpa nama tengah, GET daftar ~3 dtk setelah POST, locator subordinateRows ikut hitung supervisor) -> skrip diperbaiki (01 5/6, 03 5/5, 06 2/2); BG-124/127/136 diarsip (bukan bug app), BG-009/068 (Closed) dipindah ke Archive (SECURITY-04 lolos 4/4); Bug-List aktif kini 69 baris, semua Open & bug aplikasi nyata | 1 commit
 - 2026-11-17 | P4.0 Leave | 7 TC (API-01, MUT-01 lolos, ENT-02 lolos, VALID-01, SECURITY-01 lolos, CONFIG-01 lolos, HOLIDAY-01); helper src/utils/leaveData.ts; perbaikan infra dateInput.ts (token-based, format ke-3 dd-mm-yyyy) + LeaveListPage.rowByDate; insiden Leave Period global ter-korupsi sesaat sudah diperbaiki & diverifikasi; BUG BG-453/454/456 ditulis standar; docs TC-Leave/README; Leave 82.4%; matrix TOTAL 70.2% | 1 commit
 - 2026-11-17 | P4.0 Time | 4 TC (API-01, MUT-01, SECURITY-01 lolos, CONFIG-01 lolos); helper src/utils/timeData.ts; BUG BG-457/458 ditulis standar; docs TC-Time/README; Time 69.5%; matrix TOTAL 71.6% | 1 commit
+- 2026-11-17 | P4.0 Performance | 3 TC (API-01 lolos sebagian, EVAL-17, TRACKER-08 lolos); probe binary-search konfirmasi batas 150 karakter Tracker Log; BG-459 (rating non-numerik diterima) & BG-460 (2 temuan: ghost-id 500 + ESS BFLAC Employee Trackers) ditulis standar, diverifikasi 2x re-run terisolasi lepas dari false-positive sesi ESS akibat run 3 TC sekaligus; docs TC-Performance/README; Performance 67.2%; matrix TOTAL 72.3% | 1 commit

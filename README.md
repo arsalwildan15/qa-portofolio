@@ -196,7 +196,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | PIM | 167 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 68 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
-| Performance | 38 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
+| Performance | 41 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
 | Time | 21 | [docs/TC-Time.txt](docs/TC-Time.txt) |
@@ -206,7 +206,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **621** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **624** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -311,7 +311,7 @@ Three more TCs close out previously-untested features: editing an own post, dele
 
 Cross-origin mutation (CSRF) on vacancy creation is confirmed **blocked by CORS** (no bug). There's also a documented intermittent client-side rendering bug where Application Stage/Candidate History cards occasionally get stuck loading forever with no underlying API error.
 
-### Performance (38 TCs)
+### Performance (41 TCs)
 
 Configure > KPIs (11: add/edit/delete, required fields, rating boundary, duplicate names, default-scale behavior, filter by Job Title, sort + pagination, injection, invalid id), Manage Reviews (13: create, the supervisor-link prerequisite, activation rules, KPI scoping, completion validation, date order, list filters, delete, edit lock after activation, double-click activate, IDOR and broken function-level access control using real ESS accounts), evaluation (7: the reviewer's full save → In Progress → Complete → read-only, per-KPI rating min/max on both UI and API, stored XSS in comments, evaluating an Inactive review via API, non-numeric ratings; plus the employee's own self-evaluation from My Reviews, and proof that an employee cannot write the supervisor or final evaluation of their own review), and Trackers (7: add, required fields, duplicate names, rename/delete with logs, employee ↔ reviewer log visibility, stored XSS in logs, and cross-employee IDOR).
 
@@ -320,6 +320,11 @@ Notable confirmed behaviors: a review can only name a "Supervisor Reviewer" who 
 **Confirmed bugs:**
 - Re-opening the edit page of an already-activated review: the app's own data fetch returns 404, which throws an unhandled JS exception and leaves the form blank (another instance of the app-wide unhandled-exception defect). No data risk, since the server rejects edits to an activated review with 422 (`TC-PERF-REVIEW-10`, BG-356)
 - The evaluation API accepts a non-numeric rating (`"abc"`) with HTTP 200 and silently stores it as `0.00`. Numeric validation exists only in the browser, even though the same endpoint correctly rejects out-of-range and negative ratings (`TC-PERF-EVAL-15`, BG-373)
+
+**Taxonomy gap closure (2026-11-17), 3 new tests, Performance matrix 59.6% to 67.2%:** the KPI, Tracker, Manage/Employee Reviews, My Reviews/Trackers, Employee Trackers, Review Evaluation and Tracker Log APIs were swept end to end: `TC-PERF-API-01` (contract, paging, wrong method, no session, unknown ids, and what an ESS user may/may not reach across all 10 Performance units), `TC-PERF-EVAL-17` (server-side rating/date validation, mass-assignment, injection on the supervisor and final evaluation), and `TC-PERF-TRACKER-08` (Tracker Log contract, required fields, achievement enum, a confirmed 150-character length limit, and injection). Confirmed bugs:
+- `PUT .../evaluation/supervisor` for a review id that doesn't exist (`999999`) returns HTTP 500 instead of 4xx — the same "ghost id crashes the server" pattern already confirmed in Recruitment, Leave and Time (BG-460, High)
+- An ESS (Employee Self Service) user can `GET performance/employees/trackers`, the administrative "all employees" Employee Trackers endpoint, and read every other employee's tracker data with HTTP 200 instead of being refused with 403 — a broken function-level access control (BFLAC) issue, verified consistently across two isolated re-runs (BG-460, High)
+- A second, independent bug logged under the same script: the evaluation API accepts a non-numeric KPI rating (`"abc"`) with HTTP 200 and stores it as the literal string `"abc"`, even though the same endpoint correctly rejects out-of-range numeric ratings with 422 (`TC-PERF-EVAL-17`, BG-459, Medium)
 
 ### Claim (29 TCs)
 
@@ -378,7 +383,7 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 
 Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
 
-**Taxonomy coverage snapshot (2026-11-17):** 71.6% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7%, Leave at 82.4% and Time at 69.5%; Performance (59.6%) is next. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-17):** 72.3% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Maintenance at 88.7%, Leave at 82.4%, Time at 69.5% and Performance at 67.2%; My Info (64.5%) is next. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 
