@@ -148,11 +148,13 @@
   whitelist nama file spt Attachments), & nama file tidak pernah di-echo/disimpan (tidak ada
   risiko path traversal verbatim spt BG-462/463/464) -- jangan asumsikan semua endpoint upload
   berperilaku identik hanya krn body shape sama.
-  BERIKUT: PIM msh 71.0%, GAP tersisa (Add Employee 18, Job 20, Custom Fields 19, Personal
-  Details 16, 7 tab lain @11-13, Employee List 8, Reporting Methods/Termination Reasons @5) ->
-  TERUSKAN PIM sampai 100% sesuai instruksi user, urutan GAP terbesar dulu. Setelah PIM
-  selesai, baru kembali ke urutan standing (modul terendah): Performance 67.2% saat ini
-  terendah drpd PIM.
+  DAN PIM lanjutan 71.0% -> 71.5% (1 TC baru: JOB-API-01; BUG BG-467 (High) pola sama dgn
+  BG-466 -- jobTitleId/empStatusId/locationId tidak ada -> 500, HANYA subUnitId yg benar
+  divalidasi 422). Matrix TOTAL 74.8%.
+  BERIKUT: PIM msh 71.5%, GAP tersisa (Add Employee 18, Custom Fields 19, Personal Details 16,
+  7 tab lain @11-13, Employee List 8, Reporting Methods/Termination Reasons @5) -> TERUSKAN
+  PIM sampai 100% sesuai instruksi user, urutan GAP terbesar dulu. Setelah PIM selesai, baru
+  kembali ke urutan standing (modul terendah): Performance 67.2% saat ini terendah drpd PIM.
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -577,3 +579,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-17 | P4.0 PIM lanjutan lagi | 1 TC (REPORT-API-01); batas panjang name Reports = 255 karakter (probe binary-search); 16/16 lolos, tidak ada bug; BG-465 (ECONNRESET transien, auto-closed, diarsipkan); docs TC-PIM/README; PIM 69.0% (sejajar Buzz/Claim); matrix TOTAL 74.3%. Performance (67.2%) kini modul terendah proyek | 1 commit
 - 2026-11-17 | PIM lanjutan (instruksi user: PIM dulu sampai 100%) | 1 TC (REPORTTO-API-01); BG-466 (High, endpoint supervisors tidak validasi input sama sekali -> 500 utk 4 skenario); fix tooling report.finding() dgn kode literal salah ke-tag COVERED (ditemukan & diperbaiki, matrix jadi lebih jujur); docs TC-PIM/README; PIM 69.8%; matrix TOTAL 74.4% | 1 commit
 - 2026-11-17 | PIM lanjutan (DATAIMPORT-API-01) | 1 TC; endpoint csv-import sama body dgn Attachments/Photo tapi mekanisme validasi beda (parser CSV, bukan whitelist nama file); 14/14 lolos, tidak ada bug; TEMUAN CSV Formula Injection potensial (aman saat import, berisiko kalau di-export ulang); docs TC-PIM/README; PIM 71.0%; matrix TOTAL 74.6% | 1 commit
+- 2026-11-17 | PIM lanjutan (JOB-API-01) | 1 TC; BG-467 (High, pola sama dgn BG-466 -- jobTitleId/empStatusId/locationId tidak ada -> 500, hanya subUnitId divalidasi benar); docs TC-PIM/README; PIM 71.5%; matrix TOTAL 74.8% | 1 commit

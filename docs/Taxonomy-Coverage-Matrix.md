@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 657 | 269 | 494 | 71.0% |
+| PIM | 662 | 264 | 494 | 71.5% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3468** | **1178** | **3093** | **74.6%** |
+| **Total** | **3473** | **1173** | **3093** | **74.8%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -26,7 +26,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | Item | Taxonomy | Units with GAP |
 |---|---|---:|
 | 1.1-C | Create valid | 2 |
-| 1.1-R | Read / list | 24 |
+| 1.1-R | Read / list | 23 |
 | 1.1-U | Update valid | 23 |
 | 1.1-D | Delete valid | 7 |
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 71 |
@@ -36,11 +36,11 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.6 | Search/filter/sort valid | 24 |
 | 1.7 | Upload file valid | 2 |
 | 1.8 | Notifikasi/feedback UI | 46 |
-| 2.1 | Required field kosong | 21 |
+| 2.1 | Required field kosong | 20 |
 | 2.2 | Format salah | 54 |
 | 2.3 | Duplicate/unique conflict | 5 |
 | 2.4 | Aksi tanpa permission (UI/API) | 1 |
-| 2.5 | State transition invalid | 9 |
+| 2.5 | State transition invalid | 8 |
 | 2.6 | Operasi pada record invalid/tak eksis | 6 |
 | 2.8 | Reject/cancel tanpa alasan | 5 |
 | 3.1 | Panjang karakter field | 22 |
@@ -62,7 +62,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.1-SSRF | SSRF | 5 |
 | 5.2-IDOR | IDOR | 2 |
 | 5.2-PrivEsc | Privilege escalation | 6 |
-| 5.2-MassAssign | Mass assignment | 34 |
+| 5.2-MassAssign | Mass assignment | 33 |
 | 5.3-BadExt | Upload ekstensi terlarang | 2 |
 | 5.3-Rename | Upload file di-rename | 4 |
 | 5.3-ContentType | Content-Type spoofing | 4 |
@@ -76,7 +76,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 6.2 | Response schema/contract | 9 |
 | 6.3 | Request method salah (405) | 12 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 11 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 48 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 47 |
 | 6.7 | Idempotency | 22 |
 | 7.4 | Warning log | 2 |
 | 7.5 | Performance dasar | 2 |

@@ -2570,15 +2570,38 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND (1 TC baru):
     npx playwright test tests/pim/configuration/data-import/TC-PIM-DATAIMPORT-API-01-Verify-CSV-Import-API-Contract-Validation-Content-Type-Allowlist-Formula-Injection-And-Mass-Assignment.spec.ts --project=chromium
 
+122   TC-PIM-JOB-API-01  [DONE -- BUG]  tests/pim/job/TC-PIM-JOB-API-01-Verify-Job-Details-And-Employment-Contract-API-Contract-Validation-Mass-Assignment-Method-And-Session.spec.ts
+                             (+) 1.1-R | (-) 2.1 2.5 2.6 | (S) 5.2-MassAssign |
+                             (A) 6.3 6.4 6.5   [U093]
+                             -> LATAR: PUT pim/employees/<N>/job-details {joinedDate,
+                                jobTitleId?,empStatusId?,subUnitId?,locationId?} -- SEMUA
+                                field opsional, tidak ada field teks bebas (3.1/4.1/5.1-SQLi/
+                                5.1-XSS-Stored N/A, dicatat tanpa kode literal di label);
+                                PUT .../employment-contract {startDate,endDate}.
+                             -> GET/PUT valid -> 200 & kontrak; joinedDate null -> 200 (by
+                                design, bukan wajib); joinedDate tidak valid -> 422;
+                                employment-contract endDate < startDate -> 422; field asing
+                                (isAdmin) -> 422; empNumber tidak ada -> 422 (benar); PATCH ->
+                                405; tanpa sesi -> 401; subUnitId tidak ada -> 422 (benar,
+                                SATU-SATUNYA lookup id yg divalidasi).
+                             HASIL: SENGAJA FAILED (R3), BUG BG-467 (High) -- TIGA dari EMPAT
+                             lookup id pada job-details TIDAK divalidasi: jobTitleId,
+                             empStatusId, DAN locationId yg tidak ada (999999) KETIGANYA ->
+                             500, bukan 422. Pola sama dgn BG-466 (Report-to): validasi lookup
+                             id ditambahkan tidak konsisten per-field di backend.
+
+  RUN COMMAND (1 TC baru):
+    npx playwright test tests/pim/job/TC-PIM-JOB-API-01-Verify-Job-Details-And-Employment-Contract-API-Contract-Validation-Mass-Assignment-Method-And-Session.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 173 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 174 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
-  PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01
-  ditambahkan 2026-11-17 penutup gap taksonomi)
+  PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
+  JOB-API-01 ditambahkan 2026-11-17 penutup gap taksonomi)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,
