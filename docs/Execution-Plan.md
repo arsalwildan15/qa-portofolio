@@ -285,11 +285,49 @@
       Reports) & U098 Attachments/U099 Profile Picture: SAMA SEKALI belum disentuh batch PIM
       sweep manapun (bukan employee-tab, bentuk form beda) -- msh py gap signifikan
       (5-25 kode masing2), BELUM ada rencana sweep/TC utk ini.
-  BERIKUT: lanjutkan ke U098 Attachments (25 kode, GAP terbesar), U099 Profile Picture
-  (12 kode), lalu U002 Employee List, U036-U038 Configuration, U041 Add Employee, U042
-  Reports -- sampai HANYA struktural yg tersisa (Job/Report-to/5-unit-1.6 di atas + 1.2/1.4
-  U039/U040); SETELAH itu baru LANJUT OTOMATIS ke modul berikutnya (Performance 67.2% saat ini
-  terendah) TANPA perlu konfirmasi user lagi (instruksi user 2026-11-17 & 2026-11-18).
+  DAN PIM lanjutan (U098 Attachments, SEBAGIAN -- lihat PAUSE di bawah) 87.3% -> 89.3% (2 TC
+  baru: TC-PIM-ATTACHMENT-API-02 10/10 lolos, TC-PIM-CONTACT-10 SENGAJA FAILED R3 1 BUG BARU
+  BG-475 Medium -- double-click Save pd modal Attachments = 2 entri, instans ke-4 pola
+  double-submit app-wide sama dgn BG-427). Investigasi U098 vs sweep_units.json: BUKAN
+  oversight -- U098 tidak punya URL sendiri (widget tertanam di 8 tab), semua sweep generik
+  butuh 1 URL per unit via resolveUnitUrl, dicatat permanen. Matrix TOTAL 77.9% -> 78.3%.
+  PELAJARAN: simulasi koneksi putus (dropConnectionDuringSave) menghasilkan kata2 error
+  BERBEDA per browser engine (Chromium "net::ERR_FAILED"/"fe"; Firefox "can't access property
+  X, Y is undefined"; WebKit "due to access control checks"/"AxiosError: Network
+  Error"/"JSHandle@object") -- SEMUA pola BG-199 yg sama, whitelist WAJIB cover ketiganya kalau
+  TC dijalankan lintas project (jangan cuma --project=chromium kalau RUN COMMAND menyebut
+  "lintas 3 browser"). Launch browser lain manual di tengah test TIDAK bekerja utk 8.2 -- pola
+  yg benar: jalankan file yg sama lintas 3 project Playwright (default playwright.config.ts,
+  tanpa --project flag), biarkan fixture `page`/`testInfo.project.name` yg menyesuaikan.
+  ============================================================================
+  PAUSE 2026-11-18 (STOP REQUEST user, resume dari sini persis):
+  Daftar 7 item (urutan dari user 2026-11-18, "Next pass"):
+    1. [x] DONE -- investigasi U098 vs sweep_units.json (bukan oversight, didokumentasikan di atas).
+    2. [~] SEBAGIAN -- U098 Attachments: 19/25 kode ditutup (TC-PIM-ATTACHMENT-API-02 +
+       TC-PIM-CONTACT-10, commit b0448aa, SUDAH push). SISA 6 kode U098 BELUM digarap:
+       5.3-Rename, 5.4, 5.5, 7.4, 7.5 (belum ada TC sama sekali), 1.6 (SUDAH terbukti
+       struktural via API reject sortField -- TIDAK perlu TC lagi, cukup didokumentasikan N/A
+       di sini, yg sudah dilakukan).
+    3. [ ] NOT STARTED -- U099 Profile Picture (13 kode: 1.1-R 1.8 2.1 4.2 4.3 4.5 4.7 4.8
+       5.2-PrivEsc 5.3-BadExt 5.3-Rename 5.4 8.4).
+    4. [ ] NOT STARTED -- U002 Employee List.
+    5. [ ] NOT STARTED -- U036-U038 Configuration (Optional Fields, Custom Fields, Data Import).
+    6. [ ] NOT STARTED -- U041 Add Employee.
+    7. [ ] NOT STARTED -- U042 Reports.
+  STATE SAAT PAUSE: git status BERSIH (semua commit+push, tidak ada file probe `zz-probe-*`
+  tersisa). PIM = 89.3% (827 COVERED/99 GAP/494 N/A dari 1420 sel). Matrix TOTAL = 78.3%.
+  Commit terakhir: b0448aa "PIM: close most of Attachments' taxonomy gaps, 1 new bug (87.3% ->
+  89.3%)".
+  NEXT STEP KONKRET saat resume: lanjutkan item 2 (U098 sisa 5 kode: 5.3-Rename renamed-exe
+  test, 5.4 CSRF utk endpoint attachment -- BELUM termasuk di TC-PIM-CSRF-01 sweep lama, 5.5
+  rate-limit rapid-upload sudah di-probe live [5 upload cepat -> semua 200, tidak ada limit,
+  TINGGAL ditulis sbg finding di TC baru], 7.4/7.5 console-warning/performance -- kemungkinan
+  bisa digabung 1 file kecil TC-PIM-ATTACHMENT-API-03 atau nebeng ke TC-PIM-CONTACT-10 sbg
+  edit tambahan), BARU lanjut ke item 3 (U099) dst sesuai urutan di atas. SETELAH ke-7 item
+  selesai (atau hanya struktural yg tersisa: Job/Report-to/5-unit-1.6/U039-U040 1.2-1.4 yg
+  SUDAH terdokumentasi), baru LANJUT OTOMATIS ke modul berikutnya (Performance 67.2% saat ini
+  terendah) TANPA konfirmasi user (instruksi 2026-11-17 & 2026-11-18).
+  ============================================================================
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -729,3 +767,5 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | PIM lanjutan (REPORTMETHOD-API-01 + TERMREASON-API-01) | 2 TC file terpisah per unit; lolos penuh 5/5 masing2, tidak ada bug (limit 100 char, mass-assignment, whitespace-only name semua ditegakkan); ditemukan & diperbaiki 2 bug tooling (path-based unit mapping mis-atribusi evidence file gabungan, kode literal di label finding salah ke-tag COVERED); sisa GAP 1.2/1.4 pd unit single-field = keterbatasan struktural NA_RULES build_matrix.py, bukan bisa ditutup via TC; docs TC-PIM/README/Execution-Plan; PIM 78.2%; matrix TOTAL 76.1% | 1 commit
 - 2026-11-18 | PIM lanjutan BESAR (CSRF-01 + TABEDGE-01, sweep lintas-unit) | 2 TC baru + 2 entri NAME_RULES baru di build_matrix.py; menutup 1.8/4.2/4.3/4.5/4.7/4.8/5.4/8.4 di hampir semua 9 tab karyawan sekaligus (registry sweep lama tidak pernah mencakup form edit pim/employees/<empNumber>/*); CSRF-01 11/11 lolos (Origin tidak divalidasi di endpoint manapun, SameSite=Lax satu-satunya pertahanan, sama dgn My Info/BG-437); TABEDGE-01 19/19 lolos (toast+konsistensi pesan, back/forward, koneksi putus, double-submit, concurrency); BG-472 (timeout transien) diarsipkan sbg noise; sisa 133 GAP PIM: Job (6 kode), Report-to (11 kode, sengaja dikecualikan dari TABEDGE krn risiko duplicate-add 500), 1.6 di 5 unit (perlu verifikasi N/A genuine), U002/U036-042/U098/U099 belum tersentuh; docs TC-PIM/README/Execution-Plan; PIM 78.2% -> 85.6%; matrix TOTAL 76.1% -> 77.6% | 1 commit
 - 2026-11-18 | PIM lanjutan (PD-API-02 + JOB-API-02 + REPORTTO-API-02 + fix 3.4 Immigration/Qualifications) | 3 TC baru + 2 TC lama ditambah check; U088 Personal Details 1.2/1.4 TUNTAS (TC-PIM-PD-API-02, 6/6, nationality relation benar); U093 Job 1.2/4.4/5.9 ditutup, 2 BUG BARU (TC-PIM-JOB-API-02, SENGAJA FAILED: BG-473 Medium terminasi sblm joinedDate diterima, BG-474 Medium race 2-terminate-bersamaan tanpa locking); U095 Report-to 1.8/4.2/4.3/4.5/4.7/4.8/5.5/8.4 ditutup AMAN pakai supervisor berbeda per operasi (TC-PIM-REPORTTO-API-02, 7/7, hindari BG-466); verifikasi LIVE (bukan asumsi) bhw hipotesis 1.6-struktural utk 5 unit BENAR (1 "search input" terdeteksi di tiap tab adalah oxd-main-menu-search sidebar global, dibuktikan via ancestor-chain DOM, bukan search milik tabel record); 3.4 Immigration/Qualifications ternyata BUKAN struktural (cuma belum diuji boundary leap-year/rentang ekstrem), ditutup via 2 check tambahan di file lama; docs TC-PIM/README/Execution-Plan/Bug-List; PIM 85.6% -> 87.3%; matrix TOTAL 77.6% -> 77.9% | 1 commit
+- 2026-11-18 | PIM lanjutan (ATTACHMENT-API-02 + CONTACT-10, U098 Attachments sebagian) | 2 TC baru; investigasi U098 vs sweep_units.json selesai (bukan oversight, U098 tanpa URL sendiri); 1.1-U/1.2/1.5/2.1/2.4/5.2-IDOR/5.3-DoubleExt/6.5 ditutup via API (TC-PIM-ATTACHMENT-API-02, 10/10); 1.8/4.3/4.5/4.7/8.1/8.2/8.3/8.4 ditutup via UI widget di Contact Details (TC-PIM-CONTACT-10), SENGAJA FAILED 4.2 -> BUG BARU BG-475 Medium (double-click Save = 2 entri, instans ke-4 double-submit app-wide sama dgn BG-427); 4 baris Bug-List noise (BG-476/477/478/479, duplikat/stale dari iterasi debug whitelist console cross-browser) diarsipkan; 1.6 dikonfirmasi struktural via API (sortField ditolak 422); docs TC-PIM/README/Bug-List; PIM 87.3% -> 89.3%; matrix TOTAL 77.9% -> 78.3%; commit b0448aa, PUSHED | 1 commit
+- 2026-11-18 | **PAUSE** (STOP REQUEST user, lihat blok PAUSE di NEXT ACTION di atas) | git status bersih, semua commit+push, tidak ada file probe tersisa; PIM 89.3%, matrix TOTAL 78.3%; resume dari U098 sisa 5 kode (5.3-Rename/5.4/5.5/7.4/7.5) lalu U099/U002/U036-038/U041/U042 sesuai urutan "Next pass" user | tidak ada commit (dokumentasi saja)
