@@ -61,6 +61,15 @@ test('TC-PIM-REPORTMETHOD-API-01: Reporting Method API - length limit, mass assi
   const whitespaceOnly = await page.request.post(api, { data: { name: '   ' } });
   report.check('2.2 [U039] name hanya whitespace (format salah) -> 422 (ditegakkan)', whitespaceOnly.status() === 422, `status=${whitespaceOnly.status()}`);
 
+  report.step('4.8 Behavior non-obvious -- hapus lalu buat ulang nama yg sama');
+  if (at100Data?.id) {
+    await page.request.delete(api, { data: { ids: [at100Data.id] } });
+    const recreated = await page.request.post(api, { data: { name: name100 } });
+    const recreatedData = ((await recreated.json().catch(() => ({}))) as { data?: NamedRecord }).data;
+    if (recreatedData?.id) createdRm.push(recreatedData.id);
+    report.check('4.8 [U039] Hapus lalu buat ulang nama yg sama -> diterima langsung dgn id BARU (tidak ada cooldown/reservasi nama bekas)', recreated.status() === 200 && recreatedData?.id !== at100Data.id, `status=${recreated.status()} idLama=${at100Data.id} idBaru=${recreatedData?.id}`);
+  }
+
   if (createdRm.length) await page.request.delete(api, { data: { ids: createdRm } }).catch(() => null);
   report.print();
 });

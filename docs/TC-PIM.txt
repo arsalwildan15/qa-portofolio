@@ -3060,11 +3060,75 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND:
     npx playwright test tests/pim/employee-list/TC-PIM-LIST-15-Verify-Delete-Feedback-Double-Submit-Connection-Loss-And-CSRF.spec.ts --project=chromium
 
+147   TC-PIM-CSRF-01 KOREKSI  [DONE]  tests/pim/security/TC-PIM-CSRF-01-Verify-A-Foreign-Site-Cannot-Change-Employee-Data-Via-PIM-Endpoints.spec.ts
+                             (S) 5.4   [U039] [U040] [U041] [U042]
+                             -> AUDIT menemukan docstring TC ini SEBELUMNYA mengklaim mencakup
+                                U037-U040 tapi kode checknya hanya benar2 menguji U088-U097 --
+                                overclaim dokumentasi vs implementasi. DIPERBAIKI: kode
+                                ditambah utk benar2 menguji U039/U040/U041/U042 (data A/B UNIK
+                                per sisi, pelajaran dari TC-PIM-CUSTOMFIELD-API-01 ttg kolisi
+                                nama/id kalau data identik diulang). U037/U038 TIDAK dimasukkan
+                                (Custom Fields/Data Import tidak punya endpoint create 1-step
+                                sederhana yg aman diulang A/B tanpa UI) -- ditutup via TC
+                                tersendiri (lihat CUSTOMFIELD-07). Juga ditemukan & diperbaiki:
+                                membershipId:1 dipakai 2x di ab() U097 menyebabkan kolisi
+                                duplikat (false-positive BG-481, auto-closed), diganti id
+                                nonexistent yg aman diulang.
+                             HASIL: lolos penuh (15/15), tidak ada bug baru. Menutup 5.4 utk
+                                U039/U040/U041/U042.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/security/TC-PIM-CSRF-01-Verify-A-Foreign-Site-Cannot-Change-Employee-Data-Via-PIM-Endpoints.spec.ts --project=chromium
+
+148   TC-PIM-OPTFIELD-05  [DONE]  tests/pim/configuration/optional-fields/TC-PIM-OPTFIELD-05-Verify-Read-Feedback-Navigation-Connection-Loss-Concurrency-Mass-Assignment-And-CSRF.spec.ts
+                             (+) 1.1-R 1.8 | (-) 2.1 | (!) 4.3 4.5 4.6 4.7 4.8 | (S)
+                             5.2-MassAssign 5.4 | (UI) 8.4   [U036]
+                             -> GET -> 200 + kontrak (1.1-R). Config singleton selalu ada,
+                                tidak pernah null (4.6). 1 field diomit dari body -> 200
+                                diterima (2.1, tidak ada konsep "required" pd toggle
+                                independen, bukan bug). Field asing -> 422 (5.2-MassAssign,
+                                literal). Origin palsu vs sendiri -> identik (5.4). Toggle+Save
+                                UI -> toast sukses (1.8/8.4). Back/Forward -> normal (4.3).
+                                Koneksi putus -> tidak crash (4.5). 2 PUT berbeda paralel ->
+                                tidak 500, last-write-wins (4.7).
+                             HASIL: lolos penuh (12/12), tidak ada bug baru. MENUTUP U036
+                                Optional Fields SEPENUHNYA.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/configuration/optional-fields/TC-PIM-OPTFIELD-05-Verify-Read-Feedback-Navigation-Connection-Loss-Concurrency-Mass-Assignment-And-CSRF.spec.ts --project=chromium
+
+149   TC-PIM-CUSTOMFIELD-07  [DONE -- BUG]  tests/pim/configuration/custom-fields/TC-PIM-CUSTOMFIELD-07-Verify-Feedback-Double-Submit-Navigation-Concurrency-Rate-Limit-And-CSRF.spec.ts
+                             (+) 1.8 | (!) 4.2 4.3 4.5 4.7 4.8 | (S) 5.4 5.5 | (UI) 8.4   [U037]
+                             -> Add valid via UI -> toast sukses (1.8/8.4). Back/Forward ->
+                                normal (4.3). Koneksi putus saat save -> tidak crash (4.5). 2
+                                create berbeda paralel -> tidak 500 (4.7). 3 create paralel ->
+                                semua 200, tidak ada rate limit (5.5, finding). Origin palsu vs
+                                sendiri -> identik (5.4).
+                             [PELAJARAN] Demo publik membatasi jumlah custom field per Screen
+                             (~10 aktif sekaligus, 400 setelah limit) -- dicatat sbg known
+                             behavior (4.8), setiap langkah TC membersihkan field sendiri sblm
+                             lanjut spy tidak menabrak limit itu.
+                             HASIL: SENGAJA FAILED (R3), BUG BARU BG-483 (Medium) -- double-
+                                click Save pd form Add Custom Field membuat 2 ENTRI dari 1
+                                submit, instans ke-5 pola double-submit app-wide sama dgn
+                                BG-427 (Locations/Reporting Methods/KPIs), BG-475 (Attachments).
+                             MENUTUP U037 Custom Fields SEPENUHNYA (bersama ATTACHMENT-API-01 &
+                                CSRF-01 koreksi di atas).
+
+  RUN COMMAND:
+    npx playwright test tests/pim/configuration/custom-fields/TC-PIM-CUSTOMFIELD-07-Verify-Feedback-Double-Submit-Navigation-Concurrency-Rate-Limit-And-CSRF.spec.ts --project=chromium
+
+  PERBAIKAN 18 Nov 2026 (TC lama, bukan TC baru): TC-PIM-REPORTMETHOD-API-01 &
+  TC-PIM-TERMREASON-API-01 masing2 ditambah 1 check baru (4.8: hapus lalu buat ulang nama yg
+  sama -> id BARU, tidak ada cooldown/reservasi nama bekas). Lolos penuh, tidak ada bug baru.
+  Menutup 4.8 utk U039/U040 -- sisa gap U039/U040 kini HANYA 1.2/1.4 (struktural, flag-based
+  NA_RULES, sudah didokumentasikan).
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 198 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 200 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
@@ -3073,7 +3137,8 @@ No.  Test Case ID      Status   Kategori           Skenario
   QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01, REPORTMETHOD-API-01,
   TERMREASON-API-01, CSRF-01, TABEDGE-01, PD-API-02, JOB-API-02,
   REPORTTO-API-02, ATTACHMENT-API-02, CONTACT-10, ATTACHMENT-API-03,
-  PHOTO-API-02, PD-12, LIST-15 ditambahkan 2026-11-17/18 penutup gap
+  PHOTO-API-02, PD-12, LIST-15, OPTFIELD-05, CUSTOMFIELD-07 ditambahkan
+  2026-11-17/18 penutup gap
   taksonomi; CONTACT-03 ditulis ulang krn bug skrip;
   IMMIGRATION-API-01/QUALIFICATION-API-01 ditambah check 3.4 18 Nov 2026)
 
