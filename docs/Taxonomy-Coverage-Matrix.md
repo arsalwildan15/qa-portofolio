@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 886 | 40 | 494 | 95.7% |
+| PIM | 892 | 34 | 494 | 96.3% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3697** | **949** | **3093** | **79.6%** |
+| **Total** | **3703** | **943** | **3093** | **79.7%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -26,7 +26,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | Item | Taxonomy | Units with GAP |
 |---|---|---:|
 | 1.1-C | Create valid | 2 |
-| 1.1-R | Read / list | 20 |
+| 1.1-R | Read / list | 19 |
 | 1.1-U | Update valid | 21 |
 | 1.1-D | Delete valid | 6 |
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 58 |
@@ -34,7 +34,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.4 | Relasi antar-entity | 40 |
 | 1.6 | Search/filter/sort valid | 24 |
 | 1.7 | Upload file valid | 2 |
-| 1.8 | Notifikasi/feedback UI | 30 |
+| 1.8 | Notifikasi/feedback UI | 29 |
 | 2.1 | Required field kosong | 15 |
 | 2.2 | Format salah | 46 |
 | 2.3 | Duplicate/unique conflict | 5 |
@@ -68,17 +68,17 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.3-Oversize | Oversized file | 3 |
 | 5.3-Filename | Malicious filename | 3 |
 | 5.4 | CSRF | 43 |
-| 5.5 | Rate limit / brute force / spam | 25 |
+| 5.5 | Rate limit / brute force / spam | 24 |
 | 5.6 | Security headers | 1 |
 | 5.9 | Business logic abuse | 10 |
-| 6.2 | Response schema/contract | 9 |
+| 6.2 | Response schema/contract | 8 |
 | 6.3 | Request method salah (405) | 11 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 10 |
 | 6.5 | Parameter negatif (tipe salah/extra/null) | 40 |
-| 6.7 | Idempotency | 20 |
+| 6.7 | Idempotency | 19 |
 | 7.4 | Warning log | 1 |
 | 7.5 | Performance dasar | 1 |
 | 8.1 | Responsive/layout | 1 |
 | 8.2 | Cross-browser | 1 |
 | 8.3 | Accessibility dasar | 1 |
-| 8.4 | Konsistensi pesan | 40 |
+| 8.4 | Konsistensi pesan | 39 |

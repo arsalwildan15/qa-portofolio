@@ -3144,11 +3144,27 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND:
     npx playwright test tests/pim/configuration/data-import/TC-PIM-DATAIMPORT-07-Verify-Feedback-Navigation-Connection-Loss-Concurrency-Idempotency-Rate-Limit-And-CSRF.spec.ts --project=chromium
 
+151   TC-PIM-ADD-34  [DONE]  tests/pim/add-employee/TC-PIM-ADD-34-Verify-Read-Contract-Idempotency-Feedback-And-Rate-Limit.spec.ts
+                             (+) 1.1-R 1.8 | (S) 5.5 | (A) 6.2 6.7 | (UI) 8.4   [U041]
+                             -> Create lalu GET personal-details -> 200 (1.1-R). POST create
+                                -> 200 + kontrak empNumber/firstName/lastName/middleName/
+                                employeeId (6.2). Create 2x dgn employeeId SAMA (simulasi
+                                retry) -> yg kedua 422 ditolak -- KONTRAS POSITIF dgn Data
+                                Import/BG-484: Add Employee BENAR menegakkan keunikan
+                                employeeId, tidak membuat duplikat (6.7). 3 create paralel ->
+                                semua 200, tidak ada rate limit (5.5, finding). Add Employee
+                                valid via UI -> toast sukses (1.8/8.4).
+                             HASIL: lolos penuh (7/7), tidak ada bug baru. MENUTUP U041 Add
+                                Employee SEPENUHNYA.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/add-employee/TC-PIM-ADD-34-Verify-Read-Contract-Idempotency-Feedback-And-Rate-Limit.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 201 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 202 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
@@ -3157,8 +3173,8 @@ No.  Test Case ID      Status   Kategori           Skenario
   QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01, REPORTMETHOD-API-01,
   TERMREASON-API-01, CSRF-01, TABEDGE-01, PD-API-02, JOB-API-02,
   REPORTTO-API-02, ATTACHMENT-API-02, CONTACT-10, ATTACHMENT-API-03,
-  PHOTO-API-02, PD-12, LIST-15, OPTFIELD-05, CUSTOMFIELD-07, DATAIMPORT-07
-  ditambahkan
+  PHOTO-API-02, PD-12, LIST-15, OPTFIELD-05, CUSTOMFIELD-07, DATAIMPORT-07,
+  ADD-34 ditambahkan
   2026-11-17/18 penutup gap
   taksonomi; CONTACT-03 ditulis ulang krn bug skrip;
   IMMIGRATION-API-01/QUALIFICATION-API-01 ditambah check 3.4 18 Nov 2026)

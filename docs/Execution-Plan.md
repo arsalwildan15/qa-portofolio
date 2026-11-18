@@ -322,7 +322,9 @@
        BARU BG-483), U038 Data Import (TC-PIM-DATAIMPORT-07, SENGAJA FAILED, BUG BARU BG-484
        -- import CSV identik 2x membuat 2 employee duplikat, tidak ada idempotency key; jg
        temuan feedback CSV import pakai panel inline bukan toast, finding bukan bug).
-    6. [ ] NOT STARTED -- U041 Add Employee.
+    6. [x] DONE -- U041 Add Employee SEPENUHNYA ditutup (TC-PIM-ADD-34, 7/7, tidak ada bug --
+       kontras positif dgn Data Import/BG-484: duplicate employeeId DITOLAK 422, keunikan
+       ditegakkan benar).
     7. [ ] NOT STARTED -- U042 Reports.
   TAMBAHAN (instruksi koordinator 18 Nov 2026): TC-PIM-CSRF-01 overclaim docstring DIPERBAIKI
     -- kode ditambah utk benar2 menguji U039/U040/U041/U042 (bukan cuma U088-U097), data A/B
@@ -332,10 +334,9 @@
     duplikat (false-positive BG-481, auto-closed) -> diganti id nonexistent yg aman diulang.
     TC-PIM-REPORTMETHOD-API-01/TERMREASON-API-01 masing2 ditambah 1 check 4.8 (hapus+buat
     ulang nama sama -> id baru, tidak ada cooldown) -- menutup 4.8 utk U039/U040.
-  SISA GAP PIM re-verified 18 Nov 2026 (40 sel):
+  SISA GAP PIM re-verified 18 Nov 2026 (34 sel):
     U039/U040 (Reporting Methods/Termination Reasons): HANYA 1.2/1.4 tersisa, struktural
       (flag-based NA_RULES, sudah didokumentasikan berkali-kali) -- 4.8/5.4 SUDAH ditutup.
-    U041 Add Employee: BELUM disentuh (6 kode: 1.1-R 1.8 5.5 6.2 6.7 8.4).
     U042 Reports: BELUM disentuh (12 kode: 1.1-U 1.2 1.4 4.1 4.2 4.3 4.5 4.7 5.1-CmdPath 5.5
       6.7 8.4).
     U090/U091/U092/U094/U096/U097/U098 (Emergency/Dependents/Immigration/Salary/Qualifications/
@@ -347,16 +348,16 @@
       literal tidak otomatis menghasilkan N/A di matrix -- keterbatasan NA_RULES yg sama dgn
       1.2/1.4).
   STATE SAAT INI (lanjutkan dari sini kalau terputus lagi): git status BERSIH setelah commit
-  ini, tidak ada file probe `zz-probe-*` tersisa. PIM = 95.7% (886 COVERED/40 GAP/494 N/A dari
-  1420 sel). Matrix TOTAL = 79.6%. BERIKUT: U041 Add Employee (6 kode), lalu U042 Reports (12
-  kode) -- setelah keduanya, SISA GAP PIM SELURUHNYA struktural (1.2/1.4/1.6 flag-based +
-  Job/Report-to/Memberships text-injection codes tanpa field bebas genuine); PIM TIDAK BISA
-  mencapai 100% literal tanpa perubahan tool, tapi akan mencapai ~96-97% (ceiling nyata).
-  NEXT STEP KONKRET saat resume: U041 Add Employee (6 kode: 1.1-R 1.8 5.5 6.2 6.7 8.4) -> U042
-  Reports (12 kode: 1.1-U 1.2 1.4 4.1 4.2 4.3 4.5 4.7 5.1-CmdPath 5.5 6.7 8.4). SETELAH
-  keduanya selesai, SISA GAP PIM SELURUHNYA struktural (sudah terdokumentasi di atas) -> baru
-  LANJUT OTOMATIS ke modul berikutnya (Performance 67.2% saat ini terendah) TANPA konfirmasi
-  user (instruksi 2026-11-17 & 2026-11-18).
+  ini, tidak ada file probe `zz-probe-*` tersisa. PIM = 96.3% (892 COVERED/34 GAP/494 N/A dari
+  1420 sel). Matrix TOTAL = 79.7%. BERIKUT: U042 Reports (12 kode) -- INI SATU-SATUNYA unit
+  PIM yg msh py gap non-struktural. Setelah ini, SISA GAP PIM SELURUHNYA struktural (1.2/1.4/
+  1.6 flag-based + Job/Report-to/Memberships text-injection codes tanpa field bebas genuine);
+  PIM TIDAK BISA mencapai 100% literal tanpa perubahan tool, tapi akan mencapai ~96-97%
+  (ceiling nyata, hampir tercapai).
+  NEXT STEP KONKRET saat resume: U042 Reports (12 kode: 1.1-U 1.2 1.4 4.1 4.2 4.3 4.5 4.7
+  5.1-CmdPath 5.5 6.7 8.4). SETELAH ini selesai, SISA GAP PIM SELURUHNYA struktural (sudah
+  terdokumentasi di atas) -> baru LANJUT OTOMATIS ke modul berikutnya (Performance 67.2% saat
+  ini terendah) TANPA konfirmasi user (instruksi 2026-11-17 & 2026-11-18).
   ============================================================================
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
@@ -803,3 +804,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | PIM lanjutan (PHOTO-API-02 + PD-12 + LIST-15, U099 & U002 TUNTAS) | 3 TC baru; U099 Profile Picture SEPENUHNYA ditutup (PHOTO-API-02: 1.1-R/2.1/5.2-PrivEsc/5.3-BadExt/5.3-Rename/5.4, 9/9; PD-12: 1.8/4.2/4.3/4.5/4.7/4.8/8.4 via widget foto Personal Details, PUT idempotent beda dgn Attachments, 7/7); U002 Employee List SEPENUHNYA ditutup (LIST-15: 1.8/4.2/4.5/4.8/5.4, modal delete tertutup sesudah klik pertama = double-submit struktural tidak mungkin, 5/5); tidak ada bug baru; ditemukan TC-PIM-CSRF-01 docstring-nya menyebut U037-U040 tapi kode checknya tidak benar2 menguji unit itu (dicatat utk sesi berikutnya); docs TC-PIM/README/Execution-Plan; PIM 89.8% -> 91.8%; matrix TOTAL 78.4% -> 78.8% | 1 commit
 - 2026-11-18 | PIM lanjutan (koordinator: fix CSRF-01 overclaim + U036/U037 TUNTAS) | TC-PIM-CSRF-01 diperbaiki (kode ditambah utk benar2 menguji U039/U040/U041/U042, docstring dikoreksi, bug ab() U097 membershipId kolisi diperbaiki, 15/15 lolos); U036 Optional Fields TUNTAS (TC-PIM-OPTFIELD-05, 12/12, tidak ada bug); U037 Custom Fields TUNTAS (TC-PIM-CUSTOMFIELD-07, SENGAJA FAILED, BUG BARU BG-483 double-click Save = 2 entri, instans ke-5 double-submit app-wide); TC-PIM-REPORTMETHOD-API-01/TERMREASON-API-01 ditambah check 4.8, menutup U039/U040 jadi HANYA struktural (1.2/1.4); docs TC-PIM/README/Execution-Plan/Bug-List; PIM 91.8% -> 94.6%; matrix TOTAL 78.8% -> 79.4% | 1 commit
 - 2026-11-18 | PIM lanjutan (DATAIMPORT-07, U038 Data Import TUNTAS) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-484 (Medium) -- import CSV identik 2x membuat 2 employee duplikat, tidak ada idempotency key pd proses import; jg temuan feedback CSV import pakai panel ringkasan inline, bukan .oxd-toast spt form lain (finding, bukan bug); menutup 1.2/1.8/4.2/4.3/4.5/4.7/4.8/5.4/5.5/8.4 sekaligus; docs TC-PIM/README/Execution-Plan/Bug-List; PIM 94.6% -> 95.7%; matrix TOTAL 79.4% -> 79.6% | 1 commit
+- 2026-11-18 | PIM lanjutan (ADD-34, U041 Add Employee TUNTAS) | 1 TC baru; 7/7 lolos, tidak ada bug (kontras positif dgn BG-484: duplicate employeeId pd Add Employee DITOLAK 422, keunikan ditegakkan benar, beda dgn Data Import yg tidak ada deteksi duplikat); menutup 1.1-R/1.8/5.5/6.2/6.7/8.4 sekaligus; docs TC-PIM/README/Execution-Plan; PIM 95.7% -> 96.3%; matrix TOTAL 79.6% -> 79.7%; SATU-SATUNYA unit PIM yg msh py gap non-struktural kini HANYA U042 Reports | 1 commit
