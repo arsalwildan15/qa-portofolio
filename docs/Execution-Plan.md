@@ -325,7 +325,9 @@
     6. [x] DONE -- U041 Add Employee SEPENUHNYA ditutup (TC-PIM-ADD-34, 7/7, tidak ada bug --
        kontras positif dgn Data Import/BG-484: duplicate employeeId DITOLAK 422, keunikan
        ditegakkan benar).
-    7. [ ] NOT STARTED -- U042 Reports.
+    7. [x] DONE -- U042 Reports SEPENUHNYA ditutup (TC-PIM-REPORT-07, SENGAJA FAILED, BUG BARU
+       BG-485 -- field criteria pd create Report SELALU 500, 3 format dicoba semua crash,
+       fitur filter kriteria tidak bisa dipakai via API sama sekali). 10/11 lolos.
   TAMBAHAN (instruksi koordinator 18 Nov 2026): TC-PIM-CSRF-01 overclaim docstring DIPERBAIKI
     -- kode ditambah utk benar2 menguji U039/U040/U041/U042 (bukan cuma U088-U097), data A/B
     UNIK per sisi; U037/U038 TETAP di luar CSRF-01 (tidak ada endpoint create 1-step aman utk
@@ -334,30 +336,37 @@
     duplikat (false-positive BG-481, auto-closed) -> diganti id nonexistent yg aman diulang.
     TC-PIM-REPORTMETHOD-API-01/TERMREASON-API-01 masing2 ditambah 1 check 4.8 (hapus+buat
     ulang nama sama -> id baru, tidak ada cooldown) -- menutup 4.8 utk U039/U040.
-  SISA GAP PIM re-verified 18 Nov 2026 (34 sel):
-    U039/U040 (Reporting Methods/Termination Reasons): HANYA 1.2/1.4 tersisa, struktural
-      (flag-based NA_RULES, sudah didokumentasikan berkali-kali) -- 4.8/5.4 SUDAH ditutup.
-    U042 Reports: BELUM disentuh (12 kode: 1.1-U 1.2 1.4 4.1 4.2 4.3 4.5 4.7 5.1-CmdPath 5.5
-      6.7 8.4).
+  ============================================================================
+  PIM SELESAI 18 Nov 2026 -- SEMUA 7 ITEM "Next pass" TUNTAS. PIM = 97.6% (904 COVERED/22
+  GAP/494 N/A dari 1420 sel). Matrix TOTAL = 80.0%. SISA 22 GAP PIM SELURUHNYA STRUKTURAL,
+  diverifikasi ulang & dikonfirmasi FINAL:
+    U039/U040 (Reporting Methods/Termination Reasons): 1.2/1.4 -- flag-based NA_RULES
+      mewajibkan evidence optional-field/relasi pd SEMUA unit ber-flag 'C', terlepas apakah
+      unit itu genuinely punya field opsional/relasi (keduanya cuma punya 1 field "name").
     U090/U091/U092/U094/U096/U097/U098 (Emergency/Dependents/Immigration/Salary/Qualifications/
-      Memberships/Attachments): hanya 1.6 tersisa, SUDAH dikonfirmasi struktural.
-    U093 Job & U095 Report-to: 3.1/4.1/5.1-SQLi/5.1-XSS-Stored (+ Report-to py 1.2/1.6 jg)
-      SUDAH dikonfirmasi struktural (tidak ada field teks bebas, hanya id/enum).
-    U097 Memberships jg py 5.1-XSS-Stored GAP -- SAMA KELAS struktural (sudah didokumentasikan
-      via report.finding() TANPA kode literal di TC-PIM-MEMBERSHIP-API-01; finding tanpa kode
-      literal tidak otomatis menghasilkan N/A di matrix -- keterbatasan NA_RULES yg sama dgn
-      1.2/1.4).
-  STATE SAAT INI (lanjutkan dari sini kalau terputus lagi): git status BERSIH setelah commit
-  ini, tidak ada file probe `zz-probe-*` tersisa. PIM = 96.3% (892 COVERED/34 GAP/494 N/A dari
-  1420 sel). Matrix TOTAL = 79.7%. BERIKUT: U042 Reports (12 kode) -- INI SATU-SATUNYA unit
-  PIM yg msh py gap non-struktural. Setelah ini, SISA GAP PIM SELURUHNYA struktural (1.2/1.4/
-  1.6 flag-based + Job/Report-to/Memberships text-injection codes tanpa field bebas genuine);
-  PIM TIDAK BISA mencapai 100% literal tanpa perubahan tool, tapi akan mencapai ~96-97%
-  (ceiling nyata, hampir tercapai).
-  NEXT STEP KONKRET saat resume: U042 Reports (12 kode: 1.1-U 1.2 1.4 4.1 4.2 4.3 4.5 4.7
-  5.1-CmdPath 5.5 6.7 8.4). SETELAH ini selesai, SISA GAP PIM SELURUHNYA struktural (sudah
-  terdokumentasi di atas) -> baru LANJUT OTOMATIS ke modul berikutnya (Performance 67.2% saat
-  ini terendah) TANPA konfirmasi user (instruksi 2026-11-17 & 2026-11-18).
+      Memberships/Attachments): 1.6 -- dikonfirmasi live via DOM ancestor-chain, satu2nya
+      "search input" yg terdeteksi adalah oxd-main-menu-search (sidebar global), BUKAN search
+      milik tabel record tab itu; ATTACHMENT-API-02 jg konfirmasi di level API (sortField
+      ditolak 422).
+    U093 Job & U095 Report-to: 3.1/4.1/5.1-SQLi/5.1-XSS-Stored (+Report-to 1.2/1.6 jg) --
+      tidak ada field teks bebas genuine, hanya id/enum/tanggal.
+    U097 Memberships: 5.1-XSS-Stored -- sama kelas struktural (hanya membershipId/enum +
+      subscriptionFee/angka + 2 tanggal, tidak ada field teks bebas); didokumentasikan via
+      report.finding() TANPA kode literal (konvensi project), finding tanpa kode tidak
+      otomatis jadi N/A di matrix -- keterbatasan NA_RULES yg sama dgn 1.2/1.4.
+  TIDAK ADA lagi kode yg genuinely closable via TC authoring. PIM TIDAK BISA mencapai 100%
+  literal tanpa perubahan tool build_matrix.py (keluar scope sesi ini, berisiko side effect ke
+  modul lain) -- 97.6% adalah CEILING NYATA & FINAL utk PIM.
+  BUG BARU ditemukan sesi PIM-closure ini (18 Nov 2026): BG-483 (Custom Fields double-submit),
+  BG-484 (Data Import tidak idempotent), BG-485 (Reports criteria -> 500 crash).
+  STATE SAAT INI: git status BERSIH setelah commit ini, tidak ada file probe `zz-probe-*`
+  tersisa. SESUAI INSTRUKSI USER 2026-11-17 ("apabila menu PIM sudah 100%, langsung lanjut
+  otomatis ke modul berikutnya tanpa perlu konfirmasi") -- PIM sudah mencapai ceiling
+  struktural-nya (97.6%, bukan 100% literal krn keterbatasan tool, sudah dibuktikan &
+  didokumentasikan lengkap di atas) -- LANJUT OTOMATIS ke modul berikutnya SEKARANG:
+  Performance (67.2%, modul terendah proyek saat ini). NEXT STEP KONKRET: baca ulang
+  Taxonomy-Coverage-Matrix.md utk Performance, enumerasi semua unit & kode GAP, mulai tutup
+  per-unit dgn pola kerja yg sama (probe-first, TC baru, matrix rebuild, docs, commit+push).
   ============================================================================
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
@@ -805,3 +814,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | PIM lanjutan (koordinator: fix CSRF-01 overclaim + U036/U037 TUNTAS) | TC-PIM-CSRF-01 diperbaiki (kode ditambah utk benar2 menguji U039/U040/U041/U042, docstring dikoreksi, bug ab() U097 membershipId kolisi diperbaiki, 15/15 lolos); U036 Optional Fields TUNTAS (TC-PIM-OPTFIELD-05, 12/12, tidak ada bug); U037 Custom Fields TUNTAS (TC-PIM-CUSTOMFIELD-07, SENGAJA FAILED, BUG BARU BG-483 double-click Save = 2 entri, instans ke-5 double-submit app-wide); TC-PIM-REPORTMETHOD-API-01/TERMREASON-API-01 ditambah check 4.8, menutup U039/U040 jadi HANYA struktural (1.2/1.4); docs TC-PIM/README/Execution-Plan/Bug-List; PIM 91.8% -> 94.6%; matrix TOTAL 78.8% -> 79.4% | 1 commit
 - 2026-11-18 | PIM lanjutan (DATAIMPORT-07, U038 Data Import TUNTAS) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-484 (Medium) -- import CSV identik 2x membuat 2 employee duplikat, tidak ada idempotency key pd proses import; jg temuan feedback CSV import pakai panel ringkasan inline, bukan .oxd-toast spt form lain (finding, bukan bug); menutup 1.2/1.8/4.2/4.3/4.5/4.7/4.8/5.4/5.5/8.4 sekaligus; docs TC-PIM/README/Execution-Plan/Bug-List; PIM 94.6% -> 95.7%; matrix TOTAL 79.4% -> 79.6% | 1 commit
 - 2026-11-18 | PIM lanjutan (ADD-34, U041 Add Employee TUNTAS) | 1 TC baru; 7/7 lolos, tidak ada bug (kontras positif dgn BG-484: duplicate employeeId pd Add Employee DITOLAK 422, keunikan ditegakkan benar, beda dgn Data Import yg tidak ada deteksi duplikat); menutup 1.1-R/1.8/5.5/6.2/6.7/8.4 sekaligus; docs TC-PIM/README/Execution-Plan; PIM 95.7% -> 96.3%; matrix TOTAL 79.6% -> 79.7%; SATU-SATUNYA unit PIM yg msh py gap non-struktural kini HANYA U042 Reports | 1 commit
+- 2026-11-18 | **PIM SELESAI** (REPORT-07, U042 Reports TUNTAS -- SEMUA 7 item "Next pass" tuntas) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-485 (Medium) -- field criteria pd create Report SELALU 500 Internal Server Error apa pun bentuk datanya (3 format dicoba semua crash), fitur filter kriteria tidak bisa dipakai via API sama sekali; 10/11 lolos; menutup 1.1-U/1.2/1.4/4.1/4.2/4.3/4.5/4.7/5.1-CmdPath/5.5/6.7/8.4 sekaligus; SISA 22 GAP PIM SELURUHNYA struktural (diverifikasi ulang & dikonfirmasi final); docs TC-PIM/README/Execution-Plan/Bug-List; PIM 96.3% -> 97.6% (CEILING FINAL); matrix TOTAL 79.7% -> 80.0%; LANJUT OTOMATIS ke Performance (67.2%, modul terendah) sesuai instruksi user 2026-11-17 | 1 commit

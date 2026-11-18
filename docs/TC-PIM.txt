@@ -3160,11 +3160,39 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND:
     npx playwright test tests/pim/add-employee/TC-PIM-ADD-34-Verify-Read-Contract-Idempotency-Feedback-And-Rate-Limit.spec.ts --project=chromium
 
+152   TC-PIM-REPORT-07  [DONE -- BUG]  tests/pim/reports/TC-PIM-REPORT-07-Verify-Update-Relation-Edge-Cases-Idempotency-Rate-Limit-And-Criteria-Filter-Crash.spec.ts
+                             (+) 1.1-U 1.4 | (-) 1.2 | (!) 4.1 4.2 4.3 4.5 4.7 | (S)
+                             5.1-CmdPath 5.5 | (A) 6.7 | (UI) 8.4   [U042]
+                             -> PUT update -> 200 & name berubah (1.1-U). fieldGroup merujuk
+                                group id lain -> 200 diterima (1.4). Nama unicode/emoji -> 200
+                                (4.1). Nama path traversal -> 200, aman krn name hanya label
+                                (5.1-CmdPath N/A genuine). Create nama sama 2x -> keduanya 200,
+                                tidak ada uniqueness constraint, sama kelas dgn BG-468 (6.7).
+                                3 create paralel -> tidak ada rate limit (5.5, finding). Add
+                                Report via UI -> toast sukses, double-click/back-forward/
+                                koneksi putus/concurrency semua normal (4.2/4.3/4.5/4.7/8.4).
+                             HASIL: SENGAJA FAILED (R3), BUG BARU BG-485 (Medium) -- field
+                                `criteria` pd endpoint create Report SELALU 500 Internal
+                                Server Error apa pun bentuk datanya (3 format dicoba, SEMUA
+                                crash) ketika diisi non-kosong, bukannya divalidasi (422) atau
+                                diterima (1.2) -- fitur filter kriteria report via API TIDAK
+                                BISA DIPAKAI SAMA SEKALI.
+                             MENUTUP U042 Reports SEPENUHNYA -- INI UNIT TERAKHIR PIM yg msh
+                                py gap non-struktural. SELURUH SISA GAP PIM (22 sel) SEKARANG
+                                STRUKTURAL (1.2/1.4/1.6 flag-based NA_RULES + Job/Report-to/
+                                Memberships text-injection codes tanpa field bebas genuine),
+                                sudah terbukti & terdokumentasikan berkali-kali -- PIM
+                                mencapai CEILING NYATA 97.6%, tidak bisa 100% literal tanpa
+                                perubahan tool matrix.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/reports/TC-PIM-REPORT-07-Verify-Update-Relation-Edge-Cases-Idempotency-Rate-Limit-And-Criteria-Filter-Crash.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 202 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 203 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
@@ -3174,7 +3202,7 @@ No.  Test Case ID      Status   Kategori           Skenario
   TERMREASON-API-01, CSRF-01, TABEDGE-01, PD-API-02, JOB-API-02,
   REPORTTO-API-02, ATTACHMENT-API-02, CONTACT-10, ATTACHMENT-API-03,
   PHOTO-API-02, PD-12, LIST-15, OPTFIELD-05, CUSTOMFIELD-07, DATAIMPORT-07,
-  ADD-34 ditambahkan
+  ADD-34, REPORT-07 ditambahkan
   2026-11-17/18 penutup gap
   taksonomi; CONTACT-03 ditulis ulang krn bug skrip;
   IMMIGRATION-API-01/QUALIFICATION-API-01 ditambah check 3.4 18 Nov 2026)
