@@ -3124,11 +3124,31 @@ No.  Test Case ID      Status   Kategori           Skenario
   Menutup 4.8 utk U039/U040 -- sisa gap U039/U040 kini HANYA 1.2/1.4 (struktural, flag-based
   NA_RULES, sudah didokumentasikan).
 
+150   TC-PIM-DATAIMPORT-07  [DONE -- BUG]  tests/pim/configuration/data-import/TC-PIM-DATAIMPORT-07-Verify-Feedback-Navigation-Connection-Loss-Concurrency-Idempotency-Rate-Limit-And-CSRF.spec.ts
+                             (+) 1.2 1.8 | (!) 4.2 4.3 4.5 4.7 4.8 | (S) 5.4 5.5 | (A) 6.7 |
+                             (UI) 8.4   [U038]
+                             -> middle_name (kolom opsional) kosong vs terisi -> 200 keduanya
+                                (1.2). Import via UI -> halaman berubah signifikan menampilkan
+                                panel ringkasan INLINE (bukan .oxd-toast spt form lain) --
+                                feedback tetap ada, mekanisme beda (1.8, dicatat finding 8.4).
+                                Back/Forward pasca-upload -> normal (4.3). Koneksi putus saat
+                                upload -> tidak crash (4.5). 2 import berbeda paralel -> tidak
+                                500 (4.7). 3 import paralel -> semua 200, tidak ada rate limit
+                                (5.5, finding). Origin palsu vs sendiri -> identik (5.4).
+                             HASIL: SENGAJA FAILED (R3), BUG BARU BG-484 (Medium) -- import
+                                CSV IDENTIK 2x (simulasi retry network) membuat 2 EMPLOYEE
+                                DUPLIKAT dgn nama sama (empNumber berbeda), tidak ada deteksi
+                                duplikat/idempotency key pd proses import (6.7).
+                             MENUTUP U038 Data Import SEPENUHNYA.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/configuration/data-import/TC-PIM-DATAIMPORT-07-Verify-Feedback-Navigation-Connection-Loss-Concurrency-Idempotency-Rate-Limit-And-CSRF.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 200 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 201 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
@@ -3137,7 +3157,8 @@ No.  Test Case ID      Status   Kategori           Skenario
   QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01, REPORTMETHOD-API-01,
   TERMREASON-API-01, CSRF-01, TABEDGE-01, PD-API-02, JOB-API-02,
   REPORTTO-API-02, ATTACHMENT-API-02, CONTACT-10, ATTACHMENT-API-03,
-  PHOTO-API-02, PD-12, LIST-15, OPTFIELD-05, CUSTOMFIELD-07 ditambahkan
+  PHOTO-API-02, PD-12, LIST-15, OPTFIELD-05, CUSTOMFIELD-07, DATAIMPORT-07
+  ditambahkan
   2026-11-17/18 penutup gap
   taksonomi; CONTACT-03 ditulis ulang krn bug skrip;
   IMMIGRATION-API-01/QUALIFICATION-API-01 ditambah check 3.4 18 Nov 2026)
