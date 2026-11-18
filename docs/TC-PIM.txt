@@ -2999,11 +2999,30 @@ No.  Test Case ID      Status   Kategori           Skenario
   Sisa GAP U098 Attachments setelah 2 TC di atas: 1.6 (struktural, dibuktikan), 5.3-Rename,
   5.4, 5.5, 7.4, 7.5 (6 kode, belum tersentuh -- lanjutan sesi berikutnya).
 
+143   TC-PIM-ATTACHMENT-API-03  [DONE]  tests/pim/security/TC-PIM-ATTACHMENT-API-03-Verify-Attachment-Rename-Bypass-CSRF-Rate-Limiting-Console-And-Performance.spec.ts
+                             (S) 5.3-Rename 5.4 5.5 | (7) 7.4 7.5   [U098]
+                             -> File dgn header MZ (executable) di-"rename" jadi nama .pdf,
+                                type diklaim application/pdf -> 200 DITERIMA (5.3-Rename, pola
+                                SAMA dgn BG-462/463 yg sudah tercatat -- tidak diduplikasi sbg
+                                bug baru). POST attachment dgn Origin palsu vs Origin sendiri
+                                -> status identik 200=200 (5.4, konsisten dgn TC-PIM-CSRF-01).
+                                6 create attachment paralel dlm <6 detik -> SEMUA 200, tidak
+                                ada 429/lockout (5.5, dicatat finding bukan bug, sesuai R4).
+                                Membuka modal Add Attachments di UI -> tanpa console warning
+                                aplikasi (7.4). GET list & POST create -> waktu respons dlm
+                                batas kewajaran demo publik (7.5).
+                             HASIL: lolos penuh (7/7), tidak ada bug baru. MENUTUP U098
+                             Attachments SEPENUHNYA KECUALI 1.6 (struktural, sudah dibuktikan
+                             di TC-PIM-ATTACHMENT-API-02).
+
+  RUN COMMAND:
+    npx playwright test tests/pim/security/TC-PIM-ATTACHMENT-API-03-Verify-Attachment-Rename-Bypass-CSRF-Rate-Limiting-Console-And-Performance.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 194 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 195 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
@@ -3011,9 +3030,10 @@ No.  Test Case ID      Status   Kategori           Skenario
   EMERGENCY-API-01, DEPENDENT-API-01, IMMIGRATION-API-01, SALARY-API-01,
   QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01, REPORTMETHOD-API-01,
   TERMREASON-API-01, CSRF-01, TABEDGE-01, PD-API-02, JOB-API-02,
-  REPORTTO-API-02, ATTACHMENT-API-02, CONTACT-10 ditambahkan 2026-11-17/18
-  penutup gap taksonomi; CONTACT-03 ditulis ulang krn bug skrip;
-  IMMIGRATION-API-01/QUALIFICATION-API-01 ditambah check 3.4 18 Nov 2026)
+  REPORTTO-API-02, ATTACHMENT-API-02, CONTACT-10, ATTACHMENT-API-03
+  ditambahkan 2026-11-17/18 penutup gap taksonomi; CONTACT-03 ditulis ulang
+  krn bug skrip; IMMIGRATION-API-01/QUALIFICATION-API-01 ditambah check 3.4
+  18 Nov 2026)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

@@ -300,22 +300,24 @@
   yg benar: jalankan file yg sama lintas 3 project Playwright (default playwright.config.ts,
   tanpa --project flag), biarkan fixture `page`/`testInfo.project.name` yg menyesuaikan.
   ============================================================================
-  PAUSE 2026-11-18 (STOP REQUEST user, resume dari sini persis):
+  RESUME 2026-11-18 (lanjutan dari PAUSE di atas, user: "tolong lanjutkan"):
   Daftar 7 item (urutan dari user 2026-11-18, "Next pass"):
     1. [x] DONE -- investigasi U098 vs sweep_units.json (bukan oversight, didokumentasikan di atas).
-    2. [~] SEBAGIAN -- U098 Attachments: 19/25 kode ditutup (TC-PIM-ATTACHMENT-API-02 +
-       TC-PIM-CONTACT-10, commit b0448aa, SUDAH push). SISA 6 kode U098 BELUM digarap:
-       5.3-Rename, 5.4, 5.5, 7.4, 7.5 (belum ada TC sama sekali), 1.6 (SUDAH terbukti
-       struktural via API reject sortField -- TIDAK perlu TC lagi, cukup didokumentasikan N/A
-       di sini, yg sudah dilakukan).
+    2. [x] DONE -- U098 Attachments SEPENUHNYA ditutup kecuali 1.6 (struktural, sudah
+       dibuktikan): TC-PIM-ATTACHMENT-API-03 menutup 5.3-Rename (exe header MZ di-rename .pdf
+       -> 200 diterima, pola sama BG-462/463, bukan bug baru), 5.4 (CSRF A/B Origin, identik
+       dgn TC-PIM-CSRF-01), 5.5 (6 create paralel -> semua 200, tidak ada rate limit, finding
+       bukan bug), 7.4 (tanpa console warning saat buka modal Add Attachments), 7.5 (waktu
+       respons list/create dlm batas kewajaran). 7/7 lolos, tidak ada bug baru.
     3. [ ] NOT STARTED -- U099 Profile Picture (13 kode: 1.1-R 1.8 2.1 4.2 4.3 4.5 4.7 4.8
        5.2-PrivEsc 5.3-BadExt 5.3-Rename 5.4 8.4).
     4. [ ] NOT STARTED -- U002 Employee List.
     5. [ ] NOT STARTED -- U036-U038 Configuration (Optional Fields, Custom Fields, Data Import).
     6. [ ] NOT STARTED -- U041 Add Employee.
     7. [ ] NOT STARTED -- U042 Reports.
-  STATE SAAT PAUSE: git status BERSIH (semua commit+push, tidak ada file probe `zz-probe-*`
-  tersisa). PIM = 89.3% (827 COVERED/99 GAP/494 N/A dari 1420 sel). Matrix TOTAL = 78.3%.
+  STATE SAAT INI (lanjutkan dari sini kalau terputus lagi): git status BERSIH setelah commit
+  ini, tidak ada file probe `zz-probe-*` tersisa. PIM = 89.8% (832 COVERED/94 GAP/494 N/A dari
+  1420 sel). Matrix TOTAL = 78.4%. BERIKUT: U099 Profile Picture (item 3).
   Commit terakhir: b0448aa "PIM: close most of Attachments' taxonomy gaps, 1 new bug (87.3% ->
   89.3%)".
   NEXT STEP KONKRET saat resume: lanjutkan item 2 (U098 sisa 5 kode: 5.3-Rename renamed-exe
@@ -769,3 +771,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | PIM lanjutan (PD-API-02 + JOB-API-02 + REPORTTO-API-02 + fix 3.4 Immigration/Qualifications) | 3 TC baru + 2 TC lama ditambah check; U088 Personal Details 1.2/1.4 TUNTAS (TC-PIM-PD-API-02, 6/6, nationality relation benar); U093 Job 1.2/4.4/5.9 ditutup, 2 BUG BARU (TC-PIM-JOB-API-02, SENGAJA FAILED: BG-473 Medium terminasi sblm joinedDate diterima, BG-474 Medium race 2-terminate-bersamaan tanpa locking); U095 Report-to 1.8/4.2/4.3/4.5/4.7/4.8/5.5/8.4 ditutup AMAN pakai supervisor berbeda per operasi (TC-PIM-REPORTTO-API-02, 7/7, hindari BG-466); verifikasi LIVE (bukan asumsi) bhw hipotesis 1.6-struktural utk 5 unit BENAR (1 "search input" terdeteksi di tiap tab adalah oxd-main-menu-search sidebar global, dibuktikan via ancestor-chain DOM, bukan search milik tabel record); 3.4 Immigration/Qualifications ternyata BUKAN struktural (cuma belum diuji boundary leap-year/rentang ekstrem), ditutup via 2 check tambahan di file lama; docs TC-PIM/README/Execution-Plan/Bug-List; PIM 85.6% -> 87.3%; matrix TOTAL 77.6% -> 77.9% | 1 commit
 - 2026-11-18 | PIM lanjutan (ATTACHMENT-API-02 + CONTACT-10, U098 Attachments sebagian) | 2 TC baru; investigasi U098 vs sweep_units.json selesai (bukan oversight, U098 tanpa URL sendiri); 1.1-U/1.2/1.5/2.1/2.4/5.2-IDOR/5.3-DoubleExt/6.5 ditutup via API (TC-PIM-ATTACHMENT-API-02, 10/10); 1.8/4.3/4.5/4.7/8.1/8.2/8.3/8.4 ditutup via UI widget di Contact Details (TC-PIM-CONTACT-10), SENGAJA FAILED 4.2 -> BUG BARU BG-475 Medium (double-click Save = 2 entri, instans ke-4 double-submit app-wide sama dgn BG-427); 4 baris Bug-List noise (BG-476/477/478/479, duplikat/stale dari iterasi debug whitelist console cross-browser) diarsipkan; 1.6 dikonfirmasi struktural via API (sortField ditolak 422); docs TC-PIM/README/Bug-List; PIM 87.3% -> 89.3%; matrix TOTAL 77.9% -> 78.3%; commit b0448aa, PUSHED | 1 commit
 - 2026-11-18 | **PAUSE** (STOP REQUEST user, lihat blok PAUSE di NEXT ACTION di atas) | git status bersih, semua commit+push, tidak ada file probe tersisa; PIM 89.3%, matrix TOTAL 78.3%; resume dari U098 sisa 5 kode (5.3-Rename/5.4/5.5/7.4/7.5) lalu U099/U002/U036-038/U041/U042 sesuai urutan "Next pass" user | tidak ada commit (dokumentasi saja)
+- 2026-11-18 | PIM lanjutan (RESUME, ATTACHMENT-API-03, U098 Attachments TUNTAS) | 1 TC baru; menutup 5.3-Rename (exe MZ header di-rename .pdf -> 200 diterima, pola BG-462/463), 5.4 (CSRF A/B Origin identik), 5.5 (6 create paralel semua 200, tidak ada rate limit, finding), 7.4 (tanpa console warning modal Add Attachments), 7.5 (waktu respons dlm batas kewajaran); 7/7 lolos, tidak ada bug baru; U098 Attachments TUNTAS kecuali 1.6 struktural; docs TC-PIM/README/Execution-Plan; PIM 89.3% -> 89.8%; matrix TOTAL 78.3% -> 78.4% | 1 commit
