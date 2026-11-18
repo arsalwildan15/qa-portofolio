@@ -13,11 +13,11 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
 | PIM | 904 | 22 | 494 | 97.6% |
-| Performance | 283 | 138 | 289 | 67.2% |
+| Performance | 292 | 129 | 289 | 69.4% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3715** | **931** | **3093** | **80.0%** |
+| **Total** | **3724** | **922** | **3093** | **80.2%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -29,14 +29,14 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.1-R | Read / list | 19 |
 | 1.1-U | Update valid | 20 |
 | 1.1-D | Delete valid | 6 |
-| 1.2 | Variasi input valid (opsional diisi/kosong) | 57 |
+| 1.2 | Variasi input valid (opsional diisi/kosong) | 56 |
 | 1.3 | State transition valid | 4 |
 | 1.4 | Relasi antar-entity | 39 |
 | 1.6 | Search/filter/sort valid | 24 |
 | 1.7 | Upload file valid | 2 |
 | 1.8 | Notifikasi/feedback UI | 29 |
 | 2.1 | Required field kosong | 15 |
-| 2.2 | Format salah | 46 |
+| 2.2 | Format salah | 45 |
 | 2.3 | Duplicate/unique conflict | 5 |
 | 2.5 | State transition invalid | 8 |
 | 2.6 | Operasi pada record invalid/tak eksis | 6 |
@@ -52,7 +52,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 4.5 | Session/koneksi terputus | 40 |
 | 4.6 | Data kosong/null (empty state) | 9 |
 | 4.7 | Konkurensi multi-user edit | 33 |
-| 4.8 | Behavior non-obvious terdokumentasi | 63 |
+| 4.8 | Behavior non-obvious terdokumentasi | 60 |
 | 5.1-SQLi | SQL Injection | 33 |
 | 5.1-XSS-Stored | Stored XSS | 16 |
 | 5.1-XSS-Reflected | Reflected XSS | 15 |
@@ -70,11 +70,11 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.4 | CSRF | 43 |
 | 5.5 | Rate limit / brute force / spam | 23 |
 | 5.6 | Security headers | 1 |
-| 5.9 | Business logic abuse | 10 |
+| 5.9 | Business logic abuse | 9 |
 | 6.2 | Response schema/contract | 8 |
 | 6.3 | Request method salah (405) | 11 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 10 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 40 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 37 |
 | 6.7 | Idempotency | 18 |
 | 7.4 | Warning log | 1 |
 | 7.5 | Performance dasar | 1 |

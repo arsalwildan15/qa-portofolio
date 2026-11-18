@@ -74,6 +74,7 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'performance/tracker/TC-PERF-TRACKER-07', ['Performance > Tracker Logs', 'Performance > My Trackers']),
  (r'performance/tracker/TC-PERF-TRACKER-08', ['Performance > Tracker Logs']),
  (r'performance/security/TC-PERF-API-01', ['Performance > Configure > KPIs', 'Performance > Configure > Trackers', 'Performance > Manage Reviews > Manage Reviews', 'Performance > Manage Reviews > Employee Reviews', 'Performance > Manage Reviews > My Reviews', 'Performance > My Trackers', 'Performance > Employee Trackers', 'Performance > Review Evaluation (Admin/Supervisor)', 'Performance > Self Evaluation (ESS)', 'Performance > Tracker Logs']),
+ (r'performance/security/TC-PERF-API-02', ['Performance > Manage Reviews > My Reviews', 'Performance > My Trackers', 'Performance > Employee Trackers']),
  (r'claim/config/TC-CLAIM-CONFIG-EVENT', ['Claim > Configuration > Events']),
  (r'claim/config/TC-CLAIM-CONFIG-EXPTYPE', ['Claim > Configuration > Expense Types']),
  (r'_global/login/', ['Login > Login Page']),

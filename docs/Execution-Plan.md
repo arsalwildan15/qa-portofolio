@@ -368,6 +368,32 @@
   Taxonomy-Coverage-Matrix.md utk Performance, enumerasi semua unit & kode GAP, mulai tutup
   per-unit dgn pola kerja yg sama (probe-first, TC baru, matrix rebuild, docs, commit+push).
   ============================================================================
+  PERFORMANCE CLOSURE (dimulai 18 Nov 2026, instruksi koordinator: lanjutkan pola PIM):
+  GAP list awal (rebuild matrix 18 Nov 2026, 138 sel di 10 unit):
+    U007 Employee Reviews: 27 kode. U066 KPIs: 3. U067 Trackers config: 18. U068 Manage
+    Reviews: 20. U069 My Reviews: 2. U070 My Trackers: 2. U071 Employee Trackers: 5.
+    U102 Review Evaluation: 15. U103 Self Evaluation: 31. U104 Tracker Logs: 16.
+  SELESAI sejauh ini (18 Nov 2026):
+    - TC-PERF-KPI-12: menutup U066 KPIs SEPENUHNYA (1.2/2.2/5.9; min>max via API -> 400,
+      non-numerik -> 422, isDefault opsional -> 200). Lolos penuh, tidak ada bug.
+    - TC-PERF-API-02: menutup U069 My Reviews & U070 My Trackers SEPENUHNYA (6.5, skema
+      ketat); U071 Employee Trackers turun jadi HANYA 3 kode struktural (4.1/5.1-SQLi/
+      5.1-XSS-Reflected -- tidak ada search param apa pun, dibuktikan via 422 di 3
+      percobaan param berbeda). Lolos penuh, tidak ada bug.
+  STATE SAAT INI: PIM = 97.6% (ceiling final). Performance = 69.4% (292 COVERED/129 GAP/289
+  N/A dari 710 sel). Matrix TOTAL = 80.2%.
+  BERIKUT (urutan disarankan, unit terkecil dulu): U071 sisa (3 kode, struktural, SELESAI/
+  tidak perlu TC lagi) -> U104 Tracker Logs (16 kode) -> U067 Trackers config (18 kode) ->
+  U068 Manage Reviews (20 kode) -> U007 Employee Reviews (27 kode) -> U102 Review
+  Evaluation (15 kode) -> U103 Self Evaluation (31 kode, TERBESAR, kerjakan terakhir).
+  Catatan Performance spesifik (dari sesi sebelumnya, masih berlaku): Tracker Log field
+  "log" dibatasi 150 karakter server-side; evaluation/supervisor body {ratings:[{kpiId,
+  rating,comment}],generalComment}; evaluation/final body {complete,finalRating,
+  finalComment,completedDate}; JANGAN jalankan beberapa TC security/API yg masing2 buka
+  sesi ESS sekaligus scr sequential dgn reporter penuh (video+screenshot) -- bikin sesi ESS
+  kedua timeout & false-positive berantai; jalankan terpisah kalau TC butuh assert sesi ESS
+  multipel.
+  ============================================================================
   Catatan util: label check WAJIB kode taksonomi LITERAL -- termasuk check di dalam loop (jangan
   `${label} ...`; tulis "4.1 / 5.1-SQLi ... (${label})"); TC lama -> kode di baris Kategori (apply_codes);
   form edit menimpa input saat GET detail; cookie sesi berpath /web; heredoc bash dgn kutip tunggal ->
@@ -815,3 +841,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | PIM lanjutan (DATAIMPORT-07, U038 Data Import TUNTAS) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-484 (Medium) -- import CSV identik 2x membuat 2 employee duplikat, tidak ada idempotency key pd proses import; jg temuan feedback CSV import pakai panel ringkasan inline, bukan .oxd-toast spt form lain (finding, bukan bug); menutup 1.2/1.8/4.2/4.3/4.5/4.7/4.8/5.4/5.5/8.4 sekaligus; docs TC-PIM/README/Execution-Plan/Bug-List; PIM 94.6% -> 95.7%; matrix TOTAL 79.4% -> 79.6% | 1 commit
 - 2026-11-18 | PIM lanjutan (ADD-34, U041 Add Employee TUNTAS) | 1 TC baru; 7/7 lolos, tidak ada bug (kontras positif dgn BG-484: duplicate employeeId pd Add Employee DITOLAK 422, keunikan ditegakkan benar, beda dgn Data Import yg tidak ada deteksi duplikat); menutup 1.1-R/1.8/5.5/6.2/6.7/8.4 sekaligus; docs TC-PIM/README/Execution-Plan; PIM 95.7% -> 96.3%; matrix TOTAL 79.6% -> 79.7%; SATU-SATUNYA unit PIM yg msh py gap non-struktural kini HANYA U042 Reports | 1 commit
 - 2026-11-18 | **PIM SELESAI** (REPORT-07, U042 Reports TUNTAS -- SEMUA 7 item "Next pass" tuntas) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-485 (Medium) -- field criteria pd create Report SELALU 500 Internal Server Error apa pun bentuk datanya (3 format dicoba semua crash), fitur filter kriteria tidak bisa dipakai via API sama sekali; 10/11 lolos; menutup 1.1-U/1.2/1.4/4.1/4.2/4.3/4.5/4.7/5.1-CmdPath/5.5/6.7/8.4 sekaligus; SISA 22 GAP PIM SELURUHNYA struktural (diverifikasi ulang & dikonfirmasi final); docs TC-PIM/README/Execution-Plan/Bug-List; PIM 96.3% -> 97.6% (CEILING FINAL); matrix TOTAL 79.7% -> 80.0%; LANJUT OTOMATIS ke Performance (67.2%, modul terendah) sesuai instruksi user 2026-11-17 | 1 commit
+- 2026-11-18 | Performance lanjutan (KPI-12 + API-02, U066/U069/U070 TUNTAS) | 2 TC baru; U066 KPIs SEPENUHNYA ditutup (KPI-12: min>max via API -> 400, non-numerik -> 422, isDefault opsional -> 200, 4/4); U069 My Reviews & U070 My Trackers SEPENUHNYA ditutup, U071 Employee Trackers turun jadi 3 kode struktural (API-02: 3 endpoint menolak 422 parameter apa pun -> tidak ada search capability sama sekali, 9/9); tidak ada bug baru; fix NAME_RULES build_matrix.py utk TC-PERF-API-02; docs TC-Performance/README/Execution-Plan; Performance 67.2% -> 69.4%; matrix TOTAL 80.0% -> 80.2% | 1 commit

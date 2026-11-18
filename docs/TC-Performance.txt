@@ -1218,6 +1218,48 @@ No.  Test Case ID         Status   Skenario / Deskripsi
     npx playwright test tests/performance/security/TC-PERF-API-01-Verify-KPI-Review-Tracker-And-Evaluation-APIs-Contract-Methods-Session-Unknown-Ids-And-ESS-Access.spec.ts tests/performance/evaluate/TC-PERF-EVAL-17-Verify-Evaluation-Server-Validation-Injection-And-Mass-Assignment.spec.ts tests/performance/tracker/TC-PERF-TRACKER-08-Verify-Tracker-Log-Contract-Validation-And-Injection.spec.ts --project=chromium --workers=1
 
 ================================================================================
+  LANJUTAN COVERAGE TAXONOMY (18 Nov 2026) -- lanjutan sesi PIM-closure,
+  modul Performance (67.2% -> ceiling), rebuild matrix dulu utk GAP list
+  per-unit yg benar (bukan asumsi).
+================================================================================
+
+ R4  TC-PERF-KPI-12  [DONE]  tests/performance/kpi/TC-PERF-KPI-12-Verify-Business-Logic-Format-And-Optional-Field.spec.ts
+                             (+) 1.2 | (-) 2.2 | (S) 5.9   [U066]
+                             -> TC-PERF-KPI-04 sudah menutup 3.2 (boundary) tapi
+                                HANYA via UI (client-side blocking) -- tidak pernah
+                                mengirim min>max langsung ke API. Ini membuktikan
+                                SERVER SENDIRI menolaknya: minRating=50 >
+                                maxRating=10 via API -> 400 (5.9). minRating="abc"
+                                (non-numerik) -> 422 (2.2). isDefault:true (field
+                                opsional) -> 200 & tersimpan (1.2).
+                             HASIL: lolos penuh (4/4), tidak ada bug baru. MENUTUP
+                                U066 KPIs SEPENUHNYA.
+
+  RUN COMMAND:
+    npx playwright test tests/performance/kpi/TC-PERF-KPI-12-Verify-Business-Logic-Format-And-Optional-Field.spec.ts --project=chromium
+
+ R5  TC-PERF-API-02  [DONE]  tests/performance/security/TC-PERF-API-02-Verify-My-Reviews-My-Trackers-And-Employee-Trackers-Parameter-Validation-And-No-Search-Capability.spec.ts
+                             (A) 6.5   [U069 U070 U071]
+                             -> GET performance/reviews, performance/trackers,
+                                performance/employees/trackers dgn parameter tak
+                                dikenal (sortField/nameOrId/employeeName) -> 422
+                                SEMUA -- skema ditegakkan ketat, TIDAK ADA
+                                kapasitas search/filter/sort bebas sama sekali.
+                             -> Ini menjelaskan mengapa 4.1 (karakter tidak biasa)
+                                & 5.1-SQLi/5.1-XSS-Reflected (injeksi via search
+                                param) pd Employee Trackers (U071) N/A GENUINE --
+                                tidak ada search param apa pun utk dimasukkan
+                                payload (dicatat via finding TANPA kode literal,
+                                konvensi project; sisa GAP struktural di matrix,
+                                sama kelas dgn keterbatasan NA_RULES lain).
+                             HASIL: lolos penuh (9/9), tidak ada bug baru. MENUTUP
+                                U069 My Reviews & U070 My Trackers SEPENUHNYA; U071
+                                Employee Trackers tersisa HANYA 3 kode struktural.
+
+  RUN COMMAND:
+    npx playwright test tests/performance/security/TC-PERF-API-02-Verify-My-Reviews-My-Trackers-And-Employee-Trackers-Parameter-Validation-And-No-Search-Capability.spec.ts --project=chromium
+
+================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
 
