@@ -309,15 +309,39 @@
        dgn TC-PIM-CSRF-01), 5.5 (6 create paralel -> semua 200, tidak ada rate limit, finding
        bukan bug), 7.4 (tanpa console warning saat buka modal Add Attachments), 7.5 (waktu
        respons list/create dlm batas kewajaran). 7/7 lolos, tidak ada bug baru.
-    3. [ ] NOT STARTED -- U099 Profile Picture (13 kode: 1.1-R 1.8 2.1 4.2 4.3 4.5 4.7 4.8
-       5.2-PrivEsc 5.3-BadExt 5.3-Rename 5.4 8.4).
-    4. [ ] NOT STARTED -- U002 Employee List.
+    3. [x] DONE -- U099 Profile Picture SEPENUHNYA ditutup: TC-PIM-PHOTO-API-02 (1.1-R/2.1/
+       5.2-PrivEsc/5.3-BadExt/5.3-Rename/5.4, 9/9 lolos) + TC-PIM-PD-12 (1.8/4.2/4.3/4.5/4.7/
+       4.8/8.4 via widget foto Personal Details, 7/7 lolos). Tidak ada bug baru. PUT/replace
+       idempotent (beda dgn Attachments yg POST/create-row) -- double-click/concurrency tidak
+       bisa "duplikat", diukur dari status+isi akhir.
+    4. [x] DONE -- U002 Employee List SEPENUHNYA ditutup: TC-PIM-LIST-15 (1.8/4.2/4.5/4.8/5.4,
+       5/5 lolos). Modal konfirmasi delete tertutup sesudah klik pertama -> double-submit
+       struktural tidak mungkin terjadi (kontras positif dgn BG-475 Attachments).
     5. [ ] NOT STARTED -- U036-U038 Configuration (Optional Fields, Custom Fields, Data Import).
     6. [ ] NOT STARTED -- U041 Add Employee.
     7. [ ] NOT STARTED -- U042 Reports.
+  SISA GAP PIM re-verified 18 Nov 2026 (76 sel, setelah item 1-4 tuntas):
+    U036-U038/U041/U042 (Optional Fields, Custom Fields, Data Import, Add Employee, Reports):
+      SAMA SEKALI belum disentuh (item 5-7 di atas), msh py 7-13 kode gap masing2.
+    U039/U040 (Reporting Methods/Termination Reasons): 1.2/1.4 struktural (dikonfirmasi sesi
+      lalu); 4.8/5.4 TERNYATA BELUM genuine ditutup -- TC-PIM-CSRF-01's docstring header
+      MENYEBUT U037-U040 tapi kode checknya HANYA benar2 menguji U088-U097 (job-details,
+      emergency-contacts, dst) -- dokumentasi lebih luas dari implementasi, PERLU TC CSRF
+      terpisah utk 4 unit Configuration ini kalau mau ditutup genuine.
+    U090/U091/U092/U094/U096/U097/U098 (Emergency/Dependents/Immigration/Salary/Qualifications/
+      Memberships/Attachments): hanya 1.6 tersisa, SUDAH dikonfirmasi struktural (verifikasi
+      live sesi lalu, oxd-main-menu-search bukan search tabel).
+    U093 Job & U095 Report-to: 3.1/4.1/5.1-SQLi/5.1-XSS-Stored (+ Report-to py 1.2/1.6 jg)
+      SUDAH dikonfirmasi struktural (tidak ada field teks bebas, hanya id/enum).
+    U097 Memberships jg py 5.1-XSS-Stored GAP -- SAMA KELAS struktural dgn Job/Report-to
+      (endpoint memberships hanya menerima membershipId/enum + subscriptionFee/angka + 2
+      tanggal, TIDAK ADA field teks bebas; sudah didokumentasikan via report.finding() TANPA
+      kode literal di TC-PIM-MEMBERSHIP-API-01, tapi finding tanpa kode tidak otomatis
+      menghasilkan N/A di matrix -- keterbatasan NA_RULES yg sama dgn 1.2/1.4).
   STATE SAAT INI (lanjutkan dari sini kalau terputus lagi): git status BERSIH setelah commit
-  ini, tidak ada file probe `zz-probe-*` tersisa. PIM = 89.8% (832 COVERED/94 GAP/494 N/A dari
-  1420 sel). Matrix TOTAL = 78.4%. BERIKUT: U099 Profile Picture (item 3).
+  ini, tidak ada file probe `zz-probe-*` tersisa. PIM = 91.8% (850 COVERED/76 GAP/494 N/A dari
+  1420 sel). Matrix TOTAL = 78.8%. BERIKUT: U036-U038 Configuration (item 5), lalu U041 Add
+  Employee (item 6), U042 Reports (item 7), lalu (opsional) TC CSRF genuine utk U037-U040.
   Commit terakhir: b0448aa "PIM: close most of Attachments' taxonomy gaps, 1 new bug (87.3% ->
   89.3%)".
   NEXT STEP KONKRET saat resume: lanjutkan item 2 (U098 sisa 5 kode: 5.3-Rename renamed-exe
@@ -772,3 +796,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | PIM lanjutan (ATTACHMENT-API-02 + CONTACT-10, U098 Attachments sebagian) | 2 TC baru; investigasi U098 vs sweep_units.json selesai (bukan oversight, U098 tanpa URL sendiri); 1.1-U/1.2/1.5/2.1/2.4/5.2-IDOR/5.3-DoubleExt/6.5 ditutup via API (TC-PIM-ATTACHMENT-API-02, 10/10); 1.8/4.3/4.5/4.7/8.1/8.2/8.3/8.4 ditutup via UI widget di Contact Details (TC-PIM-CONTACT-10), SENGAJA FAILED 4.2 -> BUG BARU BG-475 Medium (double-click Save = 2 entri, instans ke-4 double-submit app-wide sama dgn BG-427); 4 baris Bug-List noise (BG-476/477/478/479, duplikat/stale dari iterasi debug whitelist console cross-browser) diarsipkan; 1.6 dikonfirmasi struktural via API (sortField ditolak 422); docs TC-PIM/README/Bug-List; PIM 87.3% -> 89.3%; matrix TOTAL 77.9% -> 78.3%; commit b0448aa, PUSHED | 1 commit
 - 2026-11-18 | **PAUSE** (STOP REQUEST user, lihat blok PAUSE di NEXT ACTION di atas) | git status bersih, semua commit+push, tidak ada file probe tersisa; PIM 89.3%, matrix TOTAL 78.3%; resume dari U098 sisa 5 kode (5.3-Rename/5.4/5.5/7.4/7.5) lalu U099/U002/U036-038/U041/U042 sesuai urutan "Next pass" user | tidak ada commit (dokumentasi saja)
 - 2026-11-18 | PIM lanjutan (RESUME, ATTACHMENT-API-03, U098 Attachments TUNTAS) | 1 TC baru; menutup 5.3-Rename (exe MZ header di-rename .pdf -> 200 diterima, pola BG-462/463), 5.4 (CSRF A/B Origin identik), 5.5 (6 create paralel semua 200, tidak ada rate limit, finding), 7.4 (tanpa console warning modal Add Attachments), 7.5 (waktu respons dlm batas kewajaran); 7/7 lolos, tidak ada bug baru; U098 Attachments TUNTAS kecuali 1.6 struktural; docs TC-PIM/README/Execution-Plan; PIM 89.3% -> 89.8%; matrix TOTAL 78.3% -> 78.4% | 1 commit
+- 2026-11-18 | PIM lanjutan (PHOTO-API-02 + PD-12 + LIST-15, U099 & U002 TUNTAS) | 3 TC baru; U099 Profile Picture SEPENUHNYA ditutup (PHOTO-API-02: 1.1-R/2.1/5.2-PrivEsc/5.3-BadExt/5.3-Rename/5.4, 9/9; PD-12: 1.8/4.2/4.3/4.5/4.7/4.8/8.4 via widget foto Personal Details, PUT idempotent beda dgn Attachments, 7/7); U002 Employee List SEPENUHNYA ditutup (LIST-15: 1.8/4.2/4.5/4.8/5.4, modal delete tertutup sesudah klik pertama = double-submit struktural tidak mungkin, 5/5); tidak ada bug baru; ditemukan TC-PIM-CSRF-01 docstring-nya menyebut U037-U040 tapi kode checknya tidak benar2 menguji unit itu (dicatat utk sesi berikutnya); docs TC-PIM/README/Execution-Plan; PIM 89.8% -> 91.8%; matrix TOTAL 78.4% -> 78.8% | 1 commit

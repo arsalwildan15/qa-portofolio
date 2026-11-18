@@ -3018,11 +3018,53 @@ No.  Test Case ID      Status   Kategori           Skenario
   RUN COMMAND:
     npx playwright test tests/pim/security/TC-PIM-ATTACHMENT-API-03-Verify-Attachment-Rename-Bypass-CSRF-Rate-Limiting-Console-And-Performance.spec.ts --project=chromium
 
+144   TC-PIM-PHOTO-API-02  [DONE]  tests/pim/security/TC-PIM-PHOTO-API-02-Verify-Read-Required-Field-Rename-Bypass-Privilege-Escalation-And-CSRF.spec.ts
+                             (+) 1.1-R | (-) 2.1 | (S) 5.2-PrivEsc 5.3-BadExt 5.3-Rename 5.4   [U099]
+                             -> GET picture setelah upload -> 200 + kontrak (1.1-R). empPicture:
+                                null -> 422 (2.1). "virus.exe" type application/x-msdownload apa
+                                adanya -> 422 ditolak (5.3-BadExt). Exe byte MZ di-rename jadi
+                                nama+type .png -> 200 diterima (5.3-Rename, pola sama BG-462/463/
+                                464, bukan bug baru). Origin palsu vs sendiri -> status identik
+                                (5.4). ESS upload foto sendiri + field asing isAdmin/userRoleId
+                                -> 422 ditolak (5.2-PrivEsc, skema ketat).
+                             HASIL: lolos penuh (9/9), tidak ada bug baru.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/security/TC-PIM-PHOTO-API-02-Verify-Read-Required-Field-Rename-Bypass-Privilege-Escalation-And-CSRF.spec.ts --project=chromium
+
+145   TC-PIM-PD-12  [DONE]  tests/pim/personal-details/TC-PIM-PD-12-Verify-Profile-Photo-Feedback-Double-Submit-Navigation-Connection-Loss-And-Concurrency.spec.ts
+                             (+) 1.8 | (!) 4.2 4.3 4.5 4.7 4.8 | (UI) 8.4   [U099]
+                             -> Widget foto profil di Personal Details (beda dgn Attachments:
+                                ini PUT/replace idempotent, bukan POST/create-row). Upload valid
+                                -> toast sukses (1.8/8.4). Back/Forward pasca-save -> normal,
+                                mendarat di viewPhotograph (route SPA yg dipicu klik foto, bukan
+                                bug) (4.3). Koneksi putus saat save -> tidak crash (4.5). Double-
+                                click Save -> PUT idempotent, foto akhir konsisten (4.2). 2 PUT
+                                foto berbeda paralel -> tidak 500, last-write-wins (4.7).
+                             HASIL: lolos penuh (7/7), tidak ada bug baru. MENUTUP U099 Profile
+                             Picture SEPENUHNYA (bersama TC-PIM-PHOTO-API-01/02).
+
+  RUN COMMAND:
+    npx playwright test tests/pim/personal-details/TC-PIM-PD-12-Verify-Profile-Photo-Feedback-Double-Submit-Navigation-Connection-Loss-And-Concurrency.spec.ts --project=chromium
+
+146   TC-PIM-LIST-15  [DONE]  tests/pim/employee-list/TC-PIM-LIST-15-Verify-Delete-Feedback-Double-Submit-Connection-Loss-And-CSRF.spec.ts
+                             (+) 1.8 | (!) 4.2 4.5 4.8 | (S) 5.4   [U002]
+                             -> Delete via UI -> toast "Successfully Deleted" (1.8). Double-click
+                                "Yes, Delete" -> modal tertutup sesudah klik pertama, tetap 1
+                                DELETE efektif, tidak "setengah terhapus" (4.2). Koneksi putus
+                                saat delete -> tidak crash (4.5). Origin palsu vs sendiri (id
+                                nonexistent, non-destruktif) -> status identik (5.4).
+                             HASIL: lolos penuh (5/5), tidak ada bug baru. MENUTUP U002 Employee
+                                List SEPENUHNYA.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/employee-list/TC-PIM-LIST-15-Verify-Delete-Feedback-Double-Submit-Connection-Loss-And-CSRF.spec.ts --project=chromium
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 195 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 198 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
@@ -3030,10 +3072,10 @@ No.  Test Case ID      Status   Kategori           Skenario
   EMERGENCY-API-01, DEPENDENT-API-01, IMMIGRATION-API-01, SALARY-API-01,
   QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01, REPORTMETHOD-API-01,
   TERMREASON-API-01, CSRF-01, TABEDGE-01, PD-API-02, JOB-API-02,
-  REPORTTO-API-02, ATTACHMENT-API-02, CONTACT-10, ATTACHMENT-API-03
-  ditambahkan 2026-11-17/18 penutup gap taksonomi; CONTACT-03 ditulis ulang
-  krn bug skrip; IMMIGRATION-API-01/QUALIFICATION-API-01 ditambah check 3.4
-  18 Nov 2026)
+  REPORTTO-API-02, ATTACHMENT-API-02, CONTACT-10, ATTACHMENT-API-03,
+  PHOTO-API-02, PD-12, LIST-15 ditambahkan 2026-11-17/18 penutup gap
+  taksonomi; CONTACT-03 ditulis ulang krn bug skrip;
+  IMMIGRATION-API-01/QUALIFICATION-API-01 ditambah check 3.4 18 Nov 2026)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,

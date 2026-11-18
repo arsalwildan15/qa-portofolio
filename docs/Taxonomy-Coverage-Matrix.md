@@ -12,12 +12,12 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Leave | 411 | 88 | 424 | 82.4% |
 | Maintenance | 86 | 11 | 116 | 88.7% |
 | My Info | 354 | 108 | 319 | 76.6% |
-| PIM | 832 | 94 | 494 | 89.8% |
+| PIM | 850 | 76 | 494 | 91.8% |
 | Performance | 283 | 138 | 289 | 67.2% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3643** | **1003** | **3093** | **78.4%** |
+| **Total** | **3661** | **985** | **3093** | **78.8%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -26,7 +26,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | Item | Taxonomy | Units with GAP |
 |---|---|---:|
 | 1.1-C | Create valid | 2 |
-| 1.1-R | Read / list | 22 |
+| 1.1-R | Read / list | 21 |
 | 1.1-U | Update valid | 21 |
 | 1.1-D | Delete valid | 6 |
 | 1.2 | Variasi input valid (opsional diisi/kosong) | 59 |
@@ -34,8 +34,8 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.4 | Relasi antar-entity | 40 |
 | 1.6 | Search/filter/sort valid | 24 |
 | 1.7 | Upload file valid | 2 |
-| 1.8 | Notifikasi/feedback UI | 35 |
-| 2.1 | Required field kosong | 17 |
+| 1.8 | Notifikasi/feedback UI | 33 |
+| 2.1 | Required field kosong | 16 |
 | 2.2 | Format salah | 46 |
 | 2.3 | Duplicate/unique conflict | 5 |
 | 2.5 | State transition invalid | 8 |
@@ -46,28 +46,28 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 3.3 | Ukuran file upload | 3 |
 | 3.4 | Tanggal | 19 |
 | 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 41 |
-| 4.2 | Aksi ganda/cepat (double submit) | 40 |
-| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 41 |
+| 4.2 | Aksi ganda/cepat (double submit) | 38 |
+| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 40 |
 | 4.4 | Race condition | 14 |
-| 4.5 | Session/koneksi terputus | 46 |
+| 4.5 | Session/koneksi terputus | 44 |
 | 4.6 | Data kosong/null (empty state) | 10 |
-| 4.7 | Konkurensi multi-user edit | 37 |
-| 4.8 | Behavior non-obvious terdokumentasi | 70 |
+| 4.7 | Konkurensi multi-user edit | 36 |
+| 4.8 | Behavior non-obvious terdokumentasi | 68 |
 | 5.1-SQLi | SQL Injection | 33 |
 | 5.1-XSS-Stored | Stored XSS | 16 |
 | 5.1-XSS-Reflected | Reflected XSS | 15 |
 | 5.1-CmdPath | Command/Path injection | 5 |
 | 5.1-SSRF | SSRF | 5 |
 | 5.2-IDOR | IDOR | 1 |
-| 5.2-PrivEsc | Privilege escalation | 6 |
+| 5.2-PrivEsc | Privilege escalation | 5 |
 | 5.2-MassAssign | Mass assignment | 29 |
-| 5.3-BadExt | Upload ekstensi terlarang | 2 |
-| 5.3-Rename | Upload file di-rename | 3 |
+| 5.3-BadExt | Upload ekstensi terlarang | 1 |
+| 5.3-Rename | Upload file di-rename | 2 |
 | 5.3-ContentType | Content-Type spoofing | 3 |
 | 5.3-DoubleExt | Double extension | 3 |
 | 5.3-Oversize | Oversized file | 3 |
 | 5.3-Filename | Malicious filename | 3 |
-| 5.4 | CSRF | 52 |
+| 5.4 | CSRF | 50 |
 | 5.5 | Rate limit / brute force / spam | 27 |
 | 5.6 | Security headers | 1 |
 | 5.9 | Business logic abuse | 10 |
@@ -81,4 +81,4 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 8.1 | Responsive/layout | 1 |
 | 8.2 | Cross-browser | 1 |
 | 8.3 | Accessibility dasar | 1 |
-| 8.4 | Konsistensi pesan | 44 |
+| 8.4 | Konsistensi pesan | 43 |
