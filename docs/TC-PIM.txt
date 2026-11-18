@@ -2936,11 +2936,74 @@ No.  Test Case ID      Status   Kategori           Skenario
   menguji urutan tanggal (2.2/2.5), bukan boundary tanggal itu sendiri. Lolos penuh, tidak ada
   bug baru. Menutup 3.4 Immigration & Qualifications sepenuhnya.
 
+141   TC-PIM-ATTACHMENT-API-02  [DONE]  tests/pim/security/TC-PIM-ATTACHMENT-API-02-Verify-Update-Optional-Field-ESS-Access-Control-And-Parameter-Validation.spec.ts
+                             (+) 1.1-U 1.2 1.5 | (-) 2.1 2.4 | (S) 5.2-IDOR 5.3-DoubleExt | (A) 6.5   [U098]
+                             -> PUT attachment -> 200, rename+ubah description berhasil (1.1-U).
+                                description kosong vs terisi -> 200 keduanya (1.2). name kosong
+                                -> 422 (2.1). "evil.pdf.exe" ekstensi ganda -> 422 ditolak (5.3-
+                                DoubleExt, BEDA dgn BG-462/463 yg soal ISI bukan nama -- nama
+                                ekstensi ganda justru ditegakkan benar). attachment:null, size
+                                bertipe string, sortField tak dikenal -> 422 semua (6.5). ESS
+                                upload ke attachment MILIK SENDIRI (My Info) -> 200 (1.5); ESS
+                                GET & POST ke attachment karyawan LAIN via endpoint PIM admin-
+                                side -> 422 KEDUANYA (2.4 / 5.2-IDOR, aman).
+                             [TEMUAN] List endpoint MENOLAK (422) parameter sortField -- 1.6
+                             N/A genuine dibuktikan DI LEVEL API (lebih kuat dari sekadar
+                             "tidak ada kontrol UI").
+                             HASIL: lolos penuh (10/10), tidak ada bug baru.
+
+  RUN COMMAND:
+    npx playwright test tests/pim/security/TC-PIM-ATTACHMENT-API-02-Verify-Update-Optional-Field-ESS-Access-Control-And-Parameter-Validation.spec.ts --project=chromium
+
+142   TC-PIM-CONTACT-10  [DONE -- BUG]  tests/pim/contact-details/TC-PIM-CONTACT-10-Verify-Attachment-Feedback-Double-Submit-Navigation-Connection-Loss-Concurrency-Responsive-And-Accessibility.spec.ts
+                             (+) 1.8 | (!) 4.2 4.3 4.5 4.7 4.8 | (UI) 8.1 8.2 8.3 8.4   [U098]
+                             -> LATAR: U098 Attachments TIDAK punya URL sendiri (section
+                                tertanam di 8 tab karyawan), makanya TIDAK ADA di
+                                tools/coverage/sweep_units.json (bukan oversight -- resolveUnitUrl
+                                yg dipakai semua sweep generik butuh 1 URL per unit, U098 memang
+                                tidak punya). Diuji via widget Attachments di Contact Details
+                                (representatif, endpoint sama persis di semua tab lain).
+                             -> 1.8/8.4: upload valid -> toast "Successfully Saved" muncul & teks
+                                konsisten. 4.3: Back/Forward pasca-upload -> normal. 4.5: koneksi
+                                putus saat upload -> tidak crash. 4.7: 2 upload bersamaan (file
+                                berbeda, employee sama) -> tidak ada 500. 8.1: tidak overflow
+                                horizontal di 375px. 8.2: tombol "+Add" terlihat & clickable di
+                                chromium/firefox/webkit (dijalankan lintas 3 project Playwright
+                                SUNGGUHAN, bukan launch manual -- pelajaran: launch browser lain
+                                manual di tengah test chromium TIDAK bekerja, pola yg benar adalah
+                                menjalankan file yg sama lintas project spt TC-SWEEP-XBROWSER-01).
+                                8.3: tombol "+Add" punya accessible name ("Add").
+                             -> 4.2: double-click Save pd modal Attachments -> 2 ENTRI dari 1
+                                upload (tombol tidak dikunci saat request berjalan) -- BG-475
+                                (Medium), instans ke-4 dari pola double-submit app-wide yg SAMA
+                                dgn BG-427 (Locations/Reporting Methods/KPIs) & TC-PIM-ADD-33 (Add
+                                Employee photo).
+                             [PELAJARAN] Pesan "Uncaught exception" dari simulasi koneksi putus
+                             (dropConnectionDuringSave) BERBEDA KATA per browser engine --
+                             Chromium: "net::ERR_FAILED"/nama variabel minified "fe"; Firefox:
+                             "can't access property X, Y is undefined"; WebKit: "due to access
+                             control checks"/"AxiosError: Network Error"/"JSHandle@object" --
+                             SEMUA pola app-wide BG-199 yg SAMA, bukan 3 bug baru; whitelist
+                             expectedConsoleErrorPatterns WAJIB mencakup kata2 ketiga browser
+                             kalau TC dijalankan lintas project (bukan cuma chromium).
+                             HASIL: SENGAJA FAILED (R3) di chromium (& kadang webkit, timing-
+                             dependent spt pola serupa di modul lain), BUG BARU BG-475. 5.6
+                             (security header) TIDAK diulang sbg check literal -- halaman Contact
+                             Details sudah terbukti tanpa X-Frame-Options/CSP frame-ancestors,
+                             instans ke-4 dari clickjacking app-wide yg sudah dikonfirmasi
+                             (BG-404 dkk), dicatat sbg finding.
+
+  RUN COMMAND (lintas 3 browser, BUKAN hanya chromium):
+    npx playwright test tests/pim/contact-details/TC-PIM-CONTACT-10-Verify-Attachment-Feedback-Double-Submit-Navigation-Connection-Loss-Concurrency-Responsive-And-Accessibility.spec.ts
+
+  Sisa GAP U098 Attachments setelah 2 TC di atas: 1.6 (struktural, dibuktikan), 5.3-Rename,
+  5.4, 5.5, 7.4, 7.5 (6 kode, belum tersentuh -- lanjutan sesi berikutnya).
+
 ================================================================================
   SUMMARY
 ================================================================================
 
-  Total Test Cases (semua fase + security) : 192 (160 fungsional + 2 security
+  Total Test Cases (semua fase + security) : 194 (160 fungsional + 2 security
   + 2 edge-case refresh/connection-drop ditambahkan 2026-11-12 + REPORTTO-08,
   API-01, MUT-01 ditambahkan 2026-11-17 + OPTFIELD-04, ATTACHMENT-API-01,
   PHOTO-API-01, REPORT-API-01, REPORTTO-API-01, DATAIMPORT-API-01,
@@ -2948,9 +3011,9 @@ No.  Test Case ID      Status   Kategori           Skenario
   EMERGENCY-API-01, DEPENDENT-API-01, IMMIGRATION-API-01, SALARY-API-01,
   QUALIFICATION-API-01, MEMBERSHIP-API-01, LIST-API-01, REPORTMETHOD-API-01,
   TERMREASON-API-01, CSRF-01, TABEDGE-01, PD-API-02, JOB-API-02,
-  REPORTTO-API-02 ditambahkan 2026-11-17/18 penutup gap taksonomi;
-  CONTACT-03 ditulis ulang krn bug skrip; IMMIGRATION-API-01/
-  QUALIFICATION-API-01 ditambah check 3.4 18 Nov 2026)
+  REPORTTO-API-02, ATTACHMENT-API-02, CONTACT-10 ditambahkan 2026-11-17/18
+  penutup gap taksonomi; CONTACT-03 ditulis ulang krn bug skrip;
+  IMMIGRATION-API-01/QUALIFICATION-API-01 ditambah check 3.4 18 Nov 2026)
 
   UPDATE 2026-11-17: baris "Kategori" di header 156 TC PIM kini memuat KODE
   taksonomi yang benar-benar diverifikasi (dibaca dari judul & label check,
