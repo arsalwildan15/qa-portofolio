@@ -926,6 +926,35 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              (4.8). Fitur berfungsi normal, tidak ada bug
                              baru.
 
+35   TC-CLAIM-ASSIGN-17  [DONE -- BUG]  TC-CLAIM-ASSIGN-17-Verify-Create-Validation-State-Transition-Boundary-And-Edge-Cases.spec.ts
+                             (+) 1.2 1.8 | (-) 2.5 | (!) 3.1 4.5 4.6 | (S)
+                             5.2-MassAssign 5.4 5.5 | (A) 6.3 6.4 6.7 |
+                             (UI) 8.4  [U076]
+                             -> Menutup U076 Assign Claim SEPENUHNYA.
+                             remarks opsional -> 200 (1.2); 5000 karakter
+                             -> 422, ada batas panjang (3.1). Field asing
+                             status/id di body create -> 422 SELURUH
+                             request ditolak (5.2-MassAssign, bukti sama
+                             dgn TC-CLAIM-ASSIGN-11, diberi label literal
+                             lengkap). Approve claim yg MASIH INITIATED
+                             (skip Submit) -> 403, urutan status
+                             ditegakkan (2.5). GET ke endpoint create-only
+                             -> 405 (6.3). Request tanpa sesi -> 401
+                             (6.4). 2 klaim identik employee sama -> 200
+                             keduanya, tidak ada uniqueness constraint,
+                             wajar (6.7). Origin palsu vs sendiri ->
+                             identik (5.4). Create via UI -> toast sukses
+                             (1.8/8.4). Autocomplete Employee Name tanpa
+                             hasil -> "No Records Found" (4.6). Koneksi
+                             putus saat Create -> tidak crash, net::
+                             ERR_FAILED/Uncaught exception terdokumentasi
+                             sbg BG-199-family, di-whitelist (4.5).
+                             SENGAJA FAILED (R3), BUG BARU BG-491 (Medium)
+                             -- 8x POST create berturut-turut, TIDAK ADA
+                             satu pun kena 429/rate limit, pola sama dgn
+                             BG-026 (Login)/BG-067 (Recruitment)/BG-185
+                             (Buzz). 15/16 lolos.
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================

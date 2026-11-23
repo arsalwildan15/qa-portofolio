@@ -517,16 +517,30 @@
       string apa pun, lebih ketat dari sekadar "diabaikan". Tidak ada bug.
   STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 81.94% (254 COVERED/56 GAP/187
   N/A). Matrix TOTAL = 84.0%.
-  BERIKUT: per instruksi standar koordinator, SELESAIKAN DULU Claim (3 unit tersisa: U074
-  Submit Claim 24, U076 Assign Claim 13-18 [cek ulang saat rebuild], U105 Claim Detail
-  24-31 [cek ulang] -- sekitar 56 kode) sampai ceiling-nya sebelum pindah modul. Baca
-  docs/TC-Claim.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit berikutnya
-  (rebuild matrix dulu utk angka pasti, jangan pakai angka lama yg bisa sudah berubah krn
-  overlap NAME_RULES antar unit), lalu probe-first -> TC -> typecheck -> trial -> real-run
-  -> Bug-List -> matrix rebuild -> docs -> check_docs.py -> commit -> push, per unit. Unit
-  terbesar (U105 Claim Detail) kemungkinan perlu di-pecah jadi >1 TC spt Performance U103.
-  Setelah Claim selesai, lanjut otomatis ke Time (69.5%, next-lowest per instruksi
-  standar), lalu modul paling rendah berikutnya, dst.
+    - TC-CLAIM-ASSIGN-17: menutup U076 Assign Claim SEPENUHNYA (1.2/1.8/2.5/3.1/4.5/4.6/
+      5.2-MassAssign/5.4/5.5/6.3/6.4/6.7/8.4). remarks opsional, max 5000 char (422 kalau
+      lebih). Field asing status/id -> 422 SELURUH request (evidence sama dgn TC-CLAIM-
+      ASSIGN-11 yg sudah ada, diberi label literal 5.2-MassAssign lengkap di sini).
+      Approve claim msh INITIATED (skip Submit) -> 403, urutan status ditegakkan (2.5).
+      4.6 (empty state) BUKAN tabel Expense (create tidak auto-navigasi ke detail, form
+      reset) -- dibuktikan via autocomplete Employee Name tanpa hasil -> "No Records
+      Found". 4.5 (koneksi putus) memicu net::ERR_FAILED/Uncaught exception (BG-199-
+      family, di-whitelist). SENGAJA FAILED (R3), BUG BARU BG-491 (Medium) -- 8x POST
+      create berturut-turut, TIDAK ADA satu pun kena 429, pola sama dgn BG-026/BG-067/
+      BG-185. PELAJARAN: ikuti precedent TC-BUZZ-SECURITY-11 (hard FAIL utk rate-limit
+      absent, BUKAN report.finding() -- absennya rate limit adalah bug genuine per R3,
+      bukan sekadar observasi).
+  STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 90.0% (279 COVERED/31 GAP/187 N/A).
+  Matrix TOTAL = 84.5%.
+  BERIKUT: per instruksi standar koordinator, SELESAIKAN DULU Claim (2 unit tersisa: U074
+  Submit Claim, U105 Claim Detail -- rebuild matrix dulu utk angka GAP pasti sblm mulai,
+  jangan pakai angka lama krn overlap NAME_RULES antar unit bisa mengubah hitungan) sampai
+  ceiling-nya sebelum pindah modul. Baca docs/TC-Claim.txt + Taxonomy-Coverage-Matrix.md
+  utk daftar GAP riil per unit berikutnya, lalu probe-first -> TC -> typecheck -> trial ->
+  real-run -> Bug-List -> matrix rebuild -> docs -> check_docs.py -> commit -> push, per
+  unit. Unit terbesar (U105 Claim Detail) kemungkinan perlu di-pecah jadi >1 TC spt
+  Performance U103. Setelah Claim selesai (ceiling final), lanjut otomatis ke Time (69.5%,
+  next-lowest per instruksi standar), lalu modul paling rendah berikutnya, dst.
   **PERUBAHAN EMAIL KOMIT (24 Nov 2026, instruksi user via koordinator):** mulai komit
   berikutnya, email ganti jadi arsal@pakaidonk.id (nama tetap "Arsal", TETAP TANPA
   Co-Authored-By/trailer apa pun). Commit lama yg sudah di-push JANGAN diubah. Format:
