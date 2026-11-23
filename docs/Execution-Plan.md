@@ -483,12 +483,29 @@
       konsisten -- re-run final: semua 8 check PASS krn kondisi check memang menegaskan
       perilaku BENAR yg seharusnya, BUKAN perilaku buggy).
   STATE SAAT INI: Buzz = 100% (ceiling final, 58 COVERED/0 GAP/13 N/A). Matrix TOTAL = 83.1%.
-  BERIKUT (per-modul, hasil rebuild matrix 24 Nov 2026): Claim = 69.03% (214 COVERED/96
-  GAP), Time = 69.50% (335/147), Admin = 72.81% (798/298) -- Claim adalah modul PALING
-  RENDAH sekarang. Lanjut otomatis ke Claim per instruksi standar koordinator: baca
-  docs/TC-Claim.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit Claim, lalu
-  probe-first -> TC -> typecheck -> trial -> real-run -> Bug-List -> matrix rebuild -> docs
-  -> check_docs.py -> commit -> push, per unit.
+  CLAIM CLOSURE (dimulai 24 Nov 2026): 7 unit, 96 GAP total (U011 Employee Claims 8,
+  U072 Config Events 3, U073 Config Expense Types 5, U074 Submit Claim 24, U075 My Claims
+  7, U076 Assign Claim 18, U105 Claim Detail 31).
+  SELESAI sejauh ini (24 Nov 2026):
+    - TC-CLAIM-CONFIG-EVENT-05: menutup U072 SEPENUHNYA (1.2/2.2/4.8). description
+      opsional (tersimpan null bila kosong, konsisten di-API seluruh app). status
+      non-boolean -> 422. Tidak ada bug.
+    - TC-CLAIM-CONFIG-EXPTYPE-03: menutup U073 SEPENUHNYA (1.2/2.2/4.8/5.1-XSS-Stored/
+      5.4). Sama pola dgn Events + payload XSS di nama -> tersimpan apa adanya, tidak
+      tereksekusi (pola sama TC-CLAIM-CONFIG-EVENT-04). Origin tidak divalidasi (5.4).
+      Tidak ada bug. PELAJARAN: endpoint benar `claim/expenses/types` (bukan
+      `claim/expense-types`), halaman list benar `/claim/viewExpense` (bukan
+      `/claim/expenseTypes`) -- dikonfirmasi dari TC existing EXPTYPE-01/02.
+  STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 71.61% (231 COVERED/88 GAP/192
+  N/A). Matrix TOTAL = 83.3%. Time (69.50%) sekarang modul PALING RENDAH, menyalip Claim.
+  BERIKUT: per instruksi standar koordinator, SELESAIKAN DULU Claim (5 unit tersisa: U011
+  Employee Claims 8, U074 Submit Claim 24, U075 My Claims 7, U076 Assign Claim 18, U105
+  Claim Detail 31 -- 88 kode) sampai ceiling-nya sebelum pindah modul, KECUALI instruksi
+  eksplisit mengubah urutan jadi "selalu ke modul paling rendah sekarang". Baca
+  docs/TC-Claim.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit berikutnya,
+  lalu probe-first -> TC -> typecheck -> trial -> real-run -> Bug-List -> matrix rebuild ->
+  docs -> check_docs.py -> commit -> push, per unit. Unit terbesar (U105 Claim Detail, 31
+  kode) kemungkinan perlu di-pecah jadi >1 TC spt Performance U103.
   **PERUBAHAN EMAIL KOMIT (24 Nov 2026, instruksi user via koordinator):** mulai komit
   berikutnya, email ganti jadi arsal@pakaidonk.id (nama tetap "Arsal", TETAP TANPA
   Co-Authored-By/trailer apa pun). Commit lama yg sudah di-push JANGAN diubah. Format:

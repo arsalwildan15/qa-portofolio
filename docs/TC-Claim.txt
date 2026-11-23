@@ -850,6 +850,38 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              regresi 15 Nov 2026.
 
 ================================================================================
+  GROUP 10, TAXONOMY GAP CLOSURE (24 Nov 2026)
+================================================================================
+
+31   TC-CLAIM-CONFIG-EVENT-05  [DONE]  TC-CLAIM-CONFIG-EVENT-05-Verify-Optional-Field-Format-Validation-And-Known-Behavior.spec.ts
+                             (+) 1.2 | (-) 2.2 | (!) 4.8  [U072]
+                             -> Menutup U072 Configuration > Events
+                             SEPENUHNYA. POST claim/events tanpa field
+                             description -> 200 (1.2, opsional). status
+                             berupa string non-boolean "abc" -> 422
+                             ditolak (2.2). description yg dikosongkan
+                             tersimpan sbg null, bukan string kosong --
+                             behavior non-obvious konsisten di seluruh
+                             API OrangeHRM (4.8). Fitur berfungsi normal,
+                             tidak ada bug baru.
+
+32   TC-CLAIM-CONFIG-EXPTYPE-03  [DONE]  TC-CLAIM-CONFIG-EXPTYPE-03-Verify-Optional-Field-Format-Validation-XSS-CSRF-And-Known-Behavior.spec.ts
+                             (+) 1.2 | (-) 2.2 | (!) 4.8 | (S)
+                             5.1-XSS-Stored 5.4  [U073]
+                             -> Menutup U073 Configuration > Expense
+                             Types SEPENUHNYA. POST claim/expenses/types
+                             tanpa field description -> 200 (1.2).
+                             status="abc" -> 422 (2.2). description
+                             kosong -> null, konsisten dgn Events (4.8).
+                             Payload XSS di nama expense type -> 200,
+                             tersimpan apa adanya, TIDAK tereksekusi saat
+                             ditampilkan di daftar Admin (5.1-XSS-Stored,
+                             pola sama dgn TC-CLAIM-CONFIG-EVENT-04).
+                             Origin palsu vs sendiri -> status identik
+                             (5.4). Fitur berfungsi normal, tidak ada bug
+                             baru.
+
+================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
 

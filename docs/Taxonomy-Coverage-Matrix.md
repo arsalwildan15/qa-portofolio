@@ -6,7 +6,7 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 |---|---:|---:|---:|---:|
 | Admin | 798 | 298 | 608 | 72.8% |
 | Buzz | 58 | 0 | 13 | 100.0% |
-| Claim | 214 | 96 | 187 | 69.0% |
+| Claim | 222 | 88 | 187 | 71.6% |
 | Dashboard | 36 | 0 | 106 | 100.0% |
 | Directory | 21 | 5 | 45 | 80.8% |
 | Leave | 411 | 88 | 424 | 82.4% |
@@ -17,7 +17,7 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3863** | **783** | **3093** | **83.1%** |
+| **Total** | **3871** | **775** | **3093** | **83.3%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -29,14 +29,14 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.1-R | Read / list | 17 |
 | 1.1-U | Update valid | 17 |
 | 1.1-D | Delete valid | 4 |
-| 1.2 | Variasi input valid (opsional diisi/kosong) | 49 |
+| 1.2 | Variasi input valid (opsional diisi/kosong) | 47 |
 | 1.3 | State transition valid | 3 |
 | 1.4 | Relasi antar-entity | 35 |
 | 1.6 | Search/filter/sort valid | 24 |
 | 1.7 | Upload file valid | 2 |
 | 1.8 | Notifikasi/feedback UI | 22 |
 | 2.1 | Required field kosong | 12 |
-| 2.2 | Format salah | 40 |
+| 2.2 | Format salah | 38 |
 | 2.3 | Duplicate/unique conflict | 5 |
 | 2.5 | State transition invalid | 6 |
 | 2.6 | Operasi pada record invalid/tak eksis | 6 |
@@ -52,9 +52,9 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 4.5 | Session/koneksi terputus | 34 |
 | 4.6 | Data kosong/null (empty state) | 9 |
 | 4.7 | Konkurensi multi-user edit | 26 |
-| 4.8 | Behavior non-obvious terdokumentasi | 54 |
+| 4.8 | Behavior non-obvious terdokumentasi | 52 |
 | 5.1-SQLi | SQL Injection | 30 |
-| 5.1-XSS-Stored | Stored XSS | 14 |
+| 5.1-XSS-Stored | Stored XSS | 13 |
 | 5.1-XSS-Reflected | Reflected XSS | 15 |
 | 5.1-CmdPath | Command/Path injection | 3 |
 | 5.1-SSRF | SSRF | 4 |
@@ -66,7 +66,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.3-DoubleExt | Double extension | 2 |
 | 5.3-Oversize | Oversized file | 2 |
 | 5.3-Filename | Malicious filename | 2 |
-| 5.4 | CSRF | 37 |
+| 5.4 | CSRF | 36 |
 | 5.5 | Rate limit / brute force / spam | 19 |
 | 5.9 | Business logic abuse | 5 |
 | 6.2 | Response schema/contract | 8 |
