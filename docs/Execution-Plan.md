@@ -532,14 +532,28 @@
       bukan sekadar observasi).
   STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 90.0% (279 COVERED/31 GAP/187 N/A).
   Matrix TOTAL = 84.5%.
-  BERIKUT: per instruksi standar koordinator, SELESAIKAN DULU Claim (2 unit tersisa: U074
-  Submit Claim, U105 Claim Detail -- rebuild matrix dulu utk angka GAP pasti sblm mulai,
-  jangan pakai angka lama krn overlap NAME_RULES antar unit bisa mengubah hitungan) sampai
-  ceiling-nya sebelum pindah modul. Baca docs/TC-Claim.txt + Taxonomy-Coverage-Matrix.md
-  utk daftar GAP riil per unit berikutnya, lalu probe-first -> TC -> typecheck -> trial ->
-  real-run -> Bug-List -> matrix rebuild -> docs -> check_docs.py -> commit -> push, per
-  unit. Unit terbesar (U105 Claim Detail) kemungkinan perlu di-pecah jadi >1 TC spt
-  Performance U103. Setelah Claim selesai (ceiling final), lanjut otomatis ke Time (69.5%,
+    - TC-CLAIM-SUBMIT-05: menutup U074 Submit Claim SEPENUHNYA (1.1-R/1.2/1.4/1.8/2.1/3.1/
+      4.2/4.3/4.4/4.5/5.1-XSS-Stored/5.2-MassAssign/5.4/5.5/6.2/6.3/6.4/6.7/8.4). Endpoint
+      ESS flat POST claim/requests (beda dari U076 yg claim/employees/<empNumber>/
+      requests). PELAJARAN TIMEOUT: versi awal (testInfo.setTimeout 120s) timeout krn TC
+      ini py byk round-trip ESS (setup+19 kode+UI flow) -- naikkan ke 240s. PELAJARAN
+      DOUBLE-CLICK: gabungkan 1.8/8.4 toast check dgn langkah double-click (4.2) di 1
+      create yg sama bikin toast sudah hilang saat dicek (toast auto-dismiss) -> pisahkan
+      jadi 2 create terpisah: 1 create bersih utk toast check, 1 create lain khusus utk
+      double-click race. SENGAJA FAILED (R3), BUG BARU BG-492 (Medium) -- 8x POST create
+      ESS (endpoint beda dari BG-491) TIDAK ADA satu pun kena 429, instans KEDUA pola
+      tidak-ada-rate-limit di modul Claim (ikuti precedent TC-BUZZ-SECURITY-11: hard FAIL,
+      bukan finding). 21/22 lolos.
+  STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 96.13% (298 COVERED/12 GAP/187
+  N/A). Matrix TOTAL = 85.0%.
+  BERIKUT: HANYA 1 unit tersisa di Claim -- U105 Claim Detail, 12 kode: 1.1-U, 1.1-D, 1.7,
+  2.6, 3.3, 5.1-CmdPath, 5.3-BadExt, 5.3-Rename, 5.3-ContentType, 5.3-DoubleExt,
+  5.3-Oversize, 5.3-Filename. Hampir semua kode file-upload (attachment di claim detail,
+  endpoint claim/requests/<id>/attachments) -- sudah ada bug terdokumentasi di area ini
+  (BG-338 via TC-CLAIM-ASSIGN-10: .php di-rename .jpg diterima). Pola yg sama dgn
+  TC-BUZZ-SECURITY-12 (konsolidasi beberapa varian file jinak vs berbahaya jd beberapa
+  check representatif drpd 1 percobaan penuh per kode, utk hindari timeout/flakiness).
+  Setelah U105 selesai, Claim mencapai ceiling final -- lanjut otomatis ke Time (69.5%,
   next-lowest per instruksi standar), lalu modul paling rendah berikutnya, dst.
   **PERUBAHAN EMAIL KOMIT (24 Nov 2026, instruksi user via koordinator):** mulai komit
   berikutnya, email ganti jadi arsal@pakaidonk.id (nama tetap "Arsal", TETAP TANPA
