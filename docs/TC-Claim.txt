@@ -881,6 +881,28 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              (5.4). Fitur berfungsi normal, tidak ada bug
                              baru.
 
+33   TC-CLAIM-ASSIGN-16  [DONE]  TC-CLAIM-ASSIGN-16-Verify-Employee-Claims-Search-Validation-Injection-And-Boundary.spec.ts
+                             (-) 2.2 2.8 | (!) 3.4 4.1 4.8 | (S) 5.1-SQLi
+                             5.1-XSS-Reflected | (A) 6.5  [U011]
+                             -> Menutup U011 Employee Claims SEPENUHNYA
+                             (halaman search murni claim/viewAssignClaim,
+                             endpoint GET claim/employees/requests; nomor
+                             16 dipakai krn 15 sudah [CANCEL] dari P0.4).
+                             Param asing/sortField tak dikenal -> 422
+                             (6.5). fromDate format invalid -> 422 (2.2).
+                             fromDate > toDate -> 200 + hasil kosong,
+                             bukan error (3.4). referenceId SQLi -> 200,
+                             tidak ada DB error/bypass (5.1-SQLi).
+                             referenceId XSS di search box -> tidak
+                             tereksekusi (5.1-XSS-Reflected). Employee
+                             Name unicode/emoji -> tidak crash (4.1).
+                             Tidak ada tombol Reject/Cancel di halaman
+                             search ini -- 2.8 N/A struktural (aksi ada
+                             di Claim Detail/U105). status=999 (luar
+                             enum) -> 200 + hasil kosong, bukan error,
+                             non-obvious tapi tidak berbahaya (4.8).
+                             Fitur berfungsi normal, tidak ada bug baru.
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================

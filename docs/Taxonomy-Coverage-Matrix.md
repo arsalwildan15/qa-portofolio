@@ -6,7 +6,7 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 |---|---:|---:|---:|---:|
 | Admin | 798 | 298 | 608 | 72.8% |
 | Buzz | 58 | 0 | 13 | 100.0% |
-| Claim | 222 | 88 | 187 | 71.6% |
+| Claim | 242 | 68 | 187 | 78.1% |
 | Dashboard | 36 | 0 | 106 | 100.0% |
 | Directory | 21 | 5 | 45 | 80.8% |
 | Leave | 411 | 88 | 424 | 82.4% |
@@ -17,7 +17,7 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3871** | **775** | **3093** | **83.3%** |
+| **Total** | **3891** | **755** | **3093** | **83.7%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -36,26 +36,26 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.7 | Upload file valid | 2 |
 | 1.8 | Notifikasi/feedback UI | 22 |
 | 2.1 | Required field kosong | 12 |
-| 2.2 | Format salah | 38 |
+| 2.2 | Format salah | 35 |
 | 2.3 | Duplicate/unique conflict | 5 |
 | 2.5 | State transition invalid | 6 |
 | 2.6 | Operasi pada record invalid/tak eksis | 6 |
-| 2.8 | Reject/cancel tanpa alasan | 5 |
+| 2.8 | Reject/cancel tanpa alasan | 3 |
 | 3.1 | Panjang karakter field | 18 |
 | 3.2 | Nilai numerik | 2 |
 | 3.3 | Ukuran file upload | 2 |
-| 3.4 | Tanggal | 17 |
-| 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 35 |
+| 3.4 | Tanggal | 15 |
+| 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 32 |
 | 4.2 | Aksi ganda/cepat (double submit) | 30 |
 | 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 30 |
 | 4.4 | Race condition | 10 |
 | 4.5 | Session/koneksi terputus | 34 |
 | 4.6 | Data kosong/null (empty state) | 9 |
 | 4.7 | Konkurensi multi-user edit | 26 |
-| 4.8 | Behavior non-obvious terdokumentasi | 52 |
-| 5.1-SQLi | SQL Injection | 30 |
+| 4.8 | Behavior non-obvious terdokumentasi | 49 |
+| 5.1-SQLi | SQL Injection | 27 |
 | 5.1-XSS-Stored | Stored XSS | 13 |
-| 5.1-XSS-Reflected | Reflected XSS | 15 |
+| 5.1-XSS-Reflected | Reflected XSS | 14 |
 | 5.1-CmdPath | Command/Path injection | 3 |
 | 5.1-SSRF | SSRF | 4 |
 | 5.2-PrivEsc | Privilege escalation | 3 |
@@ -72,6 +72,6 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 6.2 | Response schema/contract | 8 |
 | 6.3 | Request method salah (405) | 11 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 10 |
-| 6.5 | Parameter negatif (tipe salah/extra/null) | 32 |
+| 6.5 | Parameter negatif (tipe salah/extra/null) | 29 |
 | 6.7 | Idempotency | 13 |
 | 8.4 | Konsistensi pesan | 31 |

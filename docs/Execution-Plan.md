@@ -498,14 +498,26 @@
       `/claim/expenseTypes`) -- dikonfirmasi dari TC existing EXPTYPE-01/02.
   STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 71.61% (231 COVERED/88 GAP/192
   N/A). Matrix TOTAL = 83.3%. Time (69.50%) sekarang modul PALING RENDAH, menyalip Claim.
-  BERIKUT: per instruksi standar koordinator, SELESAIKAN DULU Claim (5 unit tersisa: U011
-  Employee Claims 8, U074 Submit Claim 24, U075 My Claims 7, U076 Assign Claim 18, U105
-  Claim Detail 31 -- 88 kode) sampai ceiling-nya sebelum pindah modul, KECUALI instruksi
-  eksplisit mengubah urutan jadi "selalu ke modul paling rendah sekarang". Baca
-  docs/TC-Claim.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit berikutnya,
-  lalu probe-first -> TC -> typecheck -> trial -> real-run -> Bug-List -> matrix rebuild ->
-  docs -> check_docs.py -> commit -> push, per unit. Unit terbesar (U105 Claim Detail, 31
-  kode) kemungkinan perlu di-pecah jadi >1 TC spt Performance U103.
+    - TC-CLAIM-ASSIGN-16: menutup U011 Employee Claims SEPENUHNYA (2.2/2.8/3.4/4.1/4.8/
+      5.1-SQLi/5.1-XSS-Reflected/6.5). Halaman search murni (claim/viewAssignClaim,
+      endpoint GET claim/employees/requests). PELAJARAN NOMOR: TC-CLAIM-ASSIGN-15 sudah
+      [CANCEL] (dihapus P0.4 Fase 0), jadi file baru pakai nomor 16 drpd reuse nomor yg
+      sudah pernah dipakai & dibatalkan -- cek docs/TC-*.txt utk nomor [CANCEL] sblm
+      menamai TC baru di modul yg sudah py riwayat lama. 2.8 (alasan wajib reject/cancel)
+      N/A struktural di unit ini (halaman search tidak py aksi reject/cancel langsung,
+      itu ada di Claim Detail/U105). fromDate>toDate -> 200 kosong (bukan error, diterima
+      sbg filter valid). Tidak ada bug.
+  STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 78.06% (242 COVERED/68 GAP/187
+  N/A). Matrix TOTAL = 83.7%.
+  BERIKUT: per instruksi standar koordinator, SELESAIKAN DULU Claim (4 unit tersisa: U074
+  Submit Claim 24, U075 My Claims 7, U076 Assign Claim 18, U105 Claim Detail 31 -- 80
+  kode) sampai ceiling-nya sebelum pindah modul, KECUALI instruksi eksplisit mengubah
+  urutan jadi "selalu ke modul paling rendah sekarang" (per rebuild 24 Nov 2026, Time
+  69.50% sudah lebih rendah dari Claim). Baca docs/TC-Claim.txt + Taxonomy-Coverage-
+  Matrix.md utk daftar GAP riil per unit berikutnya, lalu probe-first -> TC -> typecheck
+  -> trial -> real-run -> Bug-List -> matrix rebuild -> docs -> check_docs.py -> commit ->
+  push, per unit. Unit terbesar (U105 Claim Detail, 31 kode) kemungkinan perlu di-pecah
+  jadi >1 TC spt Performance U103.
   **PERUBAHAN EMAIL KOMIT (24 Nov 2026, instruksi user via koordinator):** mulai komit
   berikutnya, email ganti jadi arsal@pakaidonk.id (nama tetap "Arsal", TETAP TANPA
   Co-Authored-By/trailer apa pun). Commit lama yg sudah di-push JANGAN diubah. Format:
