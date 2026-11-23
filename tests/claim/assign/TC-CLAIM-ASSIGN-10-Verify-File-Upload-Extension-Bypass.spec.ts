@@ -39,7 +39,7 @@ import { env } from '../../../src/config/env';
 import { TestReport } from '../../../src/utils/testReport';
 import { pickLightlyUsedEmployee } from '../../../src/utils/pickLightlyUsedEmployee';
 
-const FIXTURES_DIR = path.join(__dirname, '..', '..', 'fixtures', 'uploads');
+const FIXTURES_DIR = path.join(__dirname, '..', '..', '_global', 'fixtures', 'uploads');
 
 test('TC-CLAIM-ASSIGN-10: a .php payload renamed to .jpg bypasses file upload validation', async ({
   page,
@@ -61,7 +61,7 @@ test('TC-CLAIM-ASSIGN-10: a .php payload renamed to .jpg bypasses file upload va
 
   report.step('Upload .php LANGSUNG (ekstensi asli) -- harapannya ditolak client-side');
   const phpResp = await assignClaimPage.addAttachment(path.join(FIXTURES_DIR, 'malicious.php'), 'php direct test');
-  report.check('TIDAK ada POST terkirim utk .php langsung (ditolak client-side)', phpResp === null, `status=${phpResp?.status()}`);
+  report.check('5.3-BadExt [U105] TIDAK ada POST terkirim utk .php langsung (ditolak client-side)', phpResp === null, `status=${phpResp?.status()}`);
 
   report.step('Upload .php DI-RENAME jadi .jpg (payload identik) -- ini yg SEHARUSNYA ditolak via validasi MIME/magic byte');
   await page.reload();
@@ -70,7 +70,7 @@ test('TC-CLAIM-ASSIGN-10: a .php payload renamed to .jpg bypasses file upload va
   const renamedResp = await assignClaimPage.addAttachment(path.join(FIXTURES_DIR, 'malicious_renamed.jpg'), 'php renamed as jpg test');
   const renamedBody = await renamedResp?.json().catch(() => null);
   report.check(
-    'File .php yg di-rename jadi .jpg HARUS ditolak server (validasi konten asli) -- TC ini mendokumentasikan bahwa server MENERIMANYA (bug)',
+    '5.3-Rename [U105] File .php yg di-rename jadi .jpg HARUS ditolak server (validasi konten asli) -- TC ini mendokumentasikan bahwa server MENERIMANYA (bug)',
     renamedResp?.status() !== 200,
     `status=${renamedResp?.status()}, fileType=${renamedBody?.data?.attachment?.fileType}`,
   );
@@ -80,7 +80,7 @@ test('TC-CLAIM-ASSIGN-10: a .php payload renamed to .jpg bypasses file upload va
   await page.waitForLoadState('networkidle').catch(() => {});
   await page.waitForTimeout(1_000);
   const validResp = await assignClaimPage.addAttachment(path.join(FIXTURES_DIR, 'valid.txt'), 'valid control file');
-  report.check('[API] File .txt valid diterima normal (status 200)', validResp?.status() === 200, `status=${validResp?.status()}`);
+  report.check('1.7 [U105] File .txt valid diterima normal (status 200)', validResp?.status() === 200, `status=${validResp?.status()}`);
 
   report.finding(
     'File upload extension bypass: .php di-rename jadi .jpg diterima server (CONFIRMED)',

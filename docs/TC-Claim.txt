@@ -991,6 +991,54 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              tidak-ada-rate-limit di modul Claim. 21/22
                              lolos.
 
+37   TC-CLAIM-ASSIGN-18  [DONE -- BUG]  TC-CLAIM-ASSIGN-18-Verify-Expense-Update-Delete-Attachment-Boundary-And-Injection.spec.ts
+                             (+) 1.1-U 1.1-D | (-) 2.6 | (!) 3.3 | (S)
+                             5.1-CmdPath 5.3-ContentType 5.3-DoubleExt
+                             5.3-Oversize 5.3-Filename  [U105]
+                             -> Menutup 9 dari 12 kode terakhir U105
+                             Claim Detail (2 kode lain -- 5.3-BadExt &
+                             5.3-Rename -- ditutup via label literal di
+                             TC-CLAIM-ASSIGN-10 yg sudah ADA, 1.7 jg
+                             ditambahkan; TC-CLAIM-ASSIGN-10 SEKALIAN
+                             diperbaiki bug SCRIPT: FIXTURES_DIR masih
+                             arah ke tests/fixtures/uploads yg sudah
+                             dipindah ke tests/_global/fixtures/uploads
+                             sejak refactor lama -- ENOENT, perbaikan
+                             path, bug BG-338 terverifikasi masih
+                             reproduce identik -- MENUTUP U105
+                             SEPENUHNYA, Claim mencapai ceiling final
+                             100%). PUT expenses/<id> -> 200 (1.1-U).
+                             DELETE expenses {ids:[...]} bulk -> 200
+                             (1.1-D). PUT/DELETE langsung requests/<id>
+                             -> 405, endpoint ini tidak eksis di level
+                             claim (2.6). Attachment 2MB (oversize) ->
+                             422, ada batas ukuran (3.3/5.3-Oversize,
+                             TIDAK ada bug -- beda dgn PIM/My Info yg
+                             limitnya longgar). Content-Type di luar
+                             allowlist -> 422 (5.3-ContentType). Double
+                             extension "photo.jpg.php" -> 422
+                             (5.3-DoubleExt). SENGAJA FAILED (R3), BUG
+                             BARU BG-493 (Medium) -- nama file path
+                             traversal ("../../etc/passwd.pdf") DAN nama
+                             file berisi karakter shell
+                             ("file;rm -rf /.pdf") KEDUANYA diterima
+                             (200) & disimpan APA ADANYA tanpa sanitasi
+                             -- instans KETIGA pola yg sama dgn BG-462
+                             (My Info) & BG-463 (PIM), kali ini di modul
+                             Claim (5.1-CmdPath/5.3-Filename). PELAJARAN
+                             FALSE-POSITIVE (penting): percobaan pertama
+                             baca field salah (data.fileName, bukan
+                             data.attachment.fileName -- shape response
+                             attachment bersarang), sehingga
+                             `fileName !== traversalName` SELALU true
+                             scr trivial krn fileName=undefined --
+                             check "lolos" tapi SEBENARNYA tidak pernah
+                             menguji apa pun. Ditemukan sblm commit via
+                             pembacaan detail log (`fileName=undefined`
+                             mencurigakan), diperbaiki dgn akses field
+                             yg benar + guard `!!fileName` eksplisit.
+                             10/12 lolos.
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================

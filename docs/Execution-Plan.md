@@ -546,15 +546,44 @@
       bukan finding). 21/22 lolos.
   STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 96.13% (298 COVERED/12 GAP/187
   N/A). Matrix TOTAL = 85.0%.
-  BERIKUT: HANYA 1 unit tersisa di Claim -- U105 Claim Detail, 12 kode: 1.1-U, 1.1-D, 1.7,
-  2.6, 3.3, 5.1-CmdPath, 5.3-BadExt, 5.3-Rename, 5.3-ContentType, 5.3-DoubleExt,
-  5.3-Oversize, 5.3-Filename. Hampir semua kode file-upload (attachment di claim detail,
-  endpoint claim/requests/<id>/attachments) -- sudah ada bug terdokumentasi di area ini
-  (BG-338 via TC-CLAIM-ASSIGN-10: .php di-rename .jpg diterima). Pola yg sama dgn
-  TC-BUZZ-SECURITY-12 (konsolidasi beberapa varian file jinak vs berbahaya jd beberapa
-  check representatif drpd 1 percobaan penuh per kode, utk hindari timeout/flakiness).
-  Setelah U105 selesai, Claim mencapai ceiling final -- lanjut otomatis ke Time (69.5%,
-  next-lowest per instruksi standar), lalu modul paling rendah berikutnya, dst.
+    - Perbaikan label literal di TC-CLAIM-ASSIGN-10 (TC lama sudah ADA, SUDAH menguji
+      5.3-BadExt/5.3-Rename/1.7 scr runtime tapi labelnya tidak literal-coded jadi
+      coverage tool tidak bisa baca) + fix bug SCRIPT: FIXTURES_DIR arah ke
+      tests/fixtures/uploads (path lama, sudah pindah ke tests/_global/fixtures/uploads
+      sejak refactor sebelumnya) -> file fixture ENOENT, TC gagal total sblm diperbaiki.
+      Re-run stlh fix: bug BG-338 (.php di-rename .jpg diterima) terverifikasi masih
+      reproduce identik, bukan regresi.
+    - TC-CLAIM-ASSIGN-18: menutup 9 kode tersisa U105 (1.1-U/1.1-D/2.6/3.3/5.1-CmdPath/
+      5.3-ContentType/5.3-DoubleExt/5.3-Oversize/5.3-Filename) -> U105 SEPENUHNYA TUTUP,
+      Claim ceiling FINAL 100%. PUT/DELETE expenses/<id> -> 200 keduanya (1.1-U/1.1-D).
+      PUT/DELETE langsung requests/<id> (bkn via sub-resource) -> 405 (2.6). Attachment
+      2MB -> 422, ADA batas ukuran (3.3/5.3-Oversize, beda dgn PIM/My Info yg limitnya
+      longgar, TIDAK ada bug). Content-Type luar allowlist & double extension -> 422
+      keduanya. SENGAJA FAILED (R3), BUG BARU BG-493 (Medium) -- nama file path traversal
+      DAN karakter shell KEDUANYA diterima (200) & disimpan APA ADANYA, instans KETIGA
+      pola yg sama dgn BG-462 (My Info)/BG-463 (PIM) (5.1-CmdPath/5.3-Filename).
+      PELAJARAN FALSE-POSITIVE PENTING: percobaan pertama check baca `data.fileName`
+      (field SALAH -- shape response sbnrnya bersarang `data.attachment.fileName`),
+      sehingga `fileName !== traversalName` SELALU true scr trivial krn fileName
+      undefined -- check "PASSED" tapi TIDAK PERNAH benar2 menguji apa pun. Ditemukan
+      SEBELUM commit dgn curiga pd detail log check yg nunjukin `fileName=undefined`
+      meski status check hijau -- SELALU baca detail/evidence tiap check yg "PASSED",
+      bukan cuma percaya pass/fail-nya, terutama saat field dibaca dari response JSON
+      bersarang. Diperbaiki dgn field path benar + guard `!!fileName` eksplisit, re-run
+      -> 2 check brhsl brubah dari PASSED-palsu jd FAILED-benar (BG-493 asli). 10/12
+      lolos.
+  STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 100% (ceiling final, 310
+  COVERED/0 GAP/187 N/A). Matrix TOTAL = 85.2%.
+  CLAIM SELESAI SEPENUHNYA. Bug baru ditemukan selama closure Claim: BG-491, BG-492,
+  BG-493 (3 bug baru, semua Medium): BG-491/BG-492 = tidak ada rate limiting create claim
+  (2 endpoint terpisah, Assign & Submit), BG-493 = attachment filename tidak disanitasi
+  (instans ke-3 pola BG-462/BG-463).
+  BERIKUT: lanjut otomatis ke Time (69.5%, next-lowest per instruksi standar). Baca
+  docs/TC-Time.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit, lalu
+  probe-first -> TC -> typecheck -> trial -> real-run -> Bug-List -> matrix rebuild ->
+  docs -> check_docs.py -> commit -> push, per unit. Setelah Time selesai, lanjut
+  otomatis ke modul paling rendah berikutnya, dst (per instruksi standar koordinator:
+  lanjutkan melalui SEMUA modul).
   **PERUBAHAN EMAIL KOMIT (24 Nov 2026, instruksi user via koordinator):** mulai komit
   berikutnya, email ganti jadi arsal@pakaidonk.id (nama tetap "Arsal", TETAP TANPA
   Co-Authored-By/trailer apa pun). Commit lama yg sudah di-push JANGAN diubah. Format:
