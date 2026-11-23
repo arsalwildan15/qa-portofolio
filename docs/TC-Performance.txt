@@ -1259,6 +1259,36 @@ No.  Test Case ID         Status   Skenario / Deskripsi
   RUN COMMAND:
     npx playwright test tests/performance/security/TC-PERF-API-02-Verify-My-Reviews-My-Trackers-And-Employee-Trackers-Parameter-Validation-And-No-Search-Capability.spec.ts --project=chromium
 
+ R6  TC-PERF-TRACKER-09  [DONE -- BUG]  tests/performance/tracker/TC-PERF-TRACKER-09-Verify-Tracker-Log-Update-Delete-Feedback-Edge-Cases-Privilege-Escalation-Rate-Limit-And-CSRF.spec.ts
+                             (+) 1.1-U 1.1-D 1.2 1.8 | (!) 4.2 4.3 4.5 4.7 4.8 |
+                             (S) 5.2-PrivEsc 5.2-MassAssign 5.4 5.5 | (A) 6.7 |
+                             (UI) 8.4   [U104]
+                             -> PUT log -> 200 & berubah (1.1-U). DELETE log -> 200
+                                (1.1-D). comment kosong (opsional) -> 200 (1.2).
+                                Field asing (trackerId/empNumber) -> 422 ditolak
+                                (5.2-MassAssign). Add Log via UI -> toast sukses
+                                (1.8/8.4). Back/Forward -> normal (4.3). Koneksi
+                                putus saat Add Log -> tidak crash (4.5). 2 Add Log
+                                berbeda paralel -> tidak 500 (4.7). 3 Add Log
+                                paralel -> tidak ada rate limit (5.5, finding).
+                                Origin palsu vs sendiri -> identik (5.4). ESS Add
+                                Log ke tracker SENDIRI + field privilese asing ->
+                                422 ditolak (5.2-PrivEsc). Add Log nama sama 2x ->
+                                keduanya 200, tidak ada uniqueness constraint,
+                                wajar (6.7, finding bukan bug). GET logs dgn
+                                sortField/search tak dikenal -> 422 keduanya,
+                                menegaskan 1.6 N/A genuine (finding tanpa kode
+                                literal, konvensi project).
+                             HASIL: SENGAJA FAILED (R3), BUG BARU BG-486 (Medium)
+                                -- double-click Save pd modal Add Log membuat 2
+                                ENTRI dari 1 submit, instans ke-6 pola double-
+                                submit app-wide sama dgn BG-427/BG-475/BG-483.
+                             MENUTUP U104 Tracker Logs SEPENUHNYA KECUALI 1.6
+                                (struktural, dibuktikan).
+
+  RUN COMMAND:
+    npx playwright test tests/performance/tracker/TC-PERF-TRACKER-09-Verify-Tracker-Log-Update-Delete-Feedback-Edge-Cases-Privilege-Escalation-Rate-Limit-And-CSRF.spec.ts --project=chromium
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
