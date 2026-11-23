@@ -385,11 +385,17 @@
       (Medium) -- double-click Save pd modal Add Log = 2 entri, instans ke-6 pola
       double-submit app-wide (BG-427/BG-475/BG-483). Fix NAME_RULES build_matrix.py utk
       TC-PERF-TRACKER-09 (path tracker/ default-nya map ke U067, perlu entry eksplisit).
-  STATE SAAT INI: PIM = 97.6% (ceiling final). Performance = 72.9% (307 COVERED/114 GAP/289
-  N/A dari 710 sel). Matrix TOTAL = 80.5%.
-  BERIKUT (urutan disarankan): U067 Trackers config (18 kode) -> U068 Manage Reviews (20
-  kode) -> U007 Employee Reviews (27 kode) -> U102 Review Evaluation (15 kode) -> U103
-  Self Evaluation (31 kode, TERBESAR, kerjakan terakhir).
+    - TC-PERF-TRACKER-10: menutup U067 Trackers config SEPENUHNYA (18 kode: 1.2/1.4/1.8/
+      2.2/3.1(limit 200 karakter, binary-search)/4.1/4.2/4.3/4.5/4.7/5.1-SQLi/5.1-XSS-
+      Stored/5.2-MassAssign/5.4/5.5/6.5/6.7/8.4). SENGAJA FAILED (R3), BUG BARU BG-487
+      (Medium) -- double-click Save pd form Add Tracker = 2 entri, instans ke-7 pola
+      double-submit app-wide (BG-427/BG-475/BG-483/BG-486). Fix NAME_RULES build_matrix.py
+      regex utk include TRACKER-10 dlm mapping U067 yg sudah ada.
+  STATE SAAT INI: PIM = 97.6% (ceiling final). Performance = 77.2% (325 COVERED/96 GAP/289
+  N/A dari 710 sel). Matrix TOTAL = 80.9%.
+  BERIKUT (urutan disarankan): U068 Manage Reviews (20 kode) -> U007 Employee Reviews (27
+  kode) -> U102 Review Evaluation (15 kode) -> U103 Self Evaluation (31 kode, TERBESAR,
+  kerjakan terakhir).
   Catatan Performance spesifik (dari sesi sebelumnya, masih berlaku): Tracker Log field
   "log" dibatasi 150 karakter server-side; evaluation/supervisor body {ratings:[{kpiId,
   rating,comment}],generalComment}; evaluation/final body {complete,finalRating,
@@ -847,3 +853,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | **PIM SELESAI** (REPORT-07, U042 Reports TUNTAS -- SEMUA 7 item "Next pass" tuntas) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-485 (Medium) -- field criteria pd create Report SELALU 500 Internal Server Error apa pun bentuk datanya (3 format dicoba semua crash), fitur filter kriteria tidak bisa dipakai via API sama sekali; 10/11 lolos; menutup 1.1-U/1.2/1.4/4.1/4.2/4.3/4.5/4.7/5.1-CmdPath/5.5/6.7/8.4 sekaligus; SISA 22 GAP PIM SELURUHNYA struktural (diverifikasi ulang & dikonfirmasi final); docs TC-PIM/README/Execution-Plan/Bug-List; PIM 96.3% -> 97.6% (CEILING FINAL); matrix TOTAL 79.7% -> 80.0%; LANJUT OTOMATIS ke Performance (67.2%, modul terendah) sesuai instruksi user 2026-11-17 | 1 commit
 - 2026-11-18 | Performance lanjutan (KPI-12 + API-02, U066/U069/U070 TUNTAS) | 2 TC baru; U066 KPIs SEPENUHNYA ditutup (KPI-12: min>max via API -> 400, non-numerik -> 422, isDefault opsional -> 200, 4/4); U069 My Reviews & U070 My Trackers SEPENUHNYA ditutup, U071 Employee Trackers turun jadi 3 kode struktural (API-02: 3 endpoint menolak 422 parameter apa pun -> tidak ada search capability sama sekali, 9/9); tidak ada bug baru; fix NAME_RULES build_matrix.py utk TC-PERF-API-02; docs TC-Performance/README/Execution-Plan; Performance 67.2% -> 69.4%; matrix TOTAL 80.0% -> 80.2% | 1 commit
 - 2026-11-18 | Performance lanjutan (TRACKER-09, U104 Tracker Logs TUNTAS kecuali 1.6) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-486 (Medium) -- double-click Save pd modal Add Log membuat 2 entri, instans ke-6 pola double-submit app-wide (BG-427/BG-475/BG-483); 13/14 lolos; menutup 1.1-U/1.1-D/1.2/1.8/4.2/4.3/4.5/4.7/4.8/5.2-PrivEsc/5.2-MassAssign/5.4/5.5/6.7 sekaligus; fix NAME_RULES build_matrix.py (path tracker/ default map ke U067, perlu entry eksplisit utk TRACKER-09); docs TC-Performance/README/Execution-Plan/Bug-List; Performance 69.4% -> 72.9%; matrix TOTAL 80.2% -> 80.5% | 1 commit
+- 2026-11-18 | Performance lanjutan (TRACKER-10, U067 Trackers config TUNTAS) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-487 (Medium) -- double-click Save pd form Add Tracker membuat 2 entri, instans ke-7 pola double-submit app-wide (BG-427/BG-475/BG-483/BG-486); 18/19 lolos; menutup 1.2/1.4/1.8/2.2/3.1(limit 200 char)/4.1/4.2/4.3/4.5/4.7/5.1-SQLi/5.1-XSS-Stored/5.2-MassAssign/5.4/5.5/6.5/6.7/8.4 sekaligus; fix NAME_RULES build_matrix.py regex utk TRACKER-10; docs TC-Performance/README/Execution-Plan/Bug-List; Performance 72.9% -> 77.2%; matrix TOTAL 80.5% -> 80.9% | 1 commit

@@ -1289,6 +1289,33 @@ No.  Test Case ID         Status   Skenario / Deskripsi
   RUN COMMAND:
     npx playwright test tests/performance/tracker/TC-PERF-TRACKER-09-Verify-Tracker-Log-Update-Delete-Feedback-Edge-Cases-Privilege-Escalation-Rate-Limit-And-CSRF.spec.ts --project=chromium
 
+ R7  TC-PERF-TRACKER-10  [DONE -- BUG]  tests/performance/tracker/TC-PERF-TRACKER-10-Verify-Optional-Field-Relation-Format-Length-Limit-Edge-Cases-Injection-And-CSRF.spec.ts
+                             (+) 1.2 1.4 1.8 | (-) 2.2 | (B) 3.1 | (!) 4.1 4.2 4.3 4.5 4.7 |
+                             (S) 5.1-SQLi 5.1-XSS-Stored 5.2-MassAssign 5.4 5.5 | (A) 6.5
+                             6.7 | (UI) 8.4   [U067]
+                             -> reviewerEmpNumbers kosong (opsional) vs terisi (relasi) ->
+                                200 keduanya, reviewer tertaut benar (1.2/1.4). empNumber=
+                                "abc" -> 422 (2.2). trackerName 200 karakter (batas atas,
+                                binary-search) -> 200; 201 -> 422 (3.1). Nama unicode/emoji
+                                -> 200 (4.1). Kutip SQL/HTML di nama -> 200 & tersimpan apa
+                                adanya (5.1-SQLi/5.1-XSS-Stored). Field asing -> 422 ditolak
+                                (5.2-MassAssign). GET list sortField tak dikenal -> 422
+                                (6.5). Nama sama utk 2 employee berbeda -> keduanya 200,
+                                tidak ada uniqueness lintas-employee, konsisten dgn TC-03
+                                (6.7, finding). 3 create paralel -> tidak ada rate limit
+                                (5.5, finding). Origin palsu vs sendiri -> identik (5.4).
+                                Add Tracker via UI -> toast sukses (1.8/8.4), back/forward
+                                normal (4.3), koneksi putus -> tidak crash (4.5), 2 create
+                                berbeda paralel -> tidak 500 (4.7).
+                             HASIL: SENGAJA FAILED (R3), BUG BARU BG-487 (Medium) --
+                                double-click Save pd form Add Tracker membuat 2 ENTRI dari 1
+                                submit, instans ke-7 pola double-submit app-wide sama dgn
+                                BG-427/BG-475/BG-483/BG-486.
+                             MENUTUP U067 Trackers config SEPENUHNYA.
+
+  RUN COMMAND:
+    npx playwright test tests/performance/tracker/TC-PERF-TRACKER-10-Verify-Optional-Field-Relation-Format-Length-Limit-Edge-Cases-Injection-And-CSRF.spec.ts --project=chromium
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================

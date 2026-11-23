@@ -69,7 +69,7 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'time/timesheet/TC-TIME-(TIMESHEET|TS-SUBMIT)', ['Time > Timesheets > My Timesheets', 'Time > Timesheet Edit & Approval']),
  (r'performance/evaluate/TC-PERF-EVAL-1[06]', ['Performance > Self Evaluation (ESS)', 'Performance > Manage Reviews > My Reviews']),
  (r'performance/evaluate/', ['Performance > Review Evaluation (Admin/Supervisor)']),
- (r'performance/tracker/TC-PERF-TRACKER-0[1-4]', ['Performance > Configure > Trackers']),
+ (r'performance/tracker/TC-PERF-TRACKER-(0[1-4]|10)', ['Performance > Configure > Trackers']),
  (r'performance/tracker/TC-PERF-TRACKER-0[56]', ['Performance > Tracker Logs', 'Performance > My Trackers', 'Performance > Employee Trackers']),
  (r'performance/tracker/TC-PERF-TRACKER-07', ['Performance > Tracker Logs', 'Performance > My Trackers']),
  (r'performance/tracker/TC-PERF-TRACKER-08', ['Performance > Tracker Logs']),
