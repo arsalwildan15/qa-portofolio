@@ -196,7 +196,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | PIM | 203 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 68 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
-| Performance | 46 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
+| Performance | 47 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
 | Time | 21 | [docs/TC-Time.txt](docs/TC-Time.txt) |
@@ -206,7 +206,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **668** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **669** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -357,7 +357,7 @@ Three more TCs close out previously-untested features: editing an own post, dele
 
 Cross-origin mutation (CSRF) on vacancy creation is confirmed **blocked by CORS** (no bug). There's also a documented intermittent client-side rendering bug where Application Stage/Candidate History cards occasionally get stuck loading forever with no underlying API error.
 
-### Performance (46 TCs)
+### Performance (47 TCs)
 
 Configure > KPIs (11: add/edit/delete, required fields, rating boundary, duplicate names, default-scale behavior, filter by Job Title, sort + pagination, injection, invalid id), Manage Reviews (13: create, the supervisor-link prerequisite, activation rules, KPI scoping, completion validation, date order, list filters, delete, edit lock after activation, double-click activate, IDOR and broken function-level access control using real ESS accounts), evaluation (7: the reviewer's full save → In Progress → Complete → read-only, per-KPI rating min/max on both UI and API, stored XSS in comments, evaluating an Inactive review via API, non-numeric ratings; plus the employee's own self-evaluation from My Reviews, and proof that an employee cannot write the supervisor or final evaluation of their own review), and Trackers (7: add, required fields, duplicate names, rename/delete with logs, employee ↔ reviewer log visibility, stored XSS in logs, and cross-employee IDOR).
 
@@ -379,6 +379,8 @@ Notable confirmed behaviors: a review can only name a "Supervisor Reviewer" who 
 **Taxonomy gap closure continued (2026-11-18), 1 new test, Performance matrix 72.9% to 77.2%:** `TC-PERF-TRACKER-10` closes Trackers config (`U067`) entirely: an optional/empty reviewer list vs. a real relation both work, type-format validation, a confirmed 200-character name limit, unicode names, SQL/HTML content stored verbatim as text, mass-assignment rejected, strict parameter validation, no uniqueness constraint on tracker name across different employees (consistent with the existing duplicate-name-per-employee rule, not a new bug), no rate limiting (finding), CSRF, and full UI feedback/navigation/connection-loss/concurrency coverage. Found a new bug: double-clicking Save on the Add Tracker form creates two duplicate trackers (`BG-487`, Medium) — the 7th confirmed instance of the same double-submit pattern.
 
 **Taxonomy gap closure continued (2026-11-18), 1 new test, Performance matrix 77.2% to 81.2%:** `TC-PERF-REVIEW-14` closes Manage Reviews (`U068`) entirely except the already-proven-structural `5.1-SQLi`/`5.1-XSS-Reflected` (no free-text search parameter exists to inject into): update, format validation, mass-assignment, strict parameter validation, no uniqueness constraint on review period (expected — one employee can legitimately have multiple review records), no rate limiting (finding), CSRF, full UI feedback/navigation/connection-loss/concurrency coverage, and a parallel-Activate race that resolves safely without data corruption. Found a new bug: creating a review with an End Date before its Start Date is accepted (HTTP 200) when sent directly to the API — the date-order check only exists in the client-side form, not on the server (`BG-488`, Medium).
+
+**Taxonomy gap closure continued (2026-11-18), 1 new test, Performance matrix 81.2% to 87.2%:** `TC-PERF-EMPREVIEW-01` closes Employee Reviews (`U007`) entirely except the already-proven-structural `5.1-SQLi`/`5.1-XSS-Reflected`. This page is a pure search view reviewers use to find reviews to evaluate — confirmed live it has no Add button and no edit/delete icons, and every mutating HTTP method (POST/PUT/DELETE) returns 404/405 — so every mutation-based taxonomy code (create/update/delete/state-transition/business-logic/idempotency/mass-assignment) is genuinely not applicable here; the underlying review records' full CRUD lifecycle is already covered under Manage Reviews (`U068`). What's left — optional/relation filters, date validation, parameter strictness, no rate limiting (finding), CSRF, and UI feedback/navigation/connection-loss/concurrency — all pass. No bug.
 
 ### Claim (29 TCs)
 
@@ -446,7 +448,7 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 
 Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
 
-**Taxonomy coverage snapshot (2026-11-18):** 81.2% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Performance at 81.2%, My Info at 76.6%, Admin at 72.8%, Time at 69.5% and Buzz/Claim at 69.0%; Time (69.5%) is now the lowest. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-18):** 81.8% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, PIM at 97.6%, Performance at 87.2%, Maintenance at 88.7%, Leave at 82.4%, My Info at 76.6%, Admin at 72.8%, Time at 69.5% and Buzz/Claim at 69.0%; Time (69.5%) is now the lowest. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

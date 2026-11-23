@@ -400,10 +400,20 @@
       (pakai createReview() dgn Job Title w/ KPI genuinely valid) -> status berbeda
       (404/200), TIDAK ADA korupsi data -- lolos, bukan bug kedua (dugaan awal 2 bug
       ternyata hanya 1 yg genuine, dikoreksi setelah verifikasi ulang).
-  STATE SAAT INI: PIM = 97.6% (ceiling final). Performance = 81.2% (342 COVERED/79 GAP/289
-  N/A dari 710 sel). Matrix TOTAL = 81.2%.
-  BERIKUT (urutan disarankan): U007 Employee Reviews (27 kode) -> U102 Review Evaluation
-  (15 kode) -> U103 Self Evaluation (31 kode, TERBESAR, kerjakan terakhir).
+    - TC-PERF-EMPREVIEW-01: menutup U007 Employee Reviews SEPENUHNYA KECUALI 5.1-SQLi/
+      5.1-XSS-Reflected (struktural). PELAJARAN PENTING: U007 (performance/
+      searchEvaluatePerformanceReview) adalah halaman PENCARIAN MURNI (trash=0, pencil=0 di
+      unitRegistry traits) -- POST/PUT/DELETE SEMUA 404/405, jadi SELURUH kode berbasis
+      mutasi (1.1-C/U/D/1.3/2.5/4.4/5.2-MassAssign/5.9/6.7) TIDAK BERLAKU di unit ini (entity
+      review yg sama sudah ditutup CRUD-nya scr genuine di Manage Reviews/U068). Ditutup via
+      check literal yg MEMBUKTIKAN ketidakhadiran mutasi (status 404/405 nyata), bukan
+      diasumsikan. fromDate/toDate TERNYATA TIDAK wajib di level API (beda dari saran UI) --
+      2.1 ditutup dgn bukti sebaliknya dari ekspektasi awal. 26/26 lolos, tidak ada bug.
+  STATE SAAT INI: PIM = 97.6% (ceiling final). Performance = 87.2% (367 COVERED/54 GAP/289
+  N/A dari 710 sel). Matrix TOTAL = 81.8%.
+  BERIKUT (urutan disarankan): U102 Review Evaluation (15 kode) -> U103 Self Evaluation (31
+  kode, TERBESAR, kerjakan terakhir) -- HANYA 2 unit lagi sampai Performance habis gap
+  non-struktural.
   Catatan Performance spesifik (dari sesi sebelumnya, masih berlaku): Tracker Log field
   "log" dibatasi 150 karakter server-side; evaluation/supervisor body {ratings:[{kpiId,
   rating,comment}],generalComment}; evaluation/final body {complete,finalRating,
@@ -863,3 +873,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | Performance lanjutan (TRACKER-09, U104 Tracker Logs TUNTAS kecuali 1.6) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-486 (Medium) -- double-click Save pd modal Add Log membuat 2 entri, instans ke-6 pola double-submit app-wide (BG-427/BG-475/BG-483); 13/14 lolos; menutup 1.1-U/1.1-D/1.2/1.8/4.2/4.3/4.5/4.7/4.8/5.2-PrivEsc/5.2-MassAssign/5.4/5.5/6.7 sekaligus; fix NAME_RULES build_matrix.py (path tracker/ default map ke U067, perlu entry eksplisit utk TRACKER-09); docs TC-Performance/README/Execution-Plan/Bug-List; Performance 69.4% -> 72.9%; matrix TOTAL 80.2% -> 80.5% | 1 commit
 - 2026-11-18 | Performance lanjutan (TRACKER-10, U067 Trackers config TUNTAS) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-487 (Medium) -- double-click Save pd form Add Tracker membuat 2 entri, instans ke-7 pola double-submit app-wide (BG-427/BG-475/BG-483/BG-486); 18/19 lolos; menutup 1.2/1.4/1.8/2.2/3.1(limit 200 char)/4.1/4.2/4.3/4.5/4.7/5.1-SQLi/5.1-XSS-Stored/5.2-MassAssign/5.4/5.5/6.5/6.7/8.4 sekaligus; fix NAME_RULES build_matrix.py regex utk TRACKER-10; docs TC-Performance/README/Execution-Plan/Bug-List; Performance 72.9% -> 77.2%; matrix TOTAL 80.5% -> 80.9% | 1 commit
 - 2026-11-18 | Performance lanjutan (REVIEW-14, U068 Manage Reviews TUNTAS kecuali 5.1-SQLi/5.1-XSS-Reflected) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-488 (Medium) -- create review endDate SEBELUM startDate via API diterima 200, validasi urutan tanggal hanya client-side; 15/16 lolos; menutup 1.1-U/1.2/1.8/2.2/4.1/4.3/4.4/4.5/4.7/4.8/5.2-MassAssign/5.4/5.5/5.9/6.5/6.7/8.4 sekaligus; race 2x Activate paralel TIDAK korupsi data, lolos (dugaan awal 2 bug dikoreksi jadi 1 setelah verifikasi ulang); docs TC-Performance/README/Execution-Plan/Bug-List; Performance 77.2% -> 81.2%; matrix TOTAL 80.9% -> 81.2% | 1 commit
+- 2026-11-18 | Performance lanjutan (EMPREVIEW-01, U007 Employee Reviews TUNTAS kecuali 5.1-SQLi/5.1-XSS-Reflected) | 1 TC baru; dibuktikan live U007 adalah halaman pencarian MURNI (POST/PUT/DELETE semua 404/405), seluruh kode berbasis mutasi (1.1-C/U/D/1.3/2.5/4.4/5.2-MassAssign/5.9/6.7) TIDAK BERLAKU di unit ini -- ditutup via check literal yg membuktikan ketidakhadiran mutasi; fromDate/toDate TERNYATA opsional di API (beda dari saran UI); menutup 1.2/1.4/1.8/2.1/2.2/3.4/4.1/4.2/4.3/4.5/4.7/4.8/5.4/5.5/6.5/8.4 sekaligus; 26/26 lolos, tidak ada bug baru; docs TC-Performance/README/Execution-Plan; Performance 81.2% -> 87.2%; matrix TOTAL 81.2% -> 81.8% | 1 commit
