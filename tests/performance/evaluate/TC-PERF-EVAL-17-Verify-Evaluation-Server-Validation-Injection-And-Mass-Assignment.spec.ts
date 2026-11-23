@@ -64,11 +64,17 @@ test('TC-PERF-EVAL-17: evaluation - server validation, injection, mass assignmen
     report.check('5.2-MassAssign [U102] Field asing (reviewId, statusId) -> 422 (ditolak)', mass.status() === 422, `status=${mass.status()} keys=${await keysOf(mass)}`);
 
     report.step('Unicode & injeksi pada comment');
-    for (const [label, text] of [['4.1 Arab/CJK', 'مرحبا 你好'], ['5.1-SQLi', "' OR '1'='1 --"], ['5.1-XSS-Stored', '<img src=x onerror=alert(1)>']] as const) {
+    const putComment = async (text: string) => {
       const r = await page.request.put(`${API}performance/reviews/${reviewId}/evaluation/supervisor`, { data: { ratings: [{ kpiId: kpi.id, rating: 50, comment: text }], generalComment: text } });
       const row = ((await r.json().catch(() => ({}))) as { data?: Array<{ kpi: { id: number }; comment: string }> }).data?.find((d) => d.kpi.id === kpi.id);
-      report.check(`${label} [U102] Comment per-KPI & generalComment -> 200 & tersimpan identik sebagai teks`, r.status() === 200 && row?.comment === text, `status=${r.status()}`);
-    }
+      return { status: r.status(), matches: row?.comment === text };
+    };
+    const unicode = await putComment('مرحبا 你好');
+    report.check('4.1 [U102] Comment per-KPI & generalComment berisi Arab/CJK -> 200 & tersimpan identik sebagai teks', unicode.status === 200 && unicode.matches, `status=${unicode.status}`);
+    const sqli = await putComment("' OR '1'='1 --");
+    report.check("5.1-SQLi [U102] Comment per-KPI & generalComment berisi kutip SQL -> 200 & tersimpan identik sebagai teks", sqli.status === 200 && sqli.matches, `status=${sqli.status}`);
+    const xss = await putComment('<img src=x onerror=alert(1)>');
+    report.check('5.1-XSS-Stored [U102] Comment per-KPI & generalComment berisi HTML -> 200 & tersimpan identik sebagai teks', xss.status === 200 && xss.matches, `status=${xss.status}`);
 
     report.step('Finalisasi: valid, tanggal tidak valid, injeksi');
     const finalValid = await page.request.put(`${API}performance/reviews/${reviewId}/evaluation/final`, { data: { complete: false, finalRating: 60, finalComment: 'final valid', completedDate: '2026-11-17' } });

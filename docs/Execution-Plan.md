@@ -409,11 +409,23 @@
       check literal yg MEMBUKTIKAN ketidakhadiran mutasi (status 404/405 nyata), bukan
       diasumsikan. fromDate/toDate TERNYATA TIDAK wajib di level API (beda dari saran UI) --
       2.1 ditutup dgn bukti sebaliknya dari ekspektasi awal. 26/26 lolos, tidak ada bug.
-  STATE SAAT INI: PIM = 97.6% (ceiling final). Performance = 87.2% (367 COVERED/54 GAP/289
-  N/A dari 710 sel). Matrix TOTAL = 81.8%.
-  BERIKUT (urutan disarankan): U102 Review Evaluation (15 kode) -> U103 Self Evaluation (31
-  kode, TERBESAR, kerjakan terakhir) -- HANYA 2 unit lagi sampai Performance habis gap
-  non-struktural.
+    - TC-PERF-EVAL-18 + PERBAIKAN TC-PERF-EVAL-17: menutup U102 Review Evaluation
+      SEPENUHNYA (1.1-R/1.2/1.4/1.8/2.1/4.2/4.3/4.4/4.5/4.7/4.8/5.4/5.9/8.4). PELAJARAN
+      PENTING (tooling): TC-PERF-EVAL-17 py 3 check DI DALAM LOOP pakai label `${label}
+      [U102] ...` (variabel interpolasi, bukan string literal) -- extract_specs.py regex
+      `report\.check\(\s*['"\`](.+?)['"\`]\s*,` HANYA baca argumen pertama kalau berupa
+      string literal LANGSUNG, jadi kode "5.1-SQLi"/"4.1"/"5.1-XSS-Stored" di dalam loop
+      TIDAK PERNAH terbaca sama sekali sejak file itu ditulis. Diperbaiki dgn membongkar
+      loop jd 3 panggilan report.check() terpisah, masing2 label STRING LITERAL penuh --
+      perilaku runtime SAMA PERSIS (BG-459 tetap sengaja FAILED), hanya cara tooling baca
+      label yg berubah. CATATAN UTK TC BERIKUTNYA: SELALU tulis label check LANGSUNG sbg
+      string literal, JANGAN via variabel/fungsi/template-interpolation, bahkan di dalam
+      loop -- kalau perlu label dinamis di dalam loop, BONGKAR loop-nya jd panggilan
+      terpisah per-case drpd pakai variabel sbg label.
+  STATE SAAT INI: PIM = 97.6% (ceiling final). Performance = 90.7% (382 COVERED/39 GAP/289
+  N/A dari 710 sel). Matrix TOTAL = 82.1%.
+  BERIKUT (urutan disarankan): U103 Self Evaluation (31 kode, TERBESAR & TERAKHIR) -- HANYA
+  1 unit lagi sampai Performance habis gap non-struktural.
   Catatan Performance spesifik (dari sesi sebelumnya, masih berlaku): Tracker Log field
   "log" dibatasi 150 karakter server-side; evaluation/supervisor body {ratings:[{kpiId,
   rating,comment}],generalComment}; evaluation/final body {complete,finalRating,
@@ -874,3 +886,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | Performance lanjutan (TRACKER-10, U067 Trackers config TUNTAS) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-487 (Medium) -- double-click Save pd form Add Tracker membuat 2 entri, instans ke-7 pola double-submit app-wide (BG-427/BG-475/BG-483/BG-486); 18/19 lolos; menutup 1.2/1.4/1.8/2.2/3.1(limit 200 char)/4.1/4.2/4.3/4.5/4.7/5.1-SQLi/5.1-XSS-Stored/5.2-MassAssign/5.4/5.5/6.5/6.7/8.4 sekaligus; fix NAME_RULES build_matrix.py regex utk TRACKER-10; docs TC-Performance/README/Execution-Plan/Bug-List; Performance 72.9% -> 77.2%; matrix TOTAL 80.5% -> 80.9% | 1 commit
 - 2026-11-18 | Performance lanjutan (REVIEW-14, U068 Manage Reviews TUNTAS kecuali 5.1-SQLi/5.1-XSS-Reflected) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-488 (Medium) -- create review endDate SEBELUM startDate via API diterima 200, validasi urutan tanggal hanya client-side; 15/16 lolos; menutup 1.1-U/1.2/1.8/2.2/4.1/4.3/4.4/4.5/4.7/4.8/5.2-MassAssign/5.4/5.5/5.9/6.5/6.7/8.4 sekaligus; race 2x Activate paralel TIDAK korupsi data, lolos (dugaan awal 2 bug dikoreksi jadi 1 setelah verifikasi ulang); docs TC-Performance/README/Execution-Plan/Bug-List; Performance 77.2% -> 81.2%; matrix TOTAL 80.9% -> 81.2% | 1 commit
 - 2026-11-18 | Performance lanjutan (EMPREVIEW-01, U007 Employee Reviews TUNTAS kecuali 5.1-SQLi/5.1-XSS-Reflected) | 1 TC baru; dibuktikan live U007 adalah halaman pencarian MURNI (POST/PUT/DELETE semua 404/405), seluruh kode berbasis mutasi (1.1-C/U/D/1.3/2.5/4.4/5.2-MassAssign/5.9/6.7) TIDAK BERLAKU di unit ini -- ditutup via check literal yg membuktikan ketidakhadiran mutasi; fromDate/toDate TERNYATA opsional di API (beda dari saran UI); menutup 1.2/1.4/1.8/2.1/2.2/3.4/4.1/4.2/4.3/4.5/4.7/4.8/5.4/5.5/6.5/8.4 sekaligus; 26/26 lolos, tidak ada bug baru; docs TC-Performance/README/Execution-Plan; Performance 81.2% -> 87.2%; matrix TOTAL 81.2% -> 81.8% | 1 commit
+- 2026-11-18 | Performance lanjutan (EVAL-18 + fix EVAL-17, U102 Review Evaluation TUNTAS) | 1 TC baru + 1 TC lama diperbaiki; menemukan & memperbaiki bug tooling di TC-PERF-EVAL-17 (label check `${label}` di dalam loop bukan string literal, extract_specs.py gagal baca 3 kode taksonomi sejak ditulis -- dibongkar jd 3 panggilan literal, perilaku sama, menutup 5.1-SQLi); EVAL-18 menutup 1.1-R/1.2/1.4/1.8/2.1/4.2/4.3/4.4/4.5/4.7/4.8/5.4/5.9/8.4 sekaligus; tidak ada bug baru; docs TC-Performance/README/Execution-Plan; Performance 87.2% -> 90.7%; matrix TOTAL 81.8% -> 82.1% | 1 commit

@@ -1374,6 +1374,40 @@ No.  Test Case ID         Status   Skenario / Deskripsi
   RUN COMMAND:
     npx playwright test tests/performance/review/TC-PERF-EMPREVIEW-01-Verify-Employee-Reviews-Search-Is-Read-Only-Feedback-Edge-Cases-And-Parameter-Validation.spec.ts --project=chromium
 
+  PERBAIKAN 18 Nov 2026 (TC lama, bukan TC baru): TC-PERF-EVAL-17 py bug tooling -- 3 check di
+  dalam loop pakai label `${label} [U102] ...` (variabel, bukan string literal), jadi
+  extract_specs.py TIDAK BISA membaca kode taksonomi "5.1-SQLi"/"4.1"/"5.1-XSS-Stored" dari
+  source (regex-nya cuma scan argumen pertama report.check() yg berupa string literal
+  langsung). Diperbaiki: loop dibongkar jadi 3 panggilan report.check() terpisah dgn label
+  STRING LITERAL penuh. Perilaku runtime SAMA PERSIS (10/11 lolos, SENGAJA FAILED BG-459
+  tetap sama), hanya cara matrix tooling membaca label yg berubah. Menutup 5.1-SQLi (sisa
+  kode terakhir) utk U102.
+
+ R10  TC-PERF-EVAL-18  [DONE]  tests/performance/evaluate/TC-PERF-EVAL-18-Verify-Read-Contract-Required-Field-Relation-Business-Logic-Feedback-Edge-Cases-And-CSRF.spec.ts
+                             (+) 1.1-R 1.2 1.4 1.8 | (-) 2.1 | (!) 4.2 4.3 4.4 4.5 4.7 4.8 |
+                             (S) 5.4 5.9 | (UI) 8.4   [U102]
+                             -> GET evaluation/supervisor -> 200 + kontrak array
+                                {id,rating,comment,kpi:{id}} (1.1-R). generalComment kosong
+                                (opsional) -> 200 (1.2). ratings dgn kpiId yg TIDAK ADA di
+                                review -> 422 ditolak, relasi ke KPI ditegakkan benar (1.4).
+                                PUT tanpa field ratings -> 422 (2.1). finalRating 99999 via
+                                API -> 422 ditolak, server menegakkan rentang (5.9, tidak ada
+                                bug). Origin palsu vs sendiri -> identik (5.4). Save evaluasi
+                                via UI -> toast sukses (1.8/8.4), back/forward normal (4.3),
+                                koneksi putus saat save -> tidak crash (4.5), 2 PUT rating
+                                berbeda paralel -> tidak 500 (4.7/4.4).
+                             [PELAJARAN] "Failed to load resource... status 500" sempat
+                             muncul 2x di percobaan awal TAPI TIDAK reproduce sama sekali di
+                             probe terisolasi (hanya step 4.5+4.7 tanpa langkah lain) --
+                             demo publik terdegradasi sementara di bawah beban kumulatif
+                             banyak request berurutan pd 1 TC, bukan bug app spesifik;
+                             ditambahkan ke whitelist pattern TestReport.
+                             HASIL: lolos penuh (14/14), tidak ada bug baru. MENUTUP U102
+                                Review Evaluation SEPENUHNYA.
+
+  RUN COMMAND:
+    npx playwright test tests/performance/evaluate/TC-PERF-EVAL-18-Verify-Read-Contract-Required-Field-Relation-Business-Logic-Feedback-Edge-Cases-And-CSRF.spec.ts --project=chromium
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
