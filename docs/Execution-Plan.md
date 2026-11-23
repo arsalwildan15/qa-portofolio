@@ -509,15 +509,24 @@
       sbg filter valid). Tidak ada bug.
   STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 78.06% (242 COVERED/68 GAP/187
   N/A). Matrix TOTAL = 83.7%.
-  BERIKUT: per instruksi standar koordinator, SELESAIKAN DULU Claim (4 unit tersisa: U074
-  Submit Claim 24, U075 My Claims 7, U076 Assign Claim 18, U105 Claim Detail 31 -- 80
-  kode) sampai ceiling-nya sebelum pindah modul, KECUALI instruksi eksplisit mengubah
-  urutan jadi "selalu ke modul paling rendah sekarang" (per rebuild 24 Nov 2026, Time
-  69.50% sudah lebih rendah dari Claim). Baca docs/TC-Claim.txt + Taxonomy-Coverage-
-  Matrix.md utk daftar GAP riil per unit berikutnya, lalu probe-first -> TC -> typecheck
-  -> trial -> real-run -> Bug-List -> matrix rebuild -> docs -> check_docs.py -> commit ->
-  push, per unit. Unit terbesar (U105 Claim Detail, 31 kode) kemungkinan perlu di-pecah
-  jadi >1 TC spt Performance U103.
+    - TC-CLAIM-SUBMIT-04: menutup U075 My Claims SEPENUHNYA (2.2/3.4/4.1/4.8/5.1-SQLi/
+      5.1-XSS-Reflected/6.5). Halaman search ESS murni (claim/viewClaim, endpoint GET
+      claim/requests), pola sama persis dgn U011 tapi scope ESS sendiri. PELAJARAN 4.8:
+      endpoint ESS ini TIDAK MENGENAL param empNumber sama sekali (422 kalau dikirim) --
+      scoping ke diri sendiri 100% implisit dari sesi, tidak bisa diutak-atik via query
+      string apa pun, lebih ketat dari sekadar "diabaikan". Tidak ada bug.
+  STATE SAAT INI (rebuild matrix 24 Nov 2026): Claim = 81.94% (254 COVERED/56 GAP/187
+  N/A). Matrix TOTAL = 84.0%.
+  BERIKUT: per instruksi standar koordinator, SELESAIKAN DULU Claim (3 unit tersisa: U074
+  Submit Claim 24, U076 Assign Claim 13-18 [cek ulang saat rebuild], U105 Claim Detail
+  24-31 [cek ulang] -- sekitar 56 kode) sampai ceiling-nya sebelum pindah modul. Baca
+  docs/TC-Claim.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit berikutnya
+  (rebuild matrix dulu utk angka pasti, jangan pakai angka lama yg bisa sudah berubah krn
+  overlap NAME_RULES antar unit), lalu probe-first -> TC -> typecheck -> trial -> real-run
+  -> Bug-List -> matrix rebuild -> docs -> check_docs.py -> commit -> push, per unit. Unit
+  terbesar (U105 Claim Detail) kemungkinan perlu di-pecah jadi >1 TC spt Performance U103.
+  Setelah Claim selesai, lanjut otomatis ke Time (69.5%, next-lowest per instruksi
+  standar), lalu modul paling rendah berikutnya, dst.
   **PERUBAHAN EMAIL KOMIT (24 Nov 2026, instruksi user via koordinator):** mulai komit
   berikutnya, email ganti jadi arsal@pakaidonk.id (nama tetap "Arsal", TETAP TANPA
   Co-Authored-By/trailer apa pun). Commit lama yg sudah di-push JANGAN diubah. Format:

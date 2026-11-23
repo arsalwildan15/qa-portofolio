@@ -903,6 +903,29 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              non-obvious tapi tidak berbahaya (4.8).
                              Fitur berfungsi normal, tidak ada bug baru.
 
+34   TC-CLAIM-SUBMIT-04  [DONE]  TC-CLAIM-SUBMIT-04-Verify-My-Claims-Search-Validation-Injection-And-Boundary.spec.ts
+                             (-) 2.2 | (!) 3.4 4.1 4.8 | (S) 5.1-SQLi
+                             5.1-XSS-Reflected | (A) 6.5  [U075]
+                             -> Menutup U075 My Claims SEPENUHNYA
+                             (halaman search ESS murni claim/viewClaim,
+                             endpoint GET claim/requests, pola sama dgn
+                             U011 tapi scope ESS sendiri). Param asing/
+                             sortField tak dikenal -> 422 (6.5). fromDate
+                             format invalid -> 422 (2.2). fromDate >
+                             toDate -> 200 + hasil kosong, bukan error
+                             (3.4). referenceId SQLi -> 200, tidak ada DB
+                             error/bypass (5.1-SQLi). referenceId XSS di
+                             search box -> tidak tereksekusi
+                             (5.1-XSS-Reflected). Reference Id search box
+                             unicode/emoji -> tidak crash (4.1). empNumber
+                             asing di query (coba targetkan employee lain)
+                             -> 422, endpoint ESS ini TIDAK mengenal param
+                             empNumber sama sekali -- scoping ke diri
+                             sendiri sepenuhnya implisit dari sesi, lebih
+                             ketat dari sekadar diabaikan, bukan IDOR
+                             (4.8). Fitur berfungsi normal, tidak ada bug
+                             baru.
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
