@@ -196,7 +196,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | PIM | 203 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 68 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
-| Performance | 48 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
+| Performance | 49 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
 | Time | 21 | [docs/TC-Time.txt](docs/TC-Time.txt) |
@@ -206,7 +206,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **670** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **671** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -357,7 +357,7 @@ Three more TCs close out previously-untested features: editing an own post, dele
 
 Cross-origin mutation (CSRF) on vacancy creation is confirmed **blocked by CORS** (no bug). There's also a documented intermittent client-side rendering bug where Application Stage/Candidate History cards occasionally get stuck loading forever with no underlying API error.
 
-### Performance (48 TCs)
+### Performance (49 TCs)
 
 Configure > KPIs (11: add/edit/delete, required fields, rating boundary, duplicate names, default-scale behavior, filter by Job Title, sort + pagination, injection, invalid id), Manage Reviews (13: create, the supervisor-link prerequisite, activation rules, KPI scoping, completion validation, date order, list filters, delete, edit lock after activation, double-click activate, IDOR and broken function-level access control using real ESS accounts), evaluation (7: the reviewer's full save → In Progress → Complete → read-only, per-KPI rating min/max on both UI and API, stored XSS in comments, evaluating an Inactive review via API, non-numeric ratings; plus the employee's own self-evaluation from My Reviews, and proof that an employee cannot write the supervisor or final evaluation of their own review), and Trackers (7: add, required fields, duplicate names, rename/delete with logs, employee ↔ reviewer log visibility, stored XSS in logs, and cross-employee IDOR).
 
@@ -383,6 +383,8 @@ Notable confirmed behaviors: a review can only name a "Supervisor Reviewer" who 
 **Taxonomy gap closure continued (2026-11-18), 1 new test, Performance matrix 81.2% to 87.2%:** `TC-PERF-EMPREVIEW-01` closes Employee Reviews (`U007`) entirely except the already-proven-structural `5.1-SQLi`/`5.1-XSS-Reflected`. This page is a pure search view reviewers use to find reviews to evaluate — confirmed live it has no Add button and no edit/delete icons, and every mutating HTTP method (POST/PUT/DELETE) returns 404/405 — so every mutation-based taxonomy code (create/update/delete/state-transition/business-logic/idempotency/mass-assignment) is genuinely not applicable here; the underlying review records' full CRUD lifecycle is already covered under Manage Reviews (`U068`). What's left — optional/relation filters, date validation, parameter strictness, no rate limiting (finding), CSRF, and UI feedback/navigation/connection-loss/concurrency — all pass. No bug.
 
 **Taxonomy gap closure continued (2026-11-18), 1 new test, Performance matrix 87.2% to 90.7%:** `TC-PERF-EVAL-18` closes Review Evaluation (`U102`) entirely: a read contract on the evaluation data, an empty optional comment, a rating tied to a KPI that doesn't exist on the review (correctly rejected — the KPI relation is enforced), a missing required `ratings` field, an attempt to set an implausible Final Rating directly via the API (correctly rejected — the server enforces the range, it can't be manipulated client-side), CSRF, and full UI feedback/navigation/connection-loss/concurrency coverage. No bug. Also fixed a labeling bug in the existing `TC-PERF-EVAL-17`: three checks inside a loop used a variable as their label instead of a literal string, which meant the coverage tool's scanner — which only reads literal string arguments — couldn't see the taxonomy codes they covered. Unrolled into explicit calls with literal labels; behavior is unchanged.
+
+**Taxonomy gap closure continued (2026-11-23), 1 new test, Performance matrix 90.7% to 98.1% — Performance reaches its real ceiling:** `TC-PERF-EVAL-19` closes Self Evaluation (`U103`), the employee's own `PUT .../evaluation/employee` endpoint, entirely: a read contract, an empty optional comment, a rating tied to a nonexistent KPI (correctly rejected), a missing required `ratings` field, the state transition after Complete (a further save from the same employee is correctly refused with 403), rating boundaries below 0 and far above the KPI's max (both correctly rejected), unicode/SQL/HTML content in comments stored verbatim as text, double-clicking Save (no corruption), an IDOR attempt by a second ESS employee against the first employee's evaluation (correctly refused), a mass-assignment attempt via an extra `empNumber` field (ignored), CSRF, security headers, strict parameter validation, console-warning-free UI flow, basic response-time and viewport/accessibility checks. Found a new bug: a non-numeric rating (`"abc"`) is accepted with HTTP 200 and silently stored as `0.00` instead of being rejected — the same silent-coercion pattern as `BG-373`, but on the employee-side endpoint rather than the supervisor-side one (`BG-489`, Medium). With `U103` closed, every Performance unit has reached either full coverage or a proven structural limit — Performance's taxonomy ceiling is **98.1%** (8 of 421 applicable cells remain genuinely structural: no free-text search parameter to inject SQL/XSS into on Employee Reviews, Manage Reviews and Employee Trackers).
 
 ### Claim (29 TCs)
 
@@ -450,7 +452,7 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 
 Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
 
-**Taxonomy coverage snapshot (2026-11-18):** 82.1% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, PIM at 97.6%, Performance at 90.7%, Maintenance at 88.7%, Leave at 82.4%, My Info at 76.6%, Admin at 72.8%, Time at 69.5% and Buzz/Claim at 69.0%; Time (69.5%) is now the lowest. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-23):** 82.8% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Performance at 98.1% (its real ceiling), PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, My Info at 76.6%, Admin at 72.8%, Time at 69.5%, Claim at 69.0% and Buzz at 69.0%; Buzz (68.97%) is now the lowest, narrowly ahead of Claim (69.03%). See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

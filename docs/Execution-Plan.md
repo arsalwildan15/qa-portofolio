@@ -422,10 +422,33 @@
       string literal, JANGAN via variabel/fungsi/template-interpolation, bahkan di dalam
       loop -- kalau perlu label dinamis di dalam loop, BONGKAR loop-nya jd panggilan
       terpisah per-case drpd pakai variabel sbg label.
-  STATE SAAT INI: PIM = 97.6% (ceiling final). Performance = 90.7% (382 COVERED/39 GAP/289
-  N/A dari 710 sel). Matrix TOTAL = 82.1%.
-  BERIKUT (urutan disarankan): U103 Self Evaluation (31 kode, TERBESAR & TERAKHIR) -- HANYA
-  1 unit lagi sampai Performance habis gap non-struktural.
+    - TC-PERF-EVAL-19: menutup U103 Self Evaluation SEPENUHNYA (1.1-R/1.2/1.4/1.8/2.1/2.2/2.5/
+      3.1/3.2/3.4/4.1/4.2/4.3/4.4/4.5/4.7/4.8/5.1-SQLi/5.1-XSS-Stored/5.2-IDOR/5.2-MassAssign/
+      5.4/5.6/5.9/6.5/7.4/7.5/8.1/8.2/8.3/8.4). Endpoint ESS: PUT performance/reviews/<id>/
+      evaluation/employee {complete,ratings:[{kpiId,rating,comment}],generalComment}. Fix
+      NAME_RULES build_matrix.py (default `performance/evaluate/` map ke U102, perlu entry
+      eksplisit utk EVAL-19 -> U103). PELAJARAN TEST DESIGN: fillRatings harus pakai nilai PER
+      KPI sesuai minRating/maxRating masing2 (bukan nilai flat spt '3') -- 1 KPI pd review uji
+      ternyata minRating=50, rating flat 3 kena validasi client "Rating should be >= 50" dan
+      Save tidak pernah mengirim PUT; tambah helper validRating(kpi). PELAJARAN LAIN: goto()
+      langsung setelah browser back()+forward() kadang timeout nunggu ratingInputs (SPA state
+      stale) -- selipkan page.goto('/web/index.php/dashboard/index') dulu sbg reset sblm
+      goto() berikutnya. SENGAJA FAILED (R3), BUG BARU BG-489 (Medium) -- PUT evaluation/
+      employee dgn rating non-numerik ("abc") DITERIMA 200, server diam-diam convert ke
+      rating 0.00, pola sama dgn BG-373 tapi di endpoint employee-side bukan supervisor-side.
+      31/32 lolos.
+  STATE SAAT INI: PIM = 97.6% (ceiling final). Performance = 98.1% (ceiling final, 413
+  COVERED/8 GAP struktural/289 N/A dari 710 sel). Matrix TOTAL = 82.8%.
+  PERFORMANCE SELESAI. 8 GAP sisa semuanya struktural (tidak ada search param bebas utk
+  injeksi SQL/XSS di Employee Reviews/Manage Reviews/Employee Trackers) -- TIDAK dipaksa
+  ditutup, sesuai aturan proyek.
+  BERIKUT (per-modul, hasil rebuild matrix 23 Nov 2026): Buzz = 68.97% (40 COVERED/18 GAP),
+  Claim = 69.03% (214/96), Time = 69.50% (335/147) -- Buzz adalah modul PALING RENDAH
+  (selisih sangat kecil dgn Claim, dikonfirmasi via hitungan presisi bukan pembulatan 1
+  desimal). Lanjut otomatis ke Buzz per instruksi standar koordinator: baca
+  docs/TC-Buzz.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit Buzz, lalu
+  probe-first -> TC -> typecheck -> trial -> real-run -> Bug-List -> matrix rebuild -> docs
+  -> check_docs.py -> commit -> push, per unit.
   Catatan Performance spesifik (dari sesi sebelumnya, masih berlaku): Tracker Log field
   "log" dibatasi 150 karakter server-side; evaluation/supervisor body {ratings:[{kpiId,
   rating,comment}],generalComment}; evaluation/final body {complete,finalRating,
