@@ -1316,6 +1316,34 @@ No.  Test Case ID         Status   Skenario / Deskripsi
   RUN COMMAND:
     npx playwright test tests/performance/tracker/TC-PERF-TRACKER-10-Verify-Optional-Field-Relation-Format-Length-Limit-Edge-Cases-Injection-And-CSRF.spec.ts --project=chromium
 
+ R8  TC-PERF-REVIEW-14  [DONE -- BUG]  tests/performance/review/TC-PERF-REVIEW-14-Verify-Update-Business-Logic-Edge-Cases-Mass-Assignment-Rate-Limit-And-CSRF.spec.ts
+                             (+) 1.1-U 1.2 1.8 | (-) 2.2 | (!) 4.1 4.3 4.4 4.5 4.7 4.8 |
+                             (S) 5.2-MassAssign 5.4 5.5 5.9 | (A) 6.5 6.7 | (UI) 8.4   [U068]
+                             -> PUT review (belum aktif) -> 200 & periode berubah (1.1-U).
+                                startDate tidak valid -> 422 (2.2). Field asing -> 422
+                                ditolak (5.2-MassAssign). GET list dgn employeeName/sortField
+                                tak dikenal -> 422 SEMUA, tidak ada search/injeksi bebas sama
+                                sekali (6.5; 5.1-SQLi/5.1-XSS-Reflected N/A genuine, finding
+                                tanpa kode literal). 2 review periode sama -> keduanya 200,
+                                tidak ada uniqueness (6.7, finding). 3 create paralel -> tidak
+                                ada rate limit (5.5, finding). Origin palsu vs sendiri ->
+                                identik (5.4). Add Review via UI -> toast sukses (1.8/8.4),
+                                back/forward normal (4.3), koneksi putus -> tidak crash (4.5),
+                                2 create berbeda paralel -> tidak 500 (4.7). 2 Activate
+                                paralel pd review SAMA (employee+Job Title w/ KPI valid) ->
+                                status berbeda (404/200), tidak ada korupsi data, lolos bukan
+                                bug (4.4).
+                             HASIL: SENGAJA FAILED (R3), BUG BARU BG-488 (Medium) -- POST
+                                create review dgn endDate SEBELUM startDate via API (bypass
+                                client) -> 200 DITERIMA, validasi urutan tanggal HANYA ada di
+                                client-side, server tidak menegakkannya sama sekali (5.9).
+                             MENUTUP U068 Manage Reviews SEPENUHNYA KECUALI 5.1-SQLi/5.1-XSS-
+                                Reflected (struktural, dibuktikan: tidak ada search param
+                                bebas apa pun).
+
+  RUN COMMAND:
+    npx playwright test tests/performance/review/TC-PERF-REVIEW-14-Verify-Update-Business-Logic-Edge-Cases-Mass-Assignment-Rate-Limit-And-CSRF.spec.ts --project=chromium
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
