@@ -578,12 +578,33 @@
   BG-493 (3 bug baru, semua Medium): BG-491/BG-492 = tidak ada rate limiting create claim
   (2 endpoint terpisah, Assign & Submit), BG-493 = attachment filename tidak disanitasi
   (instans ke-3 pola BG-462/BG-463).
-  BERIKUT: lanjut otomatis ke Time (69.5%, next-lowest per instruksi standar). Baca
-  docs/TC-Time.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit, lalu
-  probe-first -> TC -> typecheck -> trial -> real-run -> Bug-List -> matrix rebuild ->
-  docs -> check_docs.py -> commit -> push, per unit. Setelah Time selesai, lanjut
-  otomatis ke modul paling rendah berikutnya, dst (per instruksi standar koordinator:
-  lanjutkan melalui SEMUA modul).
+  TIME CLOSURE (dimulai 24 Nov 2026): 11 unit, 147 GAP total awal (U004 Employee
+  Timesheets 7, U055 My Timesheets 20, U056 Attendance My Records 18, U057 Punch In/Out
+  23, U058 Attendance Employee Records 20, U059 Config 0/sudah tutup, U060 Project
+  Reports 9, U061 Employee Reports 8, U062 Attendance Summary 9, U063 Customers 3/SUDAH
+  TUTUP, U064 Projects 11, U106 Timesheet Edit & Approval 19). Modul TERBESAR sejauh ini
+  dlm proyek stlh PIM/Performance -- kerjakan unit kecil dulu (U063 done, lanjut U060/
+  U061/U062 Reports yg polanya mirip U011/U075 search-page sblmnya, lalu U064 Projects,
+  baru unit besar U055-U058/U106).
+  SELESAI sejauh ini (24 Nov 2026):
+    - TC-TIME-PROJECT-03: menutup U063 Customers SEPENUHNYA (1.2/4.8/5.1-XSS-Stored).
+      PELAJARAN URL: UI list Customers di /web/index.php/time/viewCustomers (PLURAL,
+      bukan viewCustomer singular) -- ditemukan via navigasi sidebar manual stlh beberapa
+      tebakan URL gagal (blank page). PELAJARAN XSS: name field menolak payload XSS
+      lengkap (422, lebih ketat), tapi description menerima & simpan verbatim -- pakai
+      field yg genuinely vulnerable-tested utk closure, bukan field yg menolak.
+  STATE SAAT INI (rebuild matrix 24 Nov 2026): Time = 70.75% (341 COVERED/141 GAP/370
+  N/A). Matrix TOTAL = 85.3%.
+  BERIKUT: U060 Project Reports (9 kode: 1.1-R/1.6/2.2/3.4/4.1/4.8/5.1-SQLi/
+  5.1-XSS-Reflected/6.5), U061 Employee Reports (8, sama pola minus 1.6), U062
+  Attendance Summary (9, sama pola dgn 1.6) -- ketiganya search/filter page, pola SAMA
+  PERSIS dgn TC-CLAIM-ASSIGN-16 (U011)/TC-CLAIM-SUBMIT-04 (U075) sblmnya: param
+  asing/sortField -> 422, date format invalid -> 422, SQLi/XSS di search field -> aman,
+  unicode -> tidak crash. Baca docs/TC-Time.txt + Taxonomy-Coverage-Matrix.md utk detail,
+  lalu probe-first -> TC -> typecheck -> trial -> real-run -> Bug-List -> matrix rebuild
+  -> docs -> check_docs.py -> commit -> push, per unit/batch. Setelah Time selesai,
+  lanjut otomatis ke modul paling rendah berikutnya, dst (per instruksi standar
+  koordinator: lanjutkan melalui SEMUA modul).
   **PERUBAHAN EMAIL KOMIT (24 Nov 2026, instruksi user via koordinator):** mulai komit
   berikutnya, email ganti jadi arsal@pakaidonk.id (nama tetap "Arsal", TETAP TANPA
   Co-Authored-By/trailer apa pun). Commit lama yg sudah di-push JANGAN diubah. Format:

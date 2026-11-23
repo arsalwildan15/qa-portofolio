@@ -16,8 +16,8 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Performance | 413 | 8 | 289 | 98.1% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
-| Time | 335 | 147 | 370 | 69.5% |
-| **Total** | **3959** | **687** | **3093** | **85.2%** |
+| Time | 341 | 141 | 370 | 70.7% |
+| **Total** | **3965** | **681** | **3093** | **85.3%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -29,7 +29,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.1-R | Read / list | 16 |
 | 1.1-U | Update valid | 16 |
 | 1.1-D | Delete valid | 3 |
-| 1.2 | Variasi input valid (opsional diisi/kosong) | 44 |
+| 1.2 | Variasi input valid (opsional diisi/kosong) | 42 |
 | 1.3 | State transition valid | 3 |
 | 1.4 | Relasi antar-entity | 34 |
 | 1.6 | Search/filter/sort valid | 24 |
@@ -52,9 +52,9 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 4.5 | Session/koneksi terputus | 31 |
 | 4.6 | Data kosong/null (empty state) | 7 |
 | 4.7 | Konkurensi multi-user edit | 26 |
-| 4.8 | Behavior non-obvious terdokumentasi | 47 |
+| 4.8 | Behavior non-obvious terdokumentasi | 45 |
 | 5.1-SQLi | SQL Injection | 25 |
-| 5.1-XSS-Stored | Stored XSS | 12 |
+| 5.1-XSS-Stored | Stored XSS | 10 |
 | 5.1-XSS-Reflected | Reflected XSS | 13 |
 | 5.1-CmdPath | Command/Path injection | 2 |
 | 5.1-SSRF | SSRF | 4 |

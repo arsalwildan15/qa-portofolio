@@ -726,6 +726,22 @@ No.  Test Case ID              Status   Skenario / Deskripsi
   terdedikasi (mirip TC-LEAVE-HOLIDAY-01/CANDIDATE-22). U060/U061/U062 Reports -- 1.1-R,
   1.6 search, SQLi/XSS-Reflected di filter blm diuji.
 
+ R5  TC-TIME-PROJECT-03  [DONE]  tests/time/project/TC-TIME-PROJECT-03-Verify-Customer-Optional-Field-XSS-And-Known-Behavior.spec.ts
+                             (+) 1.2 | (!) 4.8 | (S) 5.1-XSS-Stored [U063]
+                             -> Menutup U063 Customers SEPENUHNYA. description
+                                dikosongkan -> 200, opsional, tersimpan sbg string kosong
+                                "" (BUKAN null spt di modul Claim -- konvensi beda antar
+                                modul, bukan bug). name field menolak payload XSS lengkap
+                                (422, validasi lebih ketat drpd description), tapi
+                                description menerima & menyimpan payload XSS yg sama
+                                verbatim (200) -- diverifikasi TIDAK tereksekusi saat
+                                ditampilkan di daftar Customers
+                                (/web/index.php/time/viewCustomers, bukan viewCustomer
+                                singular). HASIL: lolos penuh, tidak ada bug baru.
+
+  RUN COMMAND:
+    npx playwright test tests/time/project/TC-TIME-PROJECT-03-Verify-Customer-Optional-Field-XSS-And-Known-Behavior.spec.ts --project=chromium
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
