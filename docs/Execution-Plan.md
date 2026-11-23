@@ -442,13 +442,57 @@
   PERFORMANCE SELESAI. 8 GAP sisa semuanya struktural (tidak ada search param bebas utk
   injeksi SQL/XSS di Employee Reviews/Manage Reviews/Employee Trackers) -- TIDAK dipaksa
   ditutup, sesuai aturan proyek.
-  BERIKUT (per-modul, hasil rebuild matrix 23 Nov 2026): Buzz = 68.97% (40 COVERED/18 GAP),
-  Claim = 69.03% (214/96), Time = 69.50% (335/147) -- Buzz adalah modul PALING RENDAH
-  (selisih sangat kecil dgn Claim, dikonfirmasi via hitungan presisi bukan pembulatan 1
-  desimal). Lanjut otomatis ke Buzz per instruksi standar koordinator: baca
-  docs/TC-Buzz.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit Buzz, lalu
+  BUZZ CLOSURE (24 Nov 2026): U012 (satu2nya unit Buzz) punya 18 GAP code. Ditutup via 2
+  TC baru:
+    - TC-BUZZ-22: menutup 9 kode (1.2/1.8/2.2/4.1/4.7/4.8/5.2-MassAssign/6.5/6.7).
+      PELAJARAN 1.2: type=video (via videoUrl) ternyata 500 (lihat BG-490 di bawah) jadi
+      TIDAK BISA dipakai sbg bukti "text opsional" -- dibuktikan lewat jalur lain yg lebih
+      aman: POST {type:'photo'} TANPA field apa pun -> 422 invalidParamKeys HANYA berisi
+      "photos", TIDAK berisi "text" -- bukti valid bhw text opsional saat type != text.
+      PELAJARAN 4.8: catatan lama di BuzzPage.ts ("post baru butuh reload manual, confirmed
+      2026-11-11") TERNYATA SUDAH TIDAK BERLAKU -- dibuktikan ulang live 2x konsisten: post
+      baru LANGSUNG muncul sbg card nyata (bukan cuma sisa teks composer, sudah dipersempit
+      pakai buzzPage.cardByText) tanpa reload sama sekali. Dicatat sbg update/koreksi atas
+      catatan lama, BUKAN dipaksa cocok dgn ekspektasi lama. 12/12 check lolos, tidak ada bug.
+    - TC-BUZZ-SECURITY-12: menutup 8 kode terakhir (3.3/5.1-CmdPath/5.1-SSRF/5.2-PrivEsc/
+      5.3-ContentType/5.3-DoubleExt/5.3-Oversize/5.3-Filename). BUG BARU BG-490 (High):
+      POST type=video dgn URL BENIGN (YouTube) -> 500 Internal Server Error, dicoba 2 nama
+      field (videoUrl, video) keduanya 500 -- fitur Share Video 100% broken server-side utk
+      SEMUA nilai, bukan validasi yg salah. SSRF (5.1-SSRF) ditutup dgn bukti URL internal
+      (169.254.169.254) menghasilkan status IDENTIK dgn URL benign (500 keduanya) -- field
+      ini tidak punya jalur SSRF yg berfungsi saat ini. TEMUAN BESAR (bukan bug baru
+      terpisah, didokumentasikan sbg CATATAN SCOPE di TC): investigasi mendalam (6+ probe
+      live) menunjukkan upload foto via "Share Photo" TIDAK PERNAH benar2 mengirim file ke
+      server -- native 'change' event DOM terpicu, tapi POST yg dikirim composer SELALU
+      {type:"text",...} tanpa field foto apa pun, utk file JINAK (PNG valid) MAUPUN
+      berbahaya (exe di-rename, 6MB oversized) -- perilaku IDENTIK utk keduanya, membuktikan
+      TIDAK ADA channel upload yg berfungsi saat ini utk dieksploitasi dgn file apa pun.
+      Mekanisme kontrak API yg benar (field "photos" di error 422 tapi tidak berhasil
+      ditemukan bentuk yg diterima: dicoba string/array, key photo/photoUrl/image/
+      attachment/file, semua 422) TIDAK berhasil direverse-engineer black-box dlm sesi ini --
+      TIDAK diklaim sbg bug kedua yg terpisah krn tidak cukup bukti definitif, hanya
+      dicatat sbg open question; TC-BUZZ-09/SECURITY-03/SECURITY-04 (closed, existing)
+      TIDAK disentuh/direvisi (di luar scope unit U012 closure, perlu investigasi
+      terpisah kalau mau dipastikan apakah tes2 itu false-positive). PELAJARAN TOOLING:
+      versi awal TC ini (8 percobaan upload sekuensial tanpa reset state) hang >5 menit krn
+      flakiness composer UI demo publik di bawah banyak siklus buka/tutup berturutan --
+      dikurangi jd 3 percobaan representatif + Promise.race 30s per percobaan + reset ke
+      halaman netral (dashboard) sblm tiap percobaan, pola yg sama dgn fix back/forward-
+      timeout di TC-PERF-EVAL-19. 8/8 check lolos (2 di antaranya SENGAJA gagal
+      mendokumentasikan BG-490 di real-run pertama sblm perilaku bug dikonfirmasi reproduce
+      konsisten -- re-run final: semua 8 check PASS krn kondisi check memang menegaskan
+      perilaku BENAR yg seharusnya, BUKAN perilaku buggy).
+  STATE SAAT INI: Buzz = 100% (ceiling final, 58 COVERED/0 GAP/13 N/A). Matrix TOTAL = 83.1%.
+  BERIKUT (per-modul, hasil rebuild matrix 24 Nov 2026): Claim = 69.03% (214 COVERED/96
+  GAP), Time = 69.50% (335/147), Admin = 72.81% (798/298) -- Claim adalah modul PALING
+  RENDAH sekarang. Lanjut otomatis ke Claim per instruksi standar koordinator: baca
+  docs/TC-Claim.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit Claim, lalu
   probe-first -> TC -> typecheck -> trial -> real-run -> Bug-List -> matrix rebuild -> docs
   -> check_docs.py -> commit -> push, per unit.
+  **PERUBAHAN EMAIL KOMIT (24 Nov 2026, instruksi user via koordinator):** mulai komit
+  berikutnya, email ganti jadi arsal@pakaidonk.id (nama tetap "Arsal", TETAP TANPA
+  Co-Authored-By/trailer apa pun). Commit lama yg sudah di-push JANGAN diubah. Format:
+  `git -c user.name="Arsal" -c user.email="arsal@pakaidonk.id" commit ...`.
   Catatan Performance spesifik (dari sesi sebelumnya, masih berlaku): Tracker Log field
   "log" dibatasi 150 karakter server-side; evaluation/supervisor body {ratings:[{kpiId,
   rating,comment}],generalComment}; evaluation/final body {complete,finalRating,

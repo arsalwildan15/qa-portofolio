@@ -195,7 +195,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Admin | 144 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 203 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 68 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
-| Buzz | 32 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
+| Buzz | 34 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
 | Performance | 49 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 29 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
@@ -206,7 +206,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **671** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **673** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -334,7 +334,7 @@ Two more distinct bugs confirmed on double-click: rapid double-clicking Save on 
 - A single-day date filter (From = To) passes the form but the server returns 400, and the list stays unfiltered (BG-443, Low)
 - Uploading a resume for a non-existent candidate returns 500 (BG-444, Low); a double-click on Save stores the vacancy attachment twice (BG-446, Low)
 
-### Buzz (32 TCs)
+### Buzz (34 TCs)
 
 OrangeHRM's internal social feed, broadcasting posts to every logged-in employee company-wide rather than a scoped role, the widest blast radius of any module tested, so validation gaps here were treated as higher-impact. Organized into `tests/buzz/posts/` (post lifecycle: create/cancel/delete/boundary), `tests/buzz/engagement/` (like/unlike/comment/share/interacting with another employee's post), `tests/buzz/feed-filters/` (the Most Liked / Most Commented tabs), and `tests/buzz/security/`, the same per-category subfolder structure used by Recruitment. Covers: text posts incl. empty/very-long boundary and photo-only boundary (4), valid photo upload, like/unlike, delete own post, comment incl. empty-comment rejection, share-post counter, viewing another employee's post (7), feed filter tabs (2), composer cancel/discard and rapid double-click-submit edge cases (2), plus 11 security TCs covering XSS and SQL injection on both post text and comment text, extension-only file-upload bypass via "Share Photo" with a rejected-`.exe` baseline control, a malicious-URL check on the text-only "Share Video" field, cross-origin mutation (CSRF), clickjacking headers, rate limiting on post creation, and a read-only IDOR baseline.
 
@@ -345,9 +345,11 @@ OrangeHRM's internal social feed, broadcasting posts to every logged-in employee
 - Missing `X-Frame-Options` / CSP `frame-ancestors`, the **5th app-wide confirmation** of the same clickjacking gap also found in Login, Recruitment, PIM, and Admin.
 - The same unhandled-exception-on-dropped-connection bug as Admin, PIM, and Recruitment (**4th and final confirmation**), reproduced identically on create-post.
 
-"Share Video" turned out to be a paste-a-URL field, not a file upload. An initial TC assumed otherwise and was rewritten after live discovery corrected it. IDOR on post/comment access is confirmed N/A (same single-role architecture as other modules). A new post does not appear in the feed via client-side state update, so a page reload is required to see your own post. That's documented as an app UX characteristic, not a bug. Two TCs (valid photo upload, SQL injection in comment text) pass reliably in isolation but are flaky when run as part of the full sequential suite, a timing characteristic of the shared public demo under load rather than a product defect.
+"Share Video" turned out to be a paste-a-URL field, not a file upload. An initial TC assumed otherwise and was rewritten after live discovery corrected it. IDOR on post/comment access is confirmed N/A (same single-role architecture as other modules). An earlier-documented finding that a new post requires a manual reload to appear in the feed was re-verified live and no longer holds: two independent checks now consistently show a freshly-submitted post appearing as a real feed card without any reload — the superseded claim has been corrected. Two TCs (valid photo upload, SQL injection in comment text) pass reliably in isolation but are flaky when run as part of the full sequential suite, a timing characteristic of the shared public demo under load rather than a product defect.
 
 Three more TCs close out previously-untested features: editing an own post, deleting a comment, and infinite-scroll pagination on the feed. All three work correctly, no new application bugs found. Writing the edit-post test did catch a script bug, though: the "Edit Post" modal renders on top of the still-present main composer, so the page briefly has two `<textarea>` elements (an empty one behind the modal, and the real pre-filled one inside it). An early version of the test filled the wrong one, silently leaving the post unchanged despite a 200 response.
+
+**Taxonomy gap closure (2026-11-24), 2 new tests, Buzz matrix reaches 100% (its real ceiling):** `TC-BUZZ-22` closes 9 of the remaining 18 gap codes — text is proven optional whenever `type` isn't `"text"` (a `type:"photo"` post with no text at all is rejected 422 solely for the missing `photos` field, never for a missing `text` field), strict parameter validation on both `buzz/posts` and `buzz/feed`, no uniqueness constraint on duplicate post text (expected for a social feed), unicode/emoji/RTL content round-trips identically, a Like's counter updates instantly without a reload, two concurrent comments on the same post don't 500, and consistent error-message formatting. No bug. `TC-BUZZ-SECURITY-12` closes the last 8: creating a `type:"video"` post returns **HTTP 500 for every value tried, including a completely benign YouTube URL**, under two different field names — not a validation bug but the feature crashing outright server-side (`BG-490`, High). Because an internal/metadata-endpoint URL (`169.254.169.254`) produces the exact same 500 as the benign URL, there's no working SSRF vector to exploit right now. On the file-upload side, a benign PNG and a battery of malicious uploads (a renamed `.exe`, a 6MB oversized file) all produce **identical behavior**: the file is never actually attached to the post (the request that fires always carries `{type:"text",...}`, with no photo field at all) — so there's currently no functioning upload channel for any of the file-content-based attacks (Content-Type spoofing, double extension, path-traversal/command-injection filenames, oversized files) to exploit either. The real multipart/JSON contract behind "Share Photo" could not be reverse-engineered black-box in this session (several guessed field names for the `photos` key all returned 422); this is flagged as an open question, not closed as a second bug, since the existing `TC-BUZZ-09`/`SECURITY-03`/`SECURITY-04` tests already document this area's history and weren't re-litigated here.
 
 **Other confirmed bugs:**
 - Resume upload accepts an executable disguised as a `.pdf`, same extension-only validation pattern as PIM
@@ -452,7 +454,7 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 
 Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
 
-**Taxonomy coverage snapshot (2026-11-23):** 82.8% of applicable cells COVERED overall. Recruitment, Dashboard and Sidebar Search are at 100%, Performance at 98.1% (its real ceiling), PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, My Info at 76.6%, Admin at 72.8%, Time at 69.5%, Claim at 69.0% and Buzz at 69.0%; Buzz (68.97%) is now the lowest, narrowly ahead of Claim (69.03%). See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-24):** 83.1% of applicable cells COVERED overall. Recruitment, Dashboard, Sidebar Search and Buzz are at 100% (Buzz just reached its real ceiling), Performance at 98.1%, PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, My Info at 76.6%, Admin at 72.8%, Time at 69.5% and Claim at 69.0%; Claim (69.03%) is now the lowest. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

@@ -359,6 +359,29 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              UI ini), jumlah post card bertambah (10 -> 16
                              pada percobaan live). Fitur berfungsi normal.
 
+22   TC-BUZZ-22     [DONE]   TC-BUZZ-22-Verify-Post-Validation-Unicode-Concurrency-And-Known-Behaviors.spec.ts
+                             (+) 1.2 1.8 | (-) 2.2 | (!) 4.1 4.7 4.8 | (S)
+                             5.2-MassAssign | (A) 6.5 6.7 | (UI) 8.4  [U012]
+                             -> Menutup 9 dari 18 kode GAP terakhir U012.
+                             POST type=photo tanpa text -> 422 HANYA krn
+                             "photos" hilang, bukan "text" (1.2, text
+                             opsional saat type != text). type="bogus" ->
+                             422 (2.2). employeeId asing di body -> 422
+                             ditolak (5.2-MassAssign). GET feed param
+                             asing/sortField tak dikenal -> 422 (6.5). 2
+                             post teks identik -> keduanya 200, tidak ada
+                             uniqueness constraint, wajar utk feed sosial
+                             (6.7). Post unicode/emoji/RTL -> tersimpan
+                             identik (4.1). Like -> counter berubah instan
+                             tanpa reload (1.8). Post baru LANGSUNG muncul
+                             sbg card tanpa reload -- update dari catatan
+                             lama BuzzPage.ts yg menyebut perlu reload
+                             manual, dibuktikan ulang live 2x konsisten
+                             (4.8). 2 comment paralel pd post sama -> tidak
+                             ada 500 (4.7). Pesan error "Invalid Parameter"
+                             konsisten (8.4). Fitur berfungsi normal, tidak
+                             ada bug baru.
+
 ================================================================================
   GROUP 3, SECURITY
 ================================================================================
@@ -495,6 +518,39 @@ No.  Test Case ID   Status   Skenario / Deskripsi
                              seluruh karyawan (bukan cuma 1 record), bukan
                              cuma data sampah di 1 tabel. Pola sama dgn
                              BG-026 (Login) dan BG-067 (Recruitment).
+
+20   TC-BUZZ-SECURITY-12  [DONE -- BUG]  TC-BUZZ-SECURITY-12-Verify-File-Upload-Boundary-Injection-SSRF-And-Privilege-Checks.spec.ts
+                             (!) 3.3 | (S) 5.1-CmdPath 5.1-SSRF 5.2-PrivEsc
+                             5.3-ContentType 5.3-DoubleExt 5.3-Oversize
+                             5.3-Filename  [U012]
+                             -> Menutup 8 kode GAP TERAKHIR U012 (Buzz
+                             mencapai 100%). POST type=video dgn URL
+                             benign (YouTube) -> SEHARUSNYA 200/422,
+                             DITERIMA malah 500 -- dicoba 2 nama field
+                             berbeda, keduanya 500 (BUG BARU BG-490,
+                             High: fitur Share Video 100% broken server-
+                             side, bukan salah nama field). SSRF (5.1-
+                             SSRF): URL internal/metadata (169.254.169.254)
+                             -> status IDENTIK dgn URL benign (500
+                             keduanya) -- field ini TIDAK PUNYA jalur SSRF
+                             yg berfungsi saat ini. Share Photo (3.3,
+                             5.1-CmdPath, 5.2-PrivEsc via employeeId
+                             sdh ditutup di TC-BUZZ-22, 5.3-ContentType/
+                             DoubleExt/Oversize/Filename): file jinak
+                             (PNG) vs berbahaya (exe di-rename, 6MB
+                             oversized) SAMA-SAMA tidak pernah benar2
+                             ter-attach ke post (POST yg terkirim selalu
+                             {type:"text",...}, tidak pernah ada field
+                             foto) -- krn TIDAK ADA channel upload file yg
+                             berfungsi saat ini, tidak ada jalur eksploitasi
+                             yg bisa dibuktikan utk file berbahaya apa pun.
+                             CATATAN: mekanisme JSON/multipart yg benar di
+                             balik Share Photo TIDAK berhasil direverse-
+                             engineer (dicoba field photo/photoUrl/image/
+                             attachment/file/photos dlm beberapa bentuk,
+                             semua 422 invalidParamKeys:["photos"]) --
+                             investigasi lanjutan dicatat di Execution-
+                             Plan.md kalau diperlukan nanti.
 
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (12 Nov 2026)
