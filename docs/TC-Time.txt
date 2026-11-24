@@ -879,6 +879,87 @@ No.  Test Case ID              Status   Skenario / Deskripsi
   RUN COMMAND:
     npx playwright test tests/time/timesheet/TC-TIME-TIMESHEET-12-Verify-My-Timesheet-Feedback-Double-Submit-Navigation-Session-And-Reflected-XSS.spec.ts --project=chromium
 
+15   TC-TIME-ATTENDANCE-MYRECORDS-01  [DONE -- BUG]  tests/time/attendance/TC-TIME-ATTENDANCE-MYRECORDS-01-Verify-Edit-Delete-Feedback-Double-Submit-Navigation-Session-Concurrency-And-API-Validation.spec.ts
+                             (+) 1.1-D 1.1-U 1.2 1.4 1.8 | (-) 2.1 2.2 | (B) 3.4 |
+                             (!) 4.2 4.3 4.5 4.7 4.8 | (S) 5.2-PrivEsc
+                             5.2-MassAssign 5.4 | (A) 6.5 | (8) 8.4  [U056]
+                             -> Menutup U056 Attendance My Records SEPENUHNYA (18 kode).
+                                Dikonfirmasi live SEBELUM menulis TC: halaman ESS
+                                /attendance/viewMyAttendanceRecord BUKAN read-only --
+                                tiap baris py tombol trash (delete) & pencil (edit) yg
+                                membuka /attendance/editAttendanceRecord/<id> (Date,
+                                Time, Note wajib; section Punch Out kalau record sudah
+                                lengkap). Edit Time+Note via UI -> PUT 200, toast
+                                sukses, nilai tersimpan server (1.1-U/1.8). Note
+                                kosong/diisi lagi -> diterima dua2nya, field opsional
+                                (1.2). Record baru dari Punch In/Out LANGSUNG tampil di
+                                List (relasi create->read lintas-unit) (1.4). Date*
+                                dikosongkan di form edit -> validasi "Required" inline,
+                                PUT tidak terkirim (2.1). Time/Date format salah via API
+                                -> 422 invalidParamKeys konsisten (2.2). Date filter:
+                                tanggal tanpa record -> "No Records Found" (BUKAN pola
+                                "(0) Records Found" spt unit lain -- behavior spesifik
+                                unit ini); leap year & tahun jauh di masa depan -> 200
+                                graceful (3.4). Edit Note via UI TANPA Save lalu browser
+                                back -> perubahan dibuang, tidak ada PUT (4.3). Sesi
+                                berakhir (cookies dikosongkan sesaat pd page yg sama,
+                                BUKAN login kedua -- login kedua dgn akun SAMA terbukti
+                                men-invalidasi sesi utama) lalu Save -> dialihkan ke
+                                login, nilai tidak berubah (4.5). 2 PUT paralel ke
+                                record sama (double-click Save / dua sesi) -> tanpa
+                                5xx, nilai akhir = salah satu dari keduanya, tidak
+                                korup (4.2/4.7). PUT dgn field asing "employee"
+                                (coba pindah kepemilikan record) & "state"/"isLocked"
+                                -> 422 ditolak eksplisit, BUKAN diterima diam2
+                                (5.2-PrivEsc/5.2-MassAssign, finding positif). Situs
+                                lain (attacker.test) coba PUT/DELETE pakai sesi Admin
+                                yg login -> cookie tidak ikut, data tidak berubah,
+                                sesi tetap aktif (5.4). GET list dgn date format
+                                salah/limit negatif/parameter asing -> 422 konsisten;
+                                PUT dgn tipe data salah -> 422 (6.5). Date* ditandai
+                                wajib di form UI tapi TERNYATA opsional di API murni
+                                (GET tanpa date tetap 200) -- finding, bukan bug (4.8).
+                             -> SENGAJA FAILED (R3), BUG BARU BG-499 (Low) -- DELETE
+                                attendance/records thd id yg SUDAH terhapus (atau tak
+                                pernah ada) mengembalikan 403 "Unauthorized", BUKAN 404
+                                "Record Not Found" spt GET utk kondisi persis sama;
+                                dikonfirmasi DETERMINISTIK (sequential maupun parallel,
+                                bukan flaky). Format error-nya pun tdk konsisten dgn
+                                GET/PUT endpoint yg sama (status berupa STRING
+                                "404"/"422" di GET/PUT, tapi INTEGER 403 tanpa kutip di
+                                DELETE). Dampak: user yg klik ganda tombol trash (race
+                                UI yg umum) melihat pesan "Unauthorized" yg menyesatkan,
+                                padahal aksi hapus pertama sudah berhasil sempurna.
+                             PELAJARAN SKRIP: (1) panel filter Date* TERBUKA SECARA
+                                DEFAULT di sesi baru -- mengklik toggle-nya justru
+                                MENUTUPNYA, bukan membuka (dikonfirmasi via probe
+                                headless terpisah dari sesi MCP manual yg state-nya
+                                sudah terlanjur berubah dari eksplorasi sebelumnya);
+                                (2) form edit ini memicu GET async punch-in-overlaps
+                                sesaat setelah render (pola sama dgn
+                                AdminAttendanceRecordsPage.openAddForm) -- mengisi
+                                field SEBELUM GET itu selesai membuat input ter-reset
+                                diam2 ke nilai lama; (3) login KEDUA dgn akun ADMIN yg
+                                SAMA via loginAs() meng-invalidasi sesi utama (server
+                                tampak satu sesi aktif per user) -- simulasi "sesi
+                                berakhir" harus pakai clear/restore cookies pd page yg
+                                SAMA (pola TC-LEAVE-CONFIG-01), bukan browser context
+                                kedua; (4) utk 0 hasil pencarian, teks tampilannya
+                                persis "No Records Found", BUKAN pola "(0) Records
+                                Found" yg berlaku saat N>=1.
+                             HASIL: 30/32 lolos (2 sengaja FAILED, BG-499), stabil 3x
+                             run berturut-turut.
+
+  RUN COMMAND:
+    npx playwright test tests/time/attendance/TC-TIME-ATTENDANCE-MYRECORDS-01-Verify-Edit-Delete-Feedback-Double-Submit-Navigation-Session-Concurrency-And-API-Validation.spec.ts --project=chromium --workers=1
+
+  SISA GAP (belum ditutup, utk sesi lanjutan, per rebuild matrix 24 Nov 2026): U057
+  Punch In/Out (23 kode), U058 Attendance Employee Records (20), U106 Timesheet Edit &
+  Approval (10). CATATAN: rebuild matrix 24 Nov 2026 jg menunjukkan U055 My Timesheets
+  kembali py 17 GAP walau log sesi sebelumnya mencatat "SUDAH ditutup" via
+  TC-TIME-TIMESHEET-12 -- BELUM diinvestigasi kenapa (kemungkinan drift tooling/label,
+  bukan tugas sesi ini), WAJIB diverifikasi ulang sblm diasumsikan closed lagi.
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================

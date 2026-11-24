@@ -640,20 +640,26 @@
   berlalu sejak dicatat).
   NEXT ACTION (baca ini dulu sblm kerja, lalu rebuild matrix utk angka GAP pasti sblm
   mulai unit manapun -- angka di bawah ini snapshot saat berhenti, BISA SUDAH BERUBAH):
-  Update 24 Nov 2026: U055 My Timesheet ESS SUDAH TUTUP (TC-TIME-TIMESHEET-12, lihat LOG).
-  4 unit Time tersisa (dari 11 total; U059 Config & U063 Customers & U060/U061/U062
-  Reports & U004 Timesheets & U064 Projects & U055 My Timesheets semua SUDAH TUTUP):
-    - U056 Attendance My Records (18 kode), U057 Punch In/Out (23), U058 Attendance
-      Employee Records (20), U106 Timesheet Edit & Approval (19) -- unit BESAR
-      (total >60 kode), kemungkinan perlu di-pecah jadi banyak TC spt Performance
-      U103/Claim U105.
-  Time = 81.7%, matrix TOTAL = 86.5% (rebuild 24 Nov 2026 sesudah U055). Pola standing
-  tetap: SELESAIKAN Time sampai ceiling (4 unit besar di atas) sebelum pindah ke Admin
-  (72.8%, modul terendah). Baca docs/TC-Time.txt + Taxonomy-Coverage-Matrix.md utk
-  daftar GAP riil per unit (SELALU rebuild matrix dulu utk angka pasti, jangan pakai
-  angka di atas yg sudah bisa berubah), lalu probe-first -> TC -> typecheck -> trial ->
-  real-run -> Bug-List -> matrix rebuild -> docs -> check_docs.py -> commit -> push,
-  per unit/batch.
+  Update 24 Nov 2026 (closure U056): U056 Attendance My Records SUDAH TUTUP SEPENUHNYA
+  (TC-TIME-ATTENDANCE-MYRECORDS-01, 18 kode, BUG BARU BG-499 Low, lihat LOG). 3 unit
+  Time BESAR tersisa:
+    - U057 Punch In/Out (23 kode), U058 Attendance Employee Records (20), U106
+      Timesheet Edit & Approval (10) -- kemungkinan perlu di-pecah jadi banyak TC spt
+      Performance U103/Claim U105.
+  **PENTING, BELUM DIINVESTIGASI:** rebuild matrix 24 Nov 2026 (sesudah U056) jg
+  menunjukkan U055 My Timesheets kembali py 17 GAP, walau LOG sesi sebelumnya (sebelum
+  U056) mencatat "U055 SUDAH TUTUP" via TC-TIME-TIMESHEET-12. Sesi berikutnya WAJIB
+  cek ulang: baca TC-TIME-TIMESHEET-12's header Kategori vs 17 kode GAP yg muncul
+  (1.1-R/1.2/1.4/2.1/2.5/3.1/3.4/4.1/4.4/4.7/4.8/5.1-SQLi/5.2-PrivEsc/5.2-MassAssign/
+  5.4/6.5/8.4) -- kemungkinan drift tooling/konvensi label check (bukan regresi app
+  nyata), tapi BELUM dibuktikan, jangan diasumsikan closed lagi tanpa verifikasi.
+  Time = 85.5% (412 COVERED/70 GAP/370 N/A), matrix TOTAL = 86.9% (rebuild 24 Nov 2026
+  sesudah U056). Pola standing tetap: SELESAIKAN Time sampai ceiling (3 unit besar di
+  atas, + investigasi U055) sebelum pindah ke Admin (72.8%, modul terendah). Baca
+  docs/TC-Time.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit (SELALU
+  rebuild matrix dulu utk angka pasti, jangan pakai angka di atas yg sudah bisa
+  berubah), lalu probe-first -> TC -> typecheck -> trial -> real-run -> Bug-List ->
+  matrix rebuild -> docs -> check_docs.py -> commit -> push, per unit/batch.
   CARA REBUILD MATRIX (tidak ada script chain siap pakai, run manual urutan ini dari
   root qa-portofolio, S = direktori scratch apa pun yg py units.json/sweep_units.json/
   api_units.json dari tools/coverage/ disalin ke dalamnya dulu):
@@ -1133,3 +1139,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | Performance lanjutan (EVAL-18 + fix EVAL-17, U102 Review Evaluation TUNTAS) | 1 TC baru + 1 TC lama diperbaiki; menemukan & memperbaiki bug tooling di TC-PERF-EVAL-17 (label check `${label}` di dalam loop bukan string literal, extract_specs.py gagal baca 3 kode taksonomi sejak ditulis -- dibongkar jd 3 panggilan literal, perilaku sama, menutup 5.1-SQLi); EVAL-18 menutup 1.1-R/1.2/1.4/1.8/2.1/4.2/4.3/4.4/4.5/4.7/4.8/5.4/5.9/8.4 sekaligus; tidak ada bug baru; docs TC-Performance/README/Execution-Plan; Performance 87.2% -> 90.7%; matrix TOTAL 81.8% -> 82.1% | 1 commit
 - 2026-11-24 | Time lanjutan (PROJECT-04, U064 Projects TUNTAS) | 1 TC baru; ditemukan & diperbaiki 2 bug skrip probe sblm real-run (race autocomplete Customer krn filter prefix cocok ke 5 customer lama -- diperbaiki dgn isi nama Customer PENUH; race navigasi pasca-Save krn app sudah redirect sendiri ke viewProjects -- diperbaiki dgn waitForURL); SENGAJA FAILED (4.1), BUG BARU BG-496 (Medium) -- GET validation/project-name utk emoji di Name -> 500 Internal Server Error, Save macet permanen (tidak pernah kirim POST); scope dibuktikan via probe API 5 variasi (ASCII/Jepang/Arab/aksen semua 200, HANYA emoji/astral code point yg 500); noise baris otomatis BG-495 (dari file probe yg sudah dihapus) diarsipkan; 11/12 lolos, 3x run stabil; docs TC-Time/README/Execution-Plan/Bug-List; Time 78.8% -> 80.5%; matrix TOTAL 86.2% -> 86.4%; U064 adalah unit kecil terakhir -- 6 unit Time tersisa semua BESAR (My Timesheets/Attendance/Punch/Timesheet Edit), per "PERUBAHAN URUTAN MODUL" Admin (72.8%) kini modul terendah pasti | 1 commit
 - 2026-11-24 | Time lanjutan (TIMESHEET-12, U055 My Timesheet ESS TUNTAS) | 1 TC baru (3 akun ESS terisolasi, aksi destruktif dipisah per akun); ditemukan via Playwright MCP: redirect pasca-Save ke time/viewMyTimesheet?startDate=<yyyy-mm-dd> (query param nyata, diuji reflected XSS langsung di browser -- payload <img onerror> TIDAK dieksekusi), endpoint GET .../action-logs yg sebelumnya tidak terdokumentasi, PUT entries bersifat upsert per project+activity (klik ganda Save TIDAK duplikat baris); ditemukan & diperbaiki 1 bug skrip probe (MyTimesheetPage.fillFirstRow kadang jatuh ke pasangan project/activity basi di bawah load -- diperbaiki dgn retry helper lokal di spec, page object bersama TIDAK diubah); menutup 1.1-U/1.3/1.8/4.2/4.3/4.5/5.1-XSS-Reflected; toast feedback, double-submit Save & Submit, refresh/back tanpa save, sesi habis saat Save/Submit (401+redirect login) semua BENAR -- TIDAK ADA bug baru; 2 baris noise otomatis dari reporter (BG-497/BG-498, timeout transien saat masih stabilisasi skrip) diarsipkan; 14/14 lolos, 3x run stabil; docs TC-Time/README/Execution-Plan/Bug-List (archive); Time 80.5% -> 81.7%; matrix TOTAL 86.4% -> 86.5%; SISA 4 unit Time besar (U056 Attendance My Records, U057 Punch In/Out, U058 Attendance Employee Records, U106 Timesheet Edit & Approval) | 1 commit
+- 2026-11-24 | Time lanjutan (ATTENDANCE-MYRECORDS-01, U056 Attendance My Records TUNTAS) | 1 TC baru; verifikasi live via Playwright MCP SEBELUM menulis kode: halaman ESS /attendance/viewMyAttendanceRecord BUKAN read-only -- tiap baris punya tombol trash (delete) & pencil (edit) ke /attendance/editAttendanceRecord/<id> (Date/Time/Note, GET/PUT/DELETE lewat /api/v2/attendance/records); menutup 18 kode taksonomi gap sekaligus (1.1-D/1.1-U/1.2/1.4/1.8/2.1/2.2/3.4/4.2/4.3/4.5/4.7/4.8/5.2-PrivEsc/5.2-MassAssign/5.4/6.5/8.4); ditemukan & diperbaiki 4 bug skrip sblm stabil (panel filter Date TERBUKA default di sesi baru -- klik toggle justru menutupnya; form edit memicu GET async punch-in-overlaps yg mereset field yg baru diisi kalau belum networkidle; login KEDUA via loginAs() dgn akun Admin yg SAMA meng-invalidasi sesi utama -- diganti pola clear/restore cookies pd page yg sama spt TC-LEAVE-CONFIG-01; teks empty-state sebenarnya "No Records Found" literal, bukan pola "(0) Records Found"); SENGAJA FAILED (R3), BUG BARU BG-499 (Low) -- DELETE attendance/records thd id yg sudah terhapus mengembalikan 403 "Unauthorized" (BUKAN 404 "Record Not Found" spt GET utk kondisi sama), format error jg tdk konsisten (status string "404" di GET vs integer 403 di DELETE), dikonfirmasi deterministik baik sequential maupun parallel; 30/32 lolos, 3x run stabil; fix NAME_RULES build_matrix.py (entry eksplisit baru utk ATTENDANCE-MYRECORDS); docs TC-Time/README/Execution-Plan/Bug-List; Time 81.7% -> 85.5%; matrix TOTAL 86.5% -> 86.9%; TEMUAN BELUM DIINVESTIGASI: rebuild matrix skrg menunjukkan U055 kembali py 17 GAP walau LOG sebelumnya mencatat "SUDAH TUTUP" -- dicatat di NEXT ACTION utk sesi berikutnya, bukan diperbaiki di sesi ini (di luar scope U056); SISA 3 unit Time besar (U057 Punch In/Out, U058 Attendance Employee Records, U106 Timesheet Edit & Approval) + investigasi ulang U055 | 1 commit
