@@ -595,16 +595,38 @@
       field yg genuinely vulnerable-tested utk closure, bukan field yg menolak.
   STATE SAAT INI (rebuild matrix 24 Nov 2026): Time = 70.75% (341 COVERED/141 GAP/370
   N/A). Matrix TOTAL = 85.3%.
-  BERIKUT: U060 Project Reports (9 kode: 1.1-R/1.6/2.2/3.4/4.1/4.8/5.1-SQLi/
-  5.1-XSS-Reflected/6.5), U061 Employee Reports (8, sama pola minus 1.6), U062
-  Attendance Summary (9, sama pola dgn 1.6) -- ketiganya search/filter page, pola SAMA
-  PERSIS dgn TC-CLAIM-ASSIGN-16 (U011)/TC-CLAIM-SUBMIT-04 (U075) sblmnya: param
-  asing/sortField -> 422, date format invalid -> 422, SQLi/XSS di search field -> aman,
-  unicode -> tidak crash. Baca docs/TC-Time.txt + Taxonomy-Coverage-Matrix.md utk detail,
-  lalu probe-first -> TC -> typecheck -> trial -> real-run -> Bug-List -> matrix rebuild
-  -> docs -> check_docs.py -> commit -> push, per unit/batch. Setelah Time selesai,
-  lanjut otomatis ke modul paling rendah berikutnya, dst (per instruksi standar
-  koordinator: lanjutkan melalui SEMUA modul).
+    - TC-TIME-REPORTS-02: menutup U060 Project Reports + U061 Employee Reports + U062
+      Attendance Summary SEKALIGUS (9 kode masing2, 26 total gabungan: 1.1-R/1.6/2.2/
+      3.4/4.1/4.8/5.1-SQLi/5.1-XSS-Reflected/6.5) -- ketiganya dilayani 1 endpoint yg
+      sama persis GET /api/v2/time/reports/data, dibedakan via query param `name`
+      (project/employee/attendance). PELAJARAN NAME_RULES: regex default
+      `time/attendance/TC-TIME-REPORTS` di build_matrix.py cuma map ke U061 (Employee
+      Reports) -- perlu entry eksplisit baru `TC-TIME-REPORTS-02` -> ketiga unit, taruh
+      SEBELUM entry generik supaya regex lebih spesifik cocok duluan. PELAJARAN BEHAVIOR
+      MODUL-SPESIFIK (bukan bug): fromDate>toDate DITOLAK 422 di modul Time (beda dgn
+      Claim yg menerima sbg filter kosong) -- jangan asumsikan pola 1 modul berlaku sama
+      di modul lain, SELALU verifikasi live per modul. SENGAJA FAILED (R3), BUG BARU
+      BG-494 (Medium) -- empNumber non-numerik murni ("abc") -> 500, bukan 422, pola
+      sama dgn BG-460 (ghost/invalid-type id crash server) di modul lain. 13/14 lolos.
+  STATE SAAT INI (rebuild matrix 24 Nov 2026): Time = 76.14% (367 COVERED/115 GAP/370
+  N/A). Matrix TOTAL = 85.9%.
+  **PERUBAHAN URUTAN MODUL (penting, dicatat 24 Nov 2026):** rebuild matrix barusan
+  menunjukkan Admin (72.81%) SEKARANG LEBIH RENDAH dari Time (76.14%) -- Time BUKAN lagi
+  modul paling rendah. TAPI ikuti pola yg sudah ditetapkan utk Claim: SELESAIKAN DULU
+  modul yg sedang dikerjakan (Time) sampai ceiling-nya sebelum pindah ke modul lain,
+  jangan loncat ke Admin di tengah jalan hanya krn urutan berubah. Setelah Time benar2
+  selesai (ceiling final), baru rebuild ulang & pindah ke modul paling rendah SAAT ITU
+  (kemungkinan Admin, tapi verifikasi ulang dgn rebuild matrix, jangan percaya angka lama
+  di catatan ini).
+  BERIKUT (unit Time tersisa, 8 dari 11): U004 Employee Timesheets (7 kode), U055 My
+  Timesheets (20), U056 Attendance My Records (18), U057 Punch In/Out (23), U058
+  Attendance Employee Records (20), U064 Projects (11), U106 Timesheet Edit & Approval
+  (19). Kerjakan unit kecil dulu (U004, U064), baru unit besar (U055-U058, U106 -- total
+  >100 kode, kemungkinan perlu di-pecah jadi banyak TC spt Performance U103/Claim U105).
+  Baca docs/TC-Time.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit
+  berikutnya (SELALU rebuild matrix dulu utk angka pasti, jangan pakai angka di atas yg
+  sudah bisa berubah), lalu probe-first -> TC -> typecheck -> trial -> real-run ->
+  Bug-List -> matrix rebuild -> docs -> check_docs.py -> commit -> push, per unit/batch.
   **PERUBAHAN EMAIL KOMIT (24 Nov 2026, instruksi user via koordinator):** mulai komit
   berikutnya, email ganti jadi arsal@pakaidonk.id (nama tetap "Arsal", TETAP TANPA
   Co-Authored-By/trailer apa pun). Commit lama yg sudah di-push JANGAN diubah. Format:

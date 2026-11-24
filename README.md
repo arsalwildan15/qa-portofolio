@@ -199,14 +199,14 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Performance | 49 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 36 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
-| Time | 22 | [docs/TC-Time.txt](docs/TC-Time.txt) |
+| Time | 23 | [docs/TC-Time.txt](docs/TC-Time.txt) |
 | Cross-module (Leave/Claim/Performance/Time) | 7 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
 | My Info | 18 | [docs/TC-MyInfo.txt](docs/TC-MyInfo.txt) |
 | Dashboard | 3 | [docs/TC-Dashboard.txt](docs/TC-Dashboard.txt) |
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **681** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **682** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Multi-role testing (2026-11-15):** the public demo only ships one Admin login, which earlier made approval flows look untestable ("N/A"). `tests/_global/infra/` and `src/utils/` now create real accounts on the fly (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`), so Performance, Claim, Leave and Time are tested across roles: an Employee Self-Service (ESS) user submits, an Admin approves or rejects in a separate browser context, and each test also checks the ESS user cannot approve their own request via the API. This also overturned an older "Approve/Reject is N/A" conclusion in Leave.
 
@@ -411,7 +411,7 @@ Apply (11), Assign (6), Leave List incl. cancel-restores-balance and IDOR (3 + 1
 
 Not tested end to end: Add Entitlement's "Multiple Employees" bulk-assign mode, since an empty filter on the shared demo matches 118 real employees belonging to other users, with no safe way to scope it to this suite's own test data.
 
-### Time (22 TCs)
+### Time (23 TCs)
 
 Attendance punch in/out incl. XSS in notes, Admin proxy punch-in, invalid-id handling, the employee report, timesheet hour entry and duration validation, and the cross-role timesheet flow added in Fase 2 (5): an ESS user fills and submits a weekly timesheet, the Admin approves it with a comment (APPROVED, no longer editable) or rejects it (the employee can correct and resubmit, so Reject is not terminal), self-approval through the API is refused, and approving a timesheet that was never submitted is refused (400). Layer 2 (5) adds day/week totals across several rows (and removing a row), stored XSS in a cell comment viewed by both the employee and the Admin, and Project Info: customer → project → activity names are unique at every level, an employee can log time to a new project but cannot create customers or projects (403), and nothing with time logged against it can be deleted.
 
@@ -423,7 +423,7 @@ Bug found: the 24-hour limit is checked per cell only. One cell of 25:00 is refu
 
 Not yet covered: dedicated feedback/double-submit/navigation/session/XSS-reflected UI tests for My Timesheet, Punch In/Out, Attendance Records, and Timesheet Edit & Approval, and search/filter coverage (including reflected XSS and SQLi in the search box) for the three Reports pages.
 
-**Taxonomy gap closure (2026-11-24), 1 new test, Time matrix 69.5% to 70.7%:** `TC-TIME-PROJECT-03` closes Customers entirely: `description` is optional and stored as an empty string (not `null` — a different convention from Claim's equivalent field, documented as a known behavior, not a bug). The `name` field rejects a full XSS payload outright (422, stricter validation than `description`), but the same payload in `description` is accepted and stored verbatim, then confirmed to render as plain text — not execute — on the Customers list page. No bug.
+**Taxonomy gap closure (2026-11-24), 2 new tests, Time matrix 69.5% to 76.1%:** `TC-TIME-PROJECT-03` closes Customers entirely: `description` is optional and stored as an empty string (not `null` — a different convention from Claim's equivalent field, documented as a known behavior, not a bug). The `name` field rejects a full XSS payload outright (422, stricter validation than `description`), but the same payload in `description` is accepted and stored verbatim, then confirmed to render as plain text — not execute — on the Customers list page. No bug. `TC-TIME-REPORTS-02` closes all three Reports pages (Project Reports, Employee Reports, Attendance Summary) at once, since they share one identical endpoint (`GET time/reports/data`, distinguished only by a `name` query param): required-relation validation (`projectId`/`empNumber`), a full read-contract check on both the project and employee report shapes, an invalid date format rejected, a reversed date range rejected outright (a different, equally valid convention from Claim's "accept as an empty-result filter"), an unrecognized report name returning 400 instead of the usual 422 (a quirky but harmless inconsistency), SQLi/XSS payloads safely rejected by type validation, and unicode/emoji in the employee-name search box. Found a new bug: sending a purely non-numeric employee ID (`"abc"`) crashes the server with a 500 instead of a clean validation error — the same "invalid-type ID crashes the server" pattern already confirmed elsewhere as `BG-460` (`BG-494`, Medium).
 
 ### Cross-module checks (7 TCs)
 
@@ -458,7 +458,7 @@ Tested as a real Employee Self-Service user created on the fly: personal details
 
 Data-driven checks over every menu unit: page load and console errors, security headers, the list APIs, role access, accessibility, create/update/delete contracts, add-form feedback, double-submit, navigation, and connection loss. App-wide findings include missing clickjacking protection (BG-404), unlabeled inputs and icon buttons (BG-416, Medium), and double-click duplicates on some Admin forms (BG-427).
 
-**Taxonomy coverage snapshot (2026-11-24):** 85.3% of applicable cells COVERED overall. Recruitment, Dashboard, Sidebar Search, Buzz and Claim are at 100%, Performance at 98.1%, PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, My Info at 76.6%, Admin at 72.8% and Time at 70.7%; Time is still the lowest, with the most units left to close (10 of 11). See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-24):** 85.9% of applicable cells COVERED overall. Recruitment, Dashboard, Sidebar Search, Buzz and Claim are at 100%, Performance at 98.1%, PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, My Info at 76.6%, Time at 76.1% and Admin at 72.8%; Admin is now the lowest, narrowly below Time (8 of 11 Time units remain). See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

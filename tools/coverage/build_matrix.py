@@ -64,6 +64,7 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'time/security/TC-TIME-SECURITY-01', ['Time > Attendance > Configuration', 'Time > Project Info > Customers', 'Time > Project Info > Projects']),
  (r'time/attendance/TC-TIME-PUNCH', ['Time > Attendance > Punch In/Out', 'Time > Attendance > My Records']),
  (r'time/attendance/TC-TIME-ADMIN-ATTENDANCE', ['Time > Attendance > Employee Records']),
+ (r'time/attendance/TC-TIME-REPORTS-02', ['Time > Reports > Project Reports', 'Time > Reports > Employee Reports', 'Time > Reports > Attendance Summary']),
  (r'time/attendance/TC-TIME-REPORTS', ['Time > Reports > Employee Reports']),
  (r'time/timesheet/TC-TIME-TS-APPROVAL', ['Time > Timesheets > Employee Timesheets', 'Time > Timesheet Edit & Approval']),
  (r'time/timesheet/TC-TIME-(TIMESHEET|TS-SUBMIT)', ['Time > Timesheets > My Timesheets', 'Time > Timesheet Edit & Approval']),

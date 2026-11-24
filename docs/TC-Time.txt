@@ -742,6 +742,40 @@ No.  Test Case ID              Status   Skenario / Deskripsi
   RUN COMMAND:
     npx playwright test tests/time/project/TC-TIME-PROJECT-03-Verify-Customer-Optional-Field-XSS-And-Known-Behavior.spec.ts --project=chromium
 
+ R6  TC-TIME-REPORTS-02  [DONE -- BUG]  tests/time/attendance/TC-TIME-REPORTS-02-Verify-Reports-Read-Contract-Validation-Injection-And-Boundary.spec.ts
+                             (+) 1.1-R 1.6 | (-) 2.2 | (!) 3.4 4.1 4.8 | (S)
+                             5.1-SQLi 5.1-XSS-Reflected | (A) 6.5
+                             [U060][U061][U062]
+                             -> Menutup Project Reports + Employee Reports +
+                                Attendance Summary SEKALIGUS -- ketiganya dilayani 1
+                                endpoint yg sama persis, GET /api/v2/time/reports/data,
+                                dibedakan via query param `name` (project/employee/
+                                attendance). name=project perlu projectId, name=employee
+                                perlu empNumber (422 kalau tidak ada); name=attendance
+                                langsung tanpa relasi khusus. Kontrak baca: project ->
+                                {activityId,activityName,deleted,time,_url}; employee ->
+                                {projectName,activityName,duration} (1.1-R/1.6). fromDate
+                                format invalid -> 422 (2.2). fromDate > toDate -> 422
+                                DITOLAK (beda dgn modul Claim yg menerima rentang
+                                terbalik sbg filter kosong -- bukan bug, behavior
+                                modul-spesifik) (3.4). Param asing -> 422; name=bogus ->
+                                400 BUKAN 422 (format error beda, non-obvious tapi bukan
+                                bug) (4.8/6.5). projectId XSS -> 422 ditolak
+                                (5.1-XSS-Reflected). empNumber SQLi diawali angka -> 422
+                                normal (5.1-SQLi). Employee Name search box unicode/emoji
+                                -> tidak crash (4.1). SENGAJA FAILED (R3), BUG BARU
+                                BG-494 (Medium) -- empNumber string NON-NUMERIK MURNI
+                                ("abc") -> 500 Internal Server Error, BUKAN 422 spt
+                                nonexistent-id numerik -- pola "ghost/invalid-type id
+                                crash server" yg sama dgn BG-460 di modul lain. PELAJARAN
+                                NAME_RULES: default regex `time/attendance/TC-TIME-
+                                REPORTS` sblmnya cuma map ke U061 Employee Reports --
+                                perlu entry eksplisit baru utk REPORTS-02 yg nutup 3
+                                unit sekaligus. 13/14 lolos.
+
+  RUN COMMAND:
+    npx playwright test tests/time/attendance/TC-TIME-REPORTS-02-Verify-Reports-Read-Contract-Validation-Injection-And-Boundary.spec.ts --project=chromium
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
