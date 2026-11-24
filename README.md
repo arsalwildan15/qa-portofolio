@@ -19,10 +19,10 @@ End-to-end test automation suite for the [OrangeHRM demo application](https://op
 | Code quality | ESLint + Prettier |
 | CI/CD | GitHub Actions (type-check + lint on every push) |
 | AI-assisted exploration | [Playwright MCP](https://github.com/microsoft/playwright-mcp) (`.mcp.json`) |
-| Security scanning (source code) | [Snyk](https://snyk.io/) (SCA/SAST) + [Gitleaks](https://github.com/gitleaks/gitleaks) (secrets) + [Trivy](https://trivy.dev/) (Docker misconfig) — see [security/README.md](security/README.md) |
-| Security scanning (DAST, planned) | [OWASP ZAP](https://www.zaproxy.org/) — on hold, see **Roadmap** below |
+| Security scanning (source code) | [Snyk](https://snyk.io/) (SCA/SAST) + [Gitleaks](https://github.com/gitleaks/gitleaks) (secrets) + [Trivy](https://trivy.dev/) (Docker misconfig), see [security/README.md](security/README.md) |
+| Security scanning (DAST, planned) | [OWASP ZAP](https://www.zaproxy.org/), on hold, see **Roadmap** below |
 
-> **Playwright MCP is a separate tool from the committed test suite above.** It lets an AI agent drive a real browser interactively (navigate, click, snapshot the accessibility tree) during exploration and debugging — the same role `tests/zz-probe-*.spec.ts` has played manually throughout this project (see **Test Execution & Reporting** below). It doesn't run in CI and doesn't generate spec files; every committed TC is still written, reviewed, and run through `@playwright/test` like normal.
+> **Playwright MCP is a separate tool from the committed test suite above.** It lets an AI agent drive a real browser interactively (navigate, click, snapshot the accessibility tree) during exploration and debugging, the same role `tests/zz-probe-*.spec.ts` has played manually throughout this project (see **Test Execution & Reporting** below). It doesn't run in CI and doesn't generate spec files; every committed TC is still written, reviewed, and run through `@playwright/test` like normal.
 
 ## Architecture
 
@@ -214,11 +214,11 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | **Total** | **683** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Approach highlights:**
-- **Multi-role testing:** the public demo ships only one Admin login, so `tests/_global/infra/` + `src/utils/` (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`) spin up real accounts on the fly. Performance, Claim, Leave and Time are all tested across roles — an ESS user submits, an Admin approves/rejects in a separate browser context, and each test confirms the ESS user can't self-approve via the API.
+- **Multi-role testing:** the public demo ships only one Admin login, so `tests/_global/infra/` + `src/utils/` (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`) spin up real accounts on the fly. Performance, Claim, Leave and Time are all tested across roles: an ESS user submits, an Admin approves/rejects in a separate browser context, and each test confirms the ESS user can't self-approve via the API.
 - **Environment resilience:** the shared demo flips its global date format at random (`src/utils/dateInput.ts` reads the live placeholder instead of assuming one format) and other users delete shared seed data, so tests that need data create their own (`ensureVacancy.ts`, etc.) rather than relying on it existing.
-- **Taxonomy coverage:** `docs/Taxonomy-Coverage-Matrix.xlsx` maps all 109 menu units across every sidebar module against every item in `docs/Test-Case-Taxonomy.txt` — each cell is COVERED (with TC ids), N/A (with a verified reason), or GAP. `tools/coverage/` rebuilds it; `docs/Taxonomy-Coverage-Matrix.md` has the per-module gap backlog.
+- **Taxonomy coverage:** `docs/Taxonomy-Coverage-Matrix.xlsx` maps all 109 menu units across every sidebar module against every item in `docs/Test-Case-Taxonomy.txt`; each cell is COVERED (with TC ids), N/A (with a verified reason), or GAP. `tools/coverage/` rebuilds it; `docs/Taxonomy-Coverage-Matrix.md` has the per-module gap backlog.
 
-**App-wide bugs confirmed independently across multiple modules** (same root cause, found and reproduced separately in each — the strongest signal of a systemic code issue rather than a one-off):
+**App-wide bugs confirmed independently across multiple modules** (same root cause, found and reproduced separately in each, the strongest signal of a systemic code issue rather than a one-off):
 
 | Pattern | Confirmed in | Bug IDs |
 |---|---|---|
@@ -234,18 +234,18 @@ If targeting a different environment for a local run, set these in `.env` (copie
 
 | Module | Coverage | Standout findings |
 |---|---|---|
-| **Login** | — | No rate limiting/lockout on failed logins; missing clickjacking header; Reset Password intermittently hangs with no response (~29% of isolated runs, likely an unreachable SMTP dependency) |
+| **Login** | n/a | No rate limiting/lockout on failed logins; missing clickjacking header; Reset Password intermittently hangs with no response (~29% of isolated runs, likely an unreachable SMTP dependency) |
 | **Admin** | 72.8% | Renaming a freshly-created Org Structure unit fails with 422 (resends an untouched optional field as `null`); Job Title's file upload accepts a renamed executable; combined Role+Status filter confirmed to AND correctly; currently the lowest-coverage module |
 | **PIM** | 97.6% (ceiling) | Full employee-record + configuration coverage. Supervisor/Job/Personal-Details lookup ids crash with 500 instead of 422 (BG-466/467/470); CSV re-import has no idempotency, creating a duplicate employee on retry (BG-484); Report `criteria` filter crashes 500 for every value tried (BG-485) |
-| **Recruitment** | 68 TCs | Candidate Shortlist 500s specifically when the vacancy has no hiring manager — root-caused via an 8/8 correlation, not random flakiness; double-click creates duplicate candidates; resume/vacancy-attachment uploads accept renamed executables |
-| **Buzz** | 100% (ceiling) | Share Video returns HTTP 500 for *every* value tried, including a benign URL — the feature is broken server-side, not just under-validated (BG-490, High); double-click posts broadcast duplicates company-wide; no rate limiting on post creation |
+| **Recruitment** | 68 TCs | Candidate Shortlist 500s specifically when the vacancy has no hiring manager, root-caused via an 8/8 correlation, not random flakiness; double-click creates duplicate candidates; resume/vacancy-attachment uploads accept renamed executables |
+| **Buzz** | 100% (ceiling) | Share Video returns HTTP 500 for *every* value tried, including a benign URL: the feature is broken server-side, not just under-validated (BG-490, High); double-click posts broadcast duplicates company-wide; no rate limiting on post creation |
 | **Performance** | 98.1% (ceiling) | Non-numeric KPI ratings silently coerced to `0` on both supervisor- and employee-side endpoints (BG-373/489); an ESS user could read every employee's tracker data, a broken function-level access control issue (BG-460); review end-date-before-start-date accepted via direct API call |
 | **Claim** | 100% (ceiling) | Zero-expense claims can be approved straight to PAID; a stale Reject button throws on an already-paid claim; attachment filenames with path traversal or shell metacharacters are stored verbatim with no sanitization (BG-493) |
 | **Leave** | 82.4% | `GET leave-entitlements` 500s on any `offset` value; two holidays on the same date are blocked client-side but accepted by the API with no server-side constraint |
-| **Time** | 78.8% | The 24h/day limit is enforced per cell, not per day — two legitimate-looking rows together exceed 24h undetected (BG-402); a non-numeric employee id crashes the Reports endpoint with 500 |
+| **Time** | 78.8% | The 24h/day limit is enforced per cell, not per day: two legitimate-looking rows together exceed 24h undetected (BG-402); a non-numeric employee id crashes the Reports endpoint with 500 |
 | **Cross-module** | 7 TCs | None of the four shared-layer modules sends a clickjacking header; an emoji in a name field 500s the server-side uniqueness check; a dropped connection mid-save leaves the form stuck on its spinner forever |
 | **My Info** | 76.6% | Fields disabled in the UI (Employee Id, Date of Birth) are still editable through direct API calls (BG-420, High); a cross-site page can overwrite the session cookie and log the employee out |
-| **Dashboard / Sidebar Search / Maintenance** | 80.8% / 100% / 88.7% | Maintenance's "Administrator Access" password prompt is UI-only — purge and personal-data export both succeed via the API with no password check at all (BG-440, High) |
+| **Dashboard / Sidebar Search / Maintenance** | 80.8% / 100% / 88.7% | Maintenance's "Administrator Access" password prompt is UI-only; purge and personal-data export both succeed via the API with no password check at all (BG-440, High) |
 | **Sweep (all menus)** | 11 TCs | Confirms the clickjacking gap and an unlabeled-input/icon-button accessibility issue (BG-416) hold app-wide, across every module at once, not just where found individually |
 
 Full reproduction steps, request/response bodies, and the complete bug catalog for each module live in its `docs/TC-<Module>.txt` and in `docs/Bug-List.xlsx`.
