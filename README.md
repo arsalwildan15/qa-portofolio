@@ -19,6 +19,8 @@ End-to-end test automation suite for the [OrangeHRM demo application](https://op
 | Code quality | ESLint + Prettier |
 | CI/CD | GitHub Actions (type-check + lint on every push) |
 | AI-assisted exploration | [Playwright MCP](https://github.com/microsoft/playwright-mcp) (`.mcp.json`) |
+| Security scanning (source code) | [Snyk](https://snyk.io/) (SCA/SAST) + [Gitleaks](https://github.com/gitleaks/gitleaks) (secrets) + [Trivy](https://trivy.dev/) (Docker misconfig) — see [security/README.md](security/README.md) |
+| Security scanning (DAST, planned) | [OWASP ZAP](https://www.zaproxy.org/) — on hold, see **Roadmap** below |
 
 > **Playwright MCP is a separate tool from the committed test suite above.** It lets an AI agent drive a real browser interactively (navigate, click, snapshot the accessibility tree) during exploration and debugging — the same role `tests/zz-probe-*.spec.ts` has played manually throughout this project (see **Test Execution & Reporting** below). It doesn't run in CI and doesn't generate spec files; every committed TC is still written, reviewed, and run through `@playwright/test` like normal.
 
