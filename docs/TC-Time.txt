@@ -1034,13 +1034,111 @@ No.  Test Case ID              Status   Skenario / Deskripsi
   RUN COMMAND:
     npx playwright test tests/time/attendance/TC-TIME-PUNCH-03-Verify-Feedback-Validation-Boundary-Edge-Security-And-API-Contract.spec.ts --project=chromium --workers=1
 
-  SISA GAP (belum ditutup, utk sesi lanjutan, per rebuild matrix 25 Nov 2026): U058
-  Attendance Employee Records (20), U106 Timesheet Edit & Approval (10). U057 Punch
-  In/Out SEKARANG SEPENUHNYA TERTUTUP (0 GAP). CATATAN (msh berlaku, blm diinvestigasi):
-  rebuild matrix jg menunjukkan U055 My Timesheets msh py 17 GAP walau log sesi
-  sebelumnya mencatat "SUDAH ditutup" via TC-TIME-TIMESHEET-12 -- kemungkinan drift
-  tooling/label, bukan tugas sesi ini, WAJIB diverifikasi ulang sblm diasumsikan closed
-  lagi.
+17   TC-TIME-ADMIN-ATTENDANCE-03  [DONE -- BUG]  tests/time/attendance/TC-TIME-ADMIN-ATTENDANCE-03-Verify-Edit-Delete-Feedback-Double-Submit-Navigation-Session-Concurrency-And-API-Validation.spec.ts
+                             (+) 1.1-U 1.1-D 1.2 1.8 | (-) 2.1 2.2 | (B) 3.4 |
+                             (!) 4.1 4.2 4.3 4.5 4.7 4.8 | (S) 5.1-SQLi
+                             5.1-XSS-Reflected 5.2-MassAssign 5.4 5.5 | (A) 6.5
+                             6.7 | (8) 8.4  [U058]
+                             -> Menutup U058 Attendance Employee Records SEPENUHNYA (20
+                                kode). TC-TIME-ADMIN-ATTENDANCE-01/02 sblmnya sudah
+                                menutup 1.1-C/1.4/1.8/6.1 (proxy Punch In/Out) -- TC INI
+                                melengkapi sisanya: edit/delete per baris record, search
+                                Employee Name, dan validasi API. Dikonfirmasi live via
+                                Playwright MCP SEBELUM menulis kode: klik "View" pd
+                                baris employee di list utama -> URL employeeId=<X>&
+                                date=<Y> -> detail record BUKAN read-only, tiap baris
+                                py tombol trash (delete) & pencil (edit, membuka
+                                /attendance/editEmployeeAttendanceRecord/<id> -- URL
+                                BEDA dari My Records' editAttendanceRecord/<id>, tapi
+                                form & PUT /api/v2/attendance/records/<id>-nya PERSIS
+                                SAMA dgn My Records/U056). TEMUAN PENTING: CREATE &
+                                DELETE justru pakai endpoint NESTED per-employee yg
+                                BEDA dari My Records: POST/GET/DELETE
+                                /api/v2/attendance/employees/<empNumber>/records (My
+                                Records pakai endpoint "flat" attendance/records tanpa
+                                empNumber di path) -- DUA bentuk URL berbeda utk
+                                resource attendance record yg SAMA, dibedakan hanya
+                                oleh siapa target-nya. Employee Name search HANYA
+                                memanggil endpoint GLOBAL /api/v2/pim/employees
+                                ?nameOrId=...&includeEmployees=currentAndPast (dipakai
+                                bersama banyak modul lain). Edit Time+Note via UI ->
+                                PUT 200, toast sukses, nilai tersimpan server (1.1-U/
+                                1.8). Note kosong/diisi lagi -> diterima dua2nya (1.2).
+                                Date* dikosongkan di form edit -> validasi "Required"
+                                inline, PUT tidak terkirim (2.1). Time/Date format
+                                salah via API -> 422 invalidParamKeys konsisten (2.2).
+                                Leap year & tahun jauh di masa depan/lalu -> 200
+                                graceful (3.4). Unicode CJK/aksen Latin/zero-width-
+                                space di Employee Name search -> 200 aman (4.1, KECUALI
+                                emoji -- lihat BUG di bawah). Edit via UI TANPA Save
+                                lalu browser back -> perubahan dibuang (4.3). Sesi admin
+                                berakhir lalu Save -> dialihkan ke login, nilai tidak
+                                berubah (4.5). 2 PUT paralel ke record sama -> tanpa
+                                5xx, nilai akhir = salah satu dari keduanya (4.2/4.7).
+                                PUT dgn field asing "employeeId" (coba pindah
+                                kepemilikan record ke employee lain) & "state"/
+                                "isLocked" -> 422 ditolak eksplisit (5.2-MassAssign).
+                                Payload SQLi/XSS di Employee Name search -> 200, data
+                                kosong/aman, tidak dipantulkan mentah (5.1-SQLi/5.1-
+                                XSS-Reflected). Situs lain (attacker.test) coba PUT
+                                pakai sesi Admin -> cookie tidak ikut, data tidak
+                                berubah (5.4). 8 proxy Punch In paralel (tanggal
+                                berbeda) -> tidak ada satupun 429 (5.5, finding, pola
+                                sama BG-491/492). GET list dgn date format salah/limit
+                                negatif/empNumber query TIDAK COCOK dgn path -> 422
+                                konsisten (6.5). Date* wajib di form filter UI tapi
+                                opsional di API nested murni (4.8, finding, konsisten
+                                dgn U056). Hapus record via UI SUNGGUHAN (klik trash +
+                                konfirmasi) -> record benar2 hilang di list & server
+                                (1.1-D).
+                             -> SENGAJA FAILED (R3), 2 BUG BARU:
+                                BG-504 (Low) -- SAMA KELAS dgn BG-499 (My Records) --
+                                DELETE /api/v2/attendance/employees/<empNumber>/records
+                                thd id yg SUDAH terhapus (simulasi klik ganda tombol
+                                trash) mengembalikan 403 "Unauthorized" (status
+                                INTEGER tanpa kutip), BUKAN 404 "Record Not Found"
+                                (status STRING) spt GET utk kondisi IDENTIK; deterministik
+                                (bukan flaky). Kini terbukti bug ini BUKAN satu endpoint
+                                saja -- menyebar ke SEMUA jalur delete attendance record
+                                (flat maupun nested per-employee).
+                                BG-505 (Medium) -- GET /api/v2/pim/employees?nameOrId=
+                                <emoji astral 4-byte> -> 500 Internal Server Error,
+                                BUKAN 200 kosong spt unicode lain; dikonfirmasi
+                                deterministik (4 payload emoji berbeda + 2 ulangan =
+                                6/6 kali 500). Endpoint GLOBAL ini dipakai Employee Name
+                                search di unit ini, tapi jg dipakai banyak modul lain --
+                                SATU root cause (kolom DB "utf8" bukan "utf8mb4", pola
+                                SAMA dgn BG-501/BG-496), bug id TERPISAH krn unit beda
+                                (konvensi project).
+                             PELAJARAN METODOLOGI PENTING: Punch In/Out adl SATU flag
+                                GLOBAL per employee (pola sama dgn TC-TIME-PUNCH-03) --
+                                record B (Punch In kedua) TIDAK BISA dibuat selagi
+                                record A msh "terbuka" (belum di-delete/Punch Out),
+                                server menolak 400 "Already Punched In" meski beda
+                                record id; urutan skrip disesuaikan (hapus A dulu,
+                                baru buat B). Deep-link employeeId+date (page.reload()
+                                setelah navigasi lain) TIDAK reliable stlh sesi
+                                "pulih" dari simulasi session-expired -- WAJIB cari
+                                ulang via searchAndView(), bukan reload() di page yg
+                                sudah pindah ke list bare. Employee throwaway sendiri
+                                (bukan employee demo yg sudah ada) dipakai sbg target
+                                proxy punch, menghindari sentuh data employee lain.
+                             HASIL: 37 check -> 34 lolos, 3 sengaja FAILED (BG-504 x2,
+                             BG-505 x1), stabil 3x run berturut-turut (ditambah 1x
+                             trial run sblm stabilisasi urutan Punch In/Out).
+
+  RUN COMMAND:
+    npx playwright test tests/time/attendance/TC-TIME-ADMIN-ATTENDANCE-03-Verify-Edit-Delete-Feedback-Double-Submit-Navigation-Session-Concurrency-And-API-Validation.spec.ts --project=chromium --workers=1
+
+  SISA GAP (belum ditutup, utk sesi lanjutan, per rebuild matrix 25 Nov 2026): U106
+  Timesheet Edit & Approval (10). U058 Attendance Employee Records SEKARANG
+  SEPENUHNYA TERTUTUP (0 GAP). CATATAN (msh berlaku, BELUM diinvestigasi, DIKONFIRMASI
+  ULANG via rebuild matrix independen sesi ini -- BUKAN transien/mitos, 3 sesi
+  berturut-turut termasuk sesi ini menunjukkan angka yg SAMA): U055 My Timesheets msh
+  py 17 GAP walau log sesi sebelumnya (sblm U056) mencatat "SUDAH ditutup" via
+  TC-TIME-TIMESHEET-12 -- kemungkinan drift tooling/label (lihat header TC-TIME-
+  TIMESHEET-12 vs kode yg muncul GAP), BUKAN tugas sesi ini, WAJIB diinvestigasi sesi
+  berikutnya, jangan diasumsikan closed lagi tanpa pembuktian baru.
 
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
@@ -1088,9 +1186,11 @@ No.  Test Case ID              Status   Skenario / Deskripsi
                                    semua terdokumentasi di Catatan Teknis &
                                    NOTE per TC di atas)
 
-  BELUM DICAKUP (backlog, lihat docs/Execution-Plan.md P2.4):
+  BELUM DICAKUP (backlog, lihat docs/Execution-Plan.md P2.4; PUNCH-03 &
+  ADMIN-ATTENDANCE-03 sudah ditutup di closure U057/U058 di atas):
     TIMESHEET navigasi minggu & Reset (UI), Reject tanpa komentar sbg TC
-    tersendiri, PUNCH-03..05, ADMIN-ATTENDANCE-03/04, REPORTS-02..05,
+    tersendiri, PUNCH-04/05, ADMIN-ATTENDANCE-04, REPORTS-02..05 (REPORTS-02
+    sudah ditutup di closure Time Reports di atas),
     Customer/Project lewat UI (lapis 2 mencakupnya via API).
 
   RUN COMMAND (semua TC):

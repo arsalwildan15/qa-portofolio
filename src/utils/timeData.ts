@@ -86,3 +86,37 @@ export async function deleteAttendanceRecords(req: APIRequestContext, ids: Array
   const real = ids.filter((x): x is number => typeof x === 'number');
   if (real.length) await req.delete(`${API}attendance/records`, { data: { ids: real } }).catch(() => null);
 }
+
+/**
+ * Admin proxy Punch In on behalf of ANOTHER employee -- confirmed live 25 Nov 2026 via
+ * page.on('request') while clicking "Add" -> "In" on Time > Attendance > Employee Records
+ * (AdminAttendanceRecordsPage): POST to the NESTED collection endpoint
+ * attendance/employees/<empNumber>/records (NOT the plain attendance/records used by
+ * self-service punchIn/punchOut above). Body shape is otherwise identical. Returns the new
+ * record's id.
+ */
+export async function proxyPunchIn(
+  req: APIRequestContext,
+  empNumber: number,
+  date: string,
+  time: string,
+  note: string | null = null,
+  timezoneOffset = 7,
+  timezoneName = 'Asia/Jakarta',
+): Promise<number> {
+  const r = await req.post(`${API}attendance/employees/${empNumber}/records`, { data: { date, time, note, timezoneOffset, timezoneName } });
+  const id = ((await r.json().catch(() => ({}))) as { data?: { id?: number } }).data?.id;
+  if (!id) throw new Error(`proxyPunchIn failed: ${r.status()} ${await r.text()}`);
+  return id;
+}
+
+/**
+ * Admin-side bulk delete of attendance records belonging to a SPECIFIC employee -- confirmed
+ * live 25 Nov 2026 via the real trash-icon "Yes, Delete" flow on Employee Records: DELETE
+ * attendance/employees/<empNumber>/records {ids:[...]} (scoped by path empNumber, NOT the
+ * plain attendance/records {ids} used by self-service deleteAttendanceRecords above).
+ */
+export async function deleteEmployeeAttendanceRecords(req: APIRequestContext, empNumber: number, ids: Array<number | undefined>): Promise<void> {
+  const real = ids.filter((x): x is number => typeof x === 'number');
+  if (real.length) await req.delete(`${API}attendance/employees/${empNumber}/records`, { data: { ids: real } }).catch(() => null);
+}
