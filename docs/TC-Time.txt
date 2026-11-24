@@ -799,6 +799,40 @@ No.  Test Case ID              Status   Skenario / Deskripsi
   RUN COMMAND:
     npx playwright test tests/time/timesheet/TC-TIME-TS-APPROVAL-05-Verify-Search-Validation-Reject-Without-Reason-And-Concurrency.spec.ts --project=chromium
 
+13   TC-TIME-PROJECT-04  [DONE -- BUG]  tests/time/project/TC-TIME-PROJECT-04-Verify-Project-Feedback-Double-Submit-Navigation-Connection-Loss-Concurrency-And-Injection.spec.ts
+                             (+) 1.8 | (!) 4.1 4.2 4.3 4.5 4.7 | (S) 5.1-SQLi
+                             | 8.4  [U064]
+                             -> Menutup U064 Projects SEPENUHNYA. Save valid -> toast
+                                "Successfully Saved", project tampil di daftar (1.8).
+                                Klik ganda Save -> tepat 1 project tersimpan, constraint
+                                unique server-side menolak nama kedua (4.2). Isi Name
+                                lalu refresh TANPA Save -> project tidak tercipta (4.3).
+                                Koneksi diputus saat Save -> tetap di form, tidak ada
+                                project setengah-jadi (4.5). Dua Admin membuat project
+                                nama sama hampir bersamaan -> tepat 1 berhasil, 1 ditolak
+                                422, tidak ada race corruption (4.7). Payload SQL di
+                                Name -> tersimpan sbg teks literal, tidak ada DB
+                                error/bypass (5.1-SQLi). Nama duplikat -> 422 dgn
+                                "Already Exists", format konsisten dgn modul lain (8.4).
+                             -> SENGAJA FAILED (4.1): BUG BARU BG-496 (Medium) -- GET
+                                /api/v2/time/validation/project-name?projectName=<emoji>
+                                -> 500 Internal Server Error (bukan 422), diikuti
+                                uncaught exception di client. Scope dibuktikan via probe
+                                API langsung thd 5 variasi: ASCII, Jepang, Arab, aksen
+                                non-ASCII semua 200; HANYA karakter emoji (code point
+                                astral/4-byte UTF-8, mis. U+1F389) yg memicu 500 --
+                                pola klasik mismatch charset DB (utf8 vs utf8mb4).
+                                Dampak: field Name pd Add Project jd TIDAK BISA dipakai
+                                sama sekali kalau user mengetik emoji apa pun, krn
+                                validasi real-time (on-keystroke) macet di exception
+                                sblm tombol Save bisa memicu POST sama sekali (bukan
+                                sekadar ditolak -- macet permanen, beda dr pola 422 yg
+                                sudah dikonfirmasi normal di modul lain).
+                             HASIL: 11/12 lolos (1 sengaja FAILED, BG-496).
+
+  RUN COMMAND:
+    npx playwright test tests/time/project/TC-TIME-PROJECT-04-Verify-Project-Feedback-Double-Submit-Navigation-Connection-Loss-Concurrency-And-Injection.spec.ts --project=chromium
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================

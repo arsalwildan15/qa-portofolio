@@ -204,14 +204,14 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Performance | 49 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 36 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
-| Time | 24 | [docs/TC-Time.txt](docs/TC-Time.txt) |
+| Time | 25 | [docs/TC-Time.txt](docs/TC-Time.txt) |
 | Cross-module (Leave/Claim/Performance/Time) | 7 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
 | My Info | 18 | [docs/TC-MyInfo.txt](docs/TC-MyInfo.txt) |
 | Dashboard | 3 | [docs/TC-Dashboard.txt](docs/TC-Dashboard.txt) |
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **683** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **684** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Approach highlights:**
 - **Multi-role testing:** the public demo ships only one Admin login, so `tests/_global/infra/` + `src/utils/` (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`) spin up real accounts on the fly. Performance, Claim, Leave and Time are all tested across roles: an ESS user submits, an Admin approves/rejects in a separate browser context, and each test confirms the ESS user can't self-approve via the API.
@@ -250,7 +250,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 
 Full reproduction steps, request/response bodies, and the complete bug catalog for each module live in its `docs/TC-<Module>.txt` and in `docs/Bug-List.xlsx`.
 
-**Taxonomy coverage snapshot (2026-11-24):** 86.2% of applicable cells COVERED overall. Recruitment, Dashboard, Sidebar Search, Buzz and Claim are at 100%, Performance at 98.1%, PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, My Info at 76.6%, Time at 78.8% and Admin at 72.8%; Admin is now the lowest (7 of 11 Time units remain). See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-24):** 86.4% of applicable cells COVERED overall. Recruitment, Dashboard, Sidebar Search, Buzz and Claim are at 100%, Performance at 98.1%, PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, Time at 80.5%, My Info at 76.6% and Admin at 72.8%; Admin is now the lowest module. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

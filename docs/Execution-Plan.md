@@ -625,6 +625,10 @@
   (semua ter-commit & ter-push, tidak ada file probe zz-probe-* tersisa, tidak ada TC
   setengah-jadi). Commit terakhir: "Close Time Timesheets (U004) entirely" (lihat git log
   utk hash persis).
+  RESUME (24 Nov 2026, sesi berikutnya): U064 Projects DITUTUP (TC-TIME-PROJECT-04, lihat
+  LOG di bawah). Time = 80.5% (388 COVERED/94 GAP/370 N/A). Matrix TOTAL = 86.4%. Admin
+  (72.8%) kini modul TERENDAH secara pasti (Time sudah tidak lagi, lihat
+  "PERUBAHAN URUTAN MODUL" di bawah -- pola itu kini TERPAKAI: lanjut ke Admin).
   **PERUBAHAN URUTAN MODUL (penting, masih berlaku):** rebuild matrix terakhir
   menunjukkan Admin (72.81%, BELUM di-rebuild ulang stlh sesi ini -- cek ulang) SEKARANG
   LEBIH RENDAH dari Time (78.84%) -- Time BUKAN lagi modul paling rendah. Pola yg sudah
@@ -636,20 +640,21 @@
   berlalu sejak dicatat).
   NEXT ACTION (baca ini dulu sblm kerja, lalu rebuild matrix utk angka GAP pasti sblm
   mulai unit manapun -- angka di bawah ini snapshot saat berhenti, BISA SUDAH BERUBAH):
-  7 unit Time tersisa (dari 11 total; U059 Config & U063 Customers & U060/U061/U062
-  Reports & U004 Timesheets semua SUDAH TUTUP):
-    - U064 Projects (11 kode: 1.8/4.1/4.2/4.3/4.5/4.7/5.1-SQLi/8.4 + lainnya -- cek ulang
-      rebuild matrix) -- unit kecil, kerjakan DULUAN, probe endpoint time/projects
-      (PUT/DELETE update-delete project, UI feedback double-submit/back-forward/
-      connection-drop/concurrency, pola sama TC-CLAIM-CONFIG-* sblmnya).
+  6 unit Time tersisa (dari 11 total; U059 Config & U063 Customers & U060/U061/U062
+  Reports & U004 Timesheets & U064 Projects semua SUDAH TUTUP):
     - U055 My Timesheets ESS (20 kode), U056 Attendance My Records (18), U057 Punch
       In/Out (23), U058 Attendance Employee Records (20), U106 Timesheet Edit & Approval
       (19) -- unit BESAR (total >100 kode), kemungkinan perlu di-pecah jadi banyak TC spt
-      Performance U103/Claim U105. Kerjakan SETELAH U064.
-  Baca docs/TC-Time.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit
-  berikutnya (SELALU rebuild matrix dulu utk angka pasti, jangan pakai angka di atas yg
-  sudah bisa berubah), lalu probe-first -> TC -> typecheck -> trial -> real-run ->
-  Bug-List -> matrix rebuild -> docs -> check_docs.py -> commit -> push, per unit/batch.
+      Performance U103/Claim U105.
+  TAPI: sesuai pola "PERUBAHAN URUTAN MODUL" di atas, Admin (72.8%) kini PASTI lebih
+  rendah dari Time (80.5%) dan Time belum punya ceiling final (msh py 6 unit besar) --
+  rebuild matrix ulang dulu utk angka pasti, lalu putuskan: lanjutkan Time sampai
+  ceiling (6 unit besar di atas), ATAU pindah ke Admin (modul terendah) sesuai urutan
+  standing "selesaikan modul terendah". Baca docs/TC-Time.txt + docs/TC-Admin.txt +
+  Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit (SELALU rebuild matrix dulu
+  utk angka pasti, jangan pakai angka di atas yg sudah bisa berubah), lalu probe-first ->
+  TC -> typecheck -> trial -> real-run -> Bug-List -> matrix rebuild -> docs ->
+  check_docs.py -> commit -> push, per unit/batch.
   **PERUBAHAN EMAIL KOMIT (24 Nov 2026, instruksi user via koordinator):** mulai komit
   berikutnya, email ganti jadi arsal@pakaidonk.id (nama tetap "Arsal", TETAP TANPA
   Co-Authored-By/trailer apa pun). Commit lama yg sudah di-push JANGAN diubah. Format:
@@ -1115,3 +1120,4 @@ unicode/RTL, API param negatif (offset/limit/sortField).
 - 2026-11-18 | Performance lanjutan (REVIEW-14, U068 Manage Reviews TUNTAS kecuali 5.1-SQLi/5.1-XSS-Reflected) | 1 TC baru; SENGAJA FAILED (R3), BUG BARU BG-488 (Medium) -- create review endDate SEBELUM startDate via API diterima 200, validasi urutan tanggal hanya client-side; 15/16 lolos; menutup 1.1-U/1.2/1.8/2.2/4.1/4.3/4.4/4.5/4.7/4.8/5.2-MassAssign/5.4/5.5/5.9/6.5/6.7/8.4 sekaligus; race 2x Activate paralel TIDAK korupsi data, lolos (dugaan awal 2 bug dikoreksi jadi 1 setelah verifikasi ulang); docs TC-Performance/README/Execution-Plan/Bug-List; Performance 77.2% -> 81.2%; matrix TOTAL 80.9% -> 81.2% | 1 commit
 - 2026-11-18 | Performance lanjutan (EMPREVIEW-01, U007 Employee Reviews TUNTAS kecuali 5.1-SQLi/5.1-XSS-Reflected) | 1 TC baru; dibuktikan live U007 adalah halaman pencarian MURNI (POST/PUT/DELETE semua 404/405), seluruh kode berbasis mutasi (1.1-C/U/D/1.3/2.5/4.4/5.2-MassAssign/5.9/6.7) TIDAK BERLAKU di unit ini -- ditutup via check literal yg membuktikan ketidakhadiran mutasi; fromDate/toDate TERNYATA opsional di API (beda dari saran UI); menutup 1.2/1.4/1.8/2.1/2.2/3.4/4.1/4.2/4.3/4.5/4.7/4.8/5.4/5.5/6.5/8.4 sekaligus; 26/26 lolos, tidak ada bug baru; docs TC-Performance/README/Execution-Plan; Performance 81.2% -> 87.2%; matrix TOTAL 81.2% -> 81.8% | 1 commit
 - 2026-11-18 | Performance lanjutan (EVAL-18 + fix EVAL-17, U102 Review Evaluation TUNTAS) | 1 TC baru + 1 TC lama diperbaiki; menemukan & memperbaiki bug tooling di TC-PERF-EVAL-17 (label check `${label}` di dalam loop bukan string literal, extract_specs.py gagal baca 3 kode taksonomi sejak ditulis -- dibongkar jd 3 panggilan literal, perilaku sama, menutup 5.1-SQLi); EVAL-18 menutup 1.1-R/1.2/1.4/1.8/2.1/4.2/4.3/4.4/4.5/4.7/4.8/5.4/5.9/8.4 sekaligus; tidak ada bug baru; docs TC-Performance/README/Execution-Plan; Performance 87.2% -> 90.7%; matrix TOTAL 81.8% -> 82.1% | 1 commit
+- 2026-11-24 | Time lanjutan (PROJECT-04, U064 Projects TUNTAS) | 1 TC baru; ditemukan & diperbaiki 2 bug skrip probe sblm real-run (race autocomplete Customer krn filter prefix cocok ke 5 customer lama -- diperbaiki dgn isi nama Customer PENUH; race navigasi pasca-Save krn app sudah redirect sendiri ke viewProjects -- diperbaiki dgn waitForURL); SENGAJA FAILED (4.1), BUG BARU BG-496 (Medium) -- GET validation/project-name utk emoji di Name -> 500 Internal Server Error, Save macet permanen (tidak pernah kirim POST); scope dibuktikan via probe API 5 variasi (ASCII/Jepang/Arab/aksen semua 200, HANYA emoji/astral code point yg 500); noise baris otomatis BG-495 (dari file probe yg sudah dihapus) diarsipkan; 11/12 lolos, 3x run stabil; docs TC-Time/README/Execution-Plan/Bug-List; Time 78.8% -> 80.5%; matrix TOTAL 86.2% -> 86.4%; U064 adalah unit kecil terakhir -- 6 unit Time tersisa semua BESAR (My Timesheets/Attendance/Punch/Timesheet Edit), per "PERUBAHAN URUTAN MODUL" Admin (72.8%) kini modul terendah pasti | 1 commit

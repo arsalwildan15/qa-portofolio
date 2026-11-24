@@ -16,8 +16,8 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Performance | 413 | 8 | 289 | 98.1% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
-| Time | 380 | 102 | 370 | 78.8% |
-| **Total** | **4004** | **642** | **3093** | **86.2%** |
+| Time | 388 | 94 | 370 | 80.5% |
+| **Total** | **4012** | **634** | **3093** | **86.4%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -34,7 +34,7 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.4 | Relasi antar-entity | 34 |
 | 1.6 | Search/filter/sort valid | 22 |
 | 1.7 | Upload file valid | 1 |
-| 1.8 | Notifikasi/feedback UI | 19 |
+| 1.8 | Notifikasi/feedback UI | 18 |
 | 2.1 | Required field kosong | 11 |
 | 2.2 | Format salah | 30 |
 | 2.3 | Duplicate/unique conflict | 5 |
@@ -45,15 +45,15 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 3.2 | Nilai numerik | 2 |
 | 3.3 | Ukuran file upload | 1 |
 | 3.4 | Tanggal | 11 |
-| 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 25 |
-| 4.2 | Aksi ganda/cepat (double submit) | 29 |
-| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 29 |
+| 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 24 |
+| 4.2 | Aksi ganda/cepat (double submit) | 28 |
+| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 28 |
 | 4.4 | Race condition | 7 |
-| 4.5 | Session/koneksi terputus | 31 |
+| 4.5 | Session/koneksi terputus | 30 |
 | 4.6 | Data kosong/null (empty state) | 7 |
-| 4.7 | Konkurensi multi-user edit | 26 |
+| 4.7 | Konkurensi multi-user edit | 25 |
 | 4.8 | Behavior non-obvious terdokumentasi | 40 |
-| 5.1-SQLi | SQL Injection | 20 |
+| 5.1-SQLi | SQL Injection | 19 |
 | 5.1-XSS-Stored | Stored XSS | 10 |
 | 5.1-XSS-Reflected | Reflected XSS | 9 |
 | 5.1-CmdPath | Command/Path injection | 2 |
@@ -73,4 +73,4 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 7 |
 | 6.5 | Parameter negatif (tipe salah/extra/null) | 22 |
 | 6.7 | Idempotency | 10 |
-| 8.4 | Konsistensi pesan | 28 |
+| 8.4 | Konsistensi pesan | 27 |
