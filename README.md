@@ -18,6 +18,9 @@ End-to-end test automation suite for the [OrangeHRM demo application](https://op
 | Reporting | [Allure Report](https://allurereport.org/) + Playwright HTML report |
 | Code quality | ESLint + Prettier |
 | CI/CD | GitHub Actions (type-check + lint on every push) |
+| AI-assisted exploration | [Playwright MCP](https://github.com/microsoft/playwright-mcp) (`.mcp.json`) |
+
+> **Playwright MCP is a separate tool from the committed test suite above.** It lets an AI agent drive a real browser interactively (navigate, click, snapshot the accessibility tree) during exploration and debugging — the same role `tests/zz-probe-*.spec.ts` has played manually throughout this project (see **Test Execution & Reporting** below). It doesn't run in CI and doesn't generate spec files; every committed TC is still written, reviewed, and run through `@playwright/test` like normal.
 
 ## Architecture
 
