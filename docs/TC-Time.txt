@@ -953,12 +953,94 @@ No.  Test Case ID              Status   Skenario / Deskripsi
   RUN COMMAND:
     npx playwright test tests/time/attendance/TC-TIME-ATTENDANCE-MYRECORDS-01-Verify-Edit-Delete-Feedback-Double-Submit-Navigation-Session-Concurrency-And-API-Validation.spec.ts --project=chromium --workers=1
 
-  SISA GAP (belum ditutup, utk sesi lanjutan, per rebuild matrix 24 Nov 2026): U057
-  Punch In/Out (23 kode), U058 Attendance Employee Records (20), U106 Timesheet Edit &
-  Approval (10). CATATAN: rebuild matrix 24 Nov 2026 jg menunjukkan U055 My Timesheets
-  kembali py 17 GAP walau log sesi sebelumnya mencatat "SUDAH ditutup" via
-  TC-TIME-TIMESHEET-12 -- BELUM diinvestigasi kenapa (kemungkinan drift tooling/label,
-  bukan tugas sesi ini), WAJIB diverifikasi ulang sblm diasumsikan closed lagi.
+16   TC-TIME-PUNCH-03  [DONE -- BUG]  tests/time/attendance/TC-TIME-PUNCH-03-Verify-Feedback-Validation-Boundary-Edge-Security-And-API-Contract.spec.ts
+                             (+) 1.1-R 1.2 1.4 1.8 | (-) 2.1 2.2 2.5 | (B) 3.1 3.4 |
+                             (!) 4.1 4.2 4.3 4.4 4.5 4.8 | (S) 5.1-SQLi 5.2-MassAssign
+                             5.4 5.5 5.9 | (A) 6.5 6.7 | (8) 8.4  [U057]
+                             -> Menutup U057 Punch In/Out SEPENUHNYA (23 kode -- TC-TIME-
+                                PUNCH-01/02 lama sudah menutup 1.1-C/1.3/5.1-XSS-Stored
+                                sblmnya). Dikonfirmasi live via Playwright MCP SEBELUM kode
+                                ditulis: POST/PUT {API}attendance/records KEDUANYA ke endpoint
+                                KOLEKSI (tanpa :id) -- server menutup/membuka punch dari sesi,
+                                bukan id yg dikirim client. GET records/latest/records/<id>/
+                                list (date filter) semua membaca state (1.1-R). Record Punch
+                                In LANGSUNG muncul di GET list tanpa aksi tambahan (1.4). Note
+                                opsional (kosong/diisi) diterima dua2nya (1.2). Feedback sukses
+                                = REDIRECT OTOMATIS ke /attendance/punchOut + teks "Punched in
+                                time" (BUKAN toast) -- TEMUAN: halaman ini KINI py 2 URL
+                                terpisah per state, beda dari komentar lama TimeAttendancePage.ts
+                                yg bilang "1 URL, tidak re-render otomatis" (kemungkinan app
+                                demo di-upgrade) (1.8). Date/Time kosong -> 422 invalidParamKeys
+                                (2.1); format salah -> 422 jg (2.2). Punch Out tanpa punch
+                                terbuka & Punch In dobel -> 400 pesan jelas "Cannot Proceed...
+                                Already Punched In/Out" (2.5). Note max 250 karakter (251
+                                ditolak 422, dikonfirmasi binary-search) (3.1); leap year sbg
+                                filter list -> 200 graceful (3.4). Unicode/CJK/aksen/RTL/
+                                whitespace-only/multi-line di Note semua AMAN (4.1 -- emoji
+                                astral KHUSUS rusak, lihat BUG di bawah). 2 Punch In/Out
+                                paralel (klik ganda) -> locking benar, SALAH SATU 200 SATUNYA
+                                400, tidak ada duplikat/korup (4.2/4.4/6.7). Browser back/
+                                forward setelah Punch In via UI -> tidak crash, tidak
+                                duplikat, forward kembali ke state benar -- TEMUAN: SATU back
+                                dari Punch Out melompat ke halaman Timesheets search (bukan
+                                form Punch In), krn navigasi menu adl client-side route change
+                                tanpa history entry per klik menu, tidak berbahaya (4.3). Sesi
+                                berakhir (cookies dikosongkan) lalu klik "In" -> dialihkan ke
+                                login, tidak ada record tercipta (4.5). SQLi di Note -> tersimpan
+                                verbatim, tabel tidak rusak (5.1-SQLi). Field asing employeeId/
+                                id/state di body -> 422 eksplisit; "empNumber" diterima tapi
+                                diam2 diabaikan (bukan mass-assignment eksploitatif, finding)
+                                (5.2-MassAssign). Situs lain (attacker.test) coba POST pakai
+                                sesi Admin -> cookie tidak ikut (SameSite=Lax), data tidak
+                                berubah (5.4). 8 POST beruntun cepat tanpa jeda -> tidak ada
+                                429/lockout satu pun (5.5, finding). timezoneOffset ekstrem &
+                                Time bertipe number -> 422 (6.5). Semua 422 pakai envelope
+                                SAMA, semua 400 business-rule pakai pesan manusiawi konsisten
+                                (8.4).
+                             -> SENGAJA FAILED (R3), 2 BUG BARU:
+                                BG-501 (Medium-High) -- emoji ASTRAL (4-byte UTF-8, mis. party-
+                                popper/rocket) di Note RUSAK PERMANEN jadi "??" setiap kali
+                                DIBACA ULANG dari server (GET latest/list/by-id, SEMUA 3 jalur
+                                baca), padahal respons CREATE yg langsung meng-echo body
+                                (tanpa round-trip DB) masih benar; CJK/aksen Latin/RTL di Note
+                                YG SAMA semuanya aman -- pola klasik kolom DB "utf8" (3-byte)
+                                bukan "utf8mb4" (4-byte), silent data corruption.
+                                BG-502 (Medium) -- TIDAK ADA validasi rentang tanggal sama
+                                sekali pd Punch In/Out: tanggal 73 tahun ke DEPAN (2099-12-31,
+                                belum terjadi) DAN 36 tahun ke BELAKANG (1990-01-01) KEDUANYA
+                                diterima 200, dibuktikan via API LANGSUNG maupun via UI
+                                SUNGGUHAN (mengetik tanggal di field Date* form lalu klik
+                                "In", bukan bypass API) -- karyawan ESS bisa memfabrikasi jam
+                                kerja utk tanggal mana pun.
+                             PELAJARAN METODOLOGI PENTING: state Punch In/Out adl SATU flag
+                                GLOBAL per employee (empNumber=7 "John Doe", akun seed default)
+                                di DEMO PUBLIK yg dipakai banyak orang scr bersamaan utk belajar
+                                -- percobaan awal TC ini MEMBUKTIKAN kontensi nyata (Punch In
+                                via UI yg sukses ternyata sudah "Already Punched Out" sesaat
+                                kemudian via API). SEMUA transisi state di TC ini memakai
+                                helper `ensureClosed`/`ensureOpen` yg SELALU membaca state
+                                AKTUAL dulu (bukan asumsi dari langkah sebelumnya) & self-heal
+                                (retry dgn jam RELATIF berbeda tiap percobaan -- jam TETAP yg
+                                diulang sama tidak pernah bisa lolos dari overlap yg sama).
+                                PELAJARAN KEDUA: `today` dari GET current-datetime (berbasis
+                                UTC) TIDAK SELALU sama dgn tanggal yg ditampilkan/dikirim form
+                                UI (berbasis jam lokal +7, bisa beda 1 hari di jendela dini
+                                hari) -- baca tanggal yg BENAR2 ditampilkan di field Date* form
+                                sblm mencari record yg baru dibuat via UI, jangan asumsikan
+                                sama dgn `today` yg di-cache sekali di awal test.
+                             HASIL: 43 check -> 39 lolos, 4 sengaja FAILED (BG-501 x1,
+                             BG-502 x3), stabil 3x run berturut-turut.
+
+  RUN COMMAND:
+    npx playwright test tests/time/attendance/TC-TIME-PUNCH-03-Verify-Feedback-Validation-Boundary-Edge-Security-And-API-Contract.spec.ts --project=chromium --workers=1
+
+  SISA GAP (belum ditutup, utk sesi lanjutan, per rebuild matrix 25 Nov 2026): U058
+  Attendance Employee Records (20), U106 Timesheet Edit & Approval (10). U057 Punch
+  In/Out SEKARANG SEPENUHNYA TERTUTUP (0 GAP). CATATAN (msh berlaku, blm diinvestigasi):
+  rebuild matrix jg menunjukkan U055 My Timesheets msh py 17 GAP walau log sesi
+  sebelumnya mencatat "SUDAH ditutup" via TC-TIME-TIMESHEET-12 -- kemungkinan drift
+  tooling/label, bukan tugas sesi ini, WAJIB diverifikasi ulang sblm diasumsikan closed
+  lagi.
 
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
