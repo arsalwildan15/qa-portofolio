@@ -610,19 +610,42 @@
       sama dgn BG-460 (ghost/invalid-type id crash server) di modul lain. 13/14 lolos.
   STATE SAAT INI (rebuild matrix 24 Nov 2026): Time = 76.14% (367 COVERED/115 GAP/370
   N/A). Matrix TOTAL = 85.9%.
-  **PERUBAHAN URUTAN MODUL (penting, dicatat 24 Nov 2026):** rebuild matrix barusan
-  menunjukkan Admin (72.81%) SEKARANG LEBIH RENDAH dari Time (76.14%) -- Time BUKAN lagi
-  modul paling rendah. TAPI ikuti pola yg sudah ditetapkan utk Claim: SELESAIKAN DULU
-  modul yg sedang dikerjakan (Time) sampai ceiling-nya sebelum pindah ke modul lain,
-  jangan loncat ke Admin di tengah jalan hanya krn urutan berubah. Setelah Time benar2
-  selesai (ceiling final), baru rebuild ulang & pindah ke modul paling rendah SAAT ITU
-  (kemungkinan Admin, tapi verifikasi ulang dgn rebuild matrix, jangan percaya angka lama
-  di catatan ini).
-  BERIKUT (unit Time tersisa, 8 dari 11): U004 Employee Timesheets (7 kode), U055 My
-  Timesheets (20), U056 Attendance My Records (18), U057 Punch In/Out (23), U058
-  Attendance Employee Records (20), U064 Projects (11), U106 Timesheet Edit & Approval
-  (19). Kerjakan unit kecil dulu (U004, U064), baru unit besar (U055-U058, U106 -- total
-  >100 kode, kemungkinan perlu di-pecah jadi banyak TC spt Performance U103/Claim U105).
+    - TC-TIME-TS-APPROVAL-05: menutup U004 Employee Timesheets SEPENUHNYA (2.8/4.1/4.4/
+      4.8/5.1-SQLi/5.1-XSS-Reflected/6.5). Endpoint list GET time/employees/timesheets/
+      list; satu2nya filter (Employee Name) resolve ke empNumber NUMERIK, jadi tidak ada
+      permukaan free-text utk reflected injection (structural, beda dgn Reports/U060-62
+      yg jg numerik tapi py bug krash -- di SINI endpoint validasi tipe dgn benar, 422
+      bukan 500). Reject timesheet TANPA comment -> 200 diterima, field alasan TIDAK
+      wajib (sudah finding informal di TC-TIME-TS-APPROVAL-02, diformalkan jd check
+      literal 2.8 di sini). 2 aksi Approve+Reject paralel -> tepat 1 menang, status akhir
+      konsisten (4.4, pola sama TC-CLAIM-APPROVAL-06). 11/11 lolos, tidak ada bug baru.
+  STATE SAAT INI (rebuild matrix 24 Nov 2026, STOP REQUEST user): Time = 78.84% (380
+  COVERED/102 GAP/370 N/A). Matrix TOTAL = 86.18%.
+  **PAUSE MARKER -- SESI DIHENTIKAN ATAS PERMINTAAN USER 24 Nov 2026.** git status BERSIH
+  (semua ter-commit & ter-push, tidak ada file probe zz-probe-* tersisa, tidak ada TC
+  setengah-jadi). Commit terakhir: "Close Time Timesheets (U004) entirely" (lihat git log
+  utk hash persis).
+  **PERUBAHAN URUTAN MODUL (penting, masih berlaku):** rebuild matrix terakhir
+  menunjukkan Admin (72.81%, BELUM di-rebuild ulang stlh sesi ini -- cek ulang) SEKARANG
+  LEBIH RENDAH dari Time (78.84%) -- Time BUKAN lagi modul paling rendah. Pola yg sudah
+  ditetapkan: SELESAIKAN DULU modul yg sedang dikerjakan (Time) sampai ceiling-nya
+  sebelum pindah ke modul lain, jangan loncat ke Admin di tengah jalan hanya krn urutan
+  berubah. Setelah Time benar2 selesai (ceiling final), baru rebuild ulang & pindah ke
+  modul paling rendah SAAT ITU (kemungkinan Admin, tapi WAJIB verifikasi ulang dgn
+  rebuild matrix, jangan percaya angka di catatan ini begitu saja -- sudah beberapa hari
+  berlalu sejak dicatat).
+  NEXT ACTION (baca ini dulu sblm kerja, lalu rebuild matrix utk angka GAP pasti sblm
+  mulai unit manapun -- angka di bawah ini snapshot saat berhenti, BISA SUDAH BERUBAH):
+  7 unit Time tersisa (dari 11 total; U059 Config & U063 Customers & U060/U061/U062
+  Reports & U004 Timesheets semua SUDAH TUTUP):
+    - U064 Projects (11 kode: 1.8/4.1/4.2/4.3/4.5/4.7/5.1-SQLi/8.4 + lainnya -- cek ulang
+      rebuild matrix) -- unit kecil, kerjakan DULUAN, probe endpoint time/projects
+      (PUT/DELETE update-delete project, UI feedback double-submit/back-forward/
+      connection-drop/concurrency, pola sama TC-CLAIM-CONFIG-* sblmnya).
+    - U055 My Timesheets ESS (20 kode), U056 Attendance My Records (18), U057 Punch
+      In/Out (23), U058 Attendance Employee Records (20), U106 Timesheet Edit & Approval
+      (19) -- unit BESAR (total >100 kode), kemungkinan perlu di-pecah jadi banyak TC spt
+      Performance U103/Claim U105. Kerjakan SETELAH U064.
   Baca docs/TC-Time.txt + Taxonomy-Coverage-Matrix.md utk daftar GAP riil per unit
   berikutnya (SELALU rebuild matrix dulu utk angka pasti, jangan pakai angka di atas yg
   sudah bisa berubah), lalu probe-first -> TC -> typecheck -> trial -> real-run ->

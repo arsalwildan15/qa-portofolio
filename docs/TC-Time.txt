@@ -776,6 +776,29 @@ No.  Test Case ID              Status   Skenario / Deskripsi
   RUN COMMAND:
     npx playwright test tests/time/attendance/TC-TIME-REPORTS-02-Verify-Reports-Read-Contract-Validation-Injection-And-Boundary.spec.ts --project=chromium
 
+12   TC-TIME-TS-APPROVAL-05  [DONE]  TC-TIME-TS-APPROVAL-05-Verify-Search-Validation-Reject-Without-Reason-And-Concurrency.spec.ts
+                             (-) 2.8 | (!) 4.1 4.4 4.8 | (S) 5.1-SQLi
+                             5.1-XSS-Reflected | (A) 6.5  [U004]
+                             -> Menutup U004 Employee Timesheets SEPENUHNYA. Param
+                                asing/sortField tak dikenal -> 422 (6.5). empNumber
+                                SQLi/non-numerik -> 422 ditolak, TIDAK crash (beda dgn
+                                Reports/BG-494 -- endpoint ini validasi tipe dgn benar)
+                                (5.1-SQLi). Satu2nya filter (Employee Name -> empNumber
+                                numerik) tidak py permukaan free-text utk reflected
+                                injection (5.1-XSS-Reflected, structural). Employee Name
+                                search box unicode/emoji -> tidak crash (4.1). Reject
+                                timesheet TANPA comment/alasan -> 200 DITERIMA, field
+                                alasan tidak wajib (2.8, sudah jd finding di TC-TIME-
+                                TS-APPROVAL-02, diformalkan jd check literal di sini).
+                                Timesheet yg di-reject tanpa alasan tetap bisa
+                                di-resubmit normal (4.8). 2 aksi Approve+Reject paralel
+                                pd timesheet sama -> TEPAT SATU 200, status akhir
+                                konsisten (4.4, pola sama dgn TC-CLAIM-APPROVAL-06).
+                                Fitur berfungsi normal, tidak ada bug baru.
+
+  RUN COMMAND:
+    npx playwright test tests/time/timesheet/TC-TIME-TS-APPROVAL-05-Verify-Search-Validation-Reject-Without-Reason-And-Concurrency.spec.ts --project=chromium
+
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
 ================================================================================
