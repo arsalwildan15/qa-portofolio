@@ -720,11 +720,12 @@ No.  Test Case ID              Status   Skenario / Deskripsi
   RUN COMMAND (4 TC baru):
     npx playwright test tests/time/security/TC-TIME-API-01-Verify-Attendance-Project-And-Timesheet-APIs-Contract-Methods-Session-Unknown-Ids-And-ESS-Access.spec.ts tests/time/security/TC-TIME-MUT-01-Verify-Customers-Projects-Activities-And-Attendance-Configuration-Create-Update-Delete-Validation-And-Injection.spec.ts tests/time/security/TC-TIME-SECURITY-01-Verify-Cross-Site-Requests-Concurrent-Writes-And-A-Burst-Of-Customers.spec.ts tests/time/attendance/TC-TIME-CONFIG-01-Verify-Attendance-Configuration-Feedback-Double-Submit-Navigation-Session-And-Concurrency.spec.ts --project=chromium --workers=1
 
-  SISA GAP (belum ditutup, utk sesi lanjutan): U055 My Timesheet, U056 Attendance My
-  Records, U057 Punch In/Out, U058 Attendance Employee Records, U106 Timesheet Edit &
-  Approval -- pola feedback/double-submit/navigasi/sesi/XSS-reflected blm ada TC UI
-  terdedikasi (mirip TC-LEAVE-HOLIDAY-01/CANDIDATE-22). U060/U061/U062 Reports -- 1.1-R,
-  1.6 search, SQLi/XSS-Reflected di filter blm diuji.
+  SISA GAP (belum ditutup, utk sesi lanjutan): U056 Attendance My Records, U057 Punch
+  In/Out, U058 Attendance Employee Records, U106 Timesheet Edit & Approval -- pola
+  feedback/double-submit/navigasi/sesi/XSS-reflected blm ada TC UI terdedikasi (mirip
+  TC-LEAVE-HOLIDAY-01/CANDIDATE-22). U055 My Timesheet SUDAH ditutup (lihat
+  TC-TIME-TIMESHEET-12, 24 Nov 2026). U060/U061/U062 Reports -- 1.1-R, 1.6 search,
+  SQLi/XSS-Reflected di filter blm diuji.
 
  R5  TC-TIME-PROJECT-03  [DONE]  tests/time/project/TC-TIME-PROJECT-03-Verify-Customer-Optional-Field-XSS-And-Known-Behavior.spec.ts
                              (+) 1.2 | (!) 4.8 | (S) 5.1-XSS-Stored [U063]
@@ -832,6 +833,51 @@ No.  Test Case ID              Status   Skenario / Deskripsi
 
   RUN COMMAND:
     npx playwright test tests/time/project/TC-TIME-PROJECT-04-Verify-Project-Feedback-Double-Submit-Navigation-Connection-Loss-Concurrency-And-Injection.spec.ts --project=chromium
+
+14   TC-TIME-TIMESHEET-12  [DONE]  tests/time/timesheet/TC-TIME-TIMESHEET-12-Verify-My-Timesheet-Feedback-Double-Submit-Navigation-Session-And-Reflected-XSS.spec.ts
+                             (+) 1.1-U 1.3 1.8 | (!) 4.2 4.3 4.5 | (S)
+                             5.1-XSS-Reflected  [U055]
+                             -> Menutup U055 My Timesheet (ESS self-service) lapis UI
+                                feedback/double-submit/navigasi/sesi/XSS-reflected.
+                                3 akun ESS terisolasi (akun destruktif/terminal
+                                dipisah spy status Submitted tidak mengganggu
+                                skenario lain). Isi Project+Activity+jam Senin ->
+                                Save -> PUT entries 200 & toast "Successfully
+                                Saved" (1.1-U/1.8). Klik ganda Save -> PUT
+                                terkirim 2x tapi TETAP satu baris, nilai akhir =
+                                nilai terakhir diketik -- PUT entries bersifat
+                                UPSERT per (project, activity), dikonfirmasi ulang
+                                konsisten dgn TC-TIME-TIMESHEET-04/11 (4.2). Ubah
+                                jam hari lain lalu refresh / browser back TANPA
+                                Save -> hari itu tidak pernah muncul di entries
+                                API (4.3). Sesi berakhir lalu Save -> PUT 401,
+                                dialihkan ke login, hari yg diedit tidak
+                                tersimpan (4.5). Payload <img onerror> di query
+                                param startDate (hasil self-redirect Save) ->
+                                TIDAK ter-eksekusi, app menangani tanggal tak
+                                valid scr graceful ("No Timesheets Found" +
+                                "Create Timesheet"); payload <script> di param
+                                "date" API -> 422 ditolak, tidak reflected mentah
+                                di body (5.1-XSS-Reflected). Submit -> status
+                                transisi "Not Submitted" -> "Submitted" (1.3).
+                                Klik ganda Submit (akun ESS terpisah) -> HANYA 1
+                                PUT submit terkirim (tombol hilang/disabled
+                                sesudah klik pertama -- kontras positif dgn Save
+                                yg upsert-safe tapi tetap mengirim 2 PUT) (4.2).
+                                Sesi berakhir lalu Submit (akun ESS terpisah
+                                lagi) -> PUT 401, dialihkan ke login, status
+                                tetap "Not Submitted" (4.5).
+                             NOTE: [BUG SCRIPT, diperbaiki] fillFirstRow() kadang
+                             jatuh ke candidate project kedua krn autocomplete
+                             ACME belum selesai saat dicek, tapi memilih Activity
+                             dari dropdown yg stale (sisa project sebelumnya) ->
+                             Save 422. Diperbaiki dgn retry edit-mode baru
+                             (fillRowAndSave, lokal di spec ini) alih-alih
+                             mengubah page object bersama.
+                             HASIL: lolos penuh (14/14), tidak ada bug baru.
+
+  RUN COMMAND:
+    npx playwright test tests/time/timesheet/TC-TIME-TIMESHEET-12-Verify-My-Timesheet-Feedback-Double-Submit-Navigation-Session-And-Reflected-XSS.spec.ts --project=chromium
 
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)

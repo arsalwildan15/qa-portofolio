@@ -16,8 +16,8 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Performance | 413 | 8 | 289 | 98.1% |
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
-| Time | 388 | 94 | 370 | 80.5% |
-| **Total** | **4012** | **634** | **3093** | **86.4%** |
+| Time | 394 | 88 | 370 | 81.7% |
+| **Total** | **4018** | **628** | **3093** | **86.5%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -46,10 +46,10 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 3.3 | Ukuran file upload | 1 |
 | 3.4 | Tanggal | 11 |
 | 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 24 |
-| 4.2 | Aksi ganda/cepat (double submit) | 28 |
-| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 28 |
+| 4.2 | Aksi ganda/cepat (double submit) | 26 |
+| 4.3 | Navigasi tidak biasa (back/refresh/tab baru) | 26 |
 | 4.4 | Race condition | 7 |
-| 4.5 | Session/koneksi terputus | 30 |
+| 4.5 | Session/koneksi terputus | 28 |
 | 4.6 | Data kosong/null (empty state) | 7 |
 | 4.7 | Konkurensi multi-user edit | 25 |
 | 4.8 | Behavior non-obvious terdokumentasi | 40 |
