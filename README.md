@@ -204,14 +204,14 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Performance | 49 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 36 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
-| Time | 29 | [docs/TC-Time.txt](docs/TC-Time.txt) |
+| Time | 30 | [docs/TC-Time.txt](docs/TC-Time.txt) |
 | Cross-module (Leave/Claim/Performance/Time) | 7 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
 | My Info | 18 | [docs/TC-MyInfo.txt](docs/TC-MyInfo.txt) |
 | Dashboard | 3 | [docs/TC-Dashboard.txt](docs/TC-Dashboard.txt) |
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **688** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **689** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Approach highlights:**
 - **Multi-role testing:** the public demo ships only one Admin login, so `tests/_global/infra/` + `src/utils/` (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`) spin up real accounts on the fly. Performance, Claim, Leave and Time are all tested across roles: an ESS user submits, an Admin approves/rejects in a separate browser context, and each test confirms the ESS user can't self-approve via the API.

@@ -723,9 +723,14 @@ No.  Test Case ID              Status   Skenario / Deskripsi
   SISA GAP (belum ditutup, utk sesi lanjutan): U056 Attendance My Records, U057 Punch
   In/Out, U058 Attendance Employee Records, U106 Timesheet Edit & Approval -- pola
   feedback/double-submit/navigasi/sesi/XSS-reflected blm ada TC UI terdedikasi (mirip
-  TC-LEAVE-HOLIDAY-01/CANDIDATE-22). U055 My Timesheet SUDAH ditutup (lihat
-  TC-TIME-TIMESHEET-12, 24 Nov 2026). U060/U061/U062 Reports -- 1.1-R, 1.6 search,
+  TC-LEAVE-HOLIDAY-01/CANDIDATE-22). U060/U061/U062 Reports -- 1.1-R, 1.6 search,
   SQLi/XSS-Reflected di filter blm diuji.
+  [KOREKSI 25 Nov 2026] Catatan di atas ("U055 My Timesheet SUDAH ditutup ... TC-TIME-
+  TIMESHEET-12") SALAH/OVERCLAIM -- TC-TIME-TIMESHEET-12 hanya menutup 1.1-U/1.3/1.8/
+  4.2/4.3/4.5/5.1-XSS-Reflected, BUKAN seluruh kode taksonomi U055. 17 kode lain (1.1-R/
+  1.2/1.4/2.1/2.5/3.1/3.4/4.1/4.4/4.7/4.8/5.1-SQLi/5.2-PrivEsc/5.2-MassAssign/5.4/6.5/8.4)
+  tetap GAP sampai 3 rebuild matrix independen berturut-turut membuktikannya, baru
+  ditutup via TC-TIME-TIMESHEET-13 (lihat entri TC-TIME-TIMESHEET-13 di bawah).
 
  R5  TC-TIME-PROJECT-03  [DONE]  tests/time/project/TC-TIME-PROJECT-03-Verify-Customer-Optional-Field-XSS-And-Known-Behavior.spec.ts
                              (+) 1.2 | (!) 4.8 | (S) 5.1-XSS-Stored [U063]
@@ -1132,13 +1137,91 @@ No.  Test Case ID              Status   Skenario / Deskripsi
 
   SISA GAP (belum ditutup, utk sesi lanjutan, per rebuild matrix 25 Nov 2026): U106
   Timesheet Edit & Approval (10). U058 Attendance Employee Records SEKARANG
-  SEPENUHNYA TERTUTUP (0 GAP). CATATAN (msh berlaku, BELUM diinvestigasi, DIKONFIRMASI
-  ULANG via rebuild matrix independen sesi ini -- BUKAN transien/mitos, 3 sesi
-  berturut-turut termasuk sesi ini menunjukkan angka yg SAMA): U055 My Timesheets msh
-  py 17 GAP walau log sesi sebelumnya (sblm U056) mencatat "SUDAH ditutup" via
-  TC-TIME-TIMESHEET-12 -- kemungkinan drift tooling/label (lihat header TC-TIME-
-  TIMESHEET-12 vs kode yg muncul GAP), BUKAN tugas sesi ini, WAJIB diinvestigasi sesi
-  berikutnya, jangan diasumsikan closed lagi tanpa pembuktian baru.
+  SEPENUHNYA TERTUTUP (0 GAP).
+
+18   TC-TIME-TIMESHEET-13  [DONE -- BUG]  tests/time/timesheet/TC-TIME-TIMESHEET-13-Verify-Read-Relation-Required-Boundary-Concurrency-And-Security.spec.ts
+                             (+) 1.1-R 1.2 1.4 | (-) 2.1 2.5 | (B) 3.1 3.4 |
+                             (!) 4.1 4.4 4.7 4.8 | (S) 5.1-SQLi 5.2-PrivEsc
+                             5.2-MassAssign 5.4 | (A) 6.5 | (8) 8.4  [U055]
+                             -> [KOREKSI OVERCLAIM] Menutup 17 kode U055 My Timesheet
+                                yg TERNYATA MASIH GAP walau log sesi-sesi sebelumnya
+                                (sblm & sesudah U056/U057/U058) tiga kali berturut-turut
+                                mencatat "U055 SUDAH TUTUP via TC-TIME-TIMESHEET-12" --
+                                TC-TIME-TIMESHEET-12 TERBUKTI hanya menutup 1.1-U/1.3/
+                                1.8/4.2/4.3/4.5/5.1-XSS-Reflected (sesuai Kategori di
+                                headernya sendiri), BUKAN seluruh 24 kode taksonomi unit
+                                ini. Diinvestigasi ulang via rebuild matrix LANGSUNG baca
+                                matrix.json val[0] (bukan dict/string -- bug pembacaan
+                                inilah yg sebelumnya bikin koordinator salah 3x
+                                membenarkan klaim "0 GAP"), lalu eksplorasi live
+                                Playwright MCP SEBELUM menulis kode utk pastikan ke-17
+                                kode genuinely testable (bukan N/A struktural) --
+                                SEMUANYA terbukti testable, build_matrix.py TIDAK diubah.
+                                TEMUAN LIVE: satu2nya field teks bebas di unit ini adl
+                                pencarian Project ("Type for hints...", query
+                                customerOrProjectName) -- dipakai utk 3.1 (limit PERSIS
+                                100 karakter)/4.1/5.1-SQLi. Isi Senin+Rabu, Selasa
+                                dibiarkan kosong -> Save 200, GET entries balik PERSIS yg
+                                disimpan, Selasa tidak ada (1.1-R/1.2). Project BARU yg
+                                dibuat Admin detik itu LANGSUNG muncul di pencarian
+                                Project My Timesheet (1.4, relasi lintas-unit). Baris baru
+                                dgn Activity dibiarkan "-- Select --" -> Save diblokir
+                                client-side ("Select an Activity"), tidak ada PUT (2.1).
+                                Field "comment" pd entries.dates[] ADA di skema GET
+                                (selalu null) tapi PUT entries MENOLAK SELURUH array
+                                begitu "comment" disertakan -- read-only non-obvious,
+                                tombol komentar per sel selalu display:none (4.8).
+                                Parameter negatif (duration tipe salah/negatif,
+                                entries:null, field ekstra, body kosong) -> 422 envelope
+                                SAMA semua kasus (6.5/8.4). SQLi di pencarian Project ->
+                                200, 0 hasil, aman (5.1-SQLi). GET default?date=<leap
+                                day/lintas tahun/jauh ke depan-lalu> semua 200 graceful,
+                                date non-tanggal -> 422 (3.4). Situs lain (attacker.test)
+                                coba PUT entries pakai sesi ESS -> cookie tidak ikut
+                                (5.4). 2 PUT entries paralel ke hari yg sama -> tidak ada
+                                5xx, hasil akhir SATU nilai konsisten (4.7). PUT action
+                                dgn field asing "status"/"employeeId" -> 422 eksplisit
+                                (5.2-MassAssign). ESS coba action APPROVE/REJECT pd
+                                timesheet SENDIRI via endpoint ESS sendiri (BUKAN endpoint
+                                admin yg sudah diuji TC-TIME-TS-APPROVAL-03), baik sblm
+                                maupun SESUDAH submit -> 400 ditolak, status tidak
+                                berubah (5.2-PrivEsc, finding positif, tidak ada bug).
+                                Submit LAGI pd timesheet yg sudah SUBMITTED -> 400
+                                ditolak, status tetap SUBMITTED (2.5). 2x PUT
+                                {action:SUBMIT} PARALEL pd timesheet BARU (akun ESS
+                                terpisah) -> TEPAT SATU 200, status akhir SUBMITTED,
+                                tidak korup (4.4).
+                             -> SENGAJA FAILED (R3), BUG BARU BG-506 (Medium) -- emoji
+                                ASTRAL (4-byte UTF-8) di pencarian Project
+                                (customerOrProjectName) -> 500 Internal Server Error,
+                                BUKAN 200/422 graceful; unicode lain (Jepang, Arab) di
+                                field yg SAMA tetap aman (200). Instans KE-5 pola charset
+                                DB "utf8" vs "utf8mb4" yg sama dgn BG-494/496/501/505 --
+                                root cause sama, tapi field pencarian Project pd My
+                                Timesheet (ESS) belum pernah dikonfirmasi crash
+                                sebelumnya.
+                             PELAJARAN METODOLOGI: trial run PERTAMA timeout 300s krn
+                                skrip sendiri lupa startEdit() ulang sesudah Save
+                                me-redirect halaman balik ke view read-only sebelum
+                                mencoba klik "Add Row" (bug script, bukan bug app) --
+                                baris yg gagal sempat ter-log otomatis ke Bug-List.xlsx
+                                sbg "Test timeout..." (noise), DIPERBAIKI (bukan
+                                diarsipkan terpisah, krn Bug ID yg sama -- BG-506 --
+                                akhirnya dipakai ulang oleh temuan nyata di run
+                                berikutnya) dgn menimpa isi baris itu dgn deskripsi bug
+                                sungguhan sesudah skrip stabil.
+                             HASIL: 30 check -> 29 lolos, 1 sengaja FAILED (BG-506),
+                             stabil 3x run berturut-turut.
+
+  RUN COMMAND:
+    npx playwright test tests/time/timesheet/TC-TIME-TIMESHEET-13-Verify-Read-Relation-Required-Boundary-Concurrency-And-Security.spec.ts --project=chromium --workers=1
+
+  U055 My Timesheet SEKARANG SEPENUHNYA TERTUTUP (0 GAP, dikonfirmasi via rebuild
+  matrix 25 Nov 2026, val[0] dibaca langsung, bukan asumsi). U056/U057/U058/U059/U060/
+  U061/U062/U063/U064 SEMUA TETAP 0 GAP (tidak regresi, dikonfirmasi rebuild yg sama).
+  Modul Time kini 100% (482 COVERED / 0 GAP / 370 N/A) -- CEILING TERCAPAI. SISA GAP
+  Time: U106 Timesheet Edit & Approval (10 kode) -- di luar scope sesi ini, utk sesi/
+  agent terpisah.
 
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
