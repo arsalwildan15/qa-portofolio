@@ -204,14 +204,14 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Performance | 49 | [docs/TC-Performance.txt](docs/TC-Performance.txt) |
 | Claim | 36 | [docs/TC-Claim.txt](docs/TC-Claim.txt) |
 | Leave | 33 | [docs/TC-Leave.txt](docs/TC-Leave.txt) |
-| Time | 30 | [docs/TC-Time.txt](docs/TC-Time.txt) |
+| Time | 31 | [docs/TC-Time.txt](docs/TC-Time.txt) |
 | Cross-module (Leave/Claim/Performance/Time) | 7 | [docs/TC-XMOD.txt](docs/TC-XMOD.txt) |
 | My Info | 18 | [docs/TC-MyInfo.txt](docs/TC-MyInfo.txt) |
 | Dashboard | 3 | [docs/TC-Dashboard.txt](docs/TC-Dashboard.txt) |
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **689** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **690** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Approach highlights:**
 - **Multi-role testing:** the public demo ships only one Admin login, so `tests/_global/infra/` + `src/utils/` (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`) spin up real accounts on the fly. Performance, Claim, Leave and Time are all tested across roles: an ESS user submits, an Admin approves/rejects in a separate browser context, and each test confirms the ESS user can't self-approve via the API.
@@ -242,7 +242,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | **Performance** | 98.1% (ceiling) | Non-numeric KPI ratings silently coerced to `0` on both supervisor- and employee-side endpoints (BG-373/489); an ESS user could read every employee's tracker data, a broken function-level access control issue (BG-460); review end-date-before-start-date accepted via direct API call |
 | **Claim** | 100% (ceiling) | Zero-expense claims can be approved straight to PAID; a stale Reject button throws on an already-paid claim; attachment filenames with path traversal or shell metacharacters are stored verbatim with no sanitization (BG-493) |
 | **Leave** | 82.4% | `GET leave-entitlements` 500s on any `offset` value; two holidays on the same date are blocked client-side but accepted by the API with no server-side constraint |
-| **Time** | 94.4% | The 24h/day limit is enforced per cell, not per day: two legitimate-looking rows together exceed 24h undetected (BG-402); deleting an already-deleted attendance record returns a misleading 403 "Unauthorized" instead of 404, confirmed on both the self-service and the Admin endpoint (BG-499/504); Punch In/Out has no date-range check at all, accepting a date 73 years in the future (BG-502); an emoji is silently corrupted to "??" in the Punch In note (BG-501), and crashes the Employee Name search outright with a 500 (BG-505) |
+| **Time** | 100% (ceiling) | The 24h/day limit is enforced per row, not per day, on BOTH the self-service AND the Admin-edits-another-employee's-timesheet endpoint: two legitimate-looking rows together exceed 24h undetected (BG-402/507); deleting an already-deleted attendance record returns a misleading 403 "Unauthorized" instead of 404, confirmed on both the self-service and the Admin endpoint (BG-499/504); Punch In/Out has no date-range check at all, accepting a date 73 years in the future (BG-502); an emoji is silently corrupted to "??" in the Punch In note (BG-501), and crashes the Employee Name search outright with a 500 (BG-505) |
 | **Cross-module** | 7 TCs | None of the four shared-layer modules sends a clickjacking header; an emoji in a name field 500s the server-side uniqueness check; a dropped connection mid-save leaves the form stuck on its spinner forever |
 | **My Info** | 76.6% | Fields disabled in the UI (Employee Id, Date of Birth) are still editable through direct API calls (BG-420, High); a cross-site page can overwrite the session cookie and log the employee out |
 | **Dashboard / Sidebar Search / Maintenance** | 80.8% / 100% / 88.7% | Maintenance's "Administrator Access" password prompt is UI-only; purge and personal-data export both succeed via the API with no password check at all (BG-440, High) |
@@ -250,7 +250,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 
 Full reproduction steps, request/response bodies, and the complete bug catalog for each module live in its `docs/TC-<Module>.txt` and in `docs/Bug-List.xlsx`.
 
-**Taxonomy coverage snapshot (2026-11-25):** 87.8% of applicable cells COVERED overall. Recruitment, Dashboard, Sidebar Search, Buzz and Claim are at 100%, Performance at 98.1%, PIM at 97.6%, Time at 94.4%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, My Info at 76.6% and Admin at 72.8%; Admin is now the lowest module. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-25):** 88.38% of applicable cells COVERED overall. Recruitment, Dashboard, Sidebar Search, Buzz, Claim and Time are at 100% (all six at their ceiling), Performance at 98.1%, PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, My Info at 76.6% and Admin at 72.8%; Admin is now the lowest module. See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 

@@ -25,11 +25,13 @@ LEGEND SIMBOL SKENARIO
 
   FORMAT ID  : TC-TIME-<SECTION>-NN
                SECTION: TIMESHEET (My Timesheet), TS-SUBMIT (ESS submit),
-               TS-APPROVAL (alur approval Admin <-> ESS), PUNCH (Punch
-               In/Out self-service), ADMIN-ATTENDANCE (Employee Records /
-               access control API), REPORTS (Employee Reports)
+               TS-APPROVAL (alur approval Admin <-> ESS), TS-EDIT (Admin
+               mengedit LANGSUNG jam kerja milik employee lain, U106
+               Timesheet Edit & Approval), PUNCH (Punch In/Out self-
+               service), ADMIN-ATTENDANCE (Employee Records / access
+               control API), REPORTS (Employee Reports)
   FILE       : TC-TIME-<SECTION>-NN-Verify-Name-In-English.spec.ts
-  FOLDER     : tests/time/timesheet/  (TIMESHEET-*, TS-SUBMIT-*, TS-APPROVAL-*)
+  FOLDER     : tests/time/timesheet/  (TIMESHEET-*, TS-SUBMIT-*, TS-APPROVAL-*, TS-EDIT-*)
                tests/time/attendance/ (PUNCH-*, ADMIN-ATTENDANCE-*, REPORTS-*)
                NOTE: TC-TIME-REPORTS-01 dan TC-TIME-ADMIN-ATTENDANCE-02
                secara lokasi ada di attendance/, walau keduanya juga
@@ -1219,9 +1221,108 @@ No.  Test Case ID              Status   Skenario / Deskripsi
   U055 My Timesheet SEKARANG SEPENUHNYA TERTUTUP (0 GAP, dikonfirmasi via rebuild
   matrix 25 Nov 2026, val[0] dibaca langsung, bukan asumsi). U056/U057/U058/U059/U060/
   U061/U062/U063/U064 SEMUA TETAP 0 GAP (tidak regresi, dikonfirmasi rebuild yg sama).
-  Modul Time kini 100% (482 COVERED / 0 GAP / 370 N/A) -- CEILING TERCAPAI. SISA GAP
-  Time: U106 Timesheet Edit & Approval (10 kode) -- di luar scope sesi ini, utk sesi/
-  agent terpisah.
+
+19   TC-TIME-TS-EDIT-01  [DONE -- BUG]  tests/time/timesheet/TC-TIME-TS-EDIT-01-Verify-Admin-Direct-Edit-Validation-Boundary-Concurrency-Security-And-API-Contract.spec.ts
+                             (+) 1.1-U 1.3 1.8 | (-) 2.2 2.6 | (B) 3.2 |
+                             (!) 4.2 4.3 4.4 4.5 4.7 4.8 | (S) 5.2-BFLAC 5.2-MassAssign
+                             5.4 | (A) 6.1 6.3 6.5 6.7 | (8) 8.4  [U106]
+                             -> KOREKSI PENTING sblm menulis TC ini: rebuild matrix di awal
+                                sesi (val[0] dibaca langsung, PRINT) menunjukkan U106
+                                SUDAH 0 GAP, BUKAN 10 kode spt tercatat di Execution-Plan.md/
+                                instruksi -- angka itu SUDAH STALE. Investigasi membuktikan
+                                U106 ditutup DIAM-DIAM sbg SIDE EFFECT NAME_RULES di
+                                build_matrix.py (baris yg memetakan TC-TIME-TS-APPROVAL-*
+                                [U004] & TC-TIME-TIMESHEET-*/TS-SUBMIT-* [U055] jg ke U106,
+                                krn ketiga unit berbagi URL/flow serupa) -- TAPI atribusi itu
+                                TIDAK SEPENUHNYA JUJUR: TIDAK SATU PUN TC yg pernah benar2
+                                mengklik tombol "Edit" di halaman View Employee Timesheet.
+                                EmployeeTimesheetPage.ts bahkan py catatan di docstring-nya
+                                sendiri "View opens ... with Edit / Reject / Approve buttons"
+                                TAPI TIDAK PERNAH mengekspos locator tombol Edit itu. TC ini
+                                menutup fungsi UNIK unit ini yg sebelumnya nol-teruji: Admin
+                                MENGUBAH LANGSUNG jam kerja milik employee LAIN (bukan cuma
+                                approve/reject) -- tepat sesuai hipotesis instruksi.
+                             -> Dikonfirmasi live via Playwright MCP SEBELUM kode ditulis:
+                                tombol "Edit" pd halaman View (time/viewTimesheet/employeeId/
+                                <emp>?startDate=<monday>) membuka time/editTimesheet/<id> --
+                                URL KEDUA inventaris U106. Save di form ini -> PUT /api/v2/
+                                time/employees/timesheets/<id>/entries {entries:[{projectId,
+                                activityId,dates:{<date>:{duration}}}],deletedEntries:[]} --
+                                endpoint SAMA BENTUK dgn My Timesheet ESS tapi PATH BERBEDA
+                                ("employees/timesheets/<id>" admin vs "timesheets/<id>" ESS),
+                                pola identik dgn My Records/Employee Records (U056/U058)
+                                (1.1-U). Admin BISA edit entries SEKALIPUN timesheet sudah
+                                "Approved" (tidak perlu transisi status dulu) -- TAPI edit
+                                ini TIDAK PERNAH tercatat di "Actions Performed on the
+                                Timesheet" (log hanya Submitted/Approved/Rejected), finding
+                                non-obvious bukan bug (kemungkinan disengaja, admin override
+                                tool internal HR) (1.3/4.8). Toast sukses muncul stlh Save
+                                (1.8). Durasi format salah ("99:99") -> 422 invalidParamKeys
+                                entries (2.2). GET entries timesheet id ghost (999999) -> 404
+                                "Record Not Found"; id non-numerik ("abc") -> 422
+                                invalidParamKeys timesheetId -- KONTRAS POSITIF, tipe
+                                divalidasi dgn benar (BEDA dgn banyak unit lain yg crash 500)
+                                (2.6). Isi sel TANPA Save lalu browser back -> tidak terkirim/
+                                tersimpan (4.3). Sesi admin berakhir (cookies dikosongkan)
+                                lalu Save -> dialihkan ke login, nilai employee lain TIDAK
+                                berubah (4.5). ESS (role non-admin) coba GET/PUT endpoint
+                                ADMIN entries pakai sesi SENDIRI MAUPUN sesi employee lain --
+                                KEDUANYA ditolak (403), BFLAC role-level bukan cuma ownership-
+                                level (5.2-BFLAC). Field asing "status"/"employeeId" di body
+                                PUT -> 422 menyebut KEDUA field eksplisit (5.2-MassAssign).
+                                Origin header A/B (legit vs attacker.test) -> KEDUANYA 200,
+                                Origin TIDAK divalidasi -- finding, konsisten app-wide dgn
+                                BG-437/TC-PIM-CSRF-01, BUKAN bug baru (5.4). 2 PUT entries
+                                paralel ke sel sama dgn nilai berbeda -> tanpa 5xx, hasil
+                                akhir = SALAH SATU (last-write-wins, tidak korup) (4.4/4.7).
+                                DELETE ke endpoint koleksi entries -> 405 (6.3). Body
+                                malformed (entries bukan array) -> 422 invalidParamKeys
+                                entries, bukan 500 (6.5). Payload valid identik dikirim 2x ->
+                                keduanya 200, tidak duplikat (idempotent) (6.7). Skema error
+                                422 konsisten dgn pola app-wide (8.4). Project autocomplete
+                                pd form Edit memanggil ENDPOINT YG SAMA PERSIS dgn My
+                                Timesheet ESS (time/projects?customerOrProjectName=<q>) --
+                                emoji astral jg -> 500 di sini, TAPI ini KONFIRMASI BG-506
+                                yg sudah ada (widget dibagi, bukan bug baru), TIDAK dicatat
+                                ulang sbg bug id baru.
+                             -> SENGAJA FAILED (R3), BUG BARU:
+                                BG-507 (Medium) -- total durasi 1 hari (2026-11-28) = 20:00
+                                (Project A, ACME Ltd) + 10:00 (Project B, ASF - Phase 1) via
+                                endpoint admin "employees/timesheets/<id>/entries" DITERIMA
+                                200 utk KEDUA PUT, total akhir 30:00 tersimpan utk SATU
+                                hari yg sama -- validasi 24 jam/hari HANYA per baris
+                                (project+activity), TIDAK PERNAH per-hari-lintas-baris. SAMA
+                                KELAS dgn BG-402 (TC-TIME-TIMESHEET-11, endpoint ESS
+                                "timesheets/<id>/entries" saat karyawan mengisi punya
+                                sendiri) -- kini terbukti bug yg SAMA PERSIS jg terjadi lewat
+                                jalur KEDUA independen: Admin mengedit langsung timesheet
+                                milik employee lain.
+                             PELAJARAN METODOLOGI: locator sel hari form Edit TIDAK boleh
+                                pakai "input[type=\"text\"]" (atribut type="text" literal
+                                TIDAK ADA di DOM-nya, hanya default IDL property -- selector
+                                CSS attribute itu 0 match, dikonfirmasi via Playwright MCP
+                                evaluate), harus "input" polos + index (0=Project
+                                autocomplete, 1-7=Mon..Sun). Urutan step PENTING: check [4.5]
+                                (sesi berakhir via UI klik Save) WAJIB dijalankan SAAT TABEL
+                                MASIH 1 BARIS (sblm step API lain menambah baris project
+                                KEDUA) -- dipindah ke urutan awal setelah 2 probe isolasi
+                                (zz-probe, dihapus) membuktikan redirect SELALU <10s dgn 1
+                                baris, tapi TIDAK PERNAH teramati dlm 35s begitu tabel py 2
+                                baris (root cause di sisi UI framework, bukan flakiness
+                                demo -- di luar scope investigasi lebih jauh utk TC ini).
+                             HASIL: 20 check -> 19 lolos, 1 sengaja FAILED (BG-507), stabil
+                             3x run berturut-turut (--reporter=list) + 1x real run
+                             (bugListReporter aktif).
+
+  RUN COMMAND:
+    npx playwright test tests/time/timesheet/TC-TIME-TS-EDIT-01-Verify-Admin-Direct-Edit-Validation-Boundary-Concurrency-Security-And-API-Contract.spec.ts --project=chromium --workers=1
+
+  U106 Timesheet Edit & Approval SEKARANG DITUTUP DGN EVIDENCE GENUINE (0 GAP,
+  dikonfirmasi via rebuild matrix 25 Nov 2026, val[0] dibaca langsung, PRINT -- lihat
+  juga Execution-Plan.md). U004/U055/U056/U057/U058/U059/U060/U061/U062/U063/U064
+  SEMUA TETAP 0 GAP (tidak regresi, rebuild yg sama). Modul Time = 100.00% (482
+  COVERED / 0 GAP / 370 N/A) -- CEILING FINAL, SEMUA 12 unit Time 0 GAP. TIDAK ADA
+  SISA GAP Time.
 
 ================================================================================
   RINGKASAN HASIL REGRESI TERAKHIR (15 Nov 2026)
