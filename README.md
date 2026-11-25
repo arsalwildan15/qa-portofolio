@@ -197,7 +197,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Module | TCs | Docs |
 |--------|----:|------|
 | Login | 46 | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| Admin | 149 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
+| Admin | 151 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 203 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 68 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 34 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
@@ -211,7 +211,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **695** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **697** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Approach highlights:**
 - **Multi-role testing:** the public demo ships only one Admin login, so `tests/_global/infra/` + `src/utils/` (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`) spin up real accounts on the fly. Performance, Claim, Leave and Time are all tested across roles: an ESS user submits, an Admin approves/rejects in a separate browser context, and each test confirms the ESS user can't self-approve via the API.
@@ -235,7 +235,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Module | Coverage | Standout findings |
 |---|---|---|
 | **Login** | n/a | No rate limiting/lockout on failed logins; missing clickjacking header; Reset Password intermittently hangs with no response (~29% of isolated runs, likely an unreachable SMTP dependency) |
-| **Admin** | 78.7% | Pay Grade's Add Currency accepts a negative minimum salary with no business-rule check (BG-510); Work Shift crashes with 500 on a malformed start time instead of a clean 4xx (BG-508); renaming a freshly-created Org Structure unit fails with 422 (resends an untouched optional field as `null`); Job Title's file upload accepts a renamed executable; currently the lowest-coverage module |
+| **Admin** | 80.5% | A System User account can be created for an employee who already has one, across any role (ESS + Admin on the same employee, with a third login accepted on top), with no 1-employee-1-login constraint anywhere (BG-516); Pay Grade's Add Currency accepts a negative minimum salary with no business-rule check (BG-510); Work Shift crashes with 500 on a malformed start time instead of a clean 4xx (BG-508); renaming a freshly-created Org Structure unit fails with 422 (resends an untouched optional field as `null`); Job Title's file upload accepts a renamed executable |
 | **PIM** | 97.6% (ceiling) | Full employee-record + configuration coverage. Supervisor/Job/Personal-Details lookup ids crash with 500 instead of 422 (BG-466/467/470); CSV re-import has no idempotency, creating a duplicate employee on retry (BG-484); Report `criteria` filter crashes 500 for every value tried (BG-485) |
 | **Recruitment** | 68 TCs | Candidate Shortlist 500s specifically when the vacancy has no hiring manager, root-caused via an 8/8 correlation, not random flakiness; double-click creates duplicate candidates; resume/vacancy-attachment uploads accept renamed executables |
 | **Buzz** | 100% (ceiling) | Share Video returns HTTP 500 for *every* value tried, including a benign URL: the feature is broken server-side, not just under-validated (BG-490, High); double-click posts broadcast duplicates company-wide; no rate limiting on post creation |
@@ -250,7 +250,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 
 Full reproduction steps, request/response bodies, and the complete bug catalog for each module live in its `docs/TC-<Module>.txt` and in `docs/Bug-List.xlsx`.
 
-**Taxonomy coverage snapshot (2026-11-25):** 89.8% of applicable cells COVERED overall. Recruitment, Dashboard, Sidebar Search, Buzz, Claim and Time are at 100% (all six at their ceiling), Performance at 98.1%, PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, My Info at 76.6% and Admin at 78.7%; Admin is still the lowest module (the 12 "reference data" sub-screens under Job/Organization/Qualifications/Nationalities just closed their gap in full; the larger Users/Organization/PIM-configuration-adjacent sub-screens remain open). See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
+**Taxonomy coverage snapshot (2026-11-25):** 90.2% of applicable cells COVERED overall. Recruitment, Dashboard, Sidebar Search, Buzz, Claim and Time are at 100% (all six at their ceiling), Performance at 98.1%, PIM at 97.6%, Maintenance at 88.7%, Leave at 82.4%, Directory at 80.8%, Admin at 80.5% and My Info at 76.6%; My Info is now the lowest module (Admin's Users sub-screen just closed its gap in full -- 19/19 taxonomy codes covered -- on top of the 12 "reference data" sub-screens closed earlier, moving Admin above My Info; Admin's remaining gap is concentrated in Organization > General Info/Structure and the Configuration sub-screens under Corporate Branding). See `docs/Taxonomy-Coverage-Matrix.md` for the per-module gap list.
 
 ## Security Scanning (source code, separate from the E2E suite above)
 
