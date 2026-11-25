@@ -1912,7 +1912,7 @@ LEGEND SIMBOL SKENARIO
                                    TIDAK berbagi validator karakter.
 
 ================================================================================
-  TEST CASES: CONFIGURATION - EMAIL CONFIGURATION (5 TC) [VALIDATE-ONLY]
+  TEST CASES: CONFIGURATION - EMAIL CONFIGURATION (6 TC)
 ================================================================================
 
  1   TC-ADMIN-EMAILCONFIG-01   [DONE]   TC-ADMIN-EMAILCONFIG-01-Verify-Form-Loads.spec.ts
@@ -1954,6 +1954,33 @@ LEGEND SIMBOL SKENARIO
                              [UI VERIFICATION]
                              -> Verify pesan "Should not exceed 100
                                 characters" muncul on-blur.
+
+ 6   TC-ADMIN-EMAILCONFIG-06   [DONE]   TC-ADMIN-EMAILCONFIG-06-Verify-Feedback-DoubleSubmit-Concurrency-MassAssignment-CSRF-SSRF-And-Injection-Sweep.spec.ts
+                             (+)(!)(S)(A) Sweep: Feedback, Double-Submit, Navigasi,
+                             Sesi, Konkurensi, Mass Assignment, CSRF, SSRF, Injection
+                             -> SEMUA mutasi lewat page.request (BUKAN klik Save UI
+                                beresiko, KECUALI 1 langkah no-op persis nilai sama
+                                utk verifikasi toast 1.8, tanpa checkbox "Send Test
+                                Mail"); ganti sentAs via API (1.1-U); kombinasi
+                                mailType=smtp + semua field smtp* sekaligus (1.2);
+                                switch mailType balik tanpa clear smtp* -> stale
+                                field tetap tersimpan (1.4, finding); emoji
+                                local-part ditolak & SQLi payload tersimpan aman
+                                sbg literal (4.1/5.1-SQLi); double-submit paralel
+                                (4.2); ganti field UI tanpa Save lalu reload (4.3);
+                                sesi terputus (4.5); body kosong (4.6); 2 "admin"
+                                edit field berbeda paralel (4.7); [LIHAT BUG]
+                                smtpHost diisi alamat metadata cloud (5.1-SSRF);
+                                mass assignment (5.2-MassAssign); CSRF Origin header
+                                (5.4); method salah (6.3); auth tanpa cookie (6.4);
+                                smtpPort tipe salah (6.5); konsistensi struktur
+                                error (8.4). Restore ke baseline (withConfigRestore)
+                                di setiap langkah & di akhir.
+                             [API VERIFICATION]
+                             -> 28/29 check lolos. SENGAJA FAILED (1 check): BG-521
+                                -- smtpHost menerima "169.254.169.254" (alamat
+                                metadata cloud, target klasik SSRF) tanpa validasi
+                                apa pun server-side, sama pola dgn BG-517 (Country).
 
 ================================================================================
   TEST CASES: CONFIGURATION - EMAIL SUBSCRIPTIONS (6 TC)
