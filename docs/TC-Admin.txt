@@ -2070,7 +2070,7 @@ LEGEND SIMBOL SKENARIO
                                 API).
 
 ================================================================================
-  TEST CASES: CONFIGURATION - MODULES (5 TC) [VALIDATE-ONLY]
+  TEST CASES: CONFIGURATION - MODULES (6 TC)
 ================================================================================
 
  1   TC-ADMIN-MODULES-01   [DONE]   TC-ADMIN-MODULES-01-Verify-Form-Loads.spec.ts
@@ -2108,6 +2108,30 @@ LEGEND SIMBOL SKENARIO
                              -> Verify module yang enabled di screen ini
                                 konsisten dengan link yang muncul di sidebar
                                 (read-only cross-check).
+
+ 6   TC-ADMIN-MODULES-06   [DONE]   TC-ADMIN-MODULES-06-Verify-Feedback-DoubleSubmit-Concurrency-MassAssignment-CSRF-And-Required-Field-Sweep.spec.ts
+                             (+)(-)(!)(S)(A) Sweep: Feedback, Double-Submit, Navigasi,
+                             Sesi, Konkurensi, Mass Assignment, CSRF, Required-Field
+                             -> Toggle Mobile via UI Save (1.1-U/1.8); kombinasi 2
+                                modul dimatikan sekaligus (1.2); hilangkan key
+                                "leave" vs "buzz" dari body PUT (2.1, lihat BUG);
+                                double-submit paralel (4.2); toggle tanpa Save lalu
+                                reload (4.3); sesi terputus (4.5); body kosong {}
+                                (4.6); 2 "admin" edit modul berbeda paralel (4.7);
+                                mass assignment field asing (5.2-MassAssign); CSRF
+                                Origin header (5.4); method salah POST/DELETE (6.3);
+                                auth tanpa cookie (6.4); tipe data salah (6.5);
+                                konsistensi struktur error (8.4). SEMUA mutasi via
+                                page.request + withConfigRestore, hanya menyentuh
+                                module mobile/directory, restore ke baseline di
+                                setiap langkah & di akhir.
+                             [API VERIFICATION]
+                             -> 30/31 check lolos. SENGAJA FAILED (1 check): BG-518
+                                -- menghilangkan key "buzz" (atau "claim") dari body
+                                PUT diam-diam men-set modul itu ke false (200, bukan
+                                422), TIDAK konsisten dengan 7 key lain yang benar
+                                divalidasi required ("leave" dkk ditolak 422 di body
+                                yang sama).
 
 ================================================================================
   TEST CASES: CONFIGURATION - SOCIAL MEDIA AUTHENTICATION (5 TC) [VALIDATE-ONLY]
