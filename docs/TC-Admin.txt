@@ -1995,7 +1995,7 @@ LEGEND SIMBOL SKENARIO
                                 dialog JS), dibersihkan di akhir test.
 
 ================================================================================
-  TEST CASES: CONFIGURATION - LOCALIZATION (5 TC) [VALIDATE-ONLY]
+  TEST CASES: CONFIGURATION - LOCALIZATION (6 TC)
 ================================================================================
 
  1   TC-ADMIN-LOCALIZATION-01   [DONE]   TC-ADMIN-LOCALIZATION-01-Verify-Form-Loads.spec.ts
@@ -2030,6 +2030,36 @@ LEGEND SIMBOL SKENARIO
                              -> Verify GET /api/v2/admin/i18n/languages?
                                 activeOnly=true konsisten dengan opsi dropdown
                                 Language (read-only cross-screen check).
+
+ 6   TC-ADMIN-LOCALIZATION-06   [DONE]   TC-ADMIN-LOCALIZATION-06-Verify-Feedback-DoubleSubmit-Concurrency-MassAssignment-CSRF-And-Required-Field-Sweep.spec.ts
+                             (+)(-)(!)(S)(A) Sweep: Feedback, Double-Submit, Navigasi,
+                             Sesi, Konkurensi, Mass Assignment, CSRF, Required-Field
+                             -> Ganti Language ke French via UI Save (1.1-U/1.8,
+                                PUT body {language,dateFormat}, "French" ->
+                                language="fr"); kombinasi language+dateFormat
+                                diganti sekaligus (1.2); hilangkan "language" vs
+                                "dateFormat" dari body PUT satu-satu (2.1, KEDUANYA
+                                konsisten ditolak 422 -- KONTRAS dgn BG-518 di unit
+                                Modules); double-submit paralel (4.2); ganti Date
+                                Format di UI tanpa Save lalu reload (4.3); sesi
+                                terputus (4.5); body kosong {} (4.6); 2 "admin" edit
+                                field berbeda paralel (4.7); mass assignment field
+                                asing (5.2-MassAssign); CSRF Origin header (5.4);
+                                method salah POST/DELETE (6.3); auth tanpa cookie
+                                (6.4); value tidak valid di KEDUA field (6.5);
+                                konsistensi struktur error (8.4). SEMUA mutasi via
+                                page.request + withConfigRestore, restore ke
+                                baseline (en_US/Y-d-m) di setiap langkah & di akhir.
+                                [TEMUAN] mengganti Language via UI Save mengubah
+                                BAHASA SELURUH APLIKASI (termasuk label dropdown),
+                                jadi restore step KEDUA sengaja dipindah ke
+                                page.request murni (bukan klik UI berbasis teks
+                                Inggris) supaya tidak locale-dependent.
+                             [API VERIFICATION]
+                             -> 30/30 check lolos, TIDAK ADA bug baru (semua jalur
+                                validasi -- required field, value invalid, mass
+                                assignment -- tervalidasi benar dan KONSISTEN di
+                                KEDUA field, kontras positif dgn unit Modules).
 
 ================================================================================
   TEST CASES: CONFIGURATION - LANGUAGE PACKAGES (4 TC) [FULLY EXERCISED]
