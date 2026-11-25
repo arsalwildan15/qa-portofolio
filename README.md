@@ -197,7 +197,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Module | TCs | Docs |
 |--------|----:|------|
 | Login | 46 | [docs/TC-Login.txt](docs/TC-Login.txt) |
-| Admin | 155 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
+| Admin | 156 | [docs/TC-Admin.txt](docs/TC-Admin.txt) |
 | PIM | 203 | [docs/TC-PIM.txt](docs/TC-PIM.txt) |
 | Recruitment | 68 | [docs/TC-Recruitment.txt](docs/TC-Recruitment.txt) |
 | Buzz | 34 | [docs/TC-Buzz.txt](docs/TC-Buzz.txt) |
@@ -211,7 +211,7 @@ If targeting a different environment for a local run, set these in `.env` (copie
 | Maintenance | 4 | [docs/TC-Maintenance.txt](docs/TC-Maintenance.txt) |
 | Sidebar Search | 3 | [docs/TC-SidebarSearch.txt](docs/TC-SidebarSearch.txt) |
 | Sweep, all menus (data-driven) | 11 | [docs/TC-Sweep.txt](docs/TC-Sweep.txt) |
-| **Total** | **701** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
+| **Total** | **702** | (+3 multi-role infrastructure smoke tests in `tests/_global/infra/`) |
 
 **Approach highlights:**
 - **Multi-role testing:** the public demo ships only one Admin login, so `tests/_global/infra/` + `src/utils/` (`createEssAccount`, `createSecondAdmin`, `assignSupervisor`, `loginAs`) spin up real accounts on the fly. Performance, Claim, Leave and Time are all tested across roles: an ESS user submits, an Admin approves/rejects in a separate browser context, and each test confirms the ESS user can't self-approve via the API.
