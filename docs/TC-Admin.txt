@@ -101,6 +101,26 @@ LEGEND SIMBOL SKENARIO
   (bukan upload-security, tapi null-vs-empty-string pada field opsional
   antara create dan update).
 
+  CATATAN CAKUPAN ORGANIZATION > STRUCTURE, LANJUTAN (sweep taksonomi,
+  26 Nov 2026, TC-ADMIN-STRUCTURE-10): menutup 21 kode GAP tersisa (U020
+  kini 0 GAP), LOLOS PENUH, TIDAK ADA bug baru. [KOREKSI METODOLOGI
+  PENTING] eksplorasi live awal (sebelum menulis kode) sempat SALAH
+  menyimpulkan POST create tidak menegakkan keunikan name padahal PUT edit
+  menegakkannya -- setelah ditelusuri ulang, dugaan itu adalah artefak dari
+  demo publik yang me-reset ke data seed default DI TENGAH sesi eksplorasi
+  (nama yang dikira "sudah dipakai" oleh unit lain ternyata sudah hilang
+  akibat reset tersebut, bukan karena validasinya longgar). Diuji ulang
+  SUNGGUHAN di dalam script (2 POST dengan name identik, bukan lintas
+  sesi/waktu) -- POST create DAN PUT edit KEDUANYA konsisten menolak
+  duplikat (422). Pelajaran: jangan percaya hasil eksplorasi live yang
+  terentang lama tanpa re-verifikasi data dasarnya belum berubah. [TEMUAN]
+  description bernilai JSON null (bukan string kosong "") ditolak 422
+  baik di POST maupun PUT -- ini KONFIRMASI ULANG BG-025 (9 Nov 2026) lewat
+  jalur create, bukan bug baru. [TEMUAN] emoji ASTRAL (surrogate pair)
+  ditolak 422 di Structure Name, KONTRAS dengan Organization Name (U018)
+  yang menerimanya -- 2 field berbagi batas panjang 100 karakter yang
+  identik tapi tidak berbagi validator karakter yang sama.
+
   CATATAN CAKUPAN ORGANIZATION > GENERAL INFORMATION (live discovery,
   dispatch ini): screen ini TIDAK berbentuk form Add/Edit seperti semua
   sub-screen Admin lain -- ini SATU record organisasi tunggal yang selalu
@@ -112,6 +132,19 @@ LEGEND SIMBOL SKENARIO
   ada di Corporate Branding (sudah dicakup pass pertama). Karena itu
   TIDAK ADA TC file-upload-security trio untuk screen ini -- coverage
   security dialihkan ke XSS + SQLi di field teks sebagai gantinya.
+
+  CATATAN CAKUPAN ORGANIZATION > GENERAL INFORMATION, LANJUTAN (sweep
+  taksonomi, 26 Nov 2026, TC-ADMIN-ORGGI-07): menutup 19 kode GAP tersisa
+  (U018 kini 0 GAP). [TEMUAN TEKNIS] body PUT memakai key "country" (bukan
+  "countryCode" seperti tertulis di komentar page object lama -- dikonfirmasi
+  live via page.on('request')). "Number of Employees" TERBUKTI relasi nyata
+  ke PIM: nilainya = meta.total dari GET pim/employees (field ini SAMA
+  SEKALI TIDAK ADA di payload GET/PUT organization sendiri). Boundary Name
+  = 100 karakter, IDENTIK dengan batas Name di Organization > Structure
+  (U020), mengindikasikan validator panjang yang dibagi (shared) antar 2
+  unit Organization ini. [BUG BARU] BG-517 (Medium) -- Country menerima
+  kode sembarang ("ZZZZZZ") tanpa validasi ISO apa pun server-side, dropdown
+  UI hanya whitelist visual.
 
   CATATAN CAKUPAN ORGANIZATION > LOCATIONS (live discovery, dispatch
   ini): berbeda dari screen simple-list Admin lain, Locations punya 9
@@ -1568,7 +1601,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify GET by id setelah delete -> 404.
 
 ================================================================================
-  TEST CASES: ORGANIZATION - GENERAL INFORMATION (6 TC)
+  TEST CASES: ORGANIZATION - GENERAL INFORMATION (7 TC)
 ================================================================================
 
  1   TC-ADMIN-ORGGI-01   [DONE]   TC-ADMIN-ORGGI-01-Verify-Save-Valid-Data.spec.ts
@@ -1621,6 +1654,44 @@ LEGEND SIMBOL SKENARIO
                                    baru diketik sampai halaman direload (stale
                                    displayed value), BUKAN kehilangan data
                                    nyata -- dicatat via report.finding().
+
+ 7   TC-ADMIN-ORGGI-07   [DONE -- BUG]   TC-ADMIN-ORGGI-07-Verify-Read-Schema-Boundary-Format-Edge-And-Security-Sweep.spec.ts
+                             (+)(-)(B)(!)(S) Verify Read, Response Schema, Boundary, Format,
+                             Edge Case And Security Sweep For General Information
+                             [KODE: 1.1-R 1.2 1.4 1.8 2.2 3.1 4.1 4.2 4.3 4.5
+                             4.6 4.7 5.2-MassAssign 5.4 6.2 6.3 6.4 6.5 8.4]
+                             -> Menutup 19 kode taksonomi GAP tersisa di U018
+                                sekaligus lewat 1 file sweep, pola sama dgn
+                                TC-ADMIN-USER-12/13.
+                             [API VERIFICATION]
+                             -> Verify GET/PUT schema lengkap; PUT body
+                                memakai key "country" (bukan "countryCode");
+                                boundary Name 100 (terima) vs 101 (tolak);
+                                mass assignment (noOfEmployees/isDefault/role/
+                                id) ditolak 422 eksplisit; POST/DELETE ke
+                                endpoint singleton -> 405; GET tanpa cookie
+                                -> 401; Origin palsu vs asli status identik
+                                (CSRF, Origin tidak divalidasi); 2 PUT paralel
+                                (double-submit & konkurensi 2 "admin") -> 200/
+                                200, last-write-wins, tidak korup; PUT
+                                di-abort mid-flight -> data server tidak
+                                berubah; emoji tersimpan utuh; "Number of
+                                Employees" = meta.total GET pim/employees
+                                (relasi nyata, toleransi kecil krn demo
+                                publik live).
+                             [UI VERIFICATION]
+                             -> Verify toast sukses muncul setelah Save valid;
+                                halaman tetap normal setelah back/forward.
+                             NOTE: [BUG BARU, lihat Bug-List.xlsx] BG-517
+                                   (Medium) -- PUT admin/organization
+                                   menerima nilai Country sembarang ("ZZZZZZ",
+                                   bukan kode ISO 2-huruf valid) tanpa
+                                   validasi apa pun server-side -- dropdown
+                                   UI hanya whitelist visual. SENGAJA
+                                   FAILED (R3), 28/29 check lolos. [TEMUAN]
+                                   leading/trailing whitespace pada
+                                   Organization Name TIDAK di-trim server-side
+                                   (disimpan verbatim).
 
 ================================================================================
   TEST CASES: ORGANIZATION - LOCATIONS (9 TC)
@@ -1696,7 +1767,7 @@ LEGEND SIMBOL SKENARIO
                                    report.finding().
 
 ================================================================================
-  TEST CASES: ORGANIZATION - STRUCTURE (9 TC)
+  TEST CASES: ORGANIZATION - STRUCTURE (10 TC)
 ================================================================================
 
  1   TC-ADMIN-STRUCTURE-01   [DONE]   TC-ADMIN-STRUCTURE-01-Verify-Add-Unit-Under-Root-Valid.spec.ts
@@ -1779,6 +1850,66 @@ LEGEND SIMBOL SKENARIO
                                 setelah expand node A (TIDAK auto-expand,
                                 perlu klik chevron toggle), hierarki
                                 bertingkat terbukti via API tree mode.
+
+10   TC-ADMIN-STRUCTURE-10   [DONE]   TC-ADMIN-STRUCTURE-10-Verify-Format-Duplicate-Boundary-Edge-And-Security-Sweep.spec.ts
+                             (-)(B)(!)(S) Verify Format, Duplicate Conflict, Invalid-Record,
+                             Boundary, Edge Case And Security Sweep For Organization
+                             Structure [KODE: 1.8 2.2 2.3 2.6 3.1 4.1 4.2 4.3
+                             4.5 4.6 4.7 4.8 5.2-MassAssign 5.4 5.5 6.2 6.3 6.4
+                             6.5 6.7 8.4]
+                             -> Menutup 21 kode taksonomi GAP tersisa di U020
+                                sekaligus lewat 1 file sweep.
+                             [API VERIFICATION]
+                             -> Verify schema POST (id/name/unitId/
+                                description/level/left/right, model nested-
+                                set); boundary Name 100 (terima) vs 101
+                                (tolak, IDENTIK dgn batas Organization Name);
+                                name duplikat ditolak 422 KONSISTEN baik di
+                                POST create maupun PUT edit (koreksi dari
+                                dugaan awal yang salah, lihat NOTE); 2 POST
+                                paralel dgn name identik -> TEPAT SATU 200
+                                (keunikan name mencegah duplikat double-
+                                submit, bukan dedicated idempotency key);
+                                mass assignment (id/level/left/right, dan
+                                parentId di PUT) ditolak 422; parentId hantu/
+                                id tak ada/sudah dihapus -> 404 "Record Not
+                                Found" konsisten (string status, kontras
+                                positif dgn pola BG-499/504); PATCH & PUT
+                                tanpa id -> 405; GET tanpa cookie -> 401;
+                                Origin palsu vs asli status identik (CSRF);
+                                unicode non-astral (CJK) tersimpan utuh,
+                                emoji ASTRAL ditolak 422 (beda dgn
+                                Organization Name yang menerimanya, lihat
+                                NOTE).
+                             [UI VERIFICATION]
+                             -> Verify toast sukses muncul setelah Add valid;
+                                halaman tetap normal setelah back/forward;
+                                koneksi putus saat Add -> node TIDAK ter-
+                                create; cleanup menghapus SEMUA unit probe
+                                ("QaStruct*"), tidak menyentuh "hola"/"juan
+                                perez"/departemen bawaan milik modul lain.
+                             NOTE: LOLOS PENUH, TIDAK ADA bug baru (32/32
+                                   check, stabil 3x run). KOREKSI PENTING:
+                                   eksplorasi live awal (sebelum menulis
+                                   kode) SALAH menyimpulkan POST create tidak
+                                   menegakkan keunikan name (longgar) sementara
+                                   PUT edit menegakkannya -- dugaan itu
+                                   ternyata artefak dari demo publik yang
+                                   reset ke data seed default di tengah sesi
+                                   eksplorasi (nama yang dikira "sudah
+                                   dipakai" sebenarnya sudah hilang krn
+                                   reset). Setelah diuji ulang sungguhan di
+                                   script ini (2 POST name identik balik-
+                                   balik, bukan lintas sesi), KEDUANYA
+                                   konsisten menolak 422 -- tidak ada bug.
+                                   [TEMUAN] description bernilai JSON null
+                                   (bukan string kosong) ditolak 422 baik di
+                                   POST maupun PUT -- KONFIRMASI ULANG BG-025
+                                   (9 Nov 2026), bukan bug baru. [TEMUAN]
+                                   Organization Name (U018) menerima emoji
+                                   astral yang ditolak Structure Name (U020)
+                                   -- 2 field berbagi batas panjang 100 tapi
+                                   TIDAK berbagi validator karakter.
 
 ================================================================================
   TEST CASES: CONFIGURATION - EMAIL CONFIGURATION (5 TC) [VALIDATE-ONLY]
