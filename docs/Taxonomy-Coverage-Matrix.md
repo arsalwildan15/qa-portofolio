@@ -4,7 +4,7 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 
 | Module | COVERED | GAP | N/A | Coverage of applicable |
 |---|---:|---:|---:|---:|
-| Admin | 798 | 298 | 608 | 72.8% |
+| Admin | 863 | 233 | 608 | 78.7% |
 | Buzz | 58 | 0 | 13 | 100.0% |
 | Claim | 310 | 0 | 187 | 100.0% |
 | Dashboard | 36 | 0 | 106 | 100.0% |
@@ -17,7 +17,7 @@ Scope: the 12 sidebar modules (Admin, PIM, Leave, Time, Recruitment, My Info, Pe
 | Recruitment | 216 | 0 | 68 | 100.0% |
 | Sidebar | 17 | 0 | 54 | 100.0% |
 | Time | 482 | 0 | 370 | 100.0% |
-| **Total** | **4106** | **540** | **3093** | **88.4%** |
+| **Total** | **4171** | **475** | **3093** | **89.8%** |
 
 Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 
@@ -29,20 +29,20 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 1.1-R | Read / list | 10 |
 | 1.1-U | Update valid | 14 |
 | 1.1-D | Delete valid | 1 |
-| 1.2 | Variasi input valid (opsional diisi/kosong) | 37 |
+| 1.2 | Variasi input valid (opsional diisi/kosong) | 25 |
 | 1.3 | State transition valid | 3 |
-| 1.4 | Relasi antar-entity | 30 |
+| 1.4 | Relasi antar-entity | 18 |
 | 1.6 | Search/filter/sort valid | 22 |
 | 1.7 | Upload file valid | 1 |
 | 1.8 | Notifikasi/feedback UI | 16 |
 | 2.1 | Required field kosong | 6 |
-| 2.2 | Format salah | 27 |
+| 2.2 | Format salah | 15 |
 | 2.3 | Duplicate/unique conflict | 5 |
 | 2.5 | State transition invalid | 3 |
 | 2.6 | Operasi pada record invalid/tak eksis | 5 |
 | 2.8 | Reject/cancel tanpa alasan | 1 |
 | 3.1 | Panjang karakter field | 12 |
-| 3.2 | Nilai numerik | 2 |
+| 3.2 | Nilai numerik | 1 |
 | 3.3 | Ukuran file upload | 1 |
 | 3.4 | Tanggal | 6 |
 | 4.1 | Karakter tidak biasa (unicode/emoji/RTL/whitespace) | 21 |
@@ -52,9 +52,9 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 4.5 | Session/koneksi terputus | 25 |
 | 4.6 | Data kosong/null (empty state) | 7 |
 | 4.7 | Konkurensi multi-user edit | 21 |
-| 4.8 | Behavior non-obvious terdokumentasi | 36 |
+| 4.8 | Behavior non-obvious terdokumentasi | 24 |
 | 5.1-SQLi | SQL Injection | 16 |
-| 5.1-XSS-Stored | Stored XSS | 10 |
+| 5.1-XSS-Stored | Stored XSS | 7 |
 | 5.1-XSS-Reflected | Reflected XSS | 8 |
 | 5.1-CmdPath | Command/Path injection | 2 |
 | 5.1-SSRF | SSRF | 4 |
@@ -65,9 +65,9 @@ Weak TCs (not counted as coverage): 23 -- see the xlsx sheet "Weak TCs".
 | 5.3-DoubleExt | Double extension | 1 |
 | 5.3-Oversize | Oversized file | 1 |
 | 5.3-Filename | Malicious filename | 1 |
-| 5.4 | CSRF | 28 |
+| 5.4 | CSRF | 16 |
 | 5.5 | Rate limit / brute force / spam | 14 |
-| 5.9 | Business logic abuse | 4 |
+| 5.9 | Business logic abuse | 3 |
 | 6.2 | Response schema/contract | 7 |
 | 6.3 | Request method salah (405) | 8 |
 | 6.4 | Auth/token (tanpa sesi / sesi user lain) | 7 |

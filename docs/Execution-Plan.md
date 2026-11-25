@@ -747,6 +747,53 @@
   WAJIB rebuild matrix ulang dulu di sesi berikutnya utk angka pasti, jangan percaya 72.8%
   ini begitu saja krn sudah beberapa hari berlalu). Sesi ini STOP di sini sesuai instruksi
   koordinator eksplisit (tidak lanjut ke Admin), laporkan balik hasil ke koordinator.
+  Update 25 Nov 2026 (sesi/agent terpisah -- MULAI Admin, 14 unit "reference-data" batch
+  pertama): rebuild matrix DI AWAL sesi (val[0] dibaca langsung, PRINT) mengkonfirmasi Admin
+  72.8% (798 COVERED/298 GAP/608 N/A) persis spt tercatat, modul terendah proyek. 12 dari 14
+  unit reference-data yg disebut dlm instruksi (U013 Job Titles, U014 Pay Grades, U015
+  Employment Status, U016 Job Categories, U017 Work Shifts, U019 Locations, U021 Skills,
+  U022 Education, U023 Licenses, U024 Languages, U025 Memberships, U026 Nationalities -- U018
+  Organization>General Info & U020 Organization>Structure DI LUAR SCOPE, gap jauh lebih besar/
+  beda bentuk) masing2 py 5-7 GAP identik: 1.2/1.4/2.2/4.8/5.4 di semua 12, +3.2/5.9 HANYA
+  Pay Grades (satu-satunya dgn field numerik "Add Currency"), +5.1-XSS-Stored HANYA
+  Employment Status/Licenses/Memberships (TC lama unit itu cuma SQLi, belum XSS). Eksplorasi
+  live Playwright MCP SEBELUM menulis kode (Job Titles, Pay Grades, Skills, Locations, Work
+  Shifts,+ query API langsung ke endpoint PIM terkait) membuktikan: 8 dari 12 unit (semua
+  kecuali Job Titles/Skills/Locations/Work Shifts) TIDAK punya field opsional genuine saat
+  create (hanya 1 field Name/Level wajib) -- 1.2 utk 8 unit itu ditutup lewat sisi LAIN
+  taksonomi 1.2 yg definisinya eksplisit menyebut "kombinasi filter/sort/pagination normal"
+  (API genuinely mendukung limit/offset meski UI tidak punya sort/search); SEMUA 12 unit
+  TERBUKTI punya relasi nyata ke PIM (job-details utk Job Titles/Job Categories/Employment
+  Status/Locations -- SATU endpoint, 4 field jobTitleId/jobCategoryId/empStatusId/locationId,
+  dikonfirmasi live network capture; skills/educations/licenses/languages/memberships
+  endpoint utk 5 unit Qualifications; personal-details utk Nationalities; salary-components
+  utk Pay Grades; assign empNumbers LANGSUNG di body Work Shift sendiri, bukan lewat PIM) --
+  1.4 ditutup dgn benar2 membuat link + baca cascade nama + rename entity admin + baca ulang
+  (nama ikut berubah, tidak cache lama), pola sama PD-API-02. Ditutup via 2 TC sweep baru
+  (TC-ADMIN-REFDATA-SWEEP-01 1.2/1.4/2.2/4.8/3.2/5.9, TC-ADMIN-REFDATA-CSRF-01 5.4, keduanya
+  di tests/admin/security/, reuse src/data/unitMutationRegistry.ts yg sudah ada dipakai
+  TC-SWEEP-MUT-01/UIMUT-01 -- TIDAK perlu body/endpoint baru) + 3 TC XSS tersendiri per unit
+  (TC-ADMIN-EMPSTATUS-06/LICENSE-06/MEMBERSHIP-06) + 2 entri NAME_RULES baru di
+  build_matrix.py (persis pola TC-PIM-TABEDGE-01/CSRF-01) krn file sweep INI SENGAJA menyapu
+  12 unit sekaligus. SENGAJA FAILED (R3, stabil 3x run berturut-turut, 83/85 check lolos) --
+  2 BUG BARU: BG-508 (Medium) POST/PUT admin/work-shifts dgn startTime/hoursPerDay bertipe
+  string bebas ("not-a-time"/"abc") -> 500 Unexpected Error, bukan 422 (instans PERTAMA pola
+  "field salah -> 500" pada format waktu, bukan pada id relasi); BG-510 (Medium) POST
+  admin/pay-grades/<id>/currencies menerima minSalary NEGATIF (-5000) tanpa validasi bisnis,
+  hanya menegakkan min<max (format non-numerik & inverted-range SUDAH benar ditolak). Noise
+  trial run (1 baris auto-logged "Test timeout 120000ms" CSRF-01, auto-closed stlh retest
+  lolos bersih) dipindah ke Archive sebelum commit. Rebuild matrix FINAL (val[0] langsung,
+  PRINT): SEMUA 12 unit target 0 GAP. VERIFIKASI REGRESI (PRINT, bukan klaim): SEMUA 12 unit
+  Time (U004/U055/U056/U057/U058/U059/U060/U061/U062/U063/U064/U106) TETAP 0 GAP. Admin =
+  78.7% (863 COVERED/233 GAP/608 N/A). Matrix TOTAL = 89.8% (4171 COVERED/475 GAP/3093 N/A).
+  Admin TETAP modul terendah proyek -- SISA GAP Admin (233 sel) di luar scope sesi ini: U001
+  Users, U018 Organization>General Info (19 kode), U020 Organization>Structure (21 kode),
+  U027-U035 (Corporate Branding/Configuration: Email/Email Subscriptions/Localization/
+  Language Packages/Modules/Social Media Auth/OAuth Client/LDAP -- 9 unit Configuration blm
+  disentuh batch manapun). NEXT ACTION: sesi berikutnya lanjutkan Admin (unit besar di atas,
+  WAJIB rebuild matrix ulang dulu utk angka pasti) sampai mencapai ceiling, SESUAI instruksi
+  user eksplisit utk STOP di sini (14 unit reference-data batch selesai, jangan mulai unit
+  besar lain di sesi yg sama).
   CARA REBUILD MATRIX (tidak ada script chain siap pakai, run manual urutan ini dari
   root qa-portofolio, S = direktori scratch apa pun yg py units.json/sweep_units.json/
   api_units.json dari tools/coverage/ disalin ke dalamnya dulu):

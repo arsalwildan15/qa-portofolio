@@ -1034,7 +1034,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify Pay Grade tidak lagi muncul di list.
 
 ================================================================================
-  TEST CASES: EMPLOYMENT STATUS (5 TC)
+  TEST CASES: EMPLOYMENT STATUS (6 TC)
 ================================================================================
 
  1   TC-ADMIN-EMPSTATUS-01   [DONE]   TC-ADMIN-EMPSTATUS-01-Verify-Add-Employment-Status-Valid.spec.ts
@@ -1071,6 +1071,17 @@ LEGEND SIMBOL SKENARIO
                                 trash.
                              [UI VERIFICATION]
                              -> Verify status tidak lagi muncul di list.
+
+ 6   TC-ADMIN-EMPSTATUS-06   [DONE]   TC-ADMIN-EMPSTATUS-06-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name [KODE: 5.1-XSS-Stored]
+                             -> Isi Name dengan payload <script>, submit.
+                             [UI VERIFICATION]
+                             -> Verify payload TIDAK tereksekusi (window.__xss
+                                tidak ter-set) saat ditampilkan kembali di
+                                list. Unit ini sebelumnya hanya punya TC
+                                SQLi (-03) -- XSS belum pernah diuji
+                                terpisah, pola sama dgn 9 unit referensi
+                                Admin lain.
 
 ================================================================================
   TEST CASES: JOB CATEGORIES (5 TC)
@@ -1308,7 +1319,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify Level tidak lagi muncul di list.
 
 ================================================================================
-  TEST CASES: QUALIFICATIONS - LICENSES (5 TC)
+  TEST CASES: QUALIFICATIONS - LICENSES (6 TC)
 ================================================================================
 
  1   TC-ADMIN-LICENSE-01   [DONE]   TC-ADMIN-LICENSE-01-Verify-Add-License-Valid.spec.ts
@@ -1344,6 +1355,15 @@ LEGEND SIMBOL SKENARIO
                              -> Buat License baru, hapus via icon trash.
                              [UI VERIFICATION]
                              -> Verify License tidak lagi muncul di list.
+
+ 6   TC-ADMIN-LICENSE-06   [DONE]   TC-ADMIN-LICENSE-06-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name [KODE: 5.1-XSS-Stored]
+                             -> Isi Name dengan payload <script>, submit.
+                             [UI VERIFICATION]
+                             -> Verify payload TIDAK tereksekusi saat
+                                ditampilkan kembali di list. Unit ini
+                                sebelumnya hanya punya TC SQLi (-03) -- XSS
+                                belum pernah diuji terpisah.
 
 ================================================================================
   TEST CASES: QUALIFICATIONS - LANGUAGES (5 TC)
@@ -1382,7 +1402,7 @@ LEGEND SIMBOL SKENARIO
                              -> Verify Language tidak lagi muncul di list.
 
 ================================================================================
-  TEST CASES: QUALIFICATIONS - MEMBERSHIPS (5 TC)
+  TEST CASES: QUALIFICATIONS - MEMBERSHIPS (6 TC)
 ================================================================================
 
  1   TC-ADMIN-MEMBERSHIP-01   [DONE]   TC-ADMIN-MEMBERSHIP-01-Verify-Add-Membership-Valid.spec.ts
@@ -1419,6 +1439,15 @@ LEGEND SIMBOL SKENARIO
                              -> Buat Membership baru, hapus via icon trash.
                              [UI VERIFICATION]
                              -> Verify Membership tidak lagi muncul di list.
+
+ 6   TC-ADMIN-MEMBERSHIP-06   [DONE]   TC-ADMIN-MEMBERSHIP-06-Verify-XSS-In-Name.spec.ts
+                             (S) Verify XSS Payload di Name [KODE: 5.1-XSS-Stored]
+                             -> Isi Name dengan payload <script>, submit.
+                             [UI VERIFICATION]
+                             -> Verify payload TIDAK tereksekusi saat
+                                ditampilkan kembali di list. Unit ini
+                                sebelumnya hanya punya TC SQLi (-04) -- XSS
+                                belum pernah diuji terpisah.
 
 ================================================================================
   TEST CASES: NATIONALITIES (6 TC)
@@ -2019,7 +2048,7 @@ LEGEND SIMBOL SKENARIO
                                 dari Save.
 
 ================================================================================
-  TEST CASES: ADMIN - SECURITY (2 TC) [DITAMBAHKAN 2026-11-11]
+  TEST CASES: ADMIN - SECURITY (4 TC) [DITAMBAHKAN 2026-11-11, +2 2026-11-25]
   Folder: tests/admin/security/
 ================================================================================
 
@@ -2059,6 +2088,71 @@ LEGEND SIMBOL SKENARIO
                                    sampai diproses server) -- proteksi CSRF
                                    pada endpoint mutasi Admin EFEKTIF,
                                    konsisten dengan TC-RECRUITMENT-SECURITY-05.
+
+ 3   TC-ADMIN-REFDATA-SWEEP-01   [DONE -- BUG]   TC-ADMIN-REFDATA-SWEEP-01-Verify-Optional-Fields-Relations-Format-And-Non-Obvious-Behavior-Across-12-Reference-Data-Menus.spec.ts
+                             (+)(-)(B)(!)(S) Verify Optional Fields, Entity Relations, Format
+                             Validation And Non-Obvious Behavior Across The 12
+                             Reference-Data Menus [KODE: 1.2 1.4 2.2 4.8 3.2 5.9]
+                             -> Menyapu 12 unit referensi Admin (Job Titles/
+                                Pay Grades/Employment Status/Job Categories/
+                                Work Shifts/Locations/Skills/Education/
+                                Licenses/Languages/Memberships/Nationalities,
+                                U013-U017/U019/U021-U026) sekaligus lewat
+                                registry src/data/unitMutationRegistry.ts,
+                                pola sama dgn TC-PIM-TABEDGE-01/CSRF-01.
+                             [API VERIFICATION per unit]
+                             -> 1.2 kombinasi pagination limit/offset normal
+                                (semua 12) + kombinasi field opsional
+                                terisi/kosong genuine (Job Titles Description/
+                                Note, Skills Description, Locations State/
+                                Zip/Phone/Fax/Address/Notes, Work Shifts
+                                empNumbers).
+                             -> 1.4 relasi nyata ke PIM (job-details utk Job
+                                Titles/Job Categories/Employment Status/
+                                Locations; skills/educations/licenses/
+                                languages/memberships endpoint utk 5 unit
+                                Qualifications; personal-details utk
+                                Nationalities; salary-components utk Pay
+                                Grades; assign empNumbers langsung utk Work
+                                Shifts) -- cascade nama DAN nama ikut
+                                berubah setelah entity admin di-rename.
+                             -> 4.8 PUT record dgn nama sendiri yg tidak
+                                berubah -> 200 (tidak false-positive dianggap
+                                duplikat dgn dirinya sendiri).
+                             -> 2.2 field nama bertipe object/array -> 4xx.
+                             -> 3.2/5.9 (Pay Grade only) Add Currency minSalary
+                                format salah vs nilai negatif.
+                             NOTE: [BUG BARU, lihat Bug-List.xlsx]
+                                   BG-508 (Medium) -- POST/PUT admin/
+                                   work-shifts dgn startTime/hoursPerDay
+                                   bertipe string bebas -> 500, bukan 422.
+                                   BG-510 (Medium) -- POST admin/pay-grades/
+                                   <id>/currencies menerima minSalary
+                                   negatif tanpa validasi bisnis, hanya
+                                   menegakkan min<max. 83/85 check lolos,
+                                   stabil 3x run berturut-turut.
+
+ 4   TC-ADMIN-REFDATA-CSRF-01   [DONE]   TC-ADMIN-REFDATA-CSRF-01-Verify-A-Foreign-Site-Cannot-Create-Reference-Data-Records.spec.ts
+                             (S) Verify A Foreign Site Cannot Create Reference-Data
+                             Records Via The 12 Admin Reference-Data Menus [KODE: 5.4]
+                             -> Skenario browser sungguhan (halaman penyerang
+                                di origin lain) terhadap Job Titles, DIPERLUAS
+                                via perbandingan status A/B (Origin aplikasi
+                                sendiri vs Origin palsu) di endpoint create
+                                11 unit referensi lainnya.
+                             [UI VERIFICATION]
+                             -> Verify cookie sesi HttpOnly+Secure+SameSite
+                                Lax; request penyerang terkirim TANPA cookie
+                                sesi; Job Title TIDAK terbuat oleh fetch dari
+                                situs penyerang.
+                             [API VERIFICATION]
+                             -> Verify status A/B IDENTIK di 11 endpoint
+                                lainnya (Origin tidak divalidasi server,
+                                pertahanan tunggal = cookie SameSite, pola
+                                sama TC-PIM-CSRF-01/TC-MYINFO-CSRF-01).
+                             NOTE: Lolos penuh, tidak ada bug baru -- pola
+                                   arsitektur app-wide yg sudah dikonfirmasi
+                                   di My Info/PIM/Time (BG-437).
 
 ================================================================================
   SUMMARY
@@ -2253,4 +2347,27 @@ LEGEND SIMBOL SKENARIO
      ORGANIZATION > STRUCTURE untuk detail). Cleanup-nya tetap jalan
      meski assertion gagal (expect.soft tidak menghentikan test), jadi
      unit uji tidak tertinggal di tree walau TC-nya FAILED.
+
+ 10. TC-ADMIN-REFDATA-SWEEP-01 + TC-ADMIN-REFDATA-CSRF-01 (2026-11-25, lihat
+     tests/admin/security/) menyapu 12 unit referensi Admin sekaligus
+     (Job Titles, Pay Grades, Employment Status, Job Categories, Work
+     Shifts, Locations, Skills, Education, Licenses, Languages,
+     Memberships, Nationalities -- U013-U017/U019/U021-U026), pola yg
+     sama dgn TC-PIM-TABEDGE-01/CSRF-01: SATU-DUA file dgn literal kode
+     taksonomi di label check menutup 1.2/1.4/2.2/4.8/5.4 (+3.2/5.9 Pay
+     Grade) utk SEMUA 12 unit itu sekaligus via build_matrix.py NAME_RULES
+     eksplisit, bukan ditulis ulang per unit. Reuse src/data/
+     unitMutationRegistry.ts (sudah ada, dipakai TC-SWEEP-MUT-01/UIMUT-01)
+     utk body create/update per unit -- TIDAK perlu endpoint/body baru.
+     SATU employee throwaway dibuat sekali di awal utk uji 1.4 (relasi ke
+     PIM job-details/skills/educations/licenses/languages/memberships/
+     salary-components/personal-details), dihapus di akhir (membawa
+     serta semua relasinya, tidak perlu dihapus satu-satu). 3 unit
+     (U015 Employment Status, U023 Licenses, U025 Memberships) juga
+     dapat TC XSS tersendiri (-06) krn TC lama mereka hanya menguji SQLi.
+     2 BUG BARU (BG-508 Work Shift format waktu -> 500, BG-510 Pay Grade
+     minSalary negatif diterima) -- lihat Bug-List.xlsx. Admin modul
+     72.8% -> 78.7%; Admin TETAP modul terendah proyek (24 unit besar
+     lain -- Users, Organization > General Info/Structure, Configuration,
+     dst -- di luar scope sweep ini, belum disentuh).
 ================================================================================

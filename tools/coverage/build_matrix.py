@@ -148,6 +148,12 @@ NAME_RULES = [  # (regex on path, units) for folders whose specs split across un
  (r'sweep/TC-SWEEP-(PAGE|HDR|ROLE|VIEW|A11Y|XBROWSER)', [u['path'] for u in json.load(open(S + '/units.json', encoding='utf-8'))
                                   if u['id'] in SWEEP_UNITS]),
  (r'cross-module/TC-XMOD-0[56]', ['Claim > Configuration > Events', 'Leave > Configure > Leave Types', 'Time > Project Info > Customers']),
+ # REFDATA-SWEEP-01/CSRF-01 sweep all 12 "reference-data" Admin units at once (one Add-form shape,
+ # registry src/data/unitMutationRegistry.ts) -- same style as PIM TABEDGE-01/CSRF-01.
+ (r'admin/security/TC-ADMIN-REFDATA-(SWEEP|CSRF)-01', ['Admin > Job > Job Titles', 'Admin > Job > Pay Grades', 'Admin > Job > Employment Status',
+                                 'Admin > Job > Job Categories', 'Admin > Job > Work Shifts', 'Admin > Organization > Locations',
+                                 'Admin > Qualifications > Skills', 'Admin > Qualifications > Education', 'Admin > Qualifications > Licenses',
+                                 'Admin > Qualifications > Languages', 'Admin > Qualifications > Memberships', 'Admin > Nationalities']),
 ]
 URL_UNITS = sorted(((u['url'], uid) for uid, u in units.items() if u['url'] and '(' not in u['url'] and '<' not in u['url']), key=lambda x: -len(x[0]))
 
