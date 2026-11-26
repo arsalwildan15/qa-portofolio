@@ -2309,7 +2309,7 @@ LEGEND SIMBOL SKENARIO
                                    icon).
 
 ================================================================================
-  TEST CASES: CONFIGURATION - LDAP CONFIGURATION (5 TC) [VALIDATE-ONLY]
+  TEST CASES: CONFIGURATION - LDAP CONFIGURATION (6 TC)
 ================================================================================
 
  1   TC-ADMIN-LDAP-01   [DONE]   TC-ADMIN-LDAP-01-Verify-Form-Loads.spec.ts
@@ -2351,6 +2351,40 @@ LEGEND SIMBOL SKENARIO
                                 terkirim (dikonfirmasi via network listener +
                                 reload), membuktikan probe ini aman/terpisah
                                 dari Save.
+
+ 6   TC-ADMIN-LDAP-06   [DONE]   TC-ADMIN-LDAP-06-Verify-Feedback-DoubleSubmit-Concurrency-MassAssignment-CSRF-And-Persistence-Sweep.spec.ts
+                             (+)(-)(!)(S)(A) Sweep: Feedback, Double-Submit, Navigasi,
+                             Sesi, Konkurensi, Mass Assignment, CSRF, Persistence
+                             -> "enable" DIPAKSA TETAP false SEPANJANG TC ini (tidak
+                                pernah mengaktifkan LDAP auth); Test Connection
+                                (endpoint TERPISAH /ldap-test-connection, non-
+                                mutating, host="localhost") -> dialog "Connection
+                                Status" (1.8); PUT body valid & konsisten -> 200
+                                genuinely berhasil (1.1-U, KOREKSI metodologi --
+                                eksplorasi awal salah mengira PUT tidak bisa sukses
+                                sama sekali); kombinasi bindAnonymously true/false
+                                via Test Connection (1.2); [LIHAT BUG] kontradiksi
+                                bindAnonymously=false + bindUserDN=null (2.2);
+                                hostname emoji via Test Connection (4.1); double-
+                                submit paralel (4.2); ubah Host UI tanpa Save (4.3);
+                                sesi terputus (4.5); body kosong (4.6); 2 Test
+                                Connection paralel host berbeda (4.7); mass
+                                assignment di PUT & Test Connection (5.2-MassAssign);
+                                CSRF Origin header (5.4); method salah (6.3); auth
+                                tanpa cookie (6.4); port tipe salah (6.5);
+                                konsistensi struktur error (8.4). 1.4 (relasi) DAN
+                                5.1-SSRF thd target internal/metadata sungguhan
+                                SENGAJA TIDAK diuji (lihat alasan di header file:
+                                aktivasi LDAP nyata dilarang mutlak; alat keamanan
+                                Claude Code sendiri menolak klik Test Connection ke
+                                169.254.169.254) -- KEDUA kode TETAP GAP dgn alasan
+                                eksplisit, bukan dipaksa COVERED.
+                             [API VERIFICATION]
+                             -> 32/33 check lolos. SENGAJA FAILED (1 check): BG-522
+                                -- PUT ldap-config dgn bindAnonymously=false +
+                                bindUserDN=null (kontradiksi logis) -> 500 "Unexpected
+                                Error", bukan 422; body identik dgn bindUserDN
+                                terisi berhasil 200 bersih (pembanding langsung).
 
 ================================================================================
   TEST CASES: ADMIN - SECURITY (4 TC) [DITAMBAHKAN 2026-11-11, +2 2026-11-25]
